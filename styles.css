@@ -205,3 +205,22 @@ body:not([data-theme="dark"]) #supabaseUserId {
   border-color: transparent;
 }
 
+
+
+/* Fix pixel pet images in collection cards */
+.creature-thumb {
+  position: relative;
+  height: 92px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.creature-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
