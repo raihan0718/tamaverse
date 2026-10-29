@@ -495,16 +495,7 @@ function homePage(){
     <section class="pet-stage pet-action-${petAnimation}" data-action="pet-tap" aria-label="Sentuh untuk menyapa ${esc(p.name)}">
       <div class="stage-topline"><span><i></i> YOUR COMPANION</span><b>/ 01</b></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
-      
-<div class="pet-shadow"></div>
-<div class="stage-pet" aria-hidden="true">
-  <span class="stage-creature">
-    ${petVisual(s, 'width:100%;height:100%;')}
-  </span>
-  <span class="pet-heart">♥</span>
-</div>
-<div class="action-bubble">${petActionLabel(petAnimation)}</div>
-
+<div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petVisual(s)}</span><span class="pet-heart">♥</span></div><div class="action-bubble">${petActionLabel(petAnimation)}</div>
       <div class="companion-panel"><div class="companion-meta"><div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2>${esc(p.name)}</h2></div><span class="pill">Lv. ${p.level}</span></div>
         <div class="companion-xp"><span>Companion level</span><b>${p.xp} / ${p.level*40} XP</b></div><div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
         <div class="stage-stats"><span>🍓 Lapar ${p.hunger}%</span><span>💖 ${p.happiness}%</span><span>⚡ ${p.energy}%</span><span>🫧 ${p.cleanliness}%</span></div>
