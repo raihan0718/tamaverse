@@ -23,6 +23,30 @@ const eggs = [
   {id:'mystic',name:'Mystic Egg',emoji:'🔮',price:220,gem:0,description:'Energi misterius dengan peluang pet spesial.'},
   {id:'celestial',name:'Celestial Egg',emoji:'🌙',price:5,gem:0,description:'Telur langit berisi makhluk langka.',currency:'gem'}
 ];
+const PET_IMAGES = {
+  fluffin: 'assets/pets/slime.png',
+  embercub: 'assets/pets/ice-pup.png',
+  bubblit: 'assets/pets/sprout-dino.png',
+  mossling: 'assets/pets/glow-frog.png',
+  voltkit: 'assets/pets/fire-cat.png',
+  coralyn: 'assets/pets/axolotl.png',
+  cinderowl: 'assets/pets/wizard.png',
+  petalyn: 'assets/pets/golden-fox.png',
+  lunabun: 'assets/pets/robo-bunny.png',
+  glacipup: 'assets/pets/panda.png',
+  starwhale: 'assets/pets/phoenix.png',
+  wyrmling: 'assets/pets/dragon.png'
+};
+
+function petVisual(s, extraStyle = '') {
+  const src = PET_IMAGES[s.id];
+  if (!src) return s.emoji;
+
+  return `<img src="${src}" alt="${s.name}"
+    style="width:100%;height:100%;object-fit:contain;
+    image-rendering:pixelated;${extraStyle}"
+    onerror="this.outerHTML='${s.emoji}'">`;
+}
 const eggRates = {
   basic:{Common:60,Rare:25,Epic:12,Legendary:3},
   forest:{Common:50,Rare:30,Epic:16,Legendary:4},
