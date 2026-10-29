@@ -333,3 +333,20 @@ body:not([data-theme="dark"]) #supabaseUserId {
   animation: none !important;
   transform: none !important;
 }
+
+/* Pixel pets in Gacha egg pool */
+.egg-pool .pool-pet {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+}
+
+.egg-pool .pool-pet img {
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: contain !important;
+  image-rendering: pixelated;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
