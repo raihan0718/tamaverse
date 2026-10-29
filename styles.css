@@ -267,3 +267,36 @@ body:not([data-theme="dark"]) #supabaseUserId {
   animation: none !important;
   transform: none !important;
 }
+
+/* FIX: lock pixel pet position on Home */
+.stage-pet {
+  position: relative;
+}
+
+.stage-pet .stage-creature {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+.stage-pet .stage-creature img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  margin: 0 !important;
+  image-rendering: pixelated;
+  animation: none !important;
+  transform: none !important;
+}
