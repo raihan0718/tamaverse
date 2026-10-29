@@ -246,3 +246,24 @@ body:not([data-theme="dark"]) #supabaseUserId {
   object-fit: contain;
   image-rendering: pixelated;
 }
+
+/* Fix pixel pet glitch on Home */
+.stage-pet .stage-creature {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.stage-pet .stage-creature img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  animation: none !important;
+  transform: none !important;
+}
