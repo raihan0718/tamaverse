@@ -578,8 +578,7 @@ function gachaPage(){
       const pool=species.filter(s=>s.pool.includes(e.id));
       return `<article class="card egg-card"><span class="egg-icon">${e.emoji}</span><h3>${e.name}</h3><p class="subtle">${e.description}</p>
         <p class="egg-rates"><b>Peluang:</b><br>${raritySummary(e.rates)}<br><b>Total 100%</b></p>
-        <p class="egg-pool"><b>Isi telur:</b> ${pool.map(s=>`<span class="pool-pet ${owned.has(s.id)?'pool-owned':''}" title="${esc(s.name)}">${s.emoji} ${esc(s.name)}</span>`).join('')}</p>
-        <p class="muted-label">${formatEggCost(e)}</p>
+        <p class="egg-pool"><b>Isi telur:</b> ${pool.map(s=>`<span class="pool-pet ${owned.has(s.id)?'pool-owned':''}" title="${esc(s.name)}">${petVisual(s, 'width:28px;height:28px;vertical-align:middle;')} ${esc(s.name)}</span>`).join('')}</p>
         <div class="egg-actions"><button class="button full" data-action="pull" data-egg="${e.id}">Buka 1</button><button class="button secondary full" data-action="pull-ten" data-egg="${e.id}">Buka 10 · ${formatEggCost(e,10)}</button></div>
       </article>`;
     }).join('')}</div>
