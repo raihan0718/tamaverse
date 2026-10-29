@@ -228,3 +228,21 @@ body:not([data-theme="dark"]) #supabaseUserId {
   object-fit: contain !important;
   image-rendering: pixelated;
 }
+
+
+/* Pixel pet on Home stage */
+.stage-pet .stage-creature {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: none;
+  box-shadow: none;
+}
+
+.stage-pet .stage-creature img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
