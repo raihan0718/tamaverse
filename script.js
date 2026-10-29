@@ -120,21 +120,34 @@ window.TAMAVERSE_RANKING_ERROR = '';
 async function loadGlobalRankings() {
   if (window.TAMAVERSE_RANKING_LOADING) return;
 
+  const db = window.TAMAVERSE_SUPABASE_CLIENT;
+
+  if (!db || typeof db.from !== 'function') {
+    window.TAMAVERSE_RANKING_ERROR =
+      'Supabase client belum tersedia atau tidak valid.';
+    window.TAMAVERSE_RANKING_LOADING = false;
+
+    if (typeof window.render === 'function') {
+      window.render();
+    }
+    return;
+  }
+
   window.TAMAVERSE_RANKING_LOADING = true;
   window.TAMAVERSE_RANKING_ERROR = '';
 
   try {
     const { data: profiles, error: profileError } =
-      await supabase
-        .from('profiles')
+      await db
+  .from('profiles')
         .select('id, display_name, avatar, level, rating, wins, losses')
         .limit(500);
 
     if (profileError) throw profileError;
 
     const { data: inventories, error: inventoryError } =
-      await supabase
-        .from('inventory')
+      await db
+  .from('inventory')
         .select('owner_id, coins')
         .limit(500);
 
