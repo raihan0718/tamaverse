@@ -95,6 +95,8 @@
     }
   }
 
+  window.savePlayerToSupabase = savePlayerToSupabase;
+
   async function loadPlayerFromSupabase() {
     if (!window.state || !supabase) {
       return;
