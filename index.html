@@ -32,6 +32,14 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
+      window.TAMAVERSE_SUPABASE = {
+        url: 'https://uziyhbgxvdetzlujzozu.supabase.co',
+        anonKey: 'sb_publishable_7BW0ujjrhBkOjeH4cW1XEg_RkSY-pw6'
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
       (function() {
         const tg = window.Telegram && window.Telegram.WebApp;
         if (!tg) return;
