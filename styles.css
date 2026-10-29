@@ -165,3 +165,17 @@ body[data-theme="dark"] .avatar-option.selected{background:#49354e;border-color:
   font-family: monospace;
 }
 
+/* FIX UUID — LIGHT MODE */
+body:not([data-theme="dark"]) #supabaseUserId {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: #fff0f6 !important;
+  color: #302638 !important;
+  border: 1px solid #eadce8 !important;
+  padding: 10px 12px;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font-family: monospace;
+}
