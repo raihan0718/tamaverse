@@ -111,6 +111,11 @@ return user;
     }
 window.TAMAVERSE_USER_ID = user.id;
 
+const idElement = document.getElementById('supabaseUserId');
+if (idElement) {
+  idElement.textContent = user.id;
+}
+
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -148,9 +153,6 @@ window.TAMAVERSE_USER_ID = user.id;
       console.warn('Supabase load failed:', error);
     }
   }
-if (typeof window.render === 'function') {
-  window.render();
-}
   const originalSave = typeof window.save === 'function' ? window.save : null;
   if (originalSave) {
     window.save = function() {
