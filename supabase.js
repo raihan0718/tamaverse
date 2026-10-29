@@ -73,8 +73,8 @@
         draws: Number(player.draws || 0),
       };
 
-      const { error: profileError } = await supabase
-        .from('profiles')
+      const { error: profileError } = await window.TAMAVERSE_SUPABASE_CLIENT
+  .from('profiles')
         .upsert(profilePayload, { onConflict: 'id' });
 
       if (profileError) {
@@ -91,8 +91,8 @@
         fragments: items.fragments || {},
       };
 
-      const { error: inventoryError } = await supabase
-        .from('inventory')
+      const { error: inventoryError } = await window.TAMAVERSE_SUPABASE_CLIENT
+  .from('inventory')
         .upsert(inventoryPayload, { onConflict: 'owner_id' });
 
       if (inventoryError) {
