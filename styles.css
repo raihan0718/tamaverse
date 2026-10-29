@@ -278,3 +278,24 @@ body:not([data-theme="dark"]) #supabaseUserId {
   vertical-align: middle;
   flex-shrink: 0;
 }
+
+/* Fix: remove leftover egg-shaped pet */
+.stage-pet > .stage-creature {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  clip-path: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.stage-pet > .stage-creature::before,
+.stage-pet > .stage-creature::after {
+  content: none !important;
+  display: none !important;
+}
+
+.stage-pet > .stage-creature > .face-emoji {
+  display: none !important;
+}
