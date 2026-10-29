@@ -181,26 +181,3 @@ body:not([data-theme="dark"]) #supabaseUserId {
 }
 
 
-.rank-tabs {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.rank-tab {
-  flex: 1;
-  min-width: 60px;
-  padding: 9px 12px;
-  border: 1px solid var(--border-color, #dddddd);
-  border-radius: 12px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-.rank-tab.active {
-  background: var(--accent, #8064e9);
-  color: white;
-  border-color: transparent;
-}
