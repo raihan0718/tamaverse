@@ -26,8 +26,9 @@
       }
 
       if (session?.user) {
-        return session.user;
-      }
+  window.TAMAVERSE_USER_ID = session.user.id;
+  return session.user;
+}
 
       const { data, error: signInError } = await supabase.auth.signInAnonymously();
       if (signInError) {
@@ -35,7 +36,9 @@
         return null;
       }
 
-      return data?.user || null;
+      const user = data?.user || null;
+if (user) window.TAMAVERSE_USER_ID = user.id;
+return user;
     } catch (error) {
       console.warn('Supabase auth failed:', error);
       return null;
