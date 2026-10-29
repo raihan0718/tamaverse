@@ -150,3 +150,18 @@ body[data-theme="dark"] .avatar-option,body[data-theme="dark"] .batch-result{bac
 body[data-theme="dark"] .avatar-option.selected{background:#49354e;border-color:#b18ace}
 @media(max-width:380px){.featured-banner{align-items:flex-start;padding:13px}.featured-banner h2{font-size:16px}.featured-banner .button{padding:9px 8px;font-size:10px}.fragment-actions{grid-template-columns:1fr}.fragment-actions .button{min-height:38px}.batch-results{grid-template-columns:1fr}}
 
+
+/* TAMAVERSE — UUID BACKGROUND FIX */
+#supabaseUserId {
+  display: block;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: #fff0f6 !important;
+  color: #302638 !important;
+  border: 1px solid #eadce8 !important;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font-family: monospace;
+}
+
