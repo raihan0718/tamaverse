@@ -48,7 +48,21 @@ let petAnimation = 'idle';
 let petAnimationTimer;
 let pullInProgress = false;
 
-function save(){ if(state) { try { localStorage.setItem(SAVE_KEY,JSON.stringify(state)); } catch(e){ showToast('Penyimpanan penuh. Hapus sebagian data browser.'); } } }
+function save(){
+  if(state){
+    try{
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    }catch(e){
+      showToast('Penyimpanan penuh. Hapus sebagian data browser.');
+    }
+  }
+
+  if(typeof window.savePlayerToSupabase === 'function'){
+    window.savePlayerToSupabase().catch(e=>{
+      console.warn('Cloud save failed:', e);
+    });
+  }
+}
 function freshState(name){
   return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,gems:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,items:{...initialItems,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},careUses:{date:new Date().toDateString(),feed:0,play:0,train:0},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
 }
