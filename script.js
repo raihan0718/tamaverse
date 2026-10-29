@@ -178,8 +178,64 @@ window.setRankingSort = function (category) {
   }
 };
 
+    window.TAMAVERSE_RANKING_DATA = (profiles || []).map(p => ({
+      id: p.id,
+      name: p.display_name || 'Player',
+      avatar: p.avatar || '🐣',
+      level: Number(p.level || 1),
+      rating: Number(p.rating || 1000),
+      wins: Number(p.wins || 0),
+      losses: Number(p.losses || 0),
+      coins: coinsByPlayer.get(p.id) || 0,
+      me: p.id === window.TAMAVERSE_USER_ID
+    }));
+  } catch (error) {
+    console.error('Global leaderboard failed:', error);
+    window.TAMAVERSE_RANKING_ERROR =
+      'Leaderboard gagal dimuat. Periksa koneksi atau akses database.';
+  } finally {
+    window.TAMAVERSE_RANKING_LOADING = false;
+
+    if (typeof window.render === 'function') {
+      window.render();
+    }
+  }
+}
+
+window.setRankingSort = function (category) {
+  window.TAMAVERSE_RANKING_SORT = category;
+
+  if (typeof window.render === 'function') {
+    window.render();
+  }
+};
+
 function rankingPage() {
+function rankingPage() {
+  console.log("RAJA RANKING BARU AKTIF");
+
   const categories = [
+    ['rating', 'Rating'],
+    ['level', 'Level'],
+    ['wins', 'Wins'],
+    ['coins', 'Coins']
+  ];
+  const categories = [
+    ['rating', 'Rating'],
+    ['level', 'Level'],
+    ['wins', 'Wins'],
+    ['coins', 'Coins']
+  ];
+
+  const category = window.TAMAVERSE_RANKING_SORT || 'rating';
+  const labels = {
+    rating: 'Rating Battle',
+    level: 'Level',
+    wins: 'Total Wins',
+    coins: 'Coins'
+  };
+
+  const data = window.TAMAVERSE_RANKING_DATA || []; = [
     ['rating', 'Rating'],
     ['level', 'Level'],
     ['wins', 'Wins'],
