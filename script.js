@@ -160,7 +160,7 @@ async function loadGlobalRankings() {
   } catch (error) {
     console.error('Global leaderboard failed:', error);
     window.TAMAVERSE_RANKING_ERROR =
-  'Error Supabase: ' + (error.message || String(error));
+  'Leaderboard gagal dimuat. Periksa koneksi atau akses database.';
   } finally {
     window.TAMAVERSE_RANKING_LOADING = false;
 
