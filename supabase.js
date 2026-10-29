@@ -109,6 +109,7 @@ return user;
     if (!user) {
       return;
     }
+window.TAMAVERSE_USER_ID = user.id;
 
     try {
       const { data: profileData, error: profileError } = await supabase
