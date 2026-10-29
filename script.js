@@ -33,6 +33,13 @@ const eggRates = {
 eggs.forEach(egg=>{egg.rates=eggRates[egg.id];});
 const initialItems = {snack:3,energy:2,training:1};
 let state = loadSave();
+
+Object.defineProperty(window, 'state', {
+  configurable: true,
+  get: () => state,
+  set: (value) => { state = value; }
+});
+
 let page = 'home';
 let selectedPetId = null;
 let battle = null;
