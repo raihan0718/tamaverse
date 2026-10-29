@@ -274,16 +274,14 @@ body:not([data-theme="dark"]) #supabaseUserId {
 }
 
 .stage-pet .stage-creature {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
+  position: relative !important;
+  inset: auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
   box-shadow: none !important;
   animation: none !important;
   transform: none !important;
