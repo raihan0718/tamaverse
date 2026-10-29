@@ -106,7 +106,164 @@ function petCard(p,owned){const s=speciesById(p.species);return `<button class="
 function gachaPage(){return `<section class="page"><div class="eyebrow">TEMUKAN TEMAN BARU</div><h1 class="page-title">Telur ajaib</h1><p class="subtle">Tarif dasar: Common 60% · Rare 25% · Epic 12% · Legendary 3%. Pity Rare pada 10 pull, Epic pada 50 pull.</p><div class="notice">🎁 Gratis 1 Basic Egg setiap hari. Semua hadiah menggunakan mata uang dalam game—tanpa pembayaran asli.</div><div class="collection-grid">${eggs.map(e=>`<article class="card egg-card"><span class="egg-icon">${e.emoji}</span><h3>${e.name}</h3><p class="subtle">${e.description}</p><p class="muted-label">${e.currency==='gem'?`💎 ${e.price} gem`:`🪙 ${e.price} koin`}</p><button class="button full" data-action="pull" data-egg="${e.id}">Buka 1 telur</button></article>`).join('')}</div><div class="card" style="margin-top:12px"><div class="section-heading" style="margin-top:0"><h2>Hadiah gratis harian</h2></div><button class="button secondary full" data-action="freeegg">${state.gacha.lastFree===new Date().toDateString()?'Sudah diklaim hari ini':'Klaim Basic Egg gratis'}</button><div class="section-heading"><h2>Progress pity</h2></div><p class="subtle">Rare+: ${state.gacha.pityRare}/10 · Epic+: ${state.gacha.pityEpic}/50</p><div class="section-heading"><h2>Riwayat tarikan</h2></div>${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>`<p class="subtle">${h.emoji} ${esc(h.name)} · <span class="rarity rarity-${h.rarity}">${h.rarity}</span></p>`).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}</div></section>`;}
 function battlePage(){if(battle)return battleView();return `<section class="page"><div class="eyebrow">ARENA TAMAVERSE</div><h1 class="page-title">Battle</h1><p class="subtle">Latih petmu dalam pertarungan turn-based melawan lawan simulasi.</p><div class="card"><div style="font-size:42px;text-align:center;margin:8px">⚔️</div><h2 style="text-align:center">Practice Battle</h2><p class="subtle" style="text-align:center">Lawan AI lokal · Hadiah: 35 koin + XP saat menang</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai latihan</button></div><div class="card" style="margin-top:12px"><h2>Simulated PvP</h2><p class="subtle">Mode demonstrasi melawan lawan sampel. Belum terhubung ke pemain sungguhan atau matchmaking online.</p><button class="button secondary full" data-action="battle-start" data-mode="simulated">Tantang lawan demo</button></div>${state.battleHistory.length?`<div class="section-heading"><h2>Battle terakhir</h2></div>${state.battleHistory.slice(0,4).map(b=>`<div class="card" style="margin:7px 0"><span>${b.result==='win'?'🏆':b.result==='draw'?'🤝':'💫'} ${b.result==='win'?'Menang':b.result==='draw'?'Seri':'Kalah'}</span><span style="float:right" class="muted-label">${new Date(b.date).toLocaleDateString('id-ID')}</span></div>`).join('')}`:''}<div class="notice">🛡️ Pertarungan dan rating tersimpan lokal. Hasil ini bukan ranking kompetitif online.</div></section>`;}
 function battleView(){const p=petById(battle.petId),ps=speciesById(p.species),os=speciesById(battle.opponent.species);const fx=battle.actionFx||'idle';return `<section class="page"><div class="eyebrow">${battle.mode==='simulated'?'SIMULATED PVP · DEMO':'PRACTICE BATTLE'}</div><h1 class="page-title">Arena</h1><div class="battle-scene battle-fx-${fx}" aria-label="Arena pertarungan"><div class="arena-sky"><span class="arena-moon">✦</span><span class="arena-cloud cloud-one">☁</span><span class="arena-cloud cloud-two">☁</span><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div><div class="arena-banner"><span>✨ TAMAVERSE ARENA ✨</span><b>TURN ${battle.turn}</b></div><div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div><div class="battle-side battle-player"><div class="battle-nameplate"><b>${esc(p.name)}</b><span>Lv.${p.level} · ${ps.element}</span></div><div class="battle-sprite">${ps.emoji}</div><span class="battle-effect effect-player">${fx==='skill'?'✨':''}</span><span class="battle-impact impact-player">${fx==='skill'?'SKILL!':''}</span><div class="battle-hp-card"><div class="hp-label"><b>YOUR PET</b><span>${Math.max(0,battle.playerHP)} / ${p.stats.hp} HP</span></div><div class="progress-track"><div class="progress-fill" style="width:${Math.max(0,battle.playerHP/p.stats.hp*100)}%"></div></div></div></div><div class="arena-vs">VS</div><div class="battle-side battle-enemy"><div class="battle-nameplate"><b>${esc(battle.opponent.name)}</b><span>Lv.${battle.opponent.level} · ${os.element}</span></div><div class="battle-sprite">${os.emoji}</div><span class="battle-effect effect-enemy">${fx==='skill'?'💥':''}</span><span class="battle-impact impact-enemy">${fx==='skill'?'HIT!':''}</span><div class="battle-hp-card"><div class="hp-label"><b>OPPONENT</b><span>${Math.max(0,battle.enemyHP)} / ${battle.opponent.stats.hp} HP</span></div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.max(0,battle.enemyHP/battle.opponent.stats.hp*100)}%"></div></div></div></div></div><div class="section-heading"><h2>Aksimu</h2></div><div class="button-row"><button class="button" data-action="battle-action" data-move="attack">⚔️ Attack</button><button class="button soft" data-action="battle-action" data-move="skill" ${battle.skillUsed?'disabled':''}>✨ Skill</button><button class="button secondary" data-action="battle-action" data-move="defend">🛡️ Defend</button><button class="button secondary" data-action="battle-action" data-move="item" ${state.items.snack<1?'disabled':''}>🍓 Item (${state.items.snack})</button></div><p class="muted-label">Skill sekali per battle · Maksimum 30 giliran</p><div class="section-heading"><h2>Battle log</h2><span class="pill">Giliran ${battle.turn}</span></div><div class="battle-log" id="battleLog">${battle.log.slice(-7).map(x=>`<div>• ${esc(x)}</div>`).join('')}</div></section>`;}
-function rankingPage(){const demo=[{name:'LunaStar',avatar:'🌙',level:18,rating:1840,wins:45,losses:8},{name:'MochiPop',avatar:'🍡',level:15,rating:1620,wins:32,losses:11},{name:'RinBloom',avatar:'🌸',level:13,rating:1490,wins:28,losses:14}];const me={name:state.player.name,avatar:state.player.avatar,level:state.player.level,rating:state.player.rating,wins:state.player.wins,losses:state.player.losses,me:true};const rows=[...demo,me].sort((a,b)=>b.rating-a.rating);return `<section class="page"><div class="eyebrow">PAPAN PERINGKAT</div><h1 class="page-title">Ranking</h1><div class="notice">📡 Data demo lokal—bukan leaderboard global sungguhan. Peringkat online memerlukan backend bersama.</div><div class="card"><div style="text-align:center;font-size:31px">🥇　🥈　🥉</div><div class="rank-row"><span>🏅</span><span>Rating Battle-mu</span><b>${state.player.rating}</b></div>${rows.map((r,i)=>`<div class="rank-row ${r.me?'rank-me':''}"><b>#${i+1}</b><span><span class="rank-avatar">${r.avatar}</span> ${esc(r.name)}${r.me?' (kamu)':''}<br><span class="muted-label">Lv.${r.level} · ${r.wins} menang / ${r.losses} kalah</span></span><b>${r.rating}</b></div>`).join('')}</div></section>`;}
+
+window.TAMAVERSE_RANKING_SORT =
+  window.TAMAVERSE_RANKING_SORT || 'rating';
+
+window.TAMAVERSE_RANKING_DATA =
+  window.TAMAVERSE_RANKING_DATA || [];
+
+window.TAMAVERSE_RANKING_LOADING = false;
+window.TAMAVERSE_RANKING_ERROR = '';
+
+async function loadGlobalRankings() {
+  if (window.TAMAVERSE_RANKING_LOADING) return;
+
+  window.TAMAVERSE_RANKING_LOADING = true;
+  window.TAMAVERSE_RANKING_ERROR = '';
+
+  try {
+    const { data: profiles, error: profileError } =
+      await supabase
+        .from('profiles')
+        .select('id, display_name, avatar, level, rating, wins, losses')
+        .limit(500);
+
+    if (profileError) throw profileError;
+
+    const { data: inventories, error: inventoryError } =
+      await supabase
+        .from('inventory')
+        .select('owner_id, coins')
+        .limit(500);
+
+    if (inventoryError) throw inventoryError;
+
+    const coinsByPlayer = new Map(
+      (inventories || []).map(item => [
+        item.owner_id,
+        Number(item.coins || 0)
+      ])
+    );
+
+    window.TAMAVERSE_RANKING_DATA = (profiles || []).map(p => ({
+      id: p.id,
+      name: p.display_name || 'Player',
+      avatar: p.avatar || '🐣',
+      level: Number(p.level || 1),
+      rating: Number(p.rating || 1000),
+      wins: Number(p.wins || 0),
+      losses: Number(p.losses || 0),
+      coins: coinsByPlayer.get(p.id) || 0,
+      me: p.id === window.TAMAVERSE_USER_ID
+    }));
+  } catch (error) {
+    console.error('Global leaderboard failed:', error);
+    window.TAMAVERSE_RANKING_ERROR =
+      'Leaderboard gagal dimuat. Periksa koneksi atau akses database.';
+  } finally {
+    window.TAMAVERSE_RANKING_LOADING = false;
+
+    if (typeof window.render === 'function') {
+      window.render();
+    }
+  }
+}
+
+window.setRankingSort = function (category) {
+  window.TAMAVERSE_RANKING_SORT = category;
+
+  if (typeof window.render === 'function') {
+    window.render();
+  }
+};
+
+function rankingPage() {
+  const categories = [
+    ['rating', 'Rating'],
+    ['level', 'Level'],
+    ['wins', 'Wins'],
+    ['coins', 'Coins']
+  ];
+
+  const category = window.TAMAVERSE_RANKING_SORT || 'rating';
+  const labels = {
+    rating: 'Rating Battle',
+    level: 'Level',
+    wins: 'Total Wins',
+    coins: 'Coins'
+  };
+
+  const data = window.TAMAVERSE_RANKING_DATA || [];
+
+  if (!data.length &&
+      !window.TAMAVERSE_RANKING_LOADING &&
+      !window.TAMAVERSE_RANKING_ERROR) {
+    loadGlobalRankings();
+  }
+
+  const rows = [...data].sort((a, b) => {
+    const diff = Number(b[category] || 0) -
+                 Number(a[category] || 0);
+
+    return diff || a.name.localeCompare(b.name);
+  });
+
+  const current = rows.find(r => r.me);
+
+  return `<section class="page">
+    <div class="eyebrow">PAPAN PERINGKAT</div>
+    <h1 class="page-title">Ranking</h1>
+
+    <div class="card">
+      <div class="rank-tabs">
+        ${categories.map(([key, label]) => `
+          <button
+            class="rank-tab ${category === key ? 'active' : ''}"
+            onclick="window.setRankingSort('${key}')"
+          >${label}</button>
+        `).join('')}
+      </div>
+
+      ${window.TAMAVERSE_RANKING_LOADING && !data.length
+        ? '<p class="muted-label">📡 Memuat ranking global...</p>'
+        : ''}
+
+      ${window.TAMAVERSE_RANKING_ERROR
+        ? `<p class="muted-label">${esc(window.TAMAVERSE_RANKING_ERROR)}</p>`
+        : ''}
+
+      ${!window.TAMAVERSE_RANKING_LOADING && !data.length &&
+        !window.TAMAVERSE_RANKING_ERROR
+        ? '<p class="muted-label">Belum ada data pemain.</p>'
+        : ''}
+
+      ${current ? `
+        <div class="rank-row">
+          <span>🏅</span>
+          <span>Peringkatmu · ${esc(labels[category])}</span>
+          <b>#${rows.findIndex(r => r.id === current.id) + 1}</b>
+        </div>
+      ` : ''}
+
+      ${rows.map((r, i) => `
+        <div class="rank-row ${r.me ? 'rank-me' : ''}">
+          <b>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</b>
+          <span>
+            <span class="rank-avatar">${esc(String(r.avatar))}</span>
+            ${esc(r.name)}${r.me ? ' (kamu)' : ''}
+            <br>
+            <span class="muted-label">
+              Lv.${r.level} · ${r.wins} menang / ${r.losses} kalah
+            </span>
+          </span>
+          <b>${Number(r[category] || 0).toLocaleString('id-ID')}</b>
+        </div>
+      `).join('')}
+    </div>
+  </section>`;
+}
+
 function profilePage(){const p=activePet();return `<section class="page"><div class="eyebrow">AKUN LOKAL</div><h1 class="page-title">Profile & Tas</h1><div class="card profile-card"><div class="avatar">${state.player.avatar}</div><h2>${esc(state.player.name)}</h2><div class="user-id-box" style="margin:12px 0;padding:12px;background:var(--card-bg,#f4d4e3);border-radius:12px">
   <small class="muted-label">TAMAVERSE USER ID</small>
   <p id="supabaseUserId" style="overflow-wrap:anywhere;margin:8px 0;color:var(--text-color,#302638)">
