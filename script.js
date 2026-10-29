@@ -406,7 +406,15 @@ function profilePage(){
       </div></div>`;
   }).join(''):'<p class="subtle">Fragmen dari pet duplikat akan muncul di sini.</p>';
   return `<section class="page"><div class="eyebrow">AKUN LOKAL</div><h1 class="page-title">Profil & Tas</h1>
-    <div class="card profile-card"><div class="avatar">${state.player.avatar}</div><h2>${esc(state.player.name)}</h2><p>Guest · ID ${esc(state.player.id)}</p>
+    <div class="card profile-card"><div class="avatar">${state.player.avatar}</div><h2>${esc(state.player.name)}</h2><div class="user-id-box" style="margin:12px 0;padding:12px;background:var(--card-bg,#222);border-radius:12px">
+  <small>TAMAVERSE USER ID</small>
+  <p id="supabaseUserId" style="overflow-wrap:anywhere;margin:8px 0">
+    ${esc(window.TAMAVERSE_USER_ID || 'Memuat ID...')}
+  </p>
+  <button class="button secondary full" data-action="copy-user-id">
+    📋 Salin User ID
+  </button>
+</div>
       <div class="profile-stats"><div class="profile-stat"><strong>Lv. ${state.player.level}</strong><span>LEVEL PEMAIN</span></div><div class="profile-stat"><strong>${state.player.rating}</strong><span>RATING</span></div><div class="profile-stat"><strong>${state.player.wins}/${state.player.losses}/${state.player.draws}</strong><span>W/L/D</span></div><div class="profile-stat"><strong>${new Set(state.pets.map(p=>p.species)).size}/12</strong><span>KOLEKSI</span></div><div class="profile-stat"><strong>${state.player.streak} hari</strong><span>LOGIN STREAK</span></div><div class="profile-stat"><strong>${state.player.xp}/${state.player.level*100}</strong><span>PLAYER XP</span></div></div>
       <div class="profile-edit-actions"><button class="button secondary" data-action="rename-player">✏️ Ubah nama</button><button class="button secondary" data-action="avatar-picker">🙂 Ubah avatar</button></div>
     </div>
