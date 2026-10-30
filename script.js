@@ -1084,9 +1084,26 @@ let onlineRoomPoller = null;
 async function syncOnlinePetBeforeRoom() {
   const db = window.TAMAVERSE_SUPABASE_CLIENT;
   if (!db) throw new Error('Supabase belum terkoneksi.');
-  getOnlinePetData();
+  const petData = getOnlinePetData();
+
   if (typeof window.savePlayerToSupabase === 'function') {
     await window.savePlayerToSupabase();
+  }
+
+  const userId = window.TAMAVERSE_USER_ID;
+  const { data: cloudPet, error } = await db
+    .from('pets')
+    .select('client_uid, is_active')
+    .eq('owner_id', userId)
+    .eq('client_uid', petData.pet_uid)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!cloudPet) {
+    throw new Error('Pet aktif belum tersimpan di cloud. Coba refresh game, lalu pilih pet lagi.');
+  }
+  if (!cloudPet.is_active) {
+    throw new Error('Pet pilihan belum ditandai aktif di cloud. Pilih ulang pet tersebut.');
   }
 }
 
