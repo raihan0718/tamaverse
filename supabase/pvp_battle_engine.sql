@@ -36,6 +36,7 @@ DECLARE
   v_turn integer;
   v_skill_key text;
   v_defend_key text;
+  v_target_defend_key text;
   v_actor_hp_key text;
   v_target_hp_key text;
   v_log jsonb;
@@ -71,6 +72,7 @@ BEGIN
     v_target_hp_key := 'guest_hp';
     v_skill_key := 'host_skill_used';
     v_defend_key := 'host_defending';
+    v_target_defend_key := 'guest_defending';
   ELSIF v_room.guest_id = v_uid THEN
     v_actor_is_host := false;
     v_actor_data := v_room.guest_data;
@@ -79,6 +81,7 @@ BEGIN
     v_target_hp_key := 'host_hp';
     v_skill_key := 'guest_skill_used';
     v_defend_key := 'guest_defending';
+    v_target_defend_key := 'host_defending';
   ELSE
     RAISE EXCEPTION 'Kamu bukan peserta room ini';
   END IF;
@@ -144,7 +147,9 @@ BEGIN
     END IF;
 
     v_random := 0.85 + random() * 0.30;
-    v_damage := GREATEST(4, round((v_actor_atk + CASE WHEN p_action = 'skill' THEN 10 ELSE 0 END - v_target_def * 0.35) * v_random * v_element_multiplier)::integer);
+    v_incoming_multiplier := CASE WHEN COALESCE((v_state->>v_target_defend_key)::boolean, false) THEN 0.45 ELSE 1 END;
+    v_damage := GREATEST(4, round((v_actor_atk + CASE WHEN p_action = 'skill' THEN 10 ELSE 0 END - v_target_def * 0.35) * v_random * v_element_multiplier * v_incoming_multiplier)::integer);
+    v_state := jsonb_set(v_state, ARRAY[v_target_defend_key], 'false'::jsonb, true);
 
     IF random() < 0.10 THEN
       v_damage := round(v_damage * 1.5)::integer;
@@ -169,31 +174,16 @@ BEGIN
     v_result := 'win';
     v_winner := v_uid;
   ELSE
-    -- The defending flag belongs to the player receiving this action.
-    IF v_actor_is_host THEN
-      v_incoming_multiplier := CASE WHEN COALESCE((v_state->>'guest_defending')::boolean, false) THEN 0.45 ELSE 1 END;
-      v_state := jsonb_set(v_state, '{guest_defending}', 'false'::jsonb, true);
-    ELSE
-      v_incoming_multiplier := CASE WHEN COALESCE((v_state->>'host_defending')::boolean, false) THEN 0.45 ELSE 1 END;
-      v_state := jsonb_set(v_state, '{host_defending}', 'false'::jsonb, true);
+    -- A defend stance reduces the next incoming attack to 45%.
+    IF p_action = 'defend' THEN
+      v_state := jsonb_set(v_state, ARRAY[v_defend_key], 'true'::jsonb, true);
     END IF;
 
-    -- In PvP the opponent does not auto-attack. Defend protects against the next actual attack.
-    -- The next player chooses their own action on their turn.
     IF v_actor_is_host THEN
       v_room.current_turn := v_room.guest_id;
     ELSE
       v_room.current_turn := v_room.host_id;
       v_turn := v_turn + 1;
-    END IF;
-
-    -- Preserve a defend stance until the opponent's attack is resolved.
-    IF p_action = 'defend' THEN
-      IF v_actor_is_host THEN
-        v_state := jsonb_set(v_state, '{host_defending}', 'true'::jsonb, true);
-      ELSE
-        v_state := jsonb_set(v_state, '{guest_defending}', 'true'::jsonb, true);
-      END IF;
     END IF;
 
     IF v_turn > 30 AND NOT v_actor_is_host THEN
@@ -210,10 +200,6 @@ BEGIN
     v_room.status := 'finished';
     v_state := jsonb_set(v_state, '{result}', to_jsonb(v_result), true);
     v_state := jsonb_set(v_state, '{winner_id}', COALESCE(to_jsonb(v_winner), 'null'::jsonb), true);
-
-    IF v_room.host_id = v_winner THEN
-      v_actor_pet := NULL;
-    END IF;
 
     -- Apply competitive rewards exactly once, while holding the room row lock.
     IF v_result = 'draw' THEN
