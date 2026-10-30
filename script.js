@@ -1176,12 +1176,14 @@ console.log('ROOM ERROR:', roomError);
   }
 }
 
+
 async function subscribeOnlineRoom(roomId) {
   const db = window.TAMAVERSE_SUPABASE_CLIENT;
   if (!db) return;
 
   if (onlineChannel) {
     await db.removeChannel(onlineChannel);
+    onlineChannel = null;
   }
 
   onlineChannel = db
@@ -1194,8 +1196,21 @@ async function subscribeOnlineRoom(roomId) {
         table: 'pvp_rooms',
         filter: `id=eq.${roomId}`
       },
-      payload => {
+      async payload => {
         const room = payload.new;
+
+        if (room.status === 'closed') {
+          if (onlineChannel) {
+            await db.removeChannel(onlineChannel);
+            onlineChannel = null;
+          }
+
+          onlineRoom = null;
+          render();
+          showToast('Host telah menutup room.');
+          return;
+        }
+
         onlineRoom = {
           ...onlineRoom,
           ...room
@@ -1205,11 +1220,14 @@ async function subscribeOnlineRoom(roomId) {
 
         if (room.status === 'ready') {
           showToast('Teman ditemukan! Room siap.');
+        } else if (room.status === 'waiting' && room.guest_id === null) {
+          showToast('Guest keluar. Room kembali menunggu pemain.');
         }
       }
     )
     .subscribe();
 }
+
 
 function onlineBattlePage() {
   return `
