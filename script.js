@@ -1088,7 +1088,15 @@ async function onlineJoinRoom(code) {
 
     if (error) throw error;
 
-    onlineRoom = data;
+    const { data: roomData, error: roomError } = await db
+      .from('pvp_rooms')
+      .select('*')
+      .eq('id', data.room_id)
+      .single();
+
+    if (roomError) throw roomError;
+
+    onlineRoom = roomData;
     page = 'battle';
     render();
     showToast('Berhasil masuk room!');
