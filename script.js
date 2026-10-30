@@ -1080,18 +1080,44 @@ function onlineBattlePage() {
         <button class="button full" data-action="online-random">
           Cari lawan
         </button>
-      </div>
+      <div class="card" style="
+  margin-top:14px;
+  padding:20px;
+  border:1px solid rgba(140,120,255,.25);
+  background:linear-gradient(145deg,rgba(115,90,220,.13),rgba(40,45,75,.08));
+  border-radius:18px;
+">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <div style="
+      width:44px;height:44px;border-radius:14px;
+      display:grid;place-items:center;
+      background:rgba(140,120,255,.18);
+      font-size:22px;
+    ">✦</div>
+    <div>
+      <h2 style="margin:0">Play with Friends</h2>
+      <p class="subtle" style="margin:4px 0 0">Challenge someone in a private room.</p>
+    </div>
+  </div>
 
-      <div class="card" style="margin-top:12px">
-        <h2>🔗 Invite Friend</h2>
-        <p class="subtle">Buat room pribadi dan bagikan link.</p>
-        <button class="button full" data-action="online-create">
-          Create Room
-        </button>
-        <button class="button secondary full" data-action="online-join-prompt">
-          Join Room
-        </button>
-      </div>
+  <button class="button full" data-action="online-create">
+    ✚ Create Private Room
+  </button>
+
+  <div style="
+    display:flex;align-items:center;gap:10px;
+    margin:17px 0;color:var(--muted,#888);
+    font-size:11px;letter-spacing:2px;
+  ">
+    <span style="height:1px;flex:1;background:currentColor;opacity:.25"></span>
+    OR JOIN WITH CODE
+    <span style="height:1px;flex:1;background:currentColor;opacity:.25"></span>
+  </div>
+
+  <button class="button secondary full" data-action="online-join-prompt">
+    Enter Room Code →
+  </button>
+</div>
 
       ${onlineRoom ? `
         <div class="card" style="margin-top:12px">
