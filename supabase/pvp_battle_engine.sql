@@ -46,6 +46,9 @@ DECLARE
   v_target_pet public.pets%rowtype;
   v_actor_xp integer := 0;
   v_target_xp integer := 0;
+  v_player_level integer := 1;
+  v_player_xp integer := 0;
+  v_level_bonus integer := 0;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Login required';
@@ -223,15 +226,34 @@ BEGIN
         (v_room.guest_id, 'online', 'draw');
     ELSE
       UPDATE public.profiles
-      SET wins = wins + CASE WHEN id = v_winner THEN 1 ELSE 0 END,
-          losses = losses + CASE WHEN id <> v_winner THEN 1 ELSE 0 END,
-          xp = xp + CASE WHEN id = v_winner THEN 25 ELSE 0 END,
-          rating = GREATEST(0, rating + CASE WHEN id = v_winner THEN 5 ELSE -5 END)
-      WHERE id IN (v_room.host_id, v_room.guest_id);
+      SET losses = losses + 1,
+          rating = GREATEST(0, rating - 5)
+      WHERE id = CASE WHEN v_winner = v_room.host_id THEN v_room.guest_id ELSE v_room.host_id END;
+
+      SELECT level, xp INTO v_player_level, v_player_xp
+      FROM public.profiles
+      WHERE id = v_winner
+      FOR UPDATE;
+
+      v_player_level := GREATEST(1, COALESCE(v_player_level, 1));
+      v_player_xp := GREATEST(0, COALESCE(v_player_xp, 0)) + 25;
+      v_level_bonus := 0;
+      WHILE v_player_xp >= v_player_level * 100 LOOP
+        v_player_xp := v_player_xp - (v_player_level * 100);
+        v_player_level := v_player_level + 1;
+        v_level_bonus := v_level_bonus + 50;
+      END LOOP;
+
+      UPDATE public.profiles
+      SET wins = wins + 1,
+          rating = rating + 5,
+          level = v_player_level,
+          xp = v_player_xp
+      WHERE id = v_winner;
 
       INSERT INTO public.inventory(owner_id, coins)
-      VALUES (v_winner, 35)
-      ON CONFLICT (owner_id) DO UPDATE SET coins = public.inventory.coins + 35, updated_at = now();
+      VALUES (v_winner, 35 + v_level_bonus)
+      ON CONFLICT (owner_id) DO UPDATE SET coins = public.inventory.coins + 35 + v_level_bonus, updated_at = now();
 
       INSERT INTO public.battle_history(owner_id, mode, result) VALUES
         (v_room.host_id, 'online', CASE WHEN v_room.host_id = v_winner THEN 'win' ELSE 'loss' END),
