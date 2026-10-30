@@ -936,6 +936,7 @@ function avatarPicker(){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){page=nav.dataset.page;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
+  if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}
   if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){page=btn.dataset.page;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='pet-tap'){triggerPetAnimation('greet');showToast(`${activePet()?.name||'Pet'} menyapamu!`);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
   closeModal();
@@ -1229,17 +1230,30 @@ function onlineBattleView() {
     </div>`;
 }
 
-async function onlineLeaveRoom() {
-  try {
-    if (!onlineRoom?.id) return;
+let leavingOnlineRoom = false;
 
+async function onlineLeaveRoom() {
+  if (leavingOnlineRoom) return;
+  if (!onlineRoom?.id) {
+    showToast('Room tidak ditemukan. Coba refresh game.');
+    return;
+  }
+
+  leavingOnlineRoom = true;
+  const leaveButton = document.querySelector('[data-action="online-leave"]');
+  if (leaveButton) {
+    leaveButton.disabled = true;
+    leaveButton.textContent = 'Leaving...';
+  }
+
+  try {
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
+    if (!db) throw new Error('Supabase belum terkoneksi.');
     const roomId = onlineRoom.id;
 
     const { data, error } = await db.rpc('leave_pvp_room', {
       p_room_id: roomId
     });
-
     if (error) throw error;
 
     if (onlineChannel) {
@@ -1252,17 +1266,20 @@ async function onlineLeaveRoom() {
     }
 
     onlineRoom = null;
+    leavingOnlineRoom = false;
     page = 'battle';
     render();
 
     showToast(
-      data.status === 'closed'
+      data?.status === 'closed'
         ? 'Room ditutup karena host keluar.'
         : 'Kamu berhasil keluar dari room.'
     );
   } catch (error) {
-    console.error(error);
-    showToast(error.message || 'Gagal keluar dari room.');
+    console.error('Leave online room failed:', error);
+    leavingOnlineRoom = false;
+    render();
+    showToast(error.message || 'Gagal keluar dari room. Coba lagi.');
   }
 }
 
