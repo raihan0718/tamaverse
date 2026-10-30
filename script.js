@@ -1254,17 +1254,18 @@ async function onlineUpdatePet() {
 async function onlineStartMatch() {
   try {
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
-    if (!onlineRoom?.id) throw new Error('Room tidak ditemukan.');
+    const roomId = onlineRoom?.id || onlineRoom?.room_id;
+    if (!roomId) throw new Error('Room tidak ditemukan.');
 
     await onlineAuth();
 
     const { data, error } = await db.rpc('start_pvp_match', {
-      p_room_id: onlineRoom.id
+      p_room_id: roomId
     });
 
     if (error) throw error;
 
-    onlineRoom = { ...onlineRoom, ...data };
+    onlineRoom = { ...onlineRoom, ...data, id: data.room_id || roomId };
     render();
     showToast('Match dimulai!');
     subscribeOnlineRoom(onlineRoom.id);
@@ -1286,7 +1287,7 @@ async function onlineRandomMatch() {
 
     if (error) throw error;
 
-    onlineRoom = data;
+    onlineRoom = { ...data, id: data.room_id || data.id };
     page = 'battle';
     render();
 
@@ -1314,7 +1315,7 @@ async function onlineCreateRoom() {
 
     if (error) throw error;
 
-    onlineRoom = data;
+    onlineRoom = { ...data, id: data.room_id || data.id };
     page = 'battle';
     render();
 
