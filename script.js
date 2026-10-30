@@ -571,7 +571,7 @@ function gachaPage(){
         <span class="egg-icon">${e.emoji}</span><h3>${e.name}</h3>
         <p class="subtle">${e.description}</p>
         <p class="egg-rates"><b>Peluang:</b><br>${raritySummary(e.rates)}</p>
-        <p class="egg-pool"><b>Isi telur:</b> ${pool.map(sp=>`<span class="pool-pet ${owned.has(sp.id)?'pool-owned':''}">${sp.emoji} ${esc(sp.name)}</span>`).join('')}</p>
+        <p class="egg-pool"><b>Isi telur:</b> ${pool.map(sp=>`<span class="pool-pet ${owned.has(sp.id)?'pool-owned':''}"><img src="${petImages[sp.id]}" alt="${esc(sp.name)}" style="width:24px;height:24px;object-fit:contain;vertical-align:middle"> ${esc(sp.name)}</span>`).join('')}</p>
         <p class="muted-label">${formatEggCost(e)}</p>
         <div class="egg-actions">
           <button class="button full" data-action="pull" data-egg="${e.id}">Buka 1</button>
@@ -585,7 +585,7 @@ function gachaPage(){
       <div class="section-heading"><h2>Progress pity</h2></div>
       <p class="subtle">Rare+: ${state.gacha.pityRare}/10 · Epic+: ${state.gacha.pityEpic}/50</p>
       <div class="section-heading"><h2>Riwayat tarikan</h2></div>
-      ${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>`<p class="subtle">${h.emoji} ${esc(h.name)} · <span class="rarity rarity-${h.rarity}">${h.rarity}</span></p>`).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}
+      ${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>{const s=speciesById(h.species||species.find(x=>x.name===h.name)?.id);return `<p class="subtle gacha-history-row"><img src="${petImages[s.id]}" alt="${esc(h.name)}" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:7px"><b>${esc(h.name)}</b> · <span class="rarity rarity-${h.rarity}">${h.rarity}</span></p>`;}).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}
     </div>
   </section>`;
 }
