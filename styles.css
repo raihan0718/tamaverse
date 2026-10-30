@@ -404,10 +404,10 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 .batch-reels{display:grid;gap:6px;margin:12px 0;max-height:48vh;overflow:hidden}
 .batch-reel-row{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:6px}
 .batch-reel-row>small{font-size:8px;font-weight:800;letter-spacing:.5px;color:var(--muted);text-align:center}
-.batch-reel-window{height:58px;min-width:0}
-.batch-reel-window .gacha-reel-card{width:62px;min-width:62px;padding:4px 3px;gap:2px}
-.batch-reel-window .gacha-reel-art{width:28px;height:28px;font-size:19px}
-.batch-reel-pet{width:25px;height:25px;object-fit:contain;display:block}
-.batch-reel-window .gacha-reel-card b{font-size:7px;max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.batch-reel-window{height:42px;min-width:0}
+.batch-reel-window .gacha-reel-card{width:46px;min-width:46px;padding:2px;gap:1px}
+.batch-reel-window .gacha-reel-art{width:19px;height:19px;font-size:14px}
+.batch-reel-pet{width:17px;height:17px;object-fit:contain;display:block}
+.batch-reel-window .gacha-reel-card b{font-size:6px;max-width:42px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .batch-reel-window .gacha-reel-card small{display:none}
 .batch-roll-modal .gacha-roll-status{margin-top:8px}
