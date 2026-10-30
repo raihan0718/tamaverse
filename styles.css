@@ -426,3 +426,8 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 /* Gacha egg artwork */
 .egg-icon .egg-art{width:100px;height:100px;object-fit:contain;display:block;margin:0 auto;}
 .hatch-egg .egg-art{width:120px;height:120px;object-fit:contain;display:block;margin:0 auto;}
+
+
+/* Gacha egg artwork: enforce visible uploaded egg sprites */
+.egg-card .egg-icon{display:flex!important;align-items:center!important;justify-content:center!important;min-height:118px!important;font-size:0!important;filter:none!important}
+.egg-card .egg-icon .egg-art{display:block!important;width:108px!important;height:108px!important;max-width:100%!important;object-fit:contain!important;object-position:center!important;margin:0 auto!important;visibility:visible!important;opacity:1!important}
