@@ -336,3 +336,27 @@ body:not([data-theme="dark"]) #supabaseUserId {
 .battle-player .battle-sprite img[src*="phoenix.png"] {
   transform: scaleX(-1) !important;
 }
+
+/* TAMAVERSE — CS-style gacha case-opening reel */
+.gacha-roll-modal{width:100%;text-align:center;overflow:hidden}
+.gacha-reel-window{position:relative;width:100%;height:174px;margin:20px 0 13px;overflow:hidden;border:1px solid #d9c2e7;border-radius:16px;background:linear-gradient(180deg,#251b32,#382743);box-shadow:inset 0 0 28px #100b18}
+.gacha-reel-window:before,.gacha-reel-window:after{content:"";position:absolute;z-index:3;top:0;bottom:0;width:28px;pointer-events:none}
+.gacha-reel-window:before{left:0;background:linear-gradient(90deg,#251b32,transparent)}
+.gacha-reel-window:after{right:0;background:linear-gradient(270deg,#251b32,transparent)}
+.gacha-reel-pointer{position:absolute;z-index:5;left:50%;top:0;bottom:0;width:3px;transform:translateX(-50%);background:#ffe27a;box-shadow:0 0 12px #ffe27a}
+.gacha-reel-pointer:before,.gacha-reel-pointer:after{content:"";position:absolute;left:50%;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent}
+.gacha-reel-pointer:before{top:0;border-top:11px solid #ffe27a}
+.gacha-reel-pointer:after{bottom:0;border-bottom:11px solid #ffe27a}
+.gacha-reel-track{height:100%;display:flex;align-items:center;gap:8px;padding:0 8px;width:max-content;will-change:transform}
+.gacha-reel-card{flex:0 0 104px;height:136px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:8px 5px;border:1px solid #ffffff28;border-bottom:4px solid #a6a0b5;border-radius:12px;background:linear-gradient(160deg,#51465e,#30263c);color:#fff;box-sizing:border-box}
+.gacha-reel-card.rarity-Rare{border-bottom-color:#4e9ee8}
+.gacha-reel-card.rarity-Epic{border-bottom-color:#a879ed}
+.gacha-reel-card.rarity-Legendary{border-bottom-color:#f4c75e}
+.gacha-reel-art{width:76px;height:76px;display:grid;place-items:center}
+.gacha-reel-pet{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+.gacha-reel-card b{font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gacha-reel-card small{font-size:9px;color:#d9cde4}
+.gacha-reel-status{font:800 12px 'Space Grotesk',sans-serif;letter-spacing:2px;color:#b99bda}
+.gacha-roll-status{font:800 12px 'Space Grotesk',sans-serif;letter-spacing:2px;color:#b99bda}
+body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
+@media(prefers-reduced-motion:reduce){.gacha-reel-track{transition-duration:.1s!important}}
