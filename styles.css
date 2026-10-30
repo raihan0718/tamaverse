@@ -129,7 +129,7 @@ body[data-theme="dark"] .daily-reward-day{background:#352a3a;border-color:#fffff
 .avatar-option.selected{border-color:#ad81d0;background:#f3e9fa;box-shadow:0 0 0 2px #ad81d033}
 .batch-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:48vh;overflow:auto;margin:13px 0}
 .batch-result{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:3px 7px;padding:8px;border:1px solid var(--line);border-radius:12px;background:#fff9fc}
-.batch-result>span{grid-row:span 2;font-size:22px;display:flex;align-items:center;justify-content:center}.batch-pet-image{width:42px;height:42px;object-fit:contain;display:block}
+.batch-result>span{grid-row:span 2;font-size:22px;display:flex;align-items:center;justify-content:center}.batch-pet-image{width:28px;height:28px;object-fit:contain;display:block}
 .batch-result b{font-size:10px;overflow-wrap:anywhere}
 .batch-result small{font-size:8px;text-transform:uppercase;font-weight:800}
 .comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
