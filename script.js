@@ -979,6 +979,7 @@ function getOnlinePetData() {
   const sp = speciesById(pet.species);
 
   return {
+    display_name: state.player.name || 'Player',
     name: pet.name,
     species: pet.species,
     level: Number(pet.level || 1),
