@@ -587,18 +587,61 @@ function gachaPage(){
     <div class="notice">Save dan hadiah disimpan di perangkat ini. Gacha lokal bisa diubah lewat browser; hadiah aman untuk multiplayer memerlukan validasi server.</div>
   </section>`;
 }
+
 function battlePage(){
-  if(battle)return battleView();
-  const rewarded=state.careUses.battleRewards||0;
-  return `<section class="page"><div class="eyebrow">ARENA TAMAVERSE</div><h1 class="page-title">Battle</h1>
-    <p class="subtle">Pertarungan turn-based melawan lawan AI lokal. Hadiah progres dibatasi lima battle per hari.</p>
-    <div class="card"><div style="font-size:42px;text-align:center;margin:8px">⚔️</div><h2 style="text-align:center">Practice Battle</h2>
-      <p class="subtle" style="text-align:center">Lawan AI lokal · Hadiah menang: 35 koin + XP</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai latihan</button></div>
-    <div class="card" style="margin-top:12px"><h2>Simulated PvP</h2><p class="subtle">Mode demo melawan lawan sampel. Belum terhubung ke pemain sungguhan atau matchmaking online.</p><button class="button secondary full" data-action="battle-start" data-mode="simulated">Tantang lawan demo</button></div>
-    <div class="notice">Hadiah XP dan koin tersedia pada ${Math.max(0,5-rewarded)} battle berikutnya hari ini. Semua hasil dan rating hanya tersimpan lokal.</div>
-    ${state.battleHistory.length?`<div class="section-heading"><h2>Battle terakhir</h2></div>${state.battleHistory.slice(0,5).map(item=>`<div class="card battle-history-row"><span>${item.result==='win'?'🏆':item.result==='draw'?'🤝':'💫'} ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span><span class="muted-label">${new Date(item.date).toLocaleDateString('id-ID')}</span></div>`).join('')}`:''}
-  </section>`;
+  if(battle) return battleView();
+
+  const rewarded = state.careUses.battleRewards || 0;
+
+  return `
+    ${onlineBattlePage()}
+
+    <div class="page">
+      <div class="card">
+        <h2 style="text-align:center">Practice Battle</h2>
+        <p class="subtle" style="text-align:center">
+         Berburu Hadiah menang: 35 koin + XP
+        </p>
+        <button class="button full"
+          data-action="battle-start"
+          data-mode="practice">
+          Mulai latihan
+        </button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h2>Simulated PvP</h2>
+        <p class="subtle">
+          Training Damage dengan monster.
+        </p>
+        <button class="button secondary full"
+          data-action="battle-start"
+          data-mode="simulated">
+          Training
+        </button>
+      </div>
+
+      <div class="notice">
+        Hadiah XP dan koin tersedia pada
+        ${Math.max(0,5-rewarded)} battle berikutnya hari ini.
+      </div>
+
+      ${state.battleHistory.length ? `
+        <div class="section-heading"><h2>Battle terakhir</h2></div>
+        ${state.battleHistory.slice(0,5).map(item=>`
+          <div class="card battle-history-row">
+            <span>${item.result==='win'?'🏆':item.result==='draw'?'🤝':'💫'}
+            ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span>
+            <span class="muted-label">
+              ${new Date(item.date).toLocaleDateString('id-ID')}
+            </span>
+          </div>
+        `).join('')}
+      ` : ''}
+    </div>
+  `;
 }
+
 function profilePage(){
   const fragments=Object.entries(state.items.fragments||{}).filter(([,count])=>count>0);
   const fragmentTotal=fragments.reduce((sum,[,count])=>sum+count,0);
