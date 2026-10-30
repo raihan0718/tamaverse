@@ -366,10 +366,10 @@ function questRow(q){const progress=state.quests.progress[q.id]||0,done=progress
 function startIntro(){
   showModal(`<div class="hatch-egg intro-egg-stage"><div class="egg-crack-wrap">${eggImage('basic')}<span class="egg-crack-line"></span><span class="egg-spark">✦</span></div></div><div class="eyebrow" style="text-align:center">TELUR GRATIS</div><h2 id="modalTitle" style="text-align:center">Ada yang bergerak...</h2><p style="text-align:center">Telurnya mulai bergetar. Siap-siap menyambut teman barumu!</p>`);
   const eggWrap=document.querySelector('.egg-crack-wrap');
-  if(eggWrap){[ [650,.18],[1300,.12],[1950,.075] ].forEach(([delay,speed])=>setTimeout(()=>{if(eggWrap.isConnected)eggWrap.style.animationDuration=`${speed}s`;},delay));}
+  if(eggWrap){[[1200,.18],[2500,.12],[3800,.075],[4600,.055]].forEach(([delay,speed])=>setTimeout(()=>{if(eggWrap.isConnected)eggWrap.style.animationDuration=`${speed}s`;},delay));}
   setTimeout(()=>{
     if(!document.getElementById('modalBackdrop').classList.contains('hidden'))showModal(`<div class="hatch-egg intro-pet-art pet-reveal">${petImage('fluffin','intro-pet-image')}</div><div class="eyebrow">PET PERTAMAMU</div><h2 id="modalTitle">Mochi menetas!</h2><p>Mochi adalah teman Nature yang setia. Beri nama panggilan untuk petmu.</p><input class="text-input" id="starterName" maxlength="18" value="Mochi" aria-label="Nama pet"><button class="button full" data-action="finish-intro">Ayo mulai!</button>`);
-  },2800);
+  },5000);
 }
 function finishIntro(){const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';state=freshState('Penjelajah');const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();showToast('Selamat datang! 300 koin dan 3 gem sudah jadi milikmu.');}
 function createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:75,happiness:75,energy:80,cleanliness:80,evolution:0,fragments:0};}
