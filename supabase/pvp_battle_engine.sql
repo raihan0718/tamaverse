@@ -102,8 +102,22 @@ BEGIN
   v_actor_def := COALESCE((v_actor_stats->>'def')::numeric, 0);
   v_target_atk := COALESCE((v_target_stats->>'atk')::numeric, 1);
   v_target_def := COALESCE((v_target_stats->>'def')::numeric, 0);
-  v_actor_element := COALESCE(v_actor_data->>'element', '');
-  v_target_element := COALESCE(v_target_data->>'element', '');
+  v_actor_element := CASE v_actor_data->>'species'
+    WHEN 'fluffin' THEN 'Nature' WHEN 'embercub' THEN 'Water'
+    WHEN 'bubblit' THEN 'Nature' WHEN 'mossling' THEN 'Light'
+    WHEN 'voltkit' THEN 'Fire' WHEN 'coralyn' THEN 'Water'
+    WHEN 'cinderowl' THEN 'Mystic' WHEN 'petalyn' THEN 'Light'
+    WHEN 'lunabun' THEN 'Tech' WHEN 'glacipup' THEN 'Nature'
+    WHEN 'starwhale' THEN 'Light' WHEN 'wyrmling' THEN 'Fire'
+    ELSE '' END;
+  v_target_element := CASE v_target_data->>'species'
+    WHEN 'fluffin' THEN 'Nature' WHEN 'embercub' THEN 'Water'
+    WHEN 'bubblit' THEN 'Nature' WHEN 'mossling' THEN 'Light'
+    WHEN 'voltkit' THEN 'Fire' WHEN 'coralyn' THEN 'Water'
+    WHEN 'cinderowl' THEN 'Mystic' WHEN 'petalyn' THEN 'Light'
+    WHEN 'lunabun' THEN 'Tech' WHEN 'glacipup' THEN 'Nature'
+    WHEN 'starwhale' THEN 'Light' WHEN 'wyrmling' THEN 'Fire'
+    ELSE '' END;
   v_turn := COALESCE((v_state->>'turn')::integer, 1);
   v_log := COALESCE(v_state->'log', '[]'::jsonb);
 
