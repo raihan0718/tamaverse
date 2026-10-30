@@ -431,3 +431,12 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 /* Gacha egg artwork: enforce visible uploaded egg sprites */
 .egg-card .egg-icon{display:flex!important;align-items:center!important;justify-content:center!important;min-height:118px!important;font-size:0!important;filter:none!important}
 .egg-card .egg-icon .egg-art{display:block!important;width:108px!important;height:108px!important;max-width:100%!important;object-fit:contain!important;object-position:center!important;margin:0 auto!important;visibility:visible!important;opacity:1!important}
+
+
+/* First-join welcome and hatch artwork */
+.welcome-art{display:flex!important;align-items:center!important;justify-content:center!important;min-height:150px!important;font-size:0!important;filter:none!important}
+.welcome-art .egg-art{display:block!important;width:138px!important;height:138px!important;object-fit:contain!important;visibility:visible!important;opacity:1!important}
+.hatch-egg:has(.egg-art){display:flex!important;align-items:center!important;justify-content:center!important;min-height:142px!important;font-size:0!important}
+.hatch-egg .egg-art{display:block!important;width:132px!important;height:132px!important;object-fit:contain!important;visibility:visible!important;opacity:1!important}
+.intro-pet-art{display:flex!important;align-items:center!important;justify-content:center!important;min-height:150px!important;font-size:0!important;filter:none!important}
+.intro-pet-art .intro-pet-image{display:block!important;width:136px!important;height:136px!important;max-width:100%!important;object-fit:contain!important;image-rendering:auto!important;visibility:visible!important;opacity:1!important}
