@@ -33,7 +33,7 @@ const petImages = {
 function petImage(speciesId, className = '') {
   const src = petImages[speciesId];
   return src
-    ? `<img class="pet-image ${esc(className)}" src="${src}" alt="${esc(speciesById(speciesId).name)}" loading="lazy">`
+    ? `<img class="pet-image ${esc(className)}" src="/tamaverse/${src}" alt="${esc(speciesById(speciesId).name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.style.display='none'">`
     : esc(speciesById(speciesId).emoji);
 }
 const eggs = [
@@ -44,8 +44,8 @@ function eggImage(eggId){
   const egg=eggs.find(item=>item.id===eggId);
   if(!egg?.image)return '🥚';
   const imagePath=egg.id==='basic'
-    ?'https://raw.githubusercontent.com/raihan0718/tamaverse/main/assets/eggs/pixie.png'
-    :'https://raw.githubusercontent.com/raihan0718/tamaverse/main/assets/eggs/astral.png';
+    ?'/tamaverse/assets/eggs/pixie.png'
+    :'/tamaverse/assets/eggs/astral.png';
   return `<img class="egg-art" src="${imagePath}" alt="${esc(egg.name)}" loading="eager" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'egg-fallback',textContent:'🥚'}))">`;
 }
 const eggRates = {
@@ -363,7 +363,12 @@ function questPreview(){const q=questDefinitions().slice(0,2);return q.map(x=>qu
 function questDefinitions(){return [{id:'feed',title:'Beri makan pet',target:2,icon:'🍓',reward:35},{id:'play',title:'Bermain bersama',target:2,icon:'💖',reward:35},{id:'battle',title:'Selesaikan battle',target:1,icon:'⚔️',reward:50},{id:'win',title:'Menangkan battle',target:1,icon:'🏆',reward:60},{id:'egg',title:'Buka telur',target:1,icon:'🥚',reward:40}];}
 function questList(){return questDefinitions().map(questRow).join('');}
 function questRow(q){const progress=state.quests.progress[q.id]||0,done=progress>=q.target,claimed=state.quests.claimed.includes(q.id);return `<div class="card quest-row"><div><b>${q.icon} ${q.title}</b><p>${Math.min(progress,q.target)}/${q.target} · Hadiah 🪙 ${q.reward}</p></div><button class="button ${claimed?'secondary':''}" data-action="claim" data-quest="${q.id}" ${!done||claimed?'disabled':''}>${claimed?'Selesai':done?'Klaim':'Belum'}</button></div>`;}
-function startIntro(){showModal(`<div class="hatch-egg">${eggImage('basic')}</div><div class="eyebrow" style="text-align:center">TELUR GRATIS</div><h2 id="modalTitle" style="text-align:center">Ada yang bergerak...</h2><p style="text-align:center">Keajaiban pertamamu sedang menetas!</p>`);setTimeout(()=>{if(!document.getElementById('modalBackdrop').classList.contains('hidden'))showModal(`<div class="hatch-egg intro-pet-art">${petImage('fluffin','intro-pet-image')}</div><div class="eyebrow">PET PERTAMAMU</div><h2 id="modalTitle">Mochi menetas!</h2><p>Mochi adalah teman Nature yang setia. Beri nama panggilan untuk petmu.</p><input class="text-input" id="starterName" maxlength="18" value="Mochi" aria-label="Nama pet"><button class="button full" data-action="finish-intro">Ayo mulai!</button>`);},1100);}
+function startIntro(){
+  showModal(`<div class="hatch-egg intro-egg-stage"><div class="egg-crack-wrap">${eggImage('basic')}<span class="egg-crack-line"></span><span class="egg-spark">✦</span></div></div><div class="eyebrow" style="text-align:center">TELUR GRATIS</div><h2 id="modalTitle" style="text-align:center">Ada yang bergerak...</h2><p style="text-align:center">Telurnya mulai bergetar. Siap-siap menyambut teman barumu!</p>`);
+  setTimeout(()=>{
+    if(!document.getElementById('modalBackdrop').classList.contains('hidden'))showModal(`<div class="hatch-egg intro-pet-art pet-reveal">${petImage('fluffin','intro-pet-image')}</div><div class="eyebrow">PET PERTAMAMU</div><h2 id="modalTitle">Mochi menetas!</h2><p>Mochi adalah teman Nature yang setia. Beri nama panggilan untuk petmu.</p><input class="text-input" id="starterName" maxlength="18" value="Mochi" aria-label="Nama pet"><button class="button full" data-action="finish-intro">Ayo mulai!</button>`);
+  },2800);
+}
 function finishIntro(){const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';state=freshState('Penjelajah');const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();showToast('Selamat datang! 300 koin dan 3 gem sudah jadi milikmu.');}
 function createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:75,happiness:75,energy:80,cleanliness:80,evolution:0,fragments:0};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;state.player.coins+=20;return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
