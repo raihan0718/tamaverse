@@ -365,6 +365,8 @@ function questList(){return questDefinitions().map(questRow).join('');}
 function questRow(q){const progress=state.quests.progress[q.id]||0,done=progress>=q.target,claimed=state.quests.claimed.includes(q.id);return `<div class="card quest-row"><div><b>${q.icon} ${q.title}</b><p>${Math.min(progress,q.target)}/${q.target} · Hadiah 🪙 ${q.reward}</p></div><button class="button ${claimed?'secondary':''}" data-action="claim" data-quest="${q.id}" ${!done||claimed?'disabled':''}>${claimed?'Selesai':done?'Klaim':'Belum'}</button></div>`;}
 function startIntro(){
   showModal(`<div class="hatch-egg intro-egg-stage"><div class="egg-crack-wrap">${eggImage('basic')}<span class="egg-crack-line"></span><span class="egg-spark">✦</span></div></div><div class="eyebrow" style="text-align:center">TELUR GRATIS</div><h2 id="modalTitle" style="text-align:center">Ada yang bergerak...</h2><p style="text-align:center">Telurnya mulai bergetar. Siap-siap menyambut teman barumu!</p>`);
+  const eggWrap=document.querySelector('.egg-crack-wrap');
+  if(eggWrap){[ [650,.18],[1300,.12],[1950,.075] ].forEach(([delay,speed])=>setTimeout(()=>{if(eggWrap.isConnected)eggWrap.style.animationDuration=`${speed}s`;},delay));}
   setTimeout(()=>{
     if(!document.getElementById('modalBackdrop').classList.contains('hidden'))showModal(`<div class="hatch-egg intro-pet-art pet-reveal">${petImage('fluffin','intro-pet-image')}</div><div class="eyebrow">PET PERTAMAMU</div><h2 id="modalTitle">Mochi menetas!</h2><p>Mochi adalah teman Nature yang setia. Beri nama panggilan untuk petmu.</p><input class="text-input" id="starterName" maxlength="18" value="Mochi" aria-label="Nama pet"><button class="button full" data-action="finish-intro">Ayo mulai!</button>`);
   },2800);
