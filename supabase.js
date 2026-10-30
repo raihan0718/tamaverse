@@ -215,6 +215,36 @@
         window.state.items.fragments =
           inventoryData.fragments || window.state.items.fragments || {};
       }
+
+      // Refresh cloud pet XP/levels after authoritative online battle rewards.
+      const { data: cloudPets, error: petsLoadError } = await supabase
+        .from('pets')
+        .select('client_uid, species, nickname, level, xp, is_active')
+        .eq('owner_id', user.id);
+
+      if (petsLoadError) {
+        console.warn('Load pets failed:', petsLoadError);
+      } else if (Array.isArray(cloudPets) && cloudPets.length) {
+        const localPets = Array.isArray(window.state.pets) ? window.state.pets : [];
+        cloudPets.forEach((cloudPet) => {
+          const localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
+          if (!localPet) return;
+          const oldLevel = Math.max(1, Number(localPet.level) || 1);
+          const newLevel = Math.max(1, Number(cloudPet.level) || 1);
+          const levelGain = newLevel - oldLevel;
+          if (levelGain > 0) {
+            localPet.stats = localPet.stats || {};
+            localPet.stats.hp = Number(localPet.stats.hp || 0) + 5 * levelGain;
+            localPet.stats.atk = Number(localPet.stats.atk || 0) + levelGain;
+            localPet.stats.def = Number(localPet.stats.def || 0) + levelGain;
+            localPet.hp = localPet.stats.hp;
+          }
+          localPet.level = newLevel;
+          localPet.xp = Math.max(0, Number(cloudPet.xp) || 0);
+          if (cloudPet.nickname) localPet.name = cloudPet.nickname;
+          if (cloudPet.is_active) window.state.activePet = localPet.uid;
+        });
+      }
     } catch (error) {
       console.warn('Supabase load failed:', error);
     }
