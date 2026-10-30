@@ -843,6 +843,11 @@ document.addEventListener('click',event=>{
     return;
   }
 
+
+if (action === 'online-start-match') {
+  onlineStartMatch();
+  return;
+}
   if (action === 'online-join-prompt') {
   showModal(`
     <div class="eyebrow">TAMAVERSE • ONLINE ARENA</div>
@@ -984,6 +989,29 @@ function getOnlinePetData() {
       def: Number(pet.stats.def || 5)
     }
   };
+}
+
+async function onlineStartMatch() {
+  try {
+    const db = window.TAMAVERSE_SUPABASE_CLIENT;
+    if (!onlineRoom?.id) throw new Error('Room tidak ditemukan.');
+
+    await onlineAuth();
+
+    const { data, error } = await db.rpc('start_pvp_match', {
+      p_room_id: onlineRoom.id
+    });
+
+    if (error) throw error;
+
+    onlineRoom = { ...onlineRoom, ...data };
+    render();
+    showToast('Match dimulai!');
+    subscribeOnlineRoom(onlineRoom.id);
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'Gagal memulai match.');
+  }
 }
 
 async function onlineRandomMatch() {
@@ -1156,16 +1184,33 @@ function onlineBattlePage() {
   </button>
 </div>
 
-      ${onlineRoom ? `
-        <div class="card" style="margin-top:12px">
-          <h3>Room: ${esc(onlineRoom.invite_code || '')}</h3>
-          <p class="subtle">
-            ${onlineRoom.status === 'ready'
-              ? 'Kedua pemain sudah masuk.'
-              : 'Menunggu pemain lain...'}
-          </p>
-        </div>
+     ${onlineRoom ? `
+  <div class="card" style="margin-top:14px;padding:20px">
+    <div class="eyebrow">PRIVATE BATTLE ROOM</div>
+    <h3>Room: ${esc(onlineRoom.invite_code || '')}</h3>
+
+    <p class="subtle">
+      ${onlineRoom.status === 'ready'
+        ? '2/2 Players Ready'
+        : onlineRoom.status === 'playing'
+          ? 'Match sedang berlangsung!'
+          : '1/2 Players • Menunggu lawan...'}
+    </p>
+
+    ${onlineRoom.status === 'ready' &&
+      onlineRoom.host_id === window.TAMAVERSE_USER_ID ? `
+        <button class="button full" data-action="online-start-match">
+          ⚔ Start Match
+        </button>
       ` : ''}
-    </section>
-  `;
-}
+
+    ${onlineRoom.status === 'ready' &&
+      onlineRoom.host_id !== window.TAMAVERSE_USER_ID ? `
+        <p class="subtle">Menunggu host memulai pertandingan...</p>
+      ` : ''}
+
+    ${onlineRoom.status === 'playing' ? `
+      <p class="subtle">Kedua pemain siap. Arena sedang disiapkan.</p>
+    ` : ''}
+  </div>
+` : ''}
