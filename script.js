@@ -1020,10 +1020,23 @@ if (action === 'online-join-submit') {
   if (action === 'copy-online-link') {
     const input = document.getElementById('onlineInviteLink');
     if (input) {
-      input.select();
-      navigator.clipboard.writeText(input.value)
-        .then(() => showToast('Link berhasil disalin!'))
-        .catch(() => showToast('Gagal menyalin link.'));
+      const fallbackCopy = () => {
+        input.focus();
+        input.select();
+        try {
+          const copied = document.execCommand('copy');
+          showToast(copied ? 'Kode room berhasil disalin!' : 'Gagal menyalin kode room.');
+        } catch (error) {
+          showToast('Browser tidak mengizinkan penyalinan otomatis. Salin kode secara manual.');
+        }
+      };
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(input.value)
+          .then(() => showToast('Kode room berhasil disalin!'))
+          .catch(fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
     }
     return;
   }
@@ -1194,6 +1207,8 @@ function onlineBattleView() {
   const rivalHp = Math.max(0, Number(bs[mineIsHost ? 'guest_hp' : 'host_hp'] || 0));
   const myMax = Math.max(1, Number(mine?.stats?.hp || 1));
   const rivalMax = Math.max(1, Number(rival?.stats?.hp || 1));
+  const snackCount = Number(state.items.snack || 0);
+  const snackUseful = myHp < myMax;
   const myTurn = room.current_turn === window.TAMAVERSE_USER_ID;
   const finished = room.status === 'finished';
   const log = Array.isArray(bs.log) ? bs.log : [];
@@ -1221,7 +1236,7 @@ function onlineBattleView() {
           <button class="button" data-action="online-battle-action" data-move="attack" ${myTurn ? '' : 'disabled'}>⚔️ Attack</button>
           <button class="button soft" data-action="online-battle-action" data-move="skill" ${myTurn && !bs[mineIsHost ? 'host_skill_used' : 'guest_skill_used'] ? '' : 'disabled'}>✨ Skill</button>
           <button class="button secondary" data-action="online-battle-action" data-move="defend" ${myTurn ? '' : 'disabled'}>🛡️ Defend</button>
-          <button class="button secondary" data-action="online-battle-action" data-move="item" ${myTurn && Number(state.items.snack || 0) > 0 ? '' : 'disabled'}>🍓 Snack (${Number(state.items.snack || 0)})</button>
+          <button class="button secondary" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}>🍓 Snack (${snackCount})</button>
         </div>
         <p class="muted-label">${myTurn ? 'Pilih satu aksi. Damage dan giliran dihitung server.' : 'Menunggu lawan memilih aksi...'}</p>
       `}
@@ -1594,8 +1609,8 @@ function onlineBattlePage() {
 
      ${onlineRoom ? `
   <div class="card" style="margin-top:14px;padding:20px">
-    <div class="eyebrow">PRIVATE BATTLE ROOM</div>
-    <h3>Room: ${esc(onlineRoom.invite_code || '')}</h3>
+    <div class="eyebrow">${onlineRoom.room_type === 'public' ? 'RANDOM MATCH ROOM' : 'PRIVATE FRIEND ROOM'}</div>
+    ${onlineRoom.room_type === 'public' ? '<h3>Random Match</h3>' : `<h3>Room: ${esc(onlineRoom.invite_code || '')}</h3>`}
 
 <div style="
   display:grid;
@@ -1651,7 +1666,7 @@ function onlineBattlePage() {
   style="margin-top:12px"
   data-action="online-leave"
 >
-  Leave Room
+  ${onlineRoom.room_type === 'public' && onlineRoom.status === 'waiting' ? 'Cancel Search' : 'Leave Room'}
 </button>
 
   </div>
