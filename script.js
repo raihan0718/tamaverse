@@ -844,10 +844,47 @@ document.addEventListener('click',event=>{
   }
 
   if (action === 'online-join-prompt') {
-    const code = prompt('Masukkan kode room teman:');
-    if (code) onlineJoinRoom(code.trim());
+  showModal(`
+    <div class="eyebrow">TAMAVERSE • ONLINE ARENA</div>
+    <h2 id="modalTitle">Join Private Room</h2>
+    <p class="subtle">Masukkan kode undangan dari temanmu untuk bergabung.</p>
+
+    <div style="
+      margin:18px 0;
+      padding:16px;
+      border-radius:16px;
+      background:rgba(140,120,255,.10);
+      border:1px solid rgba(140,120,255,.25);
+    ">
+      <label for="joinRoomCode" class="muted-label">ROOM INVITATION CODE</label>
+      <input
+        class="text-input"
+        id="joinRoomCode"
+        placeholder="Contoh: ABC123"
+        maxlength="12"
+        autocomplete="off"
+        style="margin-top:9px;text-transform:uppercase;text-align:center;letter-spacing:3px;font-weight:700"
+      >
+    </div>
+
+    <div class="modal-actions">
+      <button class="button secondary" data-action="close-modal">Cancel</button>
+      <button class="button" data-action="online-join-submit">Join Room →</button>
+    </div>
+  `);
+  return;
+}
+
+if (action === 'online-join-submit') {
+  const code = (document.getElementById('joinRoomCode')?.value || '').trim();
+  if (!code) {
+    showToast('Masukkan kode room terlebih dahulu.');
     return;
   }
+  closeModal();
+  onlineJoinRoom(code);
+  return;
+}
 
   if (action === 'copy-online-link') {
     const input = document.getElementById('onlineInviteLink');
