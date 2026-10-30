@@ -1427,15 +1427,7 @@ async function onlineCreateRoom() {
     page = 'battle';
     render();
 
-    showModal(`
-  <div class="eyebrow">INVITE ROOM</div>
-  <h2>Room berhasil dibuat!</h2>
-  <p class="subtle">Bagikan kode ini ke temanmu.</p>
-  <input class="text-input" readonly value="${data.invite_code}" id="onlineInviteLink">
-  <p class="muted-label">Kode room</p>
-  <button class="button full" data-action="copy-online-link">Salin kode room</button>
-  <button class="button secondary full" data-action="close-modal">Tutup</button>
-`);
+    showToast('Private room berhasil dibuat. Bagikan kode room ke temanmu.');
 
     subscribeOnlineRoom(data.room_id);
   } catch (error) {
