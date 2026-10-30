@@ -1409,7 +1409,11 @@ async function subscribeOnlineRoom(roomId) {
           ...room
         };
 
-        render();
+        if (room.status === 'finished' && typeof window.loadPlayerFromSupabase === 'function') {
+          await window.loadPlayerFromSupabase();
+        } else {
+          render();
+        }
 
         if (room.status === 'ready') {
           showToast('Teman ditemukan! Room siap.');
