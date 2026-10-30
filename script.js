@@ -971,7 +971,9 @@ if (action === 'online-start-match') {
   onlineStartMatch();
   return;
 }
-  if (action === 'online-join-prompt') {
+  if (action === 'online-battle-action') { onlineBattleAction(button.dataset.move); return; }
+
+if (action === 'online-join-prompt') {
   showModal(`
     <div class="eyebrow">TAMAVERSE • ONLINE ARENA</div>
     <h2 id="modalTitle">Join Private Room</h2>
@@ -1116,6 +1118,86 @@ function getOnlinePetData() {
   };
 }
 
+
+async function onlineBattleAction(move) {
+  try {
+    if (!onlineRoom?.id) throw new Error('Room tidak ditemukan.');
+    const db = window.TAMAVERSE_SUPABASE_CLIENT;
+    const { data, error } = await db.rpc('pvp_battle_action', { p_room_id: onlineRoom.id, p_action: move });
+    if (error) throw error;
+    onlineRoom = { ...onlineRoom, ...data };
+
+    const { data: inventory, error: inventoryError } = await db.from('inventory').select('snack').eq('owner_id', window.TAMAVERSE_USER_ID).maybeSingle();
+    if (!inventoryError && inventory) state.items.snack = Number(inventory.snack || 0);
+
+    if (data.status === 'finished' && typeof window.loadPlayerFromSupabase === 'function') {
+      await window.loadPlayerFromSupabase();
+    } else {
+      render();
+    }
+
+    if (data.status === 'finished') {
+      const result = data.battle_state?.result;
+      const winner = data.battle_state?.winner_id;
+      const outcome = result === 'draw' ? 'Seri!' : winner === window.TAMAVERSE_USER_ID ? 'Kemenangan!' : 'Pertandingan selesai';
+      showModal(`<div class="hatch-egg">${result === 'draw' ? '🤝' : winner === window.TAMAVERSE_USER_ID ? '🏆' : '💫'}</div>
+        <h2 id="modalTitle" style="text-align:center">${outcome}</h2>
+        <p style="text-align:center">${result === 'draw' ? 'Battle berakhir imbang.' : winner === window.TAMAVERSE_USER_ID ? 'Kamu mendapat 35 koin, rating, dan XP pet.' : 'Kamu mendapat XP pet. Coba lagi di pertandingan berikutnya.'}</p>
+        <button class="button full" data-action="close-modal">Lanjut</button>`);
+    } else {
+      showToast('Aksi berhasil dikirim.');
+    }
+  } catch (error) {
+    console.error('Online battle action failed:', error);
+    showToast(error.message || 'Aksi battle gagal.');
+  }
+}
+
+function onlineBattleView() {
+  const room = onlineRoom;
+  const mineIsHost = room.host_id === window.TAMAVERSE_USER_ID;
+  const mine = mineIsHost ? room.host_data : room.guest_data;
+  const rival = mineIsHost ? room.guest_data : room.host_data;
+  const bs = room.battle_state || {};
+  const myHp = Math.max(0, Number(bs[mineIsHost ? 'host_hp' : 'guest_hp'] || 0));
+  const rivalHp = Math.max(0, Number(bs[mineIsHost ? 'guest_hp' : 'host_hp'] || 0));
+  const myMax = Math.max(1, Number(mine?.stats?.hp || 1));
+  const rivalMax = Math.max(1, Number(rival?.stats?.hp || 1));
+  const myTurn = room.current_turn === window.TAMAVERSE_USER_ID;
+  const finished = room.status === 'finished';
+  const log = Array.isArray(bs.log) ? bs.log : [];
+  return `
+    <div class="online-arena card" style="margin-top:14px">
+      <div class="eyebrow">LIVE PVP ARENA</div>
+      <h2>${finished ? 'Battle selesai' : myTurn ? 'Giliranmu' : 'Giliran lawan'}</h2>
+      <div class="online-fighters">
+        <div class="online-fighter">
+          <b>${esc(mine?.display_name || 'Kamu')}</b>
+          <span>${esc(mine?.name || 'Pet')} · Lv.${mine?.level || 1}</span>
+          <strong>${myHp} / ${myMax} HP</strong>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div>
+        </div>
+        <div class="online-vs">VS</div>
+        <div class="online-fighter">
+          <b>${esc(rival?.display_name || 'Opponent')}</b>
+          <span>${esc(rival?.name || 'Pet')} · Lv.${rival?.level || 1}</span>
+          <strong>${rivalHp} / ${rivalMax} HP</strong>
+          <div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div>
+        </div>
+      </div>
+      ${finished ? `<p class="subtle">Hasil: ${bs.result === 'draw' ? 'Seri' : bs.winner_id === window.TAMAVERSE_USER_ID ? 'Menang' : 'Kalah'}</p>` : `
+        <div class="online-action-grid">
+          <button class="button" data-action="online-battle-action" data-move="attack" ${myTurn ? '' : 'disabled'}>⚔️ Attack</button>
+          <button class="button soft" data-action="online-battle-action" data-move="skill" ${myTurn && !bs[mineIsHost ? 'host_skill_used' : 'guest_skill_used'] ? '' : 'disabled'}>✨ Skill</button>
+          <button class="button secondary" data-action="online-battle-action" data-move="defend" ${myTurn ? '' : 'disabled'}>🛡️ Defend</button>
+          <button class="button secondary" data-action="online-battle-action" data-move="item" ${myTurn && Number(state.items.snack || 0) > 0 ? '' : 'disabled'}>🍓 Snack (${Number(state.items.snack || 0)})</button>
+        </div>
+        <p class="muted-label">${myTurn ? 'Pilih satu aksi. Damage dan giliran dihitung server.' : 'Menunggu lawan memilih aksi...'}</p>
+      `}
+      <div class="section-heading"><h3>Battle log</h3><span class="pill">Turn ${Number(bs.turn || 1)}</span></div>
+      <div class="battle-log">${log.slice(-8).map(item => `<div>• ${esc(item.text || '')}</div>`).join('') || '<div>Battle dimulai. Pilih aksi pertamamu.</div>'}</div>
+    </div>`;
+}
 
 async function onlineLeaveRoom() {
   try {
@@ -1445,9 +1527,7 @@ function onlineBattlePage() {
         <p class="subtle">Menunggu host memulai pertandingan...</p>
       ` : ''}
 
-    ${onlineRoom.status === 'playing' ? `
-      <p class="subtle">Kedua pemain siap. Arena sedang disiapkan.</p>
-    ` : ''}
+    ${onlineRoom.status === 'playing' || onlineRoom.status === 'finished' ? onlineBattleView() : ''}
 <button
   class="button secondary full"
   style="margin-top:12px"
