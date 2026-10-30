@@ -327,3 +327,12 @@ body:not([data-theme="dark"]) #supabaseUserId {
     font-size: 64px;
   }
 }
+
+/* Mirror selected player pets in battle */
+.battle-player .battle-sprite img[src*="robo-bunny"],
+.battle-player .battle-sprite img[src*="dragon"],
+.battle-player .battle-sprite img[src*="panda"],
+.battle-player .battle-sprite img[src*="golden-fox"],
+.battle-player .battle-sprite img[src*="phoenix"] {
+  transform: scaleX(-1);
+}
