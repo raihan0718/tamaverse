@@ -356,7 +356,7 @@ function questDefinitions(){return [{id:'feed',title:'Beri makan pet',target:2,i
 function questList(){return questDefinitions().map(questRow).join('');}
 function questRow(q){const progress=state.quests.progress[q.id]||0,done=progress>=q.target,claimed=state.quests.claimed.includes(q.id);return `<div class="card quest-row"><div><b>${q.icon} ${q.title}</b><p>${Math.min(progress,q.target)}/${q.target} · Hadiah 🪙 ${q.reward}</p></div><button class="button ${claimed?'secondary':''}" data-action="claim" data-quest="${q.id}" ${!done||claimed?'disabled':''}>${claimed?'Selesai':done?'Klaim':'Belum'}</button></div>`;}
 function startIntro(){showModal(`<div class="hatch-egg">🥚</div><div class="eyebrow" style="text-align:center">TELUR GRATIS</div><h2 id="modalTitle" style="text-align:center">Ada yang bergerak...</h2><p style="text-align:center">Keajaiban pertamamu sedang menetas!</p>`);setTimeout(()=>{if(!document.getElementById('modalBackdrop').classList.contains('hidden'))showModal(`<div class="hatch-egg">✨🐰✨</div><div class="eyebrow">PET PERTAMAMU</div><h2 id="modalTitle">Mochi menetas!</h2><p>Mochi adalah teman Nature yang setia. Beri nama panggilan untuk petmu.</p><input class="text-input" id="starterName" maxlength="18" value="Mochi" aria-label="Nama pet"><button class="button full" data-action="finish-intro">Ayo mulai!</button>`);},1100);}
-function finishIntro(){const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Fluffin';state=freshState('Penjelajah');const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();showToast('Selamat datang! 300 koin dan 3 gem sudah jadi milikmu.');}
+function finishIntro(){const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';state=freshState('Penjelajah');const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();showToast('Selamat datang! 300 koin dan 3 gem sudah jadi milikmu.');}
 function createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:75,happiness:75,energy:80,cleanliness:80,evolution:0,fragments:0};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;state.player.coins+=20;return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
 function grantPetXP(p,amount){p.xp+=amount;while(p.xp>=p.level*40){p.xp-=p.level*40;p.level++;p.stats.hp+=5;p.stats.atk+=1;p.stats.def+=1;showToast(`${p.name} naik ke Level ${p.level}!`);}}
@@ -404,7 +404,7 @@ function normalizeSavedState(saved){
     const oldStats=oldPet.stats||{};
     return {
       uid:oldPet.uid||oldPet.id||`pet-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,5)}`,
-      species:kind.id,name:oldPet.name||oldPet.nickname||kind.name,
+      species:kind.id,name:(oldPet.name && oldPet.name.trim().toLowerCase()===speciesId.toLowerCase())?kind.name:(oldPet.name||oldPet.nickname||kind.name),
       level:Math.max(1,Number(oldPet.level)||1),xp:Math.max(0,Number(oldPet.xp)||0),
       hp:Number(oldStats.hp||oldPet.hp)||kind.stats.hp,
       stats:{
@@ -557,31 +557,35 @@ function formatEggCost(egg,count=1){
 }
 function gachaPage(){
   const owned=new Set(state.pets.map(p=>p.species));
-  const featured=eggs.find(e=>e.id==='mystic');
   return `<section class="page">
-    <div class="eyebrow">TEMUKAN TEMAN BARU</div><h1 class="page-title">Telur ajaib</h1>
-    <p class="subtle">Peluang ditampilkan per telur dan diterapkan langsung pada setiap tarikan. Semua gacha memakai mata uang permainan, tanpa pembayaran uang sungguhan.</p>
-    <div class="featured-banner"><div><span class="eyebrow">TELUR PILIHAN</span><h2>${featured.emoji} ${featured.name}</h2><p>${featured.description}</p><small>${raritySummary(featured.rates)}</small></div><button class="button" data-action="pull" data-egg="${featured.id}">Lihat telur</button></div>
-    <div class="notice">Pity bersama: Rare atau lebih baik dijamin paling lambat tarikan ke-10. Epic atau lebih baik dijamin paling lambat tarikan ke-50.</div>
+    <div class="eyebrow">TEMUKAN TEMAN BARU</div>
+    <h1 class="page-title">Telur ajaib</h1>
+    <p class="subtle">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Premium: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p>
+    <div class="notice">🎁 Gratis 1 Basic Egg setiap hari. Semua hadiah menggunakan mata uang dalam game—tanpa pembayaran asli.</div>
     <div class="collection-grid">${eggs.map(e=>{
-      const pool=species.filter(s=>s.pool.includes(e.id));
-      return `<article class="card egg-card"><span class="egg-icon">${e.emoji}</span><h3>${e.name}</h3><p class="subtle">${e.description}</p>
-        <p class="egg-rates"><b>Peluang:</b><br>${raritySummary(e.rates)}<br><b>Total 100%</b></p>
-        <p class="egg-pool"><b>Isi telur:</b> ${pool.map(s=>`<span class="pool-pet ${owned.has(s.id)?'pool-owned':''}" title="${esc(s.name)}">${s.emoji} ${esc(s.name)}</span>`).join('')}</p>
+      const pool=species.filter(sp=>sp.pool.includes(e.id));
+      return `<article class="card egg-card">
+        <span class="egg-icon">${e.emoji}</span><h3>${e.name}</h3>
+        <p class="subtle">${e.description}</p>
+        <p class="egg-rates"><b>Peluang:</b><br>${raritySummary(e.rates)}</p>
+        <p class="egg-pool"><b>Isi telur:</b> ${pool.map(sp=>`<span class="pool-pet ${owned.has(sp.id)?'pool-owned':''}">${sp.emoji} ${esc(sp.name)}</span>`).join('')}</p>
         <p class="muted-label">${formatEggCost(e)}</p>
-        <div class="egg-actions"><button class="button full" data-action="pull" data-egg="${e.id}">Buka 1</button><button class="button secondary full" data-action="pull-ten" data-egg="${e.id}">Buka 10 · ${formatEggCost(e,10)}</button></div>
+        <div class="egg-actions">
+          <button class="button full" data-action="pull" data-egg="${e.id}">Buka 1</button>
+          <button class="button secondary full" data-action="pull-ten" data-egg="${e.id}">Buka 10 · ${formatEggCost(e,10)}</button>
+        </div>
       </article>`;
     }).join('')}</div>
-    <div class="card gacha-details"><div class="section-heading" style="margin-top:0"><h2>Telur gratis harian</h2></div>
-      <button class="button secondary full" data-action="freeegg" ${state.gacha.lastFree===new Date().toDateString()?'disabled':''}>${state.gacha.lastFree===new Date().toDateString()?'Sudah diklaim hari ini':'Klaim Basic Egg gratis'}</button>
-      <div class="section-heading"><h2>Progress pity</h2></div><p class="subtle">Rare+: ${state.gacha.pityRare}/10 · Epic+: ${state.gacha.pityEpic}/50</p>
+    <div class="card gacha-details">
+      <div class="section-heading"><h2>Hadiah gratis harian</h2></div>
+      <button class="button secondary full" data-action="freeegg">${state.gacha.lastFree===new Date().toDateString()?'Sudah diklaim hari ini':'Klaim Basic Egg gratis'}</button>
+      <div class="section-heading"><h2>Progress pity</h2></div>
+      <p class="subtle">Rare+: ${state.gacha.pityRare}/10 · Epic+: ${state.gacha.pityEpic}/50</p>
       <div class="section-heading"><h2>Riwayat tarikan</h2></div>
-      ${state.gacha.history.length?`<div class="pull-history">${state.gacha.history.slice(0,8).map(h=>`<div class="rank-row"><span>${h.emoji}</span><span>${esc(h.name)}<br><small class="muted-label">${new Date(h.date).toLocaleString('id-ID')}</small></span><b class="rarity rarity-${h.rarity}">${h.rarity}</b></div>`).join('')}</div>`:'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}
+      ${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>`<p class="subtle">${h.emoji} ${esc(h.name)} · <span class="rarity rarity-${h.rarity}">${h.rarity}</span></p>`).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}
     </div>
-    <div class="notice">Save dan hadiah disimpan di perangkat ini. Gacha lokal bisa diubah lewat browser; hadiah aman untuk multiplayer memerlukan validasi server.</div>
   </section>`;
 }
-
 function battlePage(){
   if(battle) return battleView();
 
