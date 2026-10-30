@@ -51,7 +51,7 @@ BEGIN
     RAISE EXCEPTION 'Login required';
   END IF;
 
-  IF p_action NOT IN ('attack', 'skill', 'defend', 'item') THEN
+  IF p_action IS NULL OR p_action NOT IN ('attack', 'skill', 'defend', 'item') THEN
     RAISE EXCEPTION 'Aksi battle tidak valid';
   END IF;
 
