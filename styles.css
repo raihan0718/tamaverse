@@ -440,3 +440,5 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 .hatch-egg .egg-art{display:block!important;width:132px!important;height:132px!important;object-fit:contain!important;visibility:visible!important;opacity:1!important}
 .intro-pet-art{display:flex!important;align-items:center!important;justify-content:center!important;min-height:150px!important;font-size:0!important;filter:none!important}
 .intro-pet-art .intro-pet-image{display:block!important;width:136px!important;height:136px!important;max-width:100%!important;object-fit:contain!important;image-rendering:auto!important;visibility:visible!important;opacity:1!important}
+
+.egg-fallback{display:grid;place-items:center;width:132px;height:132px;font-size:76px;line-height:1}
