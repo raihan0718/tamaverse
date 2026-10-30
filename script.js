@@ -1191,6 +1191,34 @@ function onlineBattlePage() {
     <div class="eyebrow">PRIVATE BATTLE ROOM</div>
     <h3>Room: ${esc(onlineRoom.invite_code || '')}</h3>
 
+<div style="
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:16px 0;
+">
+  ${[
+    { label: 'HOST', data: onlineRoom.host_data },
+    { label: 'GUEST', data: onlineRoom.guest_data }
+  ].map(player => `
+    <div class="card" style="padding:14px;margin:0">
+      <div class="eyebrow">${player.label}</div>
+      <h3 style="margin:8px 0">
+        ${esc(player.data?.display_name || 'Waiting...')}
+      </h3>
+      <p class="subtle" style="margin:4px 0">
+        Pet: ${esc(player.data?.name || '—')}
+      </p>
+      <p class="subtle" style="margin:4px 0">
+        Level: ${player.data?.level || '—'}
+      </p>
+      <p class="subtle" style="margin:4px 0">
+        Element: ${esc(player.data?.element || '—')}
+      </p>
+    </div>
+  `).join('')}
+</div>
+
     <p class="subtle">
       ${onlineRoom.status === 'ready'
         ? '2/2 Players Ready'
