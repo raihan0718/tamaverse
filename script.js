@@ -700,11 +700,46 @@ function chooseRarityForEgg(egg){
   return rarity;
 }
 function pullEgg(id,free=false){return runEggPulls(id,1,free);}
+function showGachaRoll(egg,chosen,duplicate){
+  const pool=species.filter(item=>item.pool.includes(egg.id));
+  const targetIndex=24;
+  const reel=Array.from({length:targetIndex},()=>pool[Math.floor(Math.random()*pool.length)]);
+  reel.push(chosen);
+  for(let i=0;i<8;i++)reel.push(pool[Math.floor(Math.random()*pool.length)]);
+  const cards=reel.map((pet,index)=>`<div class="gacha-reel-card rarity-${pet.rarity} ${index===targetIndex?'winner':''}"><div class="gacha-reel-art">${petImage(pet.id,'gacha-reel-pet')}</div><b>${esc(pet.name)}</b><small>${pet.rarity}</small></div>`).join('');
+  showModal(`<div class="gacha-roll-modal"><div class="eyebrow">TAMAVERSE · CASE OPENING</div><h2 id="modalTitle">Good luck!</h2><p class="subtle">Menentukan teman barumu...</p><div class="gacha-reel-window"><div class="gacha-reel-pointer"></div><div class="gacha-reel-track" id="gachaReelTrack">${cards}</div></div><div class="gacha-roll-status" id="gachaRollStatus">ROLLING...</div></div>`);
+  const track=document.getElementById('gachaReelTrack');
+  const viewport=document.querySelector('.gacha-reel-window');
+  if(!track||!viewport){showGachaResult(chosen,duplicate);return;}
+  const card=track.querySelector('.gacha-reel-card');
+  const styles=getComputedStyle(track);
+  const gap=parseFloat(styles.columnGap||styles.gap)||8;
+  const cardWidth=card.getBoundingClientRect().width;
+  const offset=viewport.clientWidth/2-(targetIndex*(cardWidth+gap)+cardWidth/2);
+  track.style.transition='none';
+  track.style.transform='translateX(0)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    track.style.transition='transform 5.2s cubic-bezier(.08,.72,.08,1)';
+    track.style.transform=`translateX(${offset}px)`;
+  }));
+  setTimeout(()=>{
+    const status=document.getElementById('gachaRollStatus');
+    if(status)status.textContent='✨ FOUND!';
+    const title=document.querySelector('.gacha-roll-modal h2');
+    if(title)title.textContent='IT’S A MATCH!';
+    setTimeout(()=>showGachaResult(chosen,duplicate),650);
+  },5450);
+}
+function showGachaResult(chosen,duplicate){
+  showModal(`<div class="hatch-egg">${petImage(chosen.id,'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2>
+    <p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p>
+    <div class="stats-row stats-four"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div><div class="stat-tile"><strong>${chosen.stats.spd}</strong><span>SPD</span></div></div>
+    <button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);
+}
 function runEggPulls(id,count,free=false){
   if(pullInProgress){showToast('Tarikan sedang diproses.');return;}
   const egg=eggs.find(item=>item.id===id);if(!egg)return;
   const pool=species.filter(item=>item.pool.includes(id));
-  const tiers=['Common','Rare','Epic','Legendary'];
   if(Object.keys(egg.rates).some(tier=>!pool.some(item=>item.rarity===tier))){showToast('Pool telur belum lengkap; tidak ada biaya yang diambil.');return;}
   if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}
   const currency=egg.currency==='gem'?'gems':'coins',cost=free?0:egg.price*count;
@@ -728,10 +763,7 @@ function runEggPulls(id,count,free=false){
     save();render();
     if(count===1){
       const {chosen,duplicate}=results[0];
-      showModal(`<div class="hatch-egg">${chosen.emoji}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2>
-        <p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p>
-        <div class="stats-row stats-four"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div><div class="stat-tile"><strong>${chosen.stats.spd}</strong><span>SPD</span></div></div>
-        <button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);
+      showGachaRoll(egg,chosen,duplicate);
     }else{
       const counts={Common:0,Rare:0,Epic:0,Legendary:0},duplicates=results.filter(result=>result.duplicate).length;
       results.forEach(result=>counts[result.chosen.rarity]++);
