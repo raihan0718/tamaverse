@@ -422,3 +422,7 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 .fragment-pet-info{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important;min-height:40px}
 .fragment-pet-icon{width:36px!important;height:36px!important;flex:0 0 36px!important;display:grid!important;place-items:center!important;overflow:hidden!important}
 .fragment-pet-icon .fragment-pet-image{display:block!important;width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;object-fit:contain!important;image-rendering:pixelated}
+
+/* Gacha egg artwork */
+.egg-icon .egg-art{width:100px;height:100px;object-fit:contain;display:block;margin:0 auto;}
+.hatch-egg .egg-art{width:120px;height:120px;object-fit:contain;display:block;margin:0 auto;}
