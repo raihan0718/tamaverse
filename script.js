@@ -1103,6 +1103,7 @@ function getOnlinePetData() {
 
   return {
     display_name: state.player.name || 'Player',
+    pet_uid: String(pet.uid),
     name: pet.name,
     species: pet.species,
     level: Number(pet.level || 1),
