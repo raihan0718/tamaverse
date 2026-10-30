@@ -43,8 +43,10 @@ const eggs = [
 function eggImage(eggId){
   const egg=eggs.find(item=>item.id===eggId);
   if(!egg?.image)return '🥚';
-  const imagePath=egg.id==='basic'?'/tamaverse/assets/eggs/pixie.png':'/tamaverse/assets/eggs/astral.png';
-  return `<img class="egg-art" src="${imagePath}" alt="${esc(egg.name)}" loading="eager" decoding="async">`;
+  const imagePath=egg.id==='basic'
+    ?'https://raw.githubusercontent.com/raihan0718/tamaverse/main/assets/eggs/pixie.png'
+    :'https://raw.githubusercontent.com/raihan0718/tamaverse/main/assets/eggs/astral.png';
+  return `<img class="egg-art" src="${imagePath}" alt="${esc(egg.name)}" loading="eager" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'egg-fallback',textContent:'🥚'}))">`;
 }
 const eggRates = {
   basic:{Common:60,Rare:28,Epic:8,Legendary:4},
