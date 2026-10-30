@@ -1079,6 +1079,16 @@ render();
 
 let onlineRoom = null;
 let onlineChannel = null;
+let onlineRoomPoller = null;
+
+async function syncOnlinePetBeforeRoom() {
+  const db = window.TAMAVERSE_SUPABASE_CLIENT;
+  if (!db) throw new Error('Supabase belum terkoneksi.');
+  getOnlinePetData();
+  if (typeof window.savePlayerToSupabase === 'function') {
+    await window.savePlayerToSupabase();
+  }
+}
 
 async function onlineAuth() {
   const db = window.TAMAVERSE_SUPABASE_CLIENT;
@@ -1098,8 +1108,11 @@ async function onlineAuth() {
 }
 
 function getOnlinePetData() {
-  const pet = activePet();
-  if (!pet) throw new Error('Kamu belum punya pet aktif.');
+  const selectedUid = state?.activePet;
+  const pet = Array.isArray(state?.pets)
+    ? state.pets.find(item => String(item.uid) === String(selectedUid))
+    : null;
+  if (!pet) throw new Error('Pet aktif tidak ditemukan. Pilih pet dari koleksi terlebih dahulu.');
 
   const sp = speciesById(pet.species);
 
@@ -1216,6 +1229,10 @@ async function onlineLeaveRoom() {
       await db.removeChannel(onlineChannel);
       onlineChannel = null;
     }
+    if (onlineRoomPoller) {
+      clearInterval(onlineRoomPoller);
+      onlineRoomPoller = null;
+    }
 
     onlineRoom = null;
     page = 'battle';
@@ -1237,6 +1254,7 @@ async function onlineUpdatePet() {
     if (!onlineRoom?.id || onlineRoom.status === 'playing') return;
 
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
+    await syncOnlinePetBeforeRoom();
 
     const { error } = await db.rpc('update_pvp_pet', {
       p_room_id: onlineRoom.id,
@@ -1278,6 +1296,7 @@ async function onlineStartMatch() {
 async function onlineRandomMatch() {
   try {
     await onlineAuth();
+    await syncOnlinePetBeforeRoom();
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
 
     const { data, error } = await db.rpc('find_random_match', {
@@ -1314,6 +1333,7 @@ async function onlineRandomMatch() {
 async function onlineCreateRoom() {
   try {
     await onlineAuth();
+    await syncOnlinePetBeforeRoom();
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
 
     const { data, error } = await db.rpc('create_pvp_room', {
@@ -1353,6 +1373,7 @@ async function onlineCreateRoom() {
 async function onlineJoinRoom(code) {
   try {
     await onlineAuth();
+    await syncOnlinePetBeforeRoom();
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
 
     const { data, error } = await db.rpc('join_pvp_room', {
@@ -1385,13 +1406,38 @@ console.log('ROOM ERROR:', roomError);
 }
 
 
+async function refreshOnlineRoom(roomId, shouldRender = true) {
+  const db = window.TAMAVERSE_SUPABASE_CLIENT;
+  if (!db || !roomId) return null;
+
+  const { data, error } = await db
+    .from('pvp_rooms')
+    .select('*')
+    .eq('id', roomId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('Refresh online room failed:', error);
+    return null;
+  }
+  if (!data) return null;
+
+  onlineRoom = { ...onlineRoom, ...data, id: data.id };
+  if (shouldRender && page === 'battle') render();
+  return data;
+}
+
 async function subscribeOnlineRoom(roomId) {
   const db = window.TAMAVERSE_SUPABASE_CLIENT;
-  if (!db) return;
+  if (!db || !roomId) return;
 
   if (onlineChannel) {
     await db.removeChannel(onlineChannel);
     onlineChannel = null;
+  }
+  if (onlineRoomPoller) {
+    clearInterval(onlineRoomPoller);
+    onlineRoomPoller = null;
   }
 
   onlineChannel = db
@@ -1399,33 +1445,34 @@ async function subscribeOnlineRoom(roomId) {
     .on(
       'postgres_changes',
       {
-        event: 'UPDATE',
+        event: '*',
         schema: 'public',
         table: 'pvp_rooms',
         filter: `id=eq.${roomId}`
       },
       async payload => {
         const room = payload.new;
+        if (!room || room.id !== roomId) return;
 
         if (room.status === 'closed') {
           if (onlineChannel) {
             await db.removeChannel(onlineChannel);
             onlineChannel = null;
           }
-
+          if (onlineRoomPoller) {
+            clearInterval(onlineRoomPoller);
+            onlineRoomPoller = null;
+          }
           onlineRoom = null;
           render();
           showToast('Host telah menutup room.');
           return;
         }
 
-        onlineRoom = {
-          ...onlineRoom,
-          ...room
-        };
-
+        onlineRoom = { ...onlineRoom, ...room, id: room.id };
         if (room.status === 'finished' && typeof window.loadPlayerFromSupabase === 'function') {
           await window.loadPlayerFromSupabase();
+          render();
         } else {
           render();
         }
@@ -1437,7 +1484,25 @@ async function subscribeOnlineRoom(roomId) {
         }
       }
     )
-    .subscribe();
+    .subscribe(async status => {
+      if (status === 'SUBSCRIBED') {
+        await refreshOnlineRoom(roomId, true);
+      }
+    });
+
+  // Realtime is the fast path; polling keeps lobby cards in sync if a device
+  // misses a Realtime event or the table publication is delayed.
+  onlineRoomPoller = setInterval(async () => {
+    if (!onlineRoom || onlineRoom.id !== roomId ||
+        ['playing', 'finished', 'closed'].includes(onlineRoom.status)) {
+      clearInterval(onlineRoomPoller);
+      onlineRoomPoller = null;
+      return;
+    }
+    await refreshOnlineRoom(roomId, true);
+  }, 2500);
+
+  await refreshOnlineRoom(roomId, true);
 }
 
 
