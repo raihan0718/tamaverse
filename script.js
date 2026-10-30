@@ -572,7 +572,7 @@ function gachaPage(){
         <p class="muted-label">${formatEggCost(e)}</p>
         <div class="egg-actions">
           <button class="button full" data-action="pull" data-egg="${e.id}">Buka 1</button>
-          <button class="button secondary full" data-action="pull-ten" data-egg="${e.id}">Buka 10 · ${formatEggCost(e,10)}</button>
+          <button class="button secondary full" data-action="pull-ten" data-egg="${e.id}">Spin 5 · ${formatEggCost(e,5)}</button>
         </div>
       </article>`;
     }).join('')}</div>
@@ -764,8 +764,8 @@ function runEggPulls(id,count,free=false){
     }else{
       const counts={Common:0,Rare:0,Epic:0,Legendary:0},duplicates=results.filter(result=>result.duplicate).length;
       results.forEach(result=>counts[result.chosen.rarity]++);
-      const list=results.map(({chosen,duplicate})=>`<div class="batch-result rarity-${chosen.rarity}"><span>${chosen.emoji}</span><b>${esc(chosen.name)}</b><small>${chosen.rarity} · ${chosen.element}${duplicate?' · +fragmen':''}</small><small class="batch-stats">HP ${chosen.stats.hp} · ATK ${chosen.stats.atk} · DEF ${chosen.stats.def} · SPD ${chosen.stats.spd}</small></div>`).join('');
-      showModal(`<div class="eyebrow">HASIL 5 TARIKAN</div><h2 id="modalTitle">Telur menetas!</h2><p>${raritySummary(counts)} · ${duplicates} duplikat menghasilkan fragmen.</p><div class="batch-results">${list}</div><button class="button full" data-action="close-modal">Lanjut</button>`);
+      const list=results.map(({chosen,duplicate})=>`<div class="batch-result rarity-${chosen.rarity}"><span>${petImage(chosen.id,"batch-pet-image")}</span><b>${esc(chosen.name)}</b><small>${chosen.rarity} · ${chosen.element}${duplicate?' · +fragmen':''}</small><small class="batch-stats">HP ${chosen.stats.hp} · ATK ${chosen.stats.atk} · DEF ${chosen.stats.def} · SPD ${chosen.stats.spd}</small></div>`).join('');
+      showModal(`<div class="eyebrow">HASIL 5 SPIN</div><h2 id="modalTitle">Telur menetas!</h2><p>${raritySummary(counts)} · ${duplicates} duplikat menghasilkan fragmen.</p><div class="batch-results">${list}</div><button class="button full" data-action="close-modal">Lanjut</button>`);
     }
   }finally{pullInProgress=false;}
 }
@@ -843,7 +843,7 @@ function finishBattle(result){
 }
 function batchPullConfirmation(egg){
   const currency=egg.currency==='gem'?'gem':'koin',cost=egg.price*5;
-  showModal(`<div class="hatch-egg">${egg.emoji}</div><div class="eyebrow">KONFIRMASI TARIKAN</div><h2 id="modalTitle">Buka 5 ${egg.name}?</h2><p>Biaya total: ${cost} ${currency}. Tarif per telur: ${raritySummary(egg.rates)}. Pity berlaku di setiap tarikan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-batch" data-egg="${egg.id}">Konfirmasi buka 5</button></div>`);
+  showModal(`<div class="hatch-egg">${egg.emoji}</div><div class="eyebrow">KONFIRMASI TARIKAN</div><h2 id="modalTitle">Spin 5 ${egg.name}?</h2><p>Biaya total: ${cost} ${currency}. Tarif per telur: ${raritySummary(egg.rates)}. Pity berlaku di setiap tarikan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-batch" data-egg="${egg.id}">Konfirmasi spin 5</button></div>`);
 }
 function avatarPicker(){
   const avatars=['✨','🌙','🌿','⚡','🎀','🦊','🐸','🌸','🪄','☄️','🍓','🧙'];
@@ -945,10 +945,10 @@ if (action === 'online-join-submit') {
   if(action==='pull-ten'){
     const egg=eggs.find(item=>item.id===button.dataset.egg);if(!egg)return;
     const currency=egg.currency==='gem'?'gems':'coins';
-    if(state.player[currency]<egg.price*10){showToast(`Perlu ${formatEggCost(egg,10)} untuk membuka 10 telur.`);return;}
+    if(state.player[currency]<egg.price*5){showToast(`Perlu ${formatEggCost(egg,5)} untuk membuka 5 telur.`);return;}
     batchPullConfirmation(egg);
   }else if(action==='confirm-batch'){
-    const id=button.dataset.egg;closeModal();runEggPulls(id,10,false);
+    const id=button.dataset.egg;closeModal();runEggPulls(id,5,false);
   }else if(action==='avatar-picker'){
     avatarPicker();
   }else if(action==='set-avatar'){
