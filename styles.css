@@ -456,3 +456,17 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 @keyframes crack-glow{from{opacity:.35;transform:rotate(24deg) scale(.8)}to{opacity:1;transform:rotate(24deg) scale(1.12)}}
 @keyframes spark-pop{from{opacity:.35;transform:scale(.7) rotate(-15deg)}to{opacity:1;transform:scale(1.2) rotate(15deg)}}
 @keyframes pet-pop{from{opacity:0;transform:scale(.35) translateY(18px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+
+/* Live online PvP arena */
+.online-fighters{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);align-items:center;gap:8px;margin:16px 0}
+.online-fighter{display:grid;gap:7px;min-width:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card-bg,rgba(150,120,180,.06))}
+.online-fighter b,.online-fighter span,.online-fighter strong{min-width:0;overflow-wrap:anywhere}
+.online-fighter b{font-size:13px}
+.online-fighter span{font-size:10px;color:var(--muted)}
+.online-fighter strong{font-size:11px}
+.online-vs{text-align:center;font:800 12px 'Space Grotesk',sans-serif;color:var(--muted)}
+.online-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.online-action-grid .button:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.5)}
+body[data-theme="dark"] .online-fighter{background:#352a3a;border-color:#ffffff20}
+@media(max-width:360px){.online-fighters{grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);gap:4px}.online-fighter{padding:8px}.online-fighter b{font-size:11px}}
