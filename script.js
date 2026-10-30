@@ -833,23 +833,23 @@ document.addEventListener('click',event=>{
   const button=event.target.closest('[data-action]');if(!button)return;
   const action=button.dataset.action;
 
-  if (a === 'online-random') {
+  if (action === 'online-random') {
     onlineRandomMatch();
     return;
   }
 
-  if (a === 'online-create') {
+  if (action === 'online-create') {
     onlineCreateRoom();
     return;
   }
 
-  if (a === 'online-join-prompt') {
+  if (action === 'online-join-prompt') {
     const code = prompt('Masukkan kode room teman:');
     if (code) onlineJoinRoom(code.trim());
     return;
   }
 
-  if (a === 'copy-online-link') {
+  if (action === 'copy-online-link') {
     const input = document.getElementById('onlineInviteLink');
     if (input) {
       input.select();
