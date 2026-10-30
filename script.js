@@ -826,7 +826,16 @@ function avatarPicker(){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){page=nav.dataset.page;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){page=btn.dataset.page;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='pet-tap'){triggerPetAnimation('greet');showToast(`${activePet()?.name||'Pet'} menyapamu!`);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){state.activePet=btn.dataset.pet;closeModal();save();render();showToast('Pet aktif berhasil diganti.');return;}if(a==='nickname-pet'){const p=petById(selectedPetId);if(!p)return;showModal(`<div class="eyebrow">NAMA PET</div><h2 id="modalTitle">Ganti nama</h2><input class="text-input" id="newPetName" maxlength="18" value="${esc(p.name)}"><button class="button full" data-action="save-pet-name">Simpan nama</button>`);return;}if(a==='save-pet-name'){const p=petById(selectedPetId);const n=(document.getElementById('newPetName')?.value||'').trim().slice(0,18);if(p&&n){p.name=n;closeModal();save();render();showToast('Nama pet diperbarui.');}return;}if(a==='rename-player'){showModal(`<div class="eyebrow">PROFIL LOKAL</div><h2 id="modalTitle">Ubah nama pemain</h2><input class="text-input" id="playerNameInput" maxlength="18" value="${esc(state.player.name)}"><button class="button full" data-action="save-player-name">Simpan</button>`);return;}if(a==='save-player-name'){const n=(document.getElementById('playerNameInput')?.value||'').trim().slice(0,18);if(n){state.player.name=n;closeModal();save();render();showToast('Nama profil diperbarui.');}return;}if(a==='pull'){const e=eggs.find(x=>x.id===btn.dataset.egg);if(!e)return;const curr=e.currency==='gem'?'gem':'koin';showModal(`<div class="hatch-egg">${e.emoji}</div><h2 id="modalTitle">Buka ${e.name}?</h2><p>Biaya: ${e.price} ${curr}. Tarikan mengikuti tarif rarity yang ditampilkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-pull" data-egg="${e.id}">Buka telur</button></div>`);return;}if(a==='confirm-pull'){const id=btn.dataset.egg;closeModal();pullEgg(id,false);return;}if(a==='freeegg'){pullEgg('basic',true);return;}if(a==='battle-start'){startBattle(btn.dataset.mode);return;}if(a==='battle-action'){battleAction(btn.dataset.move);return;}if(a==='claim'){doClaim(btn.dataset.quest);return;}if(a==='shop'){showShop();return;}if(a==='buy'){buyItem(btn.dataset.item);return;}if(a==='reset'){resetGame();return;}if(a==='confirm-reset'){localStorage.removeItem(SAVE_KEY);state=null;battle=null;page='home';closeModal();render();showToast('Save dihapus.');return;}
+  if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){page=btn.dataset.page;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='pet-tap'){triggerPetAnimation('greet');showToast(`${activePet()?.name||'Pet'} menyapamu!`);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
+  state.activePet=btn.dataset.pet;
+  closeModal();
+  save();
+  render();
+  onlineUpdatePet();
+  showToast('Pet aktif berhasil diganti.');
+  return;
+}
+if(a==='nickname-pet'){const p=petById(selectedPetId);if(!p)return;showModal(`<div class="eyebrow">NAMA PET</div><h2 id="modalTitle">Ganti nama</h2><input class="text-input" id="newPetName" maxlength="18" value="${esc(p.name)}"><button class="button full" data-action="save-pet-name">Simpan nama</button>`);return;}if(a==='save-pet-name'){const p=petById(selectedPetId);const n=(document.getElementById('newPetName')?.value||'').trim().slice(0,18);if(p&&n){p.name=n;closeModal();save();render();showToast('Nama pet diperbarui.');}return;}if(a==='rename-player'){showModal(`<div class="eyebrow">PROFIL LOKAL</div><h2 id="modalTitle">Ubah nama pemain</h2><input class="text-input" id="playerNameInput" maxlength="18" value="${esc(state.player.name)}"><button class="button full" data-action="save-player-name">Simpan</button>`);return;}if(a==='save-player-name'){const n=(document.getElementById('playerNameInput')?.value||'').trim().slice(0,18);if(n){state.player.name=n;closeModal();save();render();showToast('Nama profil diperbarui.');}return;}if(a==='pull'){const e=eggs.find(x=>x.id===btn.dataset.egg);if(!e)return;const curr=e.currency==='gem'?'gem':'koin';showModal(`<div class="hatch-egg">${e.emoji}</div><h2 id="modalTitle">Buka ${e.name}?</h2><p>Biaya: ${e.price} ${curr}. Tarikan mengikuti tarif rarity yang ditampilkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-pull" data-egg="${e.id}">Buka telur</button></div>`);return;}if(a==='confirm-pull'){const id=btn.dataset.egg;closeModal();pullEgg(id,false);return;}if(a==='freeegg'){pullEgg('basic',true);return;}if(a==='battle-start'){startBattle(btn.dataset.mode);return;}if(a==='battle-action'){battleAction(btn.dataset.move);return;}if(a==='claim'){doClaim(btn.dataset.quest);return;}if(a==='shop'){showShop();return;}if(a==='buy'){buyItem(btn.dataset.item);return;}if(a==='reset'){resetGame();return;}if(a==='confirm-reset'){localStorage.removeItem(SAVE_KEY);state=null;battle=null;page='home';closeModal();render();showToast('Save dihapus.');return;}
 });
 document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal();});
 document.addEventListener('click',event=>{
@@ -843,6 +852,10 @@ document.addEventListener('click',event=>{
     return;
   }
 
+if (action === 'online-leave') {
+  onlineLeaveRoom();
+  return;
+}
 
 if (action === 'online-start-match') {
   onlineStartMatch();
@@ -991,6 +1004,59 @@ function getOnlinePetData() {
     }
   };
 }
+
+
+async function onlineLeaveRoom() {
+  try {
+    if (!onlineRoom?.id) return;
+
+    const db = window.TAMAVERSE_SUPABASE_CLIENT;
+    const roomId = onlineRoom.id;
+
+    const { data, error } = await db.rpc('leave_pvp_room', {
+      p_room_id: roomId
+    });
+
+    if (error) throw error;
+
+    if (onlineChannel) {
+      await db.removeChannel(onlineChannel);
+      onlineChannel = null;
+    }
+
+    onlineRoom = null;
+    page = 'battle';
+    render();
+
+    showToast(
+      data.status === 'closed'
+        ? 'Room ditutup karena host keluar.'
+        : 'Kamu berhasil keluar dari room.'
+    );
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'Gagal keluar dari room.');
+  }
+}
+
+async function onlineUpdatePet() {
+  try {
+    if (!onlineRoom?.id || onlineRoom.status === 'playing') return;
+
+    const db = window.TAMAVERSE_SUPABASE_CLIENT;
+
+    const { error } = await db.rpc('update_pvp_pet', {
+      p_room_id: onlineRoom.id,
+      p_pet_data: getOnlinePetData()
+    });
+
+    if (error) throw error;
+
+  } catch (error) {
+    console.error('Update pet room:', error);
+  }
+}
+
 
 async function onlineStartMatch() {
   try {
@@ -1253,6 +1319,14 @@ function onlineBattlePage() {
     ${onlineRoom.status === 'playing' ? `
       <p class="subtle">Kedua pemain siap. Arena sedang disiapkan.</p>
     ` : ''}
+<button
+  class="button secondary full"
+  style="margin-top:12px"
+  data-action="online-leave"
+>
+  Leave Room
+</button>
+
   </div>
 ` : ''}
     </section>
