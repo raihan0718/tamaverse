@@ -954,12 +954,12 @@ document.addEventListener('click',event=>{
   const action=button.dataset.action;
 
   if (action === 'online-random') {
-    onlineRandomMatch();
+    runOnlineAction('random', button, 'Searching...', onlineRandomMatch);
     return;
   }
 
   if (action === 'online-create') {
-    onlineCreateRoom();
+    runOnlineAction('create', button, 'Creating...', onlineCreateRoom);
     return;
   }
 
@@ -969,10 +969,13 @@ if (action === 'online-leave') {
 }
 
 if (action === 'online-start-match') {
-  onlineStartMatch();
+  runOnlineAction('start', button, 'Starting...', onlineStartMatch);
   return;
 }
-  if (action === 'online-battle-action') { onlineBattleAction(button.dataset.move); return; }
+  if (action === 'online-battle-action') {
+    runOnlineAction('battle', button, 'Sending...', () => onlineBattleAction(button.dataset.move));
+    return;
+  }
 
 if (action === 'online-join-prompt') {
   showModal(`
@@ -1013,7 +1016,7 @@ if (action === 'online-join-submit') {
     return;
   }
   closeModal();
-  onlineJoinRoom(code);
+  runOnlineAction('join', button, 'Joining...', () => onlineJoinRoom(code));
   return;
 }
 
@@ -1094,6 +1097,28 @@ render();
 let onlineRoom = null;
 let onlineChannel = null;
 let onlineRoomPoller = null;
+
+const onlineActionLocks = new Set();
+
+async function runOnlineAction(key, button, loadingLabel, task) {
+  if (onlineActionLocks.has(key)) return;
+  onlineActionLocks.add(key);
+  const originalLabel = button?.textContent;
+  if (button) {
+    button.disabled = true;
+    if (loadingLabel) button.textContent = loadingLabel;
+  }
+  try {
+    await task();
+  } finally {
+    onlineActionLocks.delete(key);
+    if (button?.isConnected) {
+      button.disabled = false;
+      if (originalLabel !== undefined) button.textContent = originalLabel;
+    }
+  }
+}
+
 
 async function syncOnlinePetBeforeRoom() {
   const db = window.TAMAVERSE_SUPABASE_CLIENT;
