@@ -329,10 +329,10 @@ body:not([data-theme="dark"]) #supabaseUserId {
 }
 
 /* Mirror selected player pets in battle */
-.battle-player .battle-sprite img[src*="robo-bunny"],
-.battle-player .battle-sprite img[src*="dragon"],
-.battle-player .battle-sprite img[src*="panda"],
-.battle-player .battle-sprite img[src*="golden-fox"],
-.battle-player .battle-sprite img[src*="phoenix"] {
-  transform: scaleX(-1);
+.battle-player .battle-sprite img[src*="robo-bunny.png"],
+.battle-player .battle-sprite img[src*="dragon.png"],
+.battle-player .battle-sprite img[src*="panda.png"],
+.battle-player .battle-sprite img[src*="golden-fox.png"],
+.battle-player .battle-sprite img[src*="phoenix.png"] {
+  transform: scaleX(-1) !important;
 }
