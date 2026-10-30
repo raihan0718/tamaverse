@@ -993,17 +993,15 @@ async function onlineCreateRoom() {
     page = 'battle';
     render();
 
-    const inviteUrl = `${location.origin}${location.pathname}?room=${data.invite_code}`;
-
     showModal(`
-      <div class="eyebrow">INVITE ROOM</div>
-      <h2>Room berhasil dibuat!</h2>
-      <p class="subtle">Bagikan link ini ke temanmu.</p>
-      <input class="text-input" readonly value="${inviteUrl}" id="onlineInviteLink">
-      <p class="muted-label">Kode room: ${data.invite_code}</p>
-      <button class="button full" data-action="copy-online-link">Salin link undangan</button>
-      <button class="button secondary full" data-action="close-modal">Tutup</button>
-    `);
+  <div class="eyebrow">INVITE ROOM</div>
+  <h2>Room berhasil dibuat!</h2>
+  <p class="subtle">Bagikan kode ini ke temanmu.</p>
+  <input class="text-input" readonly value="${data.invite_code}" id="onlineInviteLink">
+  <p class="muted-label">Kode room</p>
+  <button class="button full" data-action="copy-online-link">Salin kode room</button>
+  <button class="button secondary full" data-action="close-modal">Tutup</button>
+`);
 
     subscribeOnlineRoom(data.room_id);
   } catch (error) {
