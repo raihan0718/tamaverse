@@ -716,7 +716,7 @@ function showGachaRoll(egg,chosen,duplicate){
   track.style.transition='none';
   track.style.transform='translate3d(0,0,0)';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    track.style.transition='transform 7.5s cubic-bezier(.10,.78,.12,1)';
+    track.style.transition='transform 8.5s cubic-bezier(.10,.78,.12,1)';
     track.style.transform=`translate3d(${offset}px,0,0)`;
   }));
   setTimeout(()=>{
@@ -725,7 +725,7 @@ function showGachaRoll(egg,chosen,duplicate){
     const title=document.querySelector('.gacha-roll-modal h2');
     if(title)title.textContent='IT’S A MATCH!';
     setTimeout(()=>showGachaResult(chosen,duplicate),650);
-  },5050);
+  },8550);
 }
 function showBatchGachaRoll(egg,results){
   const pool=species.filter(item=>item.pool.includes(egg.id));
@@ -748,7 +748,7 @@ function showBatchGachaRoll(egg,results){
       track.style.transition='none';
       track.style.transform='translate3d(0,0,0)';
       requestAnimationFrame(()=>{
-        track.style.transition='transform 4.8s cubic-bezier(.10,.78,.12,1)';
+        track.style.transition='transform 8.5s cubic-bezier(.10,.78,.12,1)';
         track.style.transform=`translate3d(${offset}px,0,0)`;
       });
     });
@@ -759,7 +759,7 @@ function showBatchGachaRoll(egg,results){
     const title=document.querySelector('.batch-roll-modal h2');
     if(title)title.textContent='FIVE MATCHES!';
     setTimeout(()=>showBatchGachaResult(results),650);
-  },7750);
+  },8550);
 }
 function showBatchGachaResult(results){
   const counts={Common:0,Rare:0,Epic:0,Legendary:0},duplicates=results.filter(result=>result.duplicate).length;
