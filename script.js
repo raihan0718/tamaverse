@@ -833,3 +833,207 @@ try{
 }catch(error){console.info('Telegram Mini App bridge is not available in this browser.');}
 applyTheme();
 render();
+
+
+// =====================================
+// TAMAVERSE ONLINE MATCHMAKING
+// =====================================
+
+let onlineRoom = null;
+let onlineChannel = null;
+
+async function onlineAuth() {
+  const db = window.TAMAVERSE_SUPABASE_CLIENT;
+  if (!db) throw new Error('Supabase belum terkoneksi.');
+
+  let { data: { user }, error } = await db.auth.getUser();
+  if (error) throw error;
+
+  if (!user) {
+    const result = await db.auth.signInAnonymously();
+    if (result.error) throw result.error;
+    user = result.data.user;
+  }
+
+  window.TAMAVERSE_USER_ID = user.id;
+  return user;
+}
+
+function getOnlinePetData() {
+  const pet = activePet();
+  if (!pet) throw new Error('Kamu belum punya pet aktif.');
+
+  const sp = speciesById(pet.species);
+
+  return {
+    name: pet.name,
+    species: pet.species,
+    level: Number(pet.level || 1),
+    element: sp.element,
+    stats: {
+      hp: Number(pet.stats.hp || 100),
+      atk: Number(pet.stats.atk || 10),
+      def: Number(pet.stats.def || 5)
+    }
+  };
+}
+
+async function onlineRandomMatch() {
+  try {
+    await onlineAuth();
+    const db = window.TAMAVERSE_SUPABASE_CLIENT;
+
+    const { data, error } = await db.rpc('find_random_match', {
+      p_display_name: state.player.name || 'Player',
+      p_pet_data: getOnlinePetData()
+    });
+
+    if (error) throw error;
+
+    onlineRoom = data;
+    page = 'battle';
+    render();
+
+    if (data.matched) {
+      showToast('Lawan ditemukan! Room siap.');
+      subscribeOnlineRoom(data.room_id);
+    } else {
+      showToast('Mencari lawan... tunggu pemain lain.');
+      subscribeOnlineRoom(data.room_id);
+    }
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'Gagal mencari lawan.');
+  }
+}
+
+async function onlineCreateRoom() {
+  try {
+    await onlineAuth();
+    const db = window.TAMAVERSE_SUPABASE_CLIENT;
+
+    const { data, error } = await db.rpc('create_pvp_room', {
+      p_pet_data: getOnlinePetData()
+    });
+
+    if (error) throw error;
+
+    onlineRoom = data;
+    page = 'battle';
+    render();
+
+    const inviteUrl = `${location.origin}${location.pathname}?room=${data.invite_code}`;
+
+    showModal(`
+      <div class="eyebrow">INVITE ROOM</div>
+      <h2>Room berhasil dibuat!</h2>
+      <p class="subtle">Bagikan link ini ke temanmu.</p>
+      <input class="text-input" readonly value="${inviteUrl}" id="onlineInviteLink">
+      <p class="muted-label">Kode room: ${data.invite_code}</p>
+      <button class="button full" data-action="copy-online-link">Salin link undangan</button>
+      <button class="button secondary full" data-action="close-modal">Tutup</button>
+    `);
+
+    subscribeOnlineRoom(data.room_id);
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'Gagal membuat room.');
+  }
+}
+
+async function onlineJoinRoom(code) {
+  try {
+    await onlineAuth();
+    const db = window.TAMAVERSE_SUPABASE_CLIENT;
+
+    const { data, error } = await db.rpc('join_pvp_room', {
+      p_invite_code: code,
+      p_pet_data: getOnlinePetData()
+    });
+
+    if (error) throw error;
+
+    onlineRoom = data;
+    page = 'battle';
+    render();
+    showToast('Berhasil masuk room!');
+    subscribeOnlineRoom(data.room_id);
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'Gagal masuk room.');
+  }
+}
+
+async function subscribeOnlineRoom(roomId) {
+  const db = window.TAMAVERSE_SUPABASE_CLIENT;
+  if (!db) return;
+
+  if (onlineChannel) {
+    await db.removeChannel(onlineChannel);
+  }
+
+  onlineChannel = db
+    .channel(`pvp-room-${roomId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'pvp_rooms',
+        filter: `id=eq.${roomId}`
+      },
+      payload => {
+        const room = payload.new;
+        onlineRoom = {
+          ...onlineRoom,
+          ...room
+        };
+
+        render();
+
+        if (room.status === 'ready') {
+          showToast('Teman ditemukan! Room siap.');
+        }
+      }
+    )
+    .subscribe();
+}
+
+function onlineBattlePage() {
+  return `
+    <section class="page">
+      <div class="eyebrow">TAMAVERSE ONLINE ARENA</div>
+      <h1 class="page-title">Online Match</h1>
+
+      <div class="card">
+        <h2>⚔️ Random Match</h2>
+        <p class="subtle">Cari pemain lain secara acak.</p>
+        <button class="button full" data-action="online-random">
+          Cari lawan
+        </button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h2>🔗 Invite Friend</h2>
+        <p class="subtle">Buat room pribadi dan bagikan link.</p>
+        <button class="button full" data-action="online-create">
+          Create Room
+        </button>
+        <button class="button secondary full" data-action="online-join-prompt">
+          Join Room
+        </button>
+      </div>
+
+      ${onlineRoom ? `
+        <div class="card" style="margin-top:12px">
+          <h3>Room: ${esc(onlineRoom.invite_code || '')}</h3>
+          <p class="subtle">
+            ${onlineRoom.status === 'ready'
+              ? 'Kedua pemain sudah masuk.'
+              : 'Menunggu pemain lain...'}
+          </p>
+        </div>
+      ` : ''}
+    </section>
+  `;
+}
