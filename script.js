@@ -832,6 +832,34 @@ document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.targe
 document.addEventListener('click',event=>{
   const button=event.target.closest('[data-action]');if(!button)return;
   const action=button.dataset.action;
+
+  if (a === 'online-random') {
+    onlineRandomMatch();
+    return;
+  }
+
+  if (a === 'online-create') {
+    onlineCreateRoom();
+    return;
+  }
+
+  if (a === 'online-join-prompt') {
+    const code = prompt('Masukkan kode room teman:');
+    if (code) onlineJoinRoom(code.trim());
+    return;
+  }
+
+  if (a === 'copy-online-link') {
+    const input = document.getElementById('onlineInviteLink');
+    if (input) {
+      input.select();
+      navigator.clipboard.writeText(input.value)
+        .then(() => showToast('Link berhasil disalin!'))
+        .catch(() => showToast('Gagal menyalin link.'));
+    }
+    return;
+  }
+
   if(action==='pull-ten'){
     const egg=eggs.find(item=>item.id===button.dataset.egg);if(!egg)return;
     const currency=egg.currency==='gem'?'gems':'coins';
