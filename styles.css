@@ -360,3 +360,41 @@ body:not([data-theme="dark"]) #supabaseUserId {
 .gacha-roll-status{font:800 12px 'Space Grotesk',sans-serif;letter-spacing:2px;color:#b99bda}
 body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 @media(prefers-reduced-motion:reduce){.gacha-reel-track{transition-duration:.1s!important}}
+
+
+/* Gacha polish: keep pet art fully visible in both roll and result modal */
+.hatch-egg{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:124px;
+  max-height:142px;
+  overflow:hidden;
+  font-size:0;
+  line-height:1;
+}
+.hatch-egg .detail-pet-image{
+  display:block;
+  width:116px !important;
+  height:116px !important;
+  max-width:100%;
+  max-height:116px;
+  object-fit:contain !important;
+  object-position:center;
+  image-rendering:pixelated;
+}
+.gacha-roll-modal{max-width:100%;min-width:0}
+.gacha-reel-window{height:158px;margin:17px -4px 12px;width:calc(100% + 8px)}
+.gacha-reel-track{gap:7px;padding:0 7px}
+.gacha-reel-card{flex-basis:88px;height:126px;padding:7px 4px;gap:4px}
+.gacha-reel-art{width:62px;height:62px;flex:none}
+.gacha-reel-pet{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain !important;object-position:center;image-rendering:pixelated}
+.gacha-reel-card b{font-size:10px}
+.gacha-reel-card small{font-size:8px}
+@media(max-width:380px){
+  .hatch-egg{min-height:112px;max-height:126px}
+  .hatch-egg .detail-pet-image{width:100px !important;height:100px !important;max-height:100px}
+  .gacha-reel-window{height:146px}
+  .gacha-reel-card{flex-basis:80px;height:116px}
+  .gacha-reel-art{width:56px;height:56px}
+}
