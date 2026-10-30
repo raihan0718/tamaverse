@@ -42,8 +42,7 @@ DECLARE
   v_log jsonb;
   v_result text := NULL;
   v_winner uuid := NULL;
-  v_actor_pet public.pets%rowtype;
-  v_target_pet public.pets%rowtype;
+  v_pet_row public.pets%rowtype;
   v_actor_xp integer := 0;
   v_target_xp integer := 0;
   v_player_level integer := 1;
@@ -261,32 +260,31 @@ BEGIN
     END IF;
 
     -- Pet XP is stored server-side; level-up thresholds match the local pet progression.
-    UPDATE public.pets
-    SET xp = xp + CASE
-          WHEN owner_id = v_room.host_id THEN CASE WHEN v_room.host_id = v_winner THEN 20 ELSE 8 END
-          ELSE CASE WHEN v_room.guest_id = v_winner THEN 20 ELSE 8 END
-        END
-    WHERE (owner_id = v_room.host_id AND client_uid = v_room.host_data->>'pet_uid')
-       OR (owner_id = v_room.guest_id AND client_uid = v_room.guest_data->>'pet_uid');
-
-    UPDATE public.pets p
-    SET level = p.level + 1,
-        xp = GREATEST(0, p.xp - (p.level * 40))
-    WHERE p.id IN (
-      SELECT id FROM public.pets
+    -- Apply pet XP and every earned level using the same level * 40 threshold as the client.
+    FOR v_pet_row IN
+      SELECT * FROM public.pets
       WHERE (owner_id = v_room.host_id AND client_uid = v_room.host_data->>'pet_uid')
          OR (owner_id = v_room.guest_id AND client_uid = v_room.guest_data->>'pet_uid')
-    )
-      AND p.xp >= p.level * 40;
+      FOR UPDATE
+    LOOP
+      IF v_result = 'draw' THEN
+        v_actor_xp := 8;
+      ELSIF v_pet_row.owner_id = v_winner THEN
+        v_actor_xp := 20;
+      ELSE
+        v_actor_xp := 8;
+      END IF;
 
-    -- Refresh cloud pet stats and keep the room snapshot consistent for the result screen.
-    SELECT * INTO v_actor_pet
-    FROM public.pets
-    WHERE owner_id = v_room.host_id AND client_uid = v_room.host_data->>'pet_uid';
+      v_pet_row.xp := v_pet_row.xp + v_actor_xp;
+      WHILE v_pet_row.xp >= v_pet_row.level * 40 LOOP
+        v_pet_row.xp := v_pet_row.xp - (v_pet_row.level * 40);
+        v_pet_row.level := v_pet_row.level + 1;
+      END LOOP;
 
-    SELECT * INTO v_target_pet
-    FROM public.pets
-    WHERE owner_id = v_room.guest_id AND client_uid = v_room.guest_data->>'pet_uid';
+      UPDATE public.pets
+      SET xp = v_pet_row.xp, level = v_pet_row.level
+      WHERE id = v_pet_row.id;
+    END LOOP;
 
     v_state := jsonb_set(v_state, '{rewards_applied}', 'true'::jsonb, true);
   END IF;
