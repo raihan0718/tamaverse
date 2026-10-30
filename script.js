@@ -727,6 +727,46 @@ function showGachaRoll(egg,chosen,duplicate){
     setTimeout(()=>showGachaResult(chosen,duplicate),650);
   },5050);
 }
+function showBatchGachaRoll(egg,results){
+  const pool=species.filter(item=>item.pool.includes(egg.id));
+  const targetIndex=20;
+  const reels=results.map(({chosen},spinIndex)=>{
+    const reel=Array.from({length:targetIndex},()=>pool[Math.floor(Math.random()*pool.length)]);
+    reel.push(chosen);
+    for(let i=0;i<6;i++)reel.push(pool[Math.floor(Math.random()*pool.length)]);
+    const cards=reel.map((pet,index)=>`<div class="gacha-reel-card rarity-${pet.rarity} ${index===targetIndex?'winner':''}"><div class="gacha-reel-art">${petImage(pet.id,'batch-reel-pet')}</div><b>${esc(pet.name)}</b></div>`).join('');
+    return `<div class="batch-reel-row"><small>SPIN ${spinIndex+1}</small><div class="gacha-reel-window batch-reel-window"><div class="gacha-reel-pointer"></div><div class="gacha-reel-track batch-reel-track" id="batchReelTrack${spinIndex}">${cards}</div></div></div>`;
+  }).join('');
+  showModal(`<div class="gacha-roll-modal batch-roll-modal"><div class="eyebrow">TAMAVERSE · 5× CASE OPENING</div><h2 id="modalTitle">Good luck!</h2><p class="subtle">Lima telur diputar bersamaan...</p><div class="batch-reels">${reels}</div><div class="gacha-roll-status" id="gachaRollStatus">ROLLING...</div></div>`);
+  const tracks=results.map((_,index)=>document.getElementById(`batchReelTrack${index}`));
+  const viewports=[...document.querySelectorAll('.batch-reel-window')];
+  if(tracks.some(track=>!track)||viewports.length!==5){showBatchGachaResult(results);return;}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    tracks.forEach((track,index)=>{
+      const winner=track.children[targetIndex],viewport=viewports[index];
+      const offset=viewport.clientWidth/2-(winner.offsetLeft+winner.offsetWidth/2);
+      track.style.transition='none';
+      track.style.transform='translate3d(0,0,0)';
+      requestAnimationFrame(()=>{
+        track.style.transition='transform 4.8s cubic-bezier(.10,.78,.12,1)';
+        track.style.transform=`translate3d(${offset}px,0,0)`;
+      });
+    });
+  }));
+  setTimeout(()=>{
+    const status=document.getElementById('gachaRollStatus');
+    if(status)status.textContent='✨ ALL 5 FOUND!';
+    const title=document.querySelector('.batch-roll-modal h2');
+    if(title)title.textContent='FIVE MATCHES!';
+    setTimeout(()=>showBatchGachaResult(results),650);
+  },5050);
+}
+function showBatchGachaResult(results){
+  const counts={Common:0,Rare:0,Epic:0,Legendary:0},duplicates=results.filter(result=>result.duplicate).length;
+  results.forEach(result=>counts[result.chosen.rarity]++);
+  const list=results.map(({chosen,duplicate})=>`<div class="batch-result rarity-${chosen.rarity}"><span>${petImage(chosen.id,"batch-pet-image")}</span><b>${esc(chosen.name)}</b><small>${chosen.rarity} · ${chosen.element}${duplicate?' · +fragmen':''}</small><small class="batch-stats">HP ${chosen.stats.hp} · ATK ${chosen.stats.atk} · DEF ${chosen.stats.def} · SPD ${chosen.stats.spd}</small></div>`).join('');
+  showModal(`<div class="eyebrow">HASIL 5 SPIN</div><h2 id="modalTitle">Telur menetas!</h2><p>${raritySummary(counts)} · ${duplicates} duplikat menghasilkan fragmen.</p><div class="batch-results">${list}</div><button class="button full" data-action="close-modal">Lanjut</button>`);
+}
 function showGachaResult(chosen,duplicate){
   showModal(`<div class="hatch-egg">${petImage(chosen.id,'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2>
     <p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p>
@@ -762,10 +802,7 @@ function runEggPulls(id,count,free=false){
       const {chosen,duplicate}=results[0];
       showGachaRoll(egg,chosen,duplicate);
     }else{
-      const counts={Common:0,Rare:0,Epic:0,Legendary:0},duplicates=results.filter(result=>result.duplicate).length;
-      results.forEach(result=>counts[result.chosen.rarity]++);
-      const list=results.map(({chosen,duplicate})=>`<div class="batch-result rarity-${chosen.rarity}"><span>${petImage(chosen.id,"batch-pet-image")}</span><b>${esc(chosen.name)}</b><small>${chosen.rarity} · ${chosen.element}${duplicate?' · +fragmen':''}</small><small class="batch-stats">HP ${chosen.stats.hp} · ATK ${chosen.stats.atk} · DEF ${chosen.stats.def} · SPD ${chosen.stats.spd}</small></div>`).join('');
-      showModal(`<div class="eyebrow">HASIL 5 SPIN</div><h2 id="modalTitle">Telur menetas!</h2><p>${raritySummary(counts)} · ${duplicates} duplikat menghasilkan fragmen.</p><div class="batch-results">${list}</div><button class="button full" data-action="close-modal">Lanjut</button>`);
+      showBatchGachaRoll(egg,results);
     }
   }finally{pullInProgress=false;}
 }
