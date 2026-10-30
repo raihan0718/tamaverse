@@ -411,3 +411,14 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 .batch-reel-window .gacha-reel-card b{font-size:6px;max-width:42px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .batch-reel-window .gacha-reel-card small{display:none}
 .batch-roll-modal .gacha-roll-status{margin-top:8px}
+
+
+/* Gacha pet thumbnails: compact, consistent sizing */
+.gacha-history-row{display:flex;align-items:center;gap:7px;min-height:34px;margin:7px 0}
+.gacha-history-icon{width:28px;height:28px;flex:0 0 28px;display:grid;place-items:center}
+.gacha-history-icon .history-pet-image{display:block;width:26px!important;height:26px!important;max-width:26px!important;max-height:26px!important;object-fit:contain!important;image-rendering:pixelated}
+.egg-pool .pool-pet{display:inline-flex;align-items:center;gap:4px;vertical-align:middle}
+.egg-pool .egg-pool-image{display:block;width:20px!important;height:20px!important;max-width:20px!important;max-height:20px!important;object-fit:contain!important;image-rendering:pixelated;flex:0 0 20px}
+.fragment-pet-info{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important;min-height:40px}
+.fragment-pet-icon{width:36px!important;height:36px!important;flex:0 0 36px!important;display:grid!important;place-items:center!important;overflow:hidden!important}
+.fragment-pet-icon .fragment-pet-image{display:block!important;width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;object-fit:contain!important;image-rendering:pixelated}
