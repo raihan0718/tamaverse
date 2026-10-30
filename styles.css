@@ -375,10 +375,10 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 }
 .hatch-egg .detail-pet-image{
   display:block;
-  width:58px !important;
-  height:58px !important;
+  width:70px !important;
+  height:70px !important;
   max-width:100%;
-  max-height:58px;
+  max-height:70px;
   object-fit:contain !important;
   object-position:center;
   image-rendering:pixelated;
@@ -393,7 +393,7 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 .gacha-reel-card small{font-size:8px}
 @media(max-width:380px){
   .hatch-egg{min-height:112px;max-height:126px}
-  .hatch-egg .detail-pet-image{width:50px !important;height:50px !important;max-height:50px}
+  .hatch-egg .detail-pet-image{width:60px !important;height:60px !important;max-height:60px}
   .gacha-reel-window{height:146px}
   .gacha-reel-card{flex-basis:80px;height:116px}
   .gacha-reel-art{width:56px;height:56px}
