@@ -1287,7 +1287,14 @@ async function onlineRandomMatch() {
 
     if (error) throw error;
 
-    onlineRoom = { ...data, id: data.room_id || data.id };
+    const { data: roomRow, error: roomLoadError } = await db
+      .from('pvp_rooms')
+      .select('*')
+      .eq('id', data.room_id || data.id)
+      .single();
+    if (roomLoadError) throw roomLoadError;
+
+    onlineRoom = { ...roomRow, id: roomRow.id, matched: data.matched };
     page = 'battle';
     render();
 
@@ -1315,7 +1322,14 @@ async function onlineCreateRoom() {
 
     if (error) throw error;
 
-    onlineRoom = { ...data, id: data.room_id || data.id };
+    const { data: roomRow, error: roomLoadError } = await db
+      .from('pvp_rooms')
+      .select('*')
+      .eq('id', data.room_id || data.id)
+      .single();
+    if (roomLoadError) throw roomLoadError;
+
+    onlineRoom = { ...roomRow, id: roomRow.id };
     page = 'battle';
     render();
 
