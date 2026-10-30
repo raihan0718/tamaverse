@@ -300,14 +300,14 @@ body:not([data-theme="dark"]) #supabaseUserId {
   display: none !important;
 }
 
-/* Battle pets: fix image size and position */
+/* Battle pet size adjustment */
 .battle-sprite {
-  width: 112px;
-  height: 112px;
+  width: 76px;
+  height: 76px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 96px;
+  font-size: 76px;
 }
 
 .battle-sprite .battle-pet-image {
@@ -318,13 +318,12 @@ body:not([data-theme="dark"]) #supabaseUserId {
   max-height: 100%;
   object-fit: contain;
   object-position: center;
-  image-rendering: pixelated;
 }
 
 @media (max-width: 380px) {
   .battle-sprite {
-    width: 88px;
-    height: 88px;
-    font-size: 76px;
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
   }
 }
