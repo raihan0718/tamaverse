@@ -42,7 +42,9 @@ const eggs = [
 ];
 function eggImage(eggId){
   const egg=eggs.find(item=>item.id===eggId);
-  return egg?.image ? `<img class="egg-art" src="${egg.image}" alt="${esc(egg.name)}" loading="lazy">` : '🥚';
+  if(!egg?.image)return '🥚';
+  const imagePath=egg.id==='basic'?'/tamaverse/assets/eggs/pixie.png':'/tamaverse/assets/eggs/astral.png';
+  return `<img class="egg-art" src="${imagePath}" alt="${esc(egg.name)}" loading="eager" decoding="async">`;
 }
 const eggRates = {
   basic:{Common:60,Rare:28,Epic:8,Legendary:4},
