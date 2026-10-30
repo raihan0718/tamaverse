@@ -1145,6 +1145,7 @@ function onlineBattlePage() {
         <button class="button full" data-action="online-random">
           Cari lawan
         </button>
+</div>
       <div class="card" style="
   margin-top:14px;
   padding:20px;
