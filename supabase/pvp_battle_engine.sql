@@ -225,6 +225,7 @@ BEGIN
       UPDATE public.profiles
       SET wins = wins + CASE WHEN id = v_winner THEN 1 ELSE 0 END,
           losses = losses + CASE WHEN id <> v_winner THEN 1 ELSE 0 END,
+          xp = xp + CASE WHEN id = v_winner THEN 25 ELSE 0 END,
           rating = GREATEST(0, rating + CASE WHEN id = v_winner THEN 5 ELSE -5 END)
       WHERE id IN (v_room.host_id, v_room.guest_id);
 
