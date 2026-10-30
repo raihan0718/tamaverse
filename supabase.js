@@ -98,6 +98,47 @@
       if (inventoryError) {
         console.warn('Save inventory failed:', inventoryError);
       }
+
+      // Sync the local pet collection without deleting existing cloud rows.
+      const pets = Array.isArray(window.state.pets) ? window.state.pets : [];
+
+      if (pets.length > 0) {
+        const { error: deactivateError } = await supabase
+          .from('pets')
+          .update({ is_active: false })
+          .eq('owner_id', user.id);
+
+        if (deactivateError) {
+          console.warn('Deactivate previous active pet failed:', deactivateError);
+        }
+
+        const petsPayload = pets
+          .filter((pet) => pet && pet.uid && pet.species)
+          .map((pet) => ({
+            owner_id: user.id,
+            client_uid: String(pet.uid),
+            species: String(pet.species),
+            nickname: String(pet.name || pet.species).slice(0, 40),
+            level: Math.max(1, Number(pet.level) || 1),
+            xp: Math.max(0, Number(pet.xp) || 0),
+            hunger: Math.min(100, Math.max(0, Number(pet.hunger) || 0)),
+            happiness: Math.min(100, Math.max(0, Number(pet.happiness) || 0)),
+            energy: Math.min(100, Math.max(0, Number(pet.energy) || 0)),
+            cleanliness: Math.min(100, Math.max(0, Number(pet.cleanliness) || 0)),
+            evolution: Math.max(0, Number(pet.evolution) || 0),
+            is_active: pet.uid === window.state.activePet,
+          }));
+
+        if (petsPayload.length > 0) {
+          const { error: petsError } = await supabase
+            .from('pets')
+            .upsert(petsPayload, { onConflict: 'owner_id,client_uid' });
+
+          if (petsError) {
+            console.warn('Save pets failed:', petsError);
+          }
+        }
+      }
     } catch (error) {
       console.warn('Supabase save failed:', error);
     }
