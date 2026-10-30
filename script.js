@@ -1215,3 +1215,6 @@ function onlineBattlePage() {
     ` : ''}
   </div>
 ` : ''}
+    </section>
+  `;
+}
