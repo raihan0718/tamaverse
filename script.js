@@ -1286,7 +1286,7 @@ function onlineBattleView() {
           </div>
           <div class="battle-sprite">${petImage(mine?.species, 'battle-pet-image')}</div>
           <span class="battle-effect effect-player"></span><span class="battle-impact impact-player"></span>${myFloat ? `<span class="battle-floating-number ${myFloat.kind}">${myFloat.text}</span>` : ""}
-          <div class="battle-hp-card"><div class="hp-label"><b>YOUR PET</b><span>${myHp} / ${myMax} HP</span></div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div></div>
+          <div class="battle-hp-card"><div class="hp-value">${myHp} / ${myMax} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(mine?.name || mine?.display_name || "Your Pet")}</b><span>Lv.${Number(mine?.level || 1)}</span></div></div>
         </div>
         <div class="arena-vs">VS</div>
         <div class="battle-side battle-enemy">
@@ -1296,7 +1296,7 @@ function onlineBattleView() {
           </div>
           <div class="battle-sprite">${petImage(rival?.species, 'battle-pet-image')}</div>
           <span class="battle-effect effect-enemy"></span><span class="battle-impact impact-enemy"></span>${rivalFloat ? `<span class="battle-floating-number ${rivalFloat.kind}">${rivalFloat.text}</span>` : ""}
-          <div class="battle-hp-card"><div class="hp-label"><b>OPPONENT</b><span>${rivalHp} / ${rivalMax} HP</span></div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div></div>
+          <div class="battle-hp-card"><div class="hp-value">${rivalHp} / ${rivalMax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(rival?.name || rival?.display_name || "Opponent Pet")}</b><span>Lv.${Number(rival?.level || 1)}</span></div></div>
         </div>
         <div class="battle-arena-controls">
           <div class="battle-action-status">${finished ? (bs.result === 'draw' ? 'MATCH DRAW' : bs.winner_id === window.TAMAVERSE_USER_ID ? '🏆 YOU WIN!' : 'MATCH OVER') : myTurn ? '✨ YOUR TURN — CHOOSE ACTION' : 'WAITING FOR OPPONENT...'}</div>
