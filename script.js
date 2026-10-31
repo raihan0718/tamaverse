@@ -1400,6 +1400,15 @@ async function onlineStartMatch() {
 
     await onlineAuth();
 
+    // Reconfirm the host pet in cloud immediately before starting. Refreshing
+    // the room snapshot also prevents an old pet_uid from being validated.
+    await syncOnlinePetBeforeRoom();
+    const { error: petUpdateError } = await db.rpc('update_pvp_pet', {
+      p_room_id: roomId,
+      p_pet_data: getOnlinePetData()
+    });
+    if (petUpdateError) throw petUpdateError;
+
     const { data, error } = await db.rpc('start_pvp_match', {
       p_room_id: roomId
     });
