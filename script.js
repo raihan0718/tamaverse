@@ -1276,7 +1276,7 @@ function onlineBattleView() {
           <span class="arena-light light-one"></span>
           <span class="arena-light light-two"></span>
         </div>
-        <div class="arena-banner"><span>✨ TAMAVERSE ARENA ✨</span><b>${finished ? 'FINISH' : myTurn ? 'YOUR TURN' : "OPPONENT'S TURN"}</b></div>
+        <div class="battle-turn-overlay"><b>${finished ? (bs.result === "draw" ? "MATCH DRAW" : bs.winner_id === window.TAMAVERSE_USER_ID ? "YOU WIN" : "MATCH OVER") : myTurn ? "YOUR TURN" : "OPPONENT’S TURN"}</b><span>TURN ${turn}</span></div>
         <div class="arena-platform platform-player"></div>
         <div class="arena-platform platform-enemy"></div>
         <div class="battle-side battle-player">
