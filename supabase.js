@@ -103,15 +103,8 @@
       const pets = Array.isArray(window.state.pets) ? window.state.pets : [];
 
       if (pets.length > 0) {
-        const { error: deactivateError } = await supabase
-          .from('pets')
-          .update({ is_active: false })
-          .eq('owner_id', user.id);
-
-        if (deactivateError) {
-          console.warn('Deactivate previous active pet failed:', deactivateError);
-        }
-
+        // Keep ordinary background saves from racing the explicit active-pet
+        // selection used by online matchmaking and start_pvp_match.
         const petsPayload = pets
           .filter((pet) => pet && pet.uid && pet.species)
           .map((pet) => ({
