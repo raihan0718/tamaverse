@@ -715,10 +715,21 @@ function formatEggCost(egg,count=1){
 }
 function gachaPage(){
   const owned=new Set(state.pets.map(p=>p.species));
-  return `<section class="page">
-    <div class="eyebrow">TEMUKAN TEMAN BARU</div>
-    <h1 class="page-title">Telur ajaib</h1>
-    <p class="subtle">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Premium: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p>
+  const storeItems=[
+    {icon:'🍎',name:'Apple',desc:'Memulihkan Hunger pet',price:50},
+    {icon:'⚡',name:'Energy Potion',desc:'Memulihkan Energy pet',price:40},
+    {icon:'🧃',name:'Battle Snack',desc:'Item bantuan saat battle',price:60},
+    {icon:'📘',name:'Training Manual',desc:'Membantu proses Training',price:120}
+  ];
+  return `<section class="page store-page">
+    <div class="store-hero">
+      <div class="eyebrow">WELCOME TO TAMAVERSE</div>
+      <h1 class="page-title">Store</h1>
+      <p class="subtle">Temukan teman baru dan perlengkapan untuk pet-mu.</p>
+    </div>
+
+    <div class="store-section-heading"><div><div class="eyebrow">DISCOVER & HATCH</div><h2>Gacha</h2></div><span>🥚</span></div>
+    <p class="subtle">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Special: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p>
     <div class="notice">🎁 Gratis 1 Basic Egg setiap hari. Semua hadiah menggunakan mata uang dalam game—tanpa pembayaran asli.</div>
     <div class="collection-grid">${eggs.map(e=>{
       const pool=species.filter(sp=>sp.pool.includes(e.id));
@@ -742,6 +753,10 @@ function gachaPage(){
       <div class="section-heading"><h2>Riwayat tarikan</h2></div>
       ${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>{const s=speciesById(h.species||species.find(x=>x.name===h.name)?.id);const petName=h.name||s.name;return `<p class="subtle gacha-history-row"><span class="gacha-history-icon">${petImage(s.id,'history-pet-image')}</span><b>${esc(petName)}</b> · <span class="rarity rarity-${h.rarity||s.rarity}">${h.rarity||s.rarity}</span></p>`;}).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}
     </div>
+
+    <div class="store-section-heading store-item-heading"><div><div class="eyebrow">GEAR UP YOUR COMPANION</div><h2>Item</h2></div><span>🧰</span></div>
+    <div class="store-item-preview">${storeItems.map(item=>`<div class="store-preview-item"><span class="store-preview-icon">${item.icon}</span><div><b>${item.name}</b><small>${item.desc}</small></div><strong>🪙 ${item.price}</strong></div>`).join('')}</div>
+    <button class="button full store-browse-button" data-action="shop">🛒 Browse Items</button>
   </section>`;
 }
 function battlePage(){
