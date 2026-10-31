@@ -1635,3 +1635,7 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
 /* Fine-tune companion pet slightly higher */
 .home-page .stage-pet{top:49%!important}
 @media(max-width:380px){.home-page .stage-pet{top:49%!important}}
+
+
+/* Slightly enlarge the companion pet */
+.home-page .stage-pet{transform:scale(1.08)!important;transform-origin:center center!important}
