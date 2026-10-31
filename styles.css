@@ -1701,3 +1701,13 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   .home-page .home-feature-tile b{font-size:11px!important}
   .home-page .home-feature-tile small{font-size:8px!important}
 }
+
+/* Four Home feature shortcuts in a balanced two-column layout */
+.home-page .home-feature-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+.home-page .home-feature-tile{min-height:112px!important;padding:13px 8px!important}
+.home-page .home-feature-art{width:54px!important;height:54px!important;font-size:31px!important}
+@media(max-width:380px){
+  .home-page .home-feature-shortcuts{gap:8px!important}
+  .home-page .home-feature-tile{min-height:104px!important;padding:10px 6px!important}
+  .home-page .home-feature-art{width:48px!important;height:48px!important;font-size:28px!important}
+}
