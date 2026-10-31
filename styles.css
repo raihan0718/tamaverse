@@ -537,3 +537,12 @@ body.battle-fullscreen .arena-vs{top:43%;width:48px;height:48px;font-size:14px}
 .battle-log{font-size:10px;line-height:1.45;color:#78677e}
 .battle-log>div:nth-last-child(-n+2){display:block}
 @media(max-height:700px){body.battle-fullscreen .online-battle-page{gap:7px;padding-top:8px}body.battle-fullscreen .battle-scene{min-height:430px;max-height:calc(100dvh - 145px)}.battle-log-panel{max-height:72px}.battle-action-btn{min-height:42px}}
+
+
+/* Battle action floating HP indicators */
+.battle-floating-number{position:absolute;z-index:12;top:31%;left:50%;font:900 clamp(22px,6vw,32px) 'Space Grotesk',sans-serif;letter-spacing:.5px;text-shadow:0 2px 5px #fff,0 3px 12px #35243b55;pointer-events:none;animation:battleHpFloat 1.35s ease-out forwards}
+.battle-floating-number.damage{color:#e54865}
+.battle-floating-number.heal{color:#25a96a}
+.battle-player .battle-floating-number{left:67%}
+.battle-enemy .battle-floating-number{left:24%}
+@keyframes battleHpFloat{0%{opacity:0;transform:translate(-50%,18px) scale(.65)}18%{opacity:1;transform:translate(-50%,0) scale(1.15)}72%{opacity:1;transform:translate(-50%,-28px) scale(1)}100%{opacity:0;transform:translate(-50%,-48px) scale(.95)}}
