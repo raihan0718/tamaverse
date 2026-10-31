@@ -721,7 +721,7 @@ body[data-theme="dark"].battle-fullscreen .battle-hp-card{
   z-index:1;
   width:min(100%,560px);
   height:auto;
-  aspect-ratio:714/768;
+  aspect-ratio:684/768;
   object-fit:contain;
   left:50%;
   top:50%;
