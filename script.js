@@ -333,7 +333,7 @@ function profilePage(){const p=activePet();return `<section class="page"><div cl
     📋 Salin User ID
   </button>
 </div>
-<div class="profile-stats"><div class="profile-stat"><strong>Lv. ${state.player.level}</strong><span>LEVEL PEMAIN</span></div><div class="profile-stat"><strong>${state.player.rating}</strong><span>RATING</span></div><div class="profile-stat"><strong>${state.player.wins}/${state.player.losses}/${state.player.draws}</strong><span>W/L/D</span></div><div class="profile-stat"><strong>${state.pets.length}/12</strong><span>KOLEKSI</span></div><div class="profile-stat"><strong>${state.player.streak} hari</strong><span>LOGIN STREAK</span></div><div class="profile-stat"><strong>${state.player.xp}/${state.player.level*100}</strong><span>PLAYER XP</span></div></div><button class="button secondary full" style="margin-top:13px" data-action="rename-player">✏️ Ubah nama</button></div><div class="section-heading"><h2>🎒 Inventori</h2></div><div class="card"><div class="rank-row"><span>🍓</span><span>Food<br><small class="muted-label">Digunakan untuk mengurangi Hunger</small></span><b>${state.items.food||0}</b></div><div class="rank-row"><span>🧃</span><span>Item battle<br><small class="muted-label">Memulihkan HP saat battle</small></span><b>${state.items.snack}</b></div><div class="rank-row"><span>⚡</span><span>Ramuan energi<br><small class="muted-label">Pulihkan energi pet +30</small></span><b>${state.items.energy}</b></div><div class="rank-row"><span>🏋️</span><span>Buku latihan<br><small class="muted-label">Latihan ekstra untuk pet</small></span><b>${state.items.training}</b></div><div class="rank-row"><span>🧩</span><span>Fragmen spesies<br><small class="muted-label">Duplikat dari gacha</small></span><b>${Object.values(state.items.fragments).reduce((a,b)=>a+b,0)||0}</b></div><button class="button secondary full" data-action="shop">Buka toko item</button></div><div class="section-heading"><h2>🎯 Quest harian</h2></div>${questList()}<div class="notice">☁️ Progres game disimpan di perangkat ini dan disinkronkan ke akun TAMAVERSE saat koneksi tersedia.</div><button class="button danger full" data-action="reset">Reset semua data</button></section>`;}
+<div class="profile-stats"><div class="profile-stat"><strong>Lv. ${state.player.level}</strong><span>LEVEL PEMAIN</span></div><div class="profile-stat"><strong>${state.player.rating}</strong><span>RATING</span></div><div class="profile-stat"><strong>${state.player.wins}/${state.player.losses}/${state.player.draws}</strong><span>W/L/D</span></div><div class="profile-stat"><strong>${state.pets.length}/12</strong><span>KOLEKSI</span></div><div class="profile-stat"><strong>${state.player.streak} hari</strong><span>LOGIN STREAK</span></div><div class="profile-stat"><strong>${state.player.xp}/${state.player.level*100}</strong><span>PLAYER XP</span></div></div><button class="button secondary full" style="margin-top:13px" data-action="rename-player">✏️ Ubah nama</button></div><div class="section-heading"><h2>🎒 Inventori</h2></div><div class="card"><div class="rank-row"><span>🍓</span><span>Food<br><small class="muted-label">Digunakan untuk mengurangi Hunger</small></span><b>${state.items.food||0}</b></div><div class="rank-row"><span>🧃</span><span>Item battle<br><small class="muted-label">Memulihkan HP saat battle</small></span><b>${state.items.snack}</b></div><div class="rank-row"><span>⚡</span><span>Ramuan energi<br><small class="muted-label">Pulihkan energi pet +30</small></span><b>${state.items.energy}</b><button class="button secondary" data-action="care" data-care="energy" ${!p||!state.items.energy||p.energy>=100||petSleeping(p)?'disabled':''}>Gunakan</button></div><div class="rank-row"><span>🏋️</span><span>Buku latihan<br><small class="muted-label">Latihan ekstra untuk pet</small></span><b>${state.items.training}</b></div><div class="rank-row"><span>🧩</span><span>Fragmen spesies<br><small class="muted-label">Duplikat dari gacha</small></span><b>${Object.values(state.items.fragments).reduce((a,b)=>a+b,0)||0}</b></div><button class="button secondary full" data-action="shop">Buka toko item</button></div><div class="section-heading"><h2>🎯 Quest harian</h2></div>${questList()}<div class="notice">☁️ Progres game disimpan di perangkat ini dan disinkronkan ke akun TAMAVERSE saat koneksi tersedia.</div><button class="button danger full" data-action="reset">Reset semua data</button></section>`;}
 const dailyRewards=[
   {icon:'🪙',label:'50 koin',type:'coins',amount:50},
   {icon:'🍓',label:'2 camilan',type:'snack',amount:2},
@@ -410,7 +410,7 @@ function playerXP(amount){state.player.xp+=amount;while(state.player.xp>=state.p
 function doCare(kind){
   const p=activePet();if(!p){showToast('Tetaskan pet lebih dulu!');return;}
   if(kind==='sleep'&&petSleeping(p)){
-    p.sleeping=false;p.sleepStartedAt=0;save();render();showToast(`${p.name} sudah bangun. Pemulihan energi dihentikan.`);return;
+    const elapsed=Math.max(0,Date.now()-p.sleepStartedAt);p.energy=clamp(p.energy+(elapsed/900000)*100,0,100);p.sleeping=false;p.sleepStartedAt=0;p.careUpdatedAt=Date.now();save();render();showToast(`${p.name} sudah bangun. Pemulihan energi dihentikan.`);return;
   }
   if(petActivityBlocked(p))return;
   if(kind==='energy'){if(state.items.energy<1){showToast('Ramuan energi habis.');return;}if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}state.items.energy--;p.energy=clamp(p.energy+30,0,100);save();render();showToast('Ramuan energi digunakan! Energy +30.');return;}
@@ -1474,6 +1474,7 @@ async function onlineUpdatePet() {
 
 async function onlineStartMatch() {
   try {
+    const pet=activePet();if(!pet){showToast('Kamu belum punya pet!');return;}if(petSleeping(pet)){showToast(`${pet.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(pet.happiness<20){showToast(battleMoodMessage(pet));return;}if(pet.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
     const roomId = onlineRoom?.id || onlineRoom?.room_id;
     if (!roomId) throw new Error('Room tidak ditemukan.');
@@ -1507,6 +1508,7 @@ async function onlineStartMatch() {
 
 async function onlineRandomMatch() {
   try {
+    const pet=activePet();if(!pet){showToast('Kamu belum punya pet!');return;}if(petSleeping(pet)){showToast(`${pet.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(pet.happiness<20){showToast(battleMoodMessage(pet));return;}if(pet.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}
     await onlineAuth();
     await syncOnlinePetBeforeRoom();
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
@@ -1544,6 +1546,7 @@ async function onlineRandomMatch() {
 
 async function onlineCreateRoom() {
   try {
+    const pet=activePet();if(!pet){showToast('Kamu belum punya pet!');return;}if(petSleeping(pet)){showToast(`${pet.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(pet.happiness<20){showToast(battleMoodMessage(pet));return;}if(pet.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}
     await onlineAuth();
     await syncOnlinePetBeforeRoom();
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
