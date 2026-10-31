@@ -2357,3 +2357,106 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   transform:none!important;
   animation:none!important;
 }
+
+
+/* Smooth companion motion: isolated Home sprites keep their calibrated position */
+.home-page .pet-stage.pet-action-idle .stage-creature-clean{
+  animation:cleanPetIdle 6.8s cubic-bezier(.37,0,.23,1) infinite!important;
+  transform-origin:50% 82%!important;
+  will-change:transform;
+}
+.home-page .pet-stage.pet-action-eat .stage-creature-clean{animation:cleanPetEat .72s cubic-bezier(.34,1.4,.64,1) 3!important}
+.home-page .pet-stage.pet-action-play .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet .stage-creature-clean{animation:cleanPetPlay .9s cubic-bezier(.34,1.35,.64,1) 2!important}
+.home-page .pet-stage.pet-action-bath .stage-creature-clean{animation:cleanPetBath .85s cubic-bezier(.42,0,.24,1) 3!important}
+.home-page .pet-stage.pet-action-sleep .stage-creature-clean{animation:cleanPetSleep 2.8s cubic-bezier(.37,0,.23,1) 1!important}
+.home-page .pet-stage.pet-action-train .stage-creature-clean{animation:cleanPetTrain .78s cubic-bezier(.34,1.3,.64,1) 3!important}
+@keyframes cleanPetIdle{
+  0%,100%{transform:translateY(0) rotate(-.25deg) scale(1)}
+  28%{transform:translateY(-2px) rotate(.15deg) scale(1.008)}
+  55%{transform:translateY(-4px) rotate(.3deg) scale(1.016)}
+  78%{transform:translateY(-1px) rotate(-.1deg) scale(1.006)}
+}
+@keyframes cleanPetEat{
+  0%,100%{transform:translateY(0) rotate(0) scale(1)}
+  32%{transform:translateY(3px) rotate(-5deg) scale(1.025)}
+  68%{transform:translateY(-1px) rotate(4deg) scale(.99)}
+}
+@keyframes cleanPetPlay{
+  0%,100%{transform:translateY(0) rotate(0) scale(1)}
+  35%{transform:translateY(-5px) rotate(-5deg) scale(1.035)}
+  70%{transform:translateY(-10px) rotate(6deg) scale(1.045)}
+}
+@keyframes cleanPetBath{
+  0%,100%{transform:translateY(0) rotate(0)}
+  28%{transform:translateY(-2px) rotate(-4deg)}
+  72%{transform:translateY(-2px) rotate(4deg)}
+}
+@keyframes cleanPetSleep{
+  0%,100%{transform:translateY(0) rotate(0) scale(1)}
+  45%,65%{transform:translateY(2px) rotate(-4deg) scale(.985)}
+}
+@keyframes cleanPetTrain{
+  0%,100%{transform:translateY(0) rotate(0) scale(1)}
+  35%{transform:translateY(-5px) rotate(-5deg) scale(1.035)}
+  70%{transform:translateY(0) rotate(5deg) scale(1.015)}
+}
+
+/* Smooth out care actions for every Home pet */
+.pet-action-eat .stage-pet{animation-duration:.62s!important;animation-timing-function:cubic-bezier(.34,1.25,.64,1)!important}
+.pet-action-play .stage-pet,.pet-action-greet .stage-pet{animation-duration:.78s!important;animation-timing-function:cubic-bezier(.34,1.25,.64,1)!important}
+.pet-action-bath .stage-pet{animation-duration:.82s!important;animation-timing-function:cubic-bezier(.42,0,.24,1)!important}
+.pet-action-sleep .stage-pet{animation-duration:2.8s!important;animation-timing-function:cubic-bezier(.37,0,.23,1)!important}
+.pet-action-train .stage-pet{animation-duration:.72s!important;animation-timing-function:cubic-bezier(.34,1.2,.64,1)!important}
+.pet-action-bath:before,.pet-action-bath:after{animation-duration:1.45s!important;animation-timing-function:cubic-bezier(.22,.61,.36,1)!important}
+
+/* Battle motion: longer eased anticipation, impact and recovery */
+.battle-scene .battle-sprite{transform-origin:50% 85%;will-change:transform;backface-visibility:hidden}
+.battle-fx-attack .battle-player .battle-sprite{animation:arenaLungeSmooth .78s cubic-bezier(.22,.72,.28,1) 1!important}
+.battle-fx-attack .battle-enemy .battle-sprite{animation:arenaHitSmooth .72s cubic-bezier(.22,.72,.28,1) 1!important}
+.battle-fx-skill .battle-player .battle-sprite{animation:arenaSkillSmooth .95s cubic-bezier(.22,.72,.28,1) 1!important}
+.battle-fx-skill .battle-enemy .battle-sprite{animation:arenaHitSmooth .82s cubic-bezier(.22,.72,.28,1) 1!important}
+.battle-fx-defend .battle-player .battle-sprite{animation:arenaGuardSmooth .8s cubic-bezier(.22,.72,.28,1) 1!important}
+.battle-fx-item .battle-player .battle-sprite{animation:arenaHealSmooth .95s cubic-bezier(.22,.72,.28,1) 1!important}
+.battle-fx-attack .effect-enemy,.battle-fx-skill .effect-enemy,
+.battle-fx-attack .impact-enemy,.battle-fx-skill .impact-enemy{animation-duration:.9s!important;animation-timing-function:cubic-bezier(.22,.72,.28,1)!important}
+.battle-fx-defend .battle-player:after,.battle-fx-item .battle-player:after{animation-duration:.95s!important;animation-timing-function:cubic-bezier(.22,.72,.28,1)!important}
+.battle-floating-number{animation:floatBattleNumber 1.05s cubic-bezier(.2,.7,.25,1) both!important}
+@keyframes arenaLungeSmooth{
+  0%,100%{transform:translateX(-50%) scale(1)}
+  24%{transform:translateX(-50%) translateY(3px) scale(.97)}
+  58%{transform:translateX(8%) translateY(-5px) scale(1.08)}
+  78%{transform:translateX(-54%) translateY(0) scale(1.015)}
+}
+@keyframes arenaHitSmooth{
+  0%,100%{transform:translateX(-50%) translateY(0) rotate(0) scale(1)}
+  22%{transform:translateX(-50%) translateY(-2px) scale(1.025)}
+  48%{transform:translateX(-42%) translateY(2px) rotate(5deg) scale(.96)}
+  72%{transform:translateX(-51%) rotate(-2deg) scale(1.01)}
+}
+@keyframes arenaSkillSmooth{
+  0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+  28%{transform:translateX(-50%) translateY(-8px) scale(1.04)}
+  58%{transform:translateX(-50%) translateY(-17px) scale(1.1)}
+  82%{transform:translateX(-50%) translateY(2px) scale(.99)}
+}
+@keyframes arenaGuardSmooth{
+  0%,100%{transform:translateX(-50%) scale(1)}
+  28%,68%{transform:translateX(-50%) translateY(-3px) scale(.96)}
+  48%{transform:translateX(-50%) translateY(-1px) scale(1.015)}
+}
+@keyframes arenaHealSmooth{
+  0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+  35%{transform:translateX(-50%) translateY(-7px) scale(1.045)}
+  70%{transform:translateX(-50%) translateY(0) scale(1.015)}
+}
+@keyframes floatBattleNumber{
+  0%{opacity:0;transform:translateY(12px) scale(.82)}
+  18%{opacity:1;transform:translateY(0) scale(1.08)}
+  78%{opacity:1;transform:translateY(-22px) scale(1)}
+  100%{opacity:0;transform:translateY(-34px) scale(.96)}
+}
+@media(prefers-reduced-motion:reduce){
+  .home-page .pet-stage .stage-creature-clean,
+  .battle-scene .battle-sprite,.battle-floating-number{animation:none!important}
+}
