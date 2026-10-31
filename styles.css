@@ -612,3 +612,20 @@ body[data-theme="dark"].battle-fullscreen .battle-exit{background:#352a3a!import
 /* Slightly larger battle pets; VS badge removed */
 body.battle-fullscreen .battle-sprite .pet-image{width:clamp(125px,34vw,190px)!important;height:clamp(125px,34vw,190px)!important}
 body.battle-fullscreen .arena-vs{display:none!important}
+
+
+/* Final battle readability and sprite sizing override */
+body.battle-fullscreen .battle-sprite .pet-image{width:clamp(155px,42vw,230px)!important;height:clamp(155px,42vw,230px)!important;max-width:none!important;max-height:none!important;object-fit:contain!important}
+body.battle-fullscreen .battle-turn-overlay{top:104px!important;z-index:9!important;width:min(42%,170px)!important;min-width:118px!important;padding:8px 7px!important}
+body.battle-fullscreen .battle-side{overflow:visible!important}
+body.battle-fullscreen .battle-floating-number{top:38%!important;z-index:20!important;font-size:clamp(30px,8vw,44px)!important;font-weight:1000!important;white-space:nowrap!important;text-shadow:0 2px 4px #fff,0 4px 12px #20132999!important}
+body.battle-fullscreen .battle-player .battle-floating-number{left:76%!important}
+body.battle-fullscreen .battle-enemy .battle-floating-number{left:24%!important}
+body[data-theme="dark"].battle-fullscreen .battle-floating-number.damage{color:#ff526f!important;text-shadow:0 2px 4px #1a101f,0 0 10px #ff526f88!important}
+body[data-theme="dark"].battle-fullscreen .battle-floating-number.heal{color:#50e69a!important;text-shadow:0 2px 4px #1a101f,0 0 10px #50e69a88!important}
+body[data-theme="dark"].battle-fullscreen .battle-turn-overlay{background:#30243aee!important;color:#fff!important;border-color:#ffffff55!important}
+body[data-theme="dark"].battle-fullscreen .battle-turn-overlay span{color:#f5c5e8!important}
+@media(max-height:740px){
+ body.battle-fullscreen .battle-sprite .pet-image{width:clamp(145px,38vw,205px)!important;height:clamp(145px,38vw,205px)!important}
+ body.battle-fullscreen .battle-turn-overlay{top:98px!important}
+}
