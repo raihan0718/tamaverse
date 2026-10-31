@@ -329,42 +329,42 @@ body:not([data-theme="dark"]) #supabaseUserId {
 }
 
 /* Mirror selected player pets in battle */
-.battle-player .battle-sprite img[src*="robo-bunny.png"],
-.battle-player .battle-sprite img[src*="dragon.png"],
-.battle-player .battle-sprite img[src*="panda.png"],
-.battle-player .battle-sprite img[src*="golden-fox.png"],
+.battle-player .battle-sprite img[src*="robo-bunny.webp"],
+.battle-player .battle-sprite img[src*="dragon.webp"],
+.battle-player .battle-sprite img[src*="panda.webp"],
+.battle-player .battle-sprite img[src*="golden-fox.webp"],
 /* Raw PNG orientation: these seven assets face right by default.
    On the left they stay as-is; on the right they are mirrored inward. */
-.battle-player .battle-sprite .pet-image[src*="slime.png"],
-.battle-player .battle-sprite .pet-image[src*="ice-pup.png"],
-.battle-player .battle-sprite .pet-image[src*="sprout-dino.png"],
-.battle-player .battle-sprite .pet-image[src*="glow-frog.png"],
-.battle-player .battle-sprite .pet-image[src*="fire-cat.png"],
-.battle-player .battle-sprite .pet-image[src*="wizard.png"],
-.battle-player .battle-sprite .pet-image[src*="axolotl.png"] {
+.battle-player .battle-sprite .pet-image[src*="slime.webp"],
+.battle-player .battle-sprite .pet-image[src*="ice-pup.webp"],
+.battle-player .battle-sprite .pet-image[src*="sprout-dino.webp"],
+.battle-player .battle-sprite .pet-image[src*="glow-frog.webp"],
+.battle-player .battle-sprite .pet-image[src*="fire-cat.webp"],
+.battle-player .battle-sprite .pet-image[src*="wizard.webp"],
+.battle-player .battle-sprite .pet-image[src*="axolotl.webp"] {
   transform: none !important;
 }
-.battle-player .battle-sprite .pet-image[src*="golden-fox.png"],
-.battle-player .battle-sprite .pet-image[src*="robo-bunny.png"],
-.battle-player .battle-sprite .pet-image[src*="panda.png"],
-.battle-player .battle-sprite .pet-image[src*="phoenix.png"],
-.battle-player .battle-sprite .pet-image[src*="dragon.png"] {
+.battle-player .battle-sprite .pet-image[src*="golden-fox.webp"],
+.battle-player .battle-sprite .pet-image[src*="robo-bunny.webp"],
+.battle-player .battle-sprite .pet-image[src*="panda.webp"],
+.battle-player .battle-sprite .pet-image[src*="phoenix.webp"],
+.battle-player .battle-sprite .pet-image[src*="dragon.webp"] {
   transform: scaleX(-1) !important;
 }
-.battle-enemy .battle-sprite .pet-image[src*="slime.png"],
-.battle-enemy .battle-sprite .pet-image[src*="ice-pup.png"],
-.battle-enemy .battle-sprite .pet-image[src*="sprout-dino.png"],
-.battle-enemy .battle-sprite .pet-image[src*="glow-frog.png"],
-.battle-enemy .battle-sprite .pet-image[src*="fire-cat.png"],
-.battle-enemy .battle-sprite .pet-image[src*="wizard.png"],
-.battle-enemy .battle-sprite .pet-image[src*="axolotl.png"] {
+.battle-enemy .battle-sprite .pet-image[src*="slime.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="ice-pup.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="sprout-dino.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="glow-frog.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="fire-cat.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="wizard.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="axolotl.webp"] {
   transform: scaleX(-1) !important;
 }
-.battle-enemy .battle-sprite .pet-image[src*="golden-fox.png"],
-.battle-enemy .battle-sprite .pet-image[src*="robo-bunny.png"],
-.battle-enemy .battle-sprite .pet-image[src*="panda.png"],
-.battle-enemy .battle-sprite .pet-image[src*="phoenix.png"],
-.battle-enemy .battle-sprite .pet-image[src*="dragon.png"] {
+.battle-enemy .battle-sprite .pet-image[src*="golden-fox.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="robo-bunny.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="panda.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="phoenix.webp"],
+.battle-enemy .battle-sprite .pet-image[src*="dragon.webp"] {
   transform: none !important;
 }
 
