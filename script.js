@@ -120,6 +120,7 @@ function closeModal(){clearIntroSequence();document.getElementById('modalBackdro
 function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('gemBalance').textContent=state?state.player.gems:0;}
 function applyTheme(){let dark=false;try{dark=localStorage.getItem('tamaverse_theme')==='dark';}catch(e){}document.body.dataset.theme=dark?'dark':'light';const button=document.querySelector('.theme-toggle');if(button){button.textContent=dark?'☀':'☾';button.setAttribute('aria-label',dark?'Gunakan tema terang':'Gunakan tema gelap');}}
 function render(){
+  document.body.classList.toggle('battle-fullscreen', Boolean(page === 'battle' && onlineRoom && ['playing','finished'].includes(onlineRoom.status)));
   updateWallet(); document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   const root=document.getElementById('mainContent');
   if(!state){root.innerHTML=welcomePage();return;}
@@ -1257,11 +1258,16 @@ function onlineBattleView() {
   const skillReadyAt = bs[skillReadyKey] ? Date.parse(bs[skillReadyKey]) : 0;
   const skillCooldown = Math.max(0, Math.ceil((skillReadyAt - Date.now()) / 1000));
   if (onlineSkillCooldownTicker) clearTimeout(onlineSkillCooldownTicker);
-  if (skillCooldown > 0 && myTurn && !finished) onlineSkillCooldownTicker = setTimeout(() => { if (onlineRoom?.id === room.id && page === 'battle') render(); }, 1000);
+  if (skillCooldown > 0 && myTurn && !finished) onlineSkillCooldownTicker = setTimeout(() => {
+    if (onlineRoom?.id === room.id && page === 'battle') render();
+  }, 1000);
   return `
-    <section class="page online-battle-page">
-      <div class="eyebrow">TAMAVERSE ONLINE ARENA · ${room.room_type === 'public' ? 'RANDOM MATCH' : 'PLAY WITH FRIENDS'}</div>
-      <h1 class="page-title">Battle Arena</h1>
+    <section class="page online-battle-page battle-mode-screen">
+      <div class="battle-mode-top">
+        <button class="battle-exit" data-action="online-leave" type="button" aria-label="Leave battle">←</button>
+        <div><div class="eyebrow">TAMAVERSE ARENA</div><h1>Battle Match</h1></div>
+        <div class="battle-turn-chip">TURN ${turn}</div>
+      </div>
       <div class="battle-scene battle-fx-${esc(window.onlineBattleFx || 'idle')}" aria-label="Online battle arena">
         <div class="arena-sky">
           <span class="arena-moon">✦</span>
@@ -1270,7 +1276,7 @@ function onlineBattleView() {
           <span class="arena-light light-one"></span>
           <span class="arena-light light-two"></span>
         </div>
-        <div class="arena-banner"><span>✨ TAMAVERSE ARENA ✨</span><b>TURN ${turn}</b></div>
+        <div class="arena-banner"><span>✨ TAMAVERSE ARENA ✨</span><b>${finished ? 'FINISH' : myTurn ? 'YOUR TURN' : "OPPONENT'S TURN"}</b></div>
         <div class="arena-platform platform-player"></div>
         <div class="arena-platform platform-enemy"></div>
         <div class="battle-side battle-player">
@@ -1279,12 +1285,8 @@ function onlineBattleView() {
             <span>${esc(mySpecies.element || mine?.element || 'Unknown')} · Lv.${Number(mine?.level || 1)}</span>
           </div>
           <div class="battle-sprite">${petImage(mine?.species, 'battle-pet-image')}</div>
-          <span class="battle-effect effect-player"></span>
-          <span class="battle-impact impact-player"></span>
-          <div class="battle-hp-card">
-            <div class="hp-label"><b>YOUR PET</b><span>${myHp} / ${myMax} HP</span></div>
-            <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div>
-          </div>
+          <span class="battle-effect effect-player"></span><span class="battle-impact impact-player"></span>
+          <div class="battle-hp-card"><div class="hp-label"><b>YOUR PET</b><span>${myHp} / ${myMax} HP</span></div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div></div>
         </div>
         <div class="arena-vs">VS</div>
         <div class="battle-side battle-enemy">
@@ -1293,31 +1295,22 @@ function onlineBattleView() {
             <span>${esc(rivalSpecies.element || rival?.element || 'Unknown')} · Lv.${Number(rival?.level || 1)}</span>
           </div>
           <div class="battle-sprite">${petImage(rival?.species, 'battle-pet-image')}</div>
-          <span class="battle-effect effect-enemy"></span>
-          <span class="battle-impact impact-enemy"></span>
-          <div class="battle-hp-card">
-            <div class="hp-label"><b>OPPONENT</b><span>${rivalHp} / ${rivalMax} HP</span></div>
-            <div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div>
-          </div>
+          <span class="battle-effect effect-enemy"></span><span class="battle-impact impact-enemy"></span>
+          <div class="battle-hp-card"><div class="hp-label"><b>OPPONENT</b><span>${rivalHp} / ${rivalMax} HP</span></div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div></div>
+        </div>
+        <div class="battle-arena-controls">
+          <div class="battle-action-status">${finished ? (bs.result === 'draw' ? 'MATCH DRAW' : bs.winner_id === window.TAMAVERSE_USER_ID ? '🏆 YOU WIN!' : 'MATCH OVER') : myTurn ? '✨ YOUR TURN — CHOOSE ACTION' : 'WAITING FOR OPPONENT...'}</div>
+          ${finished ? '<button class="battle-action-btn battle-action-main" data-action="online-result-dismiss">Back to Battle</button>' : `
+            <div class="battle-action-grid">
+              <button class="battle-action-btn battle-action-main" data-action="online-battle-action" data-move="attack" ${myTurn ? '' : 'disabled'}><span>⚔️</span>Attack</button>
+              <button class="battle-action-btn battle-action-skill" data-action="online-battle-action" data-move="skill" ${myTurn && skillCooldown === 0 ? '' : 'disabled'}><span>✨</span>Skill${skillCooldown > 0 ? ` · ${skillCooldown}s` : ''}</button>
+              <button class="battle-action-btn battle-action-defend" data-action="online-battle-action" data-move="defend" ${myTurn ? '' : 'disabled'}><span>🛡️</span>Defend</button>
+              <button class="battle-action-btn battle-action-item" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}><span>🍓</span>Item · ${snackCount}</button>
+            </div>
+          `}
         </div>
       </div>
-      <div class="card online-turn-card" style="text-align:center;margin-top:4px">
-        <div class="eyebrow">${finished ? 'MATCH COMPLETE' : myTurn ? 'YOUR TURN' : "OPPONENT'S TURN"}</div>
-        <h2 style="margin:6px 0">${finished ? 'Battle selesai' : myTurn ? 'Giliranmu!' : 'Menunggu lawan...'}</h2>
-        <p class="subtle" style="margin:0">${finished ? (bs.result === 'draw' ? 'Pertandingan berakhir seri.' : bs.winner_id === window.TAMAVERSE_USER_ID ? 'Kamu memenangkan pertandingan!' : 'Lawan memenangkan pertandingan.') : myTurn ? 'Pilih aksi untuk pet-mu.' : 'Aksi lawan akan muncul otomatis di arena.'}</p>
-      </div>
-      ${finished ? `<button class="button full" style="margin-top:14px" data-action="online-result-dismiss">Kembali ke Battle</button>` : `
-        <div class="section-heading"><h2>Aksimu</h2></div>
-        <div class="button-row">
-          <button class="button" data-action="online-battle-action" data-move="attack" ${myTurn ? '' : 'disabled'}>⚔️ Attack</button>
-          <button class="button soft" data-action="online-battle-action" data-move="skill" ${myTurn && skillCooldown === 0 ? '' : 'disabled'}>✨ Skill${skillCooldown > 0 ? ` (${skillCooldown}s)` : ''}</button>
-          <button class="button secondary" data-action="online-battle-action" data-move="defend" ${myTurn ? '' : 'disabled'}>🛡️ Defend</button>
-          <button class="button secondary" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}>🍓 Item (${snackCount})</button>
-        </div>
-        <p class="muted-label">Skill memiliki cooldown 5 detik · Damage dan giliran dihitung server.</p>
-      `}
-      <div class="section-heading"><h2>Battle log</h2><span class="pill">Turn ${turn}</span></div>
-      <div class="battle-log">${log.slice(-8).map(item => `<div>• ${esc(item.text || '')}</div>`).join('') || '<div>Battle dimulai. Pilih aksi pertamamu.</div>'}</div>
+      <div class="battle-log-panel"><div class="battle-log-heading">BATTLE LOG <span>TURN ${turn}</span></div><div class="battle-log">${log.slice(-4).map(item => `<div>• ${esc(item.text || '')}</div>`).join('') || '<div>Battle dimulai. Pilih aksi pertamamu.</div>'}</div></div>
     </section>
   `;
 }
