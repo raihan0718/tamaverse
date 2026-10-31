@@ -8,7 +8,7 @@ create table if not exists public.premium_inventory (
   owned_frames text[] not null default array['common']::text[],
   updated_at timestamptz not null default now(),
   constraint premium_frames_valid check (
-    owned_frames <@ array['common','legendary','celestial']::text[]
+    owned_frames <@ array['common','uncommon','rare','legendary','celestial']::text[]
   )
 );
 
