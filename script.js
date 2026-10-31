@@ -1288,7 +1288,7 @@ function onlineBattleView() {
           <span class="battle-effect effect-player"></span><span class="battle-impact impact-player"></span>${myFloat ? `<span class="battle-floating-number ${myFloat.kind}">${myFloat.text}</span>` : ""}
           <div class="battle-hp-card"><div class="hp-value">${myHp} / ${myMax} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(mine?.name || mine?.display_name || "Your Pet")}</b><span>Lv.${Number(mine?.level || 1)}</span></div></div>
         </div>
-        <div class="arena-vs">VS</div>
+        
         <div class="battle-side battle-enemy">
           <div class="battle-nameplate">
             <b>${esc(rival?.name || rival?.display_name || 'Opponent Pet')}</b>
