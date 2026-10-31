@@ -1625,3 +1625,8 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
   border-color:rgba(255,255,255,.22)!important;
   color:#fff4fb!important;
 }
+
+
+/* Set companion pet vertical position */
+.home-page .stage-pet{top:52%!important}
+@media(max-width:380px){.home-page .stage-pet{top:52%!important}}
