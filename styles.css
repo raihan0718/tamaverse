@@ -2294,3 +2294,66 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   margin:0!important;
   transform:none!important;
 }
+
+/* Home sprite isolation: remove generic creature skin from the four calibrated pets */
+.home-page .pet-stage > .stage-pet.pet-species-fluffin,
+.home-page .pet-stage > .stage-pet.pet-species-mossling,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale{
+  position:absolute!important;
+  left:51.5%!important;
+  top:50%!important;
+  width:49.3%!important;
+  height:32.045%!important;
+  margin:0!important;
+  transform:translate(-50%,-50%)!important;
+  animation:none!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  position:absolute!important;
+  inset:0!important;
+  display:grid!important;
+  place-items:center!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:none!important;
+  transform:none!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-fluffin > .stage-creature-clean::before,
+.home-page .pet-stage > .stage-pet.pet-species-fluffin > .stage-creature-clean::after,
+.home-page .pet-stage > .stage-pet.pet-species-mossling > .stage-creature-clean::before,
+.home-page .pet-stage > .stage-pet.pet-species-mossling > .stage-creature-clean::after,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit > .stage-creature-clean::before,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit > .stage-creature-clean::after,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean::before,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean::after{
+  content:none!important;
+  display:none!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-fluffin .stage-pet-image,
+.home-page .pet-stage > .stage-pet.pet-species-mossling .stage-pet-image,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit .stage-pet-image,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale .stage-pet-image{
+  position:static!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+  animation:none!important;
+}
