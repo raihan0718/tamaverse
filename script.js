@@ -533,10 +533,10 @@ function homePage(){
       <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.png" alt="" aria-hidden="true"><div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div><div class="action-bubble">${petActionLabel(petAnimation)}</div>
       <div class="tama-care-controls" aria-label="Pet interactions">
         <button class="tama-care-button" data-action="care" data-care="feed" aria-label="Feed"><span>🍓</span><small>FEED</small></button>
-        <button class="tama-care-button" data-action="care" data-care="play" aria-label="Play"><span>♡</span><small>PLAY</small></button>
+        <button class="tama-care-button" data-action="care" data-care="play" aria-label="Play"><span>💖</span><small>PLAY</small></button>
         <button class="tama-care-button" data-action="care" data-care="clean" aria-label="Bath"><span>🫧</span><small>BATH</small></button>
         <button class="tama-care-button" data-action="care" data-care="sleep" aria-label="Sleep"><span>☾</span><small>SLEEP</small></button>
-        <button class="tama-care-button" data-action="care" data-care="train" aria-label="Train"><span>✦</span><small>TRAIN</small></button>
+        <button class="tama-care-button" data-action="care" data-care="train" aria-label="Train"><span>🏋️</span><small>TRAIN</small></button>
       </div>
       </section>
       <div class="companion-panel"><div class="companion-meta"><div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2>${esc(p.name)}</h2></div><span class="pill">Lv. ${p.level}</span></div>
