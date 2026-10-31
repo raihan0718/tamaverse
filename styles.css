@@ -572,3 +572,38 @@ body.battle-fullscreen .battle-log-panel{max-height:90px!important}
  body.battle-fullscreen .battle-side{height:355px!important}
  body.battle-fullscreen .battle-sprite{top:135px!important}
 }
+
+
+/* Theme-aware battle arena typography and turn indicator */
+body.battle-fullscreen .battle-side{top:38px!important}
+body.battle-fullscreen .battle-hp-card{top:0!important}
+body.battle-fullscreen .battle-sprite{top:155px!important}
+body.battle-fullscreen .battle-turn-overlay{position:absolute;z-index:7;top:17px;left:50%;transform:translateX(-50%);width:min(34%,150px);min-width:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;padding:7px 5px;border-radius:12px;background:#fffaf2eF;border:1px solid #ffffffd9;box-shadow:0 3px 12px #49344a18;color:#553b59}
+body.battle-fullscreen .battle-turn-overlay b{font:900 10px/1.15 'Space Grotesk',sans-serif;letter-spacing:.7px}
+body.battle-fullscreen .battle-turn-overlay span{font:700 9px 'Space Grotesk',sans-serif;letter-spacing:1px;color:#98648e}
+body.battle-fullscreen .battle-scene{background-color:#d9c5e8;background-image:linear-gradient(180deg,#a993d4 0%,#d8b9df 49%,#9acb86 50%,#69a879 100%);background-size:cover;background-position:center}
+body.battle-fullscreen .arena-sky{background:transparent!important}
+body.battle-fullscreen .arena-sky:after{background:linear-gradient(180deg,#b8d99c,#85bd84)!important}
+body.battle-fullscreen .battle-hp-card .hp-value{color:#49354f!important}
+body.battle-fullscreen .battle-pet-caption{color:#49354f!important;text-shadow:0 1px 3px #fff!important}
+body.battle-fullscreen .battle-pet-caption span{color:#765e7c!important}
+body.battle-fullscreen .battle-log-panel{background:#fffdfd;color:#49354f;border-color:#edddea}
+body.battle-fullscreen .battle-log-heading{color:#a06491}
+body.battle-fullscreen .battle-log{color:#78677e}
+body[data-theme="dark"].battle-fullscreen .battle-scene{background-color:#594766;background-image:linear-gradient(180deg,#594875 0%,#806486 49%,#647d59 50%,#3f7558 100%)}
+body[data-theme="dark"].battle-fullscreen .arena-sky{background:transparent!important}
+body[data-theme="dark"].battle-fullscreen .arena-sky:after{background:linear-gradient(180deg,#829b68,#57845f)!important}
+body[data-theme="dark"].battle-fullscreen .battle-turn-overlay{background:#f7eaf6f2;border-color:#ffffff55;color:#39253f;box-shadow:0 3px 14px #0004}
+body[data-theme="dark"].battle-fullscreen .battle-turn-overlay span{color:#8b527d}
+body[data-theme="dark"].battle-fullscreen .battle-hp-card .hp-value,
+body[data-theme="dark"].battle-fullscreen .battle-pet-caption{color:#fff8ff!important;text-shadow:0 1px 4px #211728!important}
+body[data-theme="dark"].battle-fullscreen .battle-pet-caption span{color:#f0d8ed!important}
+body[data-theme="dark"].battle-fullscreen .battle-hp-card .progress-track{background:#ffffff55!important}
+body[data-theme="dark"].battle-fullscreen .battle-log-panel{background:#2b2230!important;color:#fff7fc!important;border-color:#ffffff25!important}
+body[data-theme="dark"].battle-fullscreen .battle-log-heading{color:#f0b5d8!important}
+body[data-theme="dark"].battle-fullscreen .battle-log{color:#f0e3f1!important}
+body[data-theme="dark"].battle-fullscreen .battle-action-status{color:#f0c6e5!important}
+body[data-theme="dark"].battle-fullscreen .battle-mode-top,
+body[data-theme="dark"].battle-fullscreen .battle-mode-top h1{color:#fff7fc!important}
+body[data-theme="dark"].battle-fullscreen .battle-turn-chip,
+body[data-theme="dark"].battle-fullscreen .battle-exit{background:#352a3a!important;color:#ffe6f4!important;border-color:#ffffff30!important}
