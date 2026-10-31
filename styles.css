@@ -2035,3 +2035,50 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   .accessory-art .aura-ornament,
   .home-page .home-frame-aura .aura-ornament{animation:none!important}
 }
+
+
+/* Home ornaments are a dedicated overlay above the frame artwork */
+.home-page .pet-stage > .home-frame-ornaments{
+  position:absolute!important;
+  z-index:6!important;
+  display:block;
+  left:50%;
+  top:48%;
+  width:min(90%,470px);
+  aspect-ratio:684/768;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.home-page .pet-stage > .home-frame-ornaments .aura-ornament{
+  position:absolute;
+  left:0;
+  right:0;
+  width:100%;
+  display:none;
+  text-align:center;
+  font-style:normal;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+}
+.home-page .pet-stage > .home-frame-ornaments.aura-legendary .aura-ornament{
+  display:block;
+  color:#ffe0f5;
+  font-size:clamp(16px,4.6vw,23px);
+  letter-spacing:7px;
+  text-shadow:0 0 7px #ff78d0,0 0 16px #d68cff,0 0 24px #fff;
+  animation:frameSparkle 1.8s ease-in-out infinite;
+}
+.home-page .pet-stage > .home-frame-ornaments.aura-celestial .aura-ornament{
+  display:block;
+  color:#fff8d8;
+  font-size:clamp(17px,4.8vw,24px);
+  letter-spacing:6px;
+  text-shadow:0 0 8px #fff,0 0 17px #ff8bd7,0 0 25px #8bcfff;
+  animation:frameSparkle 1.35s ease-in-out infinite;
+}
+.home-page .pet-stage > .home-frame-ornaments .aura-ornament-top{top:3%}
+.home-page .pet-stage > .home-frame-ornaments .aura-ornament-bottom{bottom:3%}
+@media(prefers-reduced-motion:reduce){
+  .home-page .pet-stage > .home-frame-ornaments .aura-ornament{animation:none!important}
+}
