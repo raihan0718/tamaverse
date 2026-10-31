@@ -825,3 +825,16 @@ body[data-theme="dark"] .home-page .stage-stats>span small{color:#aec4d9}
 body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 @media(max-width:380px){.home-page .pet-stage{min-height:660px;padding:20px 13px 14px}.home-page .stage-caption{top:13%}.home-page .stage-pet{top:53%;width:42%;height:28%}.home-page .stage-bottom-note{top:72%;font-size:7px}.home-page .companion-panel{left:11px;right:11px;bottom:11px;padding:13px 12px}.home-page .stage-stats{gap:3px}.home-page .stage-stats>span{grid-template-columns:15px 1fr;padding:6px 3px}.home-page .stage-stats>span small{font-size:5.5px}}
 @media(prefers-reduced-motion:reduce){.home-page .stage-pet,.home-page .stage-spark{animation:none!important}}
+
+
+/* Compact companion details; status meters appear only once below the frame */
+.home-page .pet-stage{min-height:640px}
+.home-page .companion-panel{left:18px;right:18px;bottom:18px;padding:12px 15px 13px;border-radius:19px}
+.home-page .companion-panel-top{margin-bottom:5px;font-size:7px;letter-spacing:1.4px}
+.home-page .companion-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.home-page .companion-meta .eyebrow{font-size:7px;letter-spacing:1.1px}
+.home-page .companion-meta h2{font-size:21px;line-height:1.1;margin-top:2px}
+.home-page .companion-meta .pill{padding:6px 9px;font-size:9px}
+.home-page .companion-xp{display:flex;justify-content:space-between;align-items:center;margin:7px 0 5px;font-size:7px;letter-spacing:1.1px}
+.home-page .companion-panel .progress-track{height:5px}
+@media(max-width:380px){.home-page .pet-stage{min-height:620px}.home-page .companion-panel{left:14px;right:14px;bottom:14px;padding:11px 12px}.home-page .companion-meta h2{font-size:19px}}
