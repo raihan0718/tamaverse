@@ -77,7 +77,7 @@ body[data-theme="dark"] .player-card,body[data-theme="dark"] .companion-panel,bo
 .arena-banner{position:absolute;z-index:2;top:12px;left:50%;transform:translateX(-50%);width:calc(100% - 26px);display:flex;justify-content:space-between;gap:6px;padding:8px 11px;border:1px solid #ffffffa8;border-radius:13px;background:#fff8ffe0;color:#65517b;font-size:9px;font-weight:900;letter-spacing:1px;box-shadow:0 4px 10px #50396312}.arena-banner b{white-space:nowrap;color:#a25588}
 .arena-platform{position:absolute;z-index:-1;bottom:87px;width:40%;height:34px;border-radius:50%;background:#6e568522;border-bottom:5px solid #ffffff80;box-shadow:0 10px 12px #47355218}.platform-player{left:3%;transform:rotate(-5deg)}.platform-enemy{right:3%;transform:rotate(5deg)}
 .battle-side{position:absolute;z-index:1;top:77px;width:48%;height:285px;text-align:center}.battle-player{left:0}.battle-enemy{right:0}.battle-nameplate{position:absolute;top:0;left:4%;right:4%;display:flex;flex-direction:column;gap:3px;color:#45354d;text-shadow:0 1px 0 #fff9}.battle-nameplate b{font:700 13px 'Space Grotesk',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.battle-nameplate span{font-size:9px;font-weight:700;color:#765e7c}
-.battle-sprite{position:absolute;z-index:2;top:54px;left:50%;font-size:clamp(70px,21vw,102px);line-height:1;filter:drop-shadow(0 10px 5px #45344a38);transform:translateX(-50%);animation:arenaPetIdle 2.5s ease-in-out infinite;transform-origin:50% 90%}.battle-enemy .battle-sprite{animation-delay:.7s;transform:translateX(-50%)}.battle-enemy .battle-sprite .pet-image{transform:scaleX(-1);transform-origin:center}
+.battle-sprite{position:absolute;z-index:2;top:54px;left:50%;font-size:clamp(70px,21vw,102px);line-height:1;filter:drop-shadow(0 10px 5px #45344a38);transform:translateX(-50%);animation:arenaPetIdle 2.5s ease-in-out infinite;transform-origin:50% 90%}.battle-enemy .battle-sprite{animation-delay:.7s;transform:translateX(-50%)}.battle-enemy .battle-sprite .pet-image{transform-origin:center}
 .battle-hp-card{position:absolute;z-index:4;left:4%;right:4%;bottom:0;padding:8px 9px;border:1px solid #ffffffb8;border-radius:13px;background:#fff9ffeb;box-shadow:0 4px 10px #47355217;text-align:left}.hp-label{display:flex;justify-content:space-between;gap:4px;margin-bottom:5px;color:#574463;font-size:8px}.hp-label b{letter-spacing:.5px}.hp-label span{white-space:nowrap}.battle-hp-card .progress-track{height:7px;background:#eadfea}.battle-hp-card .progress-fill{background:linear-gradient(90deg,#78c98c,#a4d65e)}.battle-hp-card .enemy-hp{background:linear-gradient(90deg,#ed7396,#f6a663)}
 .arena-vs{position:absolute;z-index:3;left:50%;top:49%;transform:translate(-50%,-50%);display:grid;place-items:center;width:39px;height:39px;border:2px solid #fff;border-radius:50%;background:linear-gradient(145deg,#e98bb6,#9b7add);color:white;font:800 12px 'Space Grotesk',sans-serif;box-shadow:0 0 0 5px #fff5,0 5px 13px #5e386b3b}
 .battle-effect,.battle-impact{position:absolute;z-index:5;pointer-events:none;opacity:0}.effect-player{left:58%;top:34%;font-size:40px}.effect-enemy{left:50%;top:42%;font-size:38px}.battle-impact{left:50%;top:34%;transform:translate(-50%,-50%);font:900 15px 'Space Grotesk',sans-serif;color:#fff;text-shadow:0 2px 4px #78445c}
@@ -333,8 +333,39 @@ body:not([data-theme="dark"]) #supabaseUserId {
 .battle-player .battle-sprite img[src*="dragon.png"],
 .battle-player .battle-sprite img[src*="panda.png"],
 .battle-player .battle-sprite img[src*="golden-fox.png"],
-.battle-player .battle-sprite img[src*="phoenix.png"] {
+/* Raw PNG orientation: these seven assets face right by default.
+   On the left they stay as-is; on the right they are mirrored inward. */
+.battle-player .battle-sprite .pet-image[src*="slime.png"],
+.battle-player .battle-sprite .pet-image[src*="ice-pup.png"],
+.battle-player .battle-sprite .pet-image[src*="sprout-dino.png"],
+.battle-player .battle-sprite .pet-image[src*="glow-frog.png"],
+.battle-player .battle-sprite .pet-image[src*="fire-cat.png"],
+.battle-player .battle-sprite .pet-image[src*="wizard.png"],
+.battle-player .battle-sprite .pet-image[src*="axolotl.png"] {
+  transform: none !important;
+}
+.battle-player .battle-sprite .pet-image[src*="golden-fox.png"],
+.battle-player .battle-sprite .pet-image[src*="robo-bunny.png"],
+.battle-player .battle-sprite .pet-image[src*="panda.png"],
+.battle-player .battle-sprite .pet-image[src*="phoenix.png"],
+.battle-player .battle-sprite .pet-image[src*="dragon.png"] {
   transform: scaleX(-1) !important;
+}
+.battle-enemy .battle-sprite .pet-image[src*="slime.png"],
+.battle-enemy .battle-sprite .pet-image[src*="ice-pup.png"],
+.battle-enemy .battle-sprite .pet-image[src*="sprout-dino.png"],
+.battle-enemy .battle-sprite .pet-image[src*="glow-frog.png"],
+.battle-enemy .battle-sprite .pet-image[src*="fire-cat.png"],
+.battle-enemy .battle-sprite .pet-image[src*="wizard.png"],
+.battle-enemy .battle-sprite .pet-image[src*="axolotl.png"] {
+  transform: scaleX(-1) !important;
+}
+.battle-enemy .battle-sprite .pet-image[src*="golden-fox.png"],
+.battle-enemy .battle-sprite .pet-image[src*="robo-bunny.png"],
+.battle-enemy .battle-sprite .pet-image[src*="panda.png"],
+.battle-enemy .battle-sprite .pet-image[src*="phoenix.png"],
+.battle-enemy .battle-sprite .pet-image[src*="dragon.png"] {
+  transform: none !important;
 }
 
 /* TAMAVERSE — CS-style gacha case-opening reel */
