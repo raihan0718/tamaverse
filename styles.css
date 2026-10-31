@@ -842,16 +842,16 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 
 
 
-/* Home companion: hard-center the pet inside the frame */
+/* Align the companion's center with the artwork's center */
 .home-page .stage-pet{
   position:absolute!important;
   left:50%!important;
-  top:50%!important;
+  top:48%!important;
   margin:0!important;
 }
 .home-page .pet-stage,
 .home-page .pet-stage *{-webkit-tap-highlight-color:transparent;}
 .home-page .pet-stage{cursor:default;-webkit-tap-highlight-color:transparent;}
 @media(max-width:380px){
-  .home-page .stage-pet{left:50%!important;top:50%!important;}
+  .home-page .stage-pet{left:50%!important;top:48%!important;}
 }
