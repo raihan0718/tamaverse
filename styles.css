@@ -902,3 +902,35 @@ body[data-theme="dark"] .home-page .tama-care-button{
   .home-page .tama-care-button{width:25px;height:25px;border-radius:7px}
   .home-page .tama-care-button span{font-size:13px}
 }
+
+
+/* Final LCD controls: larger keys aligned around the pet, against the inner frame */
+.home-page .tama-care-controls{
+  position:absolute;z-index:9;
+  left:23%;right:23%;top:30%;bottom:27%;
+  display:block;pointer-events:none;
+}
+.home-page .tama-care-button{
+  position:absolute;pointer-events:auto;
+  width:clamp(38px,10vw,48px);
+  height:clamp(38px,10vw,48px);
+  min-width:0;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:12px;border:2px solid #79aaca;
+  background:linear-gradient(145deg,#f8fdff,#b8def3);
+  box-shadow:0 3px 0 #6594b4,0 4px 8px #193e5930;
+}
+.home-page .tama-care-button span{font-size:clamp(19px,5vw,24px);line-height:1}
+.home-page .tama-care-button small{display:none}
+.home-page .tama-care-button:nth-child(1){left:0;top:0}
+.home-page .tama-care-button:nth-child(2){right:0;top:0}
+.home-page .tama-care-button:nth-child(3){left:0;bottom:0}
+.home-page .tama-care-button:nth-child(4){right:0;bottom:0}
+.home-page .tama-care-button:nth-child(5){left:50%;bottom:0;transform:translateX(-50%)}
+.home-page .tama-care-button:active{transform:translateY(2px);box-shadow:0 1px 0 #6594b4}
+.home-page .tama-care-button:nth-child(5):active{transform:translate(-50%,2px)}
+@media(max-width:380px){
+  .home-page .tama-care-controls{left:22%;right:22%;top:30%;bottom:27%}
+  .home-page .tama-care-button{width:38px;height:38px;border-radius:10px}
+  .home-page .tama-care-button span{font-size:19px}
+}
