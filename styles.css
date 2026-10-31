@@ -2082,3 +2082,23 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 @media(prefers-reduced-motion:reduce){
   .home-page .pet-stage > .home-frame-ornaments .aura-ornament{animation:none!important}
 }
+
+
+/* Force Home ornaments to sit visibly in front of the frame artwork */
+.home-page .pet-stage > .companion-frame-art{
+  position:absolute!important;
+  z-index:10!important;
+}
+.home-page .pet-stage > .home-frame-aura{
+  z-index:8!important;
+}
+.home-page .pet-stage > .home-frame-ornaments{
+  position:absolute!important;
+  z-index:30!important;
+  isolation:isolate;
+  pointer-events:none!important;
+}
+.home-page .pet-stage > .home-frame-ornaments .aura-ornament{
+  position:absolute!important;
+  z-index:31!important;
+}
