@@ -91,6 +91,9 @@ function freshState(name){
 function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function petById(id){return state?.pets.find(p=>p.uid===id)||null;}
 function activePet(){return petById(state?.activePet)||state?.pets[0]||null;}
+function petSleeping(p){return !!(p?.sleeping&&p.sleepStartedAt);}
+function petActivityBlocked(p){if(petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu untuk beraktivitas.`);return true;}return false;}
+function battleMoodMessage(p){return `${p.name} sedang tidak di mood yang baik beri makan atau ganti pet yang lain`;}
 function speciesById(id){return species.find(s=>s.id===id)||species[0];}
 function showToast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2300);}
 function triggerPetAnimation(action){
@@ -330,7 +333,7 @@ function profilePage(){const p=activePet();return `<section class="page"><div cl
     📋 Salin User ID
   </button>
 </div>
-<div class="profile-stats"><div class="profile-stat"><strong>Lv. ${state.player.level}</strong><span>LEVEL PEMAIN</span></div><div class="profile-stat"><strong>${state.player.rating}</strong><span>RATING</span></div><div class="profile-stat"><strong>${state.player.wins}/${state.player.losses}/${state.player.draws}</strong><span>W/L/D</span></div><div class="profile-stat"><strong>${state.pets.length}/12</strong><span>KOLEKSI</span></div><div class="profile-stat"><strong>${state.player.streak} hari</strong><span>LOGIN STREAK</span></div><div class="profile-stat"><strong>${state.player.xp}/${state.player.level*100}</strong><span>PLAYER XP</span></div></div><button class="button secondary full" style="margin-top:13px" data-action="rename-player">✏️ Ubah nama</button></div><div class="section-heading"><h2>🎒 Inventori</h2></div><div class="card"><div class="rank-row"><span>🍓</span><span>Camilan<br><small class="muted-label">Memulihkan lapar saat battle</small></span><b>${state.items.snack}</b></div><div class="rank-row"><span>⚡</span><span>Ramuan energi<br><small class="muted-label">Pulihkan energi pet +30</small></span><b>${state.items.energy}</b></div><div class="rank-row"><span>🏋️</span><span>Buku latihan<br><small class="muted-label">Latihan ekstra untuk pet</small></span><b>${state.items.training}</b></div><div class="rank-row"><span>🧩</span><span>Fragmen spesies<br><small class="muted-label">Duplikat dari gacha</small></span><b>${Object.values(state.items.fragments).reduce((a,b)=>a+b,0)||0}</b></div><button class="button secondary full" data-action="shop">Buka toko item</button></div><div class="section-heading"><h2>🎯 Quest harian</h2></div>${questList()}<div class="notice">☁️ Progres game disimpan di perangkat ini dan disinkronkan ke akun TAMAVERSE saat koneksi tersedia.</div><button class="button danger full" data-action="reset">Reset semua data</button></section>`;}
+<div class="profile-stats"><div class="profile-stat"><strong>Lv. ${state.player.level}</strong><span>LEVEL PEMAIN</span></div><div class="profile-stat"><strong>${state.player.rating}</strong><span>RATING</span></div><div class="profile-stat"><strong>${state.player.wins}/${state.player.losses}/${state.player.draws}</strong><span>W/L/D</span></div><div class="profile-stat"><strong>${state.pets.length}/12</strong><span>KOLEKSI</span></div><div class="profile-stat"><strong>${state.player.streak} hari</strong><span>LOGIN STREAK</span></div><div class="profile-stat"><strong>${state.player.xp}/${state.player.level*100}</strong><span>PLAYER XP</span></div></div><button class="button secondary full" style="margin-top:13px" data-action="rename-player">✏️ Ubah nama</button></div><div class="section-heading"><h2>🎒 Inventori</h2></div><div class="card"><div class="rank-row"><span>🍓</span><span>Food<br><small class="muted-label">Digunakan untuk mengurangi Hunger</small></span><b>${state.items.food||0}</b></div><div class="rank-row"><span>🧃</span><span>Item battle<br><small class="muted-label">Memulihkan HP saat battle</small></span><b>${state.items.snack}</b></div><div class="rank-row"><span>⚡</span><span>Ramuan energi<br><small class="muted-label">Pulihkan energi pet +30</small></span><b>${state.items.energy}</b></div><div class="rank-row"><span>🏋️</span><span>Buku latihan<br><small class="muted-label">Latihan ekstra untuk pet</small></span><b>${state.items.training}</b></div><div class="rank-row"><span>🧩</span><span>Fragmen spesies<br><small class="muted-label">Duplikat dari gacha</small></span><b>${Object.values(state.items.fragments).reduce((a,b)=>a+b,0)||0}</b></div><button class="button secondary full" data-action="shop">Buka toko item</button></div><div class="section-heading"><h2>🎯 Quest harian</h2></div>${questList()}<div class="notice">☁️ Progres game disimpan di perangkat ini dan disinkronkan ke akun TAMAVERSE saat koneksi tersedia.</div><button class="button danger full" data-action="reset">Reset semua data</button></section>`;}
 const dailyRewards=[
   {icon:'🪙',label:'50 koin',type:'coins',amount:50},
   {icon:'🍓',label:'2 camilan',type:'snack',amount:2},
@@ -400,22 +403,52 @@ function startIntro(){
   }else beginVisibleHatch();
 }
 function finishIntro(){const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';state=freshState('Penjelajah');const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();showToast('Selamat datang! 300 koin dan 3 gem sudah jadi milikmu.');}
-function createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:75,happiness:75,energy:80,cleanliness:80,evolution:0,fragments:0};}
+function createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:100,happiness:100,energy:80,cleanliness:100,evolution:0,fragments:0,sleeping:false,sleepStartedAt:0,careUpdatedAt:Date.now()};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;state.player.coins+=20;return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
 function grantPetXP(p,amount){p.xp+=amount;while(p.xp>=p.level*40){p.xp-=p.level*40;p.level++;p.stats.hp+=5;p.stats.atk+=1;p.stats.def+=1;showToast(`${p.name} naik ke Level ${p.level}!`);}}
 function playerXP(amount){state.player.xp+=amount;while(state.player.xp>=state.player.level*100){state.player.xp-=state.player.level*100;state.player.level++;state.player.coins+=50;showToast(`Level pemain naik! Hadiah +50 koin.`);}}
-function doCare(kind){const p=activePet();if(!p){showToast('Tetaskan pet lebih dulu!');return;}const dailyLimit={feed:5,play:5,train:4};if(dailyLimit[kind]&&state.careUses[kind]>=dailyLimit[kind]){showToast(`Batas ${kind==='feed'?'makan':kind==='play'?'bermain':'latihan'} harian tercapai.`);return;}if(kind==='feed'){if(p.hunger>=100){showToast(`${p.name} belum lapar.`);return;}triggerPetAnimation('eat');p.hunger=Math.min(100,p.hunger+25);state.careUses.feed++;grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! +4 XP`);}else if(kind==='play'){if(p.energy<15){showToast('Energi pet terlalu rendah untuk bermain.');return;}if(p.happiness>=100){showToast(`${p.name} sudah sangat bahagia!`);return;}triggerPetAnimation('play');p.happiness=Math.min(100,p.happiness+22);p.energy=Math.max(0,p.energy-15);state.careUses.play++;grantPetXP(p,4);state.quests.progress.play++;showToast(`Waktu bermain yang menyenangkan! +4 XP`);}else if(kind==='clean'){if(p.cleanliness>=100){showToast(`${p.name} sudah bersih!`);return;}triggerPetAnimation('bath');p.cleanliness=100;showToast(`${p.name} jadi bersih dan segar!`);}else if(kind==='sleep'){if(p.energy>=100){showToast(`${p.name} sudah penuh energi.`);return;}triggerPetAnimation('sleep');p.energy=Math.min(100,p.energy+35);showToast(`${p.name} beristirahat. Energi +35.`);}else if(kind==='train'){if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}triggerPetAnimation('train');state.careUses.train++;if(state.items.training>0){state.items.training--;grantPetXP(p,14);p.energy-=20;p.evolution=Math.min(100,p.evolution+8);showToast('Latihan selesai! +14 XP dan progres evolusi.');}else{grantPetXP(p,6);p.energy-=20;p.evolution=Math.min(100,p.evolution+4);showToast('Latihan selesai! +6 XP.');}}save();render();}
+function doCare(kind){
+  const p=activePet();if(!p){showToast('Tetaskan pet lebih dulu!');return;}
+  if(kind==='sleep'&&petSleeping(p)){
+    p.sleeping=false;p.sleepStartedAt=0;save();render();showToast(`${p.name} sudah bangun. Pemulihan energi dihentikan.`);return;
+  }
+  if(petActivityBlocked(p))return;
+  if(kind==='energy'){if(state.items.energy<1){showToast('Ramuan energi habis.');return;}if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}state.items.energy--;p.energy=clamp(p.energy+30,0,100);save();render();showToast('Ramuan energi digunakan! Energy +30.');return;}
+  const limits={feed:5,play:5,train:4};
+  if(limits[kind]&&state.careUses[kind]>=limits[kind]){showToast('Batas aksi harian tercapai.');return;}
+  if(kind==='feed'){
+    if(p.hunger>=100){showToast(`${p.name} belum lapar.`);return;}
+    if(state.items.food<1){showToast('Food habis. Beli Food di Store seharga 50 Coins.');return;}
+    state.items.food--;triggerPetAnimation('eat');p.hunger=clamp(p.hunger+50,0,100);state.careUses.feed++;grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Hunger +50.`);
+  }else if(kind==='play'){
+    if(p.energy<10){showToast('Energi pet terlalu rendah untuk bermain.');return;}
+    if(p.happiness>=100){showToast(`${p.name} sudah sangat bahagia!`);return;}
+    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-10,0,100);state.careUses.play++;grantPetXP(p,4);state.quests.progress.play++;showToast('Waktu bermain yang menyenangkan! Energy -10.');
+  }else if(kind==='clean'){
+    if(p.cleanliness>=100){showToast(`${p.name} sudah bersih!`);return;}
+    triggerPetAnimation('bath');p.cleanliness=100;showToast(`${p.name} jadi bersih dan segar!`);
+  }else if(kind==='sleep'){
+    if(p.energy>=100){showToast(`${p.name} sudah penuh energi.`);return;}
+    p.sleeping=true;p.sleepStartedAt=Date.now();triggerPetAnimation('sleep');showToast(`${p.name} mulai tidur. Energi pulih penuh dalam 15 menit.`);
+  }else if(kind==='energy'){if(state.items.energy<1){showToast('Ramuan energi habis.');return;}if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}state.items.energy--;p.energy=clamp(p.energy+30,0,100);showToast('Ramuan energi digunakan! Energy +30.');}else if(kind==='train'){
+    if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
+    if(state.items.training<1){showToast('Training Manual habis. Beli di Store untuk latihan.');return;}
+    triggerPetAnimation('train');state.careUses.train++;state.items.training--;grantPetXP(p,30);p.energy=clamp(p.energy-20,0,100);p.evolution=Math.min(100,p.evolution+12);showToast('Training Manual digunakan! +30 XP dan progres evolusi.');
+  }
+  p.careUpdatedAt=Date.now();save();render();
+}
+
 function chooseRarity(){const r=Math.random()*100;return r<60?'Common':r<85?'Rare':r<97?'Epic':'Legendary';}
 function pullEgg(id,free){const e=eggs.find(x=>x.id===id);if(!e)return;if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}const currency=e.currency==='gem'?'gems':'coins';const cost=free?0:e.price;if(state.player[currency]<cost){showToast(`Koin/gem tidak cukup untuk ${e.name}.`);return;}if(!free)state.player[currency]-=cost;else state.gacha.lastFree=new Date().toDateString();
   const pool=species.filter(s=>s.pool.includes(id));let rarity=chooseRarity();if(state.gacha.pityRare>=9&&['Common'].includes(rarity))rarity='Rare';if(state.gacha.pityEpic>=49&&['Common','Rare'].includes(rarity))rarity='Epic';let candidates=pool.filter(s=>s.rarity===rarity);if(!candidates.length){const available=pool.filter(s=>s.rarity==='Common'||s.rarity==='Rare'||s.rarity==='Epic'||s.rarity==='Legendary');candidates=available;}const chosen=candidates[Math.floor(Math.random()*candidates.length)];state.gacha.pityRare=chosen.rarity==='Common'?state.gacha.pityRare+1:0;state.gacha.pityEpic=['Common','Rare'].includes(chosen.rarity)?state.gacha.pityEpic+1:0;state.quests.progress.egg++;const result=addPet(chosen.id);state.gacha.history.unshift({species:chosen.id,name:chosen.name,rarity:chosen.rarity,date:Date.now()});state.gacha.history=state.gacha.history.slice(0,20);save();render();showModal(`<div class="hatch-egg">${petImage(chosen.id, 'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${result.duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2><p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${result.duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p><div class="stats-row"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div></div><button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);}
-function buyItem(type){const shop={snack:{name:'Camilan',price:25},energy:{name:'Ramuan energi',price:40},training:{name:'Buku latihan',price:60}};const item=shop[type];if(!item)return;if(state.player.coins<item.price){showToast('Koin tidak cukup.');return;}state.player.coins-=item.price;state.items[type]++;save();closeModal();render();showToast(`${item.name} dibeli!`);}
-function startBattle(mode){const p=activePet();if(!p){showToast('Kamu belum punya pet!');return;}if(battle)return;const pool=species.filter(s=>s.id!==p.species);const os=pool[Math.floor(Math.random()*pool.length)];const opponent={...os,level:Math.max(1,p.level),name:mode==='simulated'?['PixelPaw','StarMochi','DemoRanger'][Math.floor(Math.random()*3)]:`${os.name} liar`,stats:{...os.stats,hp:Math.round(os.stats.hp*(0.8+p.level*.08)),atk:os.stats.atk+p.level-1}};battle={mode,petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,turn:1,skillUsed:false,defending:false,log:[`${p.name} memasuki arena!`,`Lawan ${opponent.name} muncul!`],ended:false};render();}
+function buyItem(type){const p=activePet();if(p&&petActivityBlocked(p))return;const shop={food:{name:'Food',price:50},energy:{name:'Ramuan energi',price:40},training:{name:'Training Manual',price:120}};const item=shop[type];if(!item)return;if(state.player.coins<item.price){showToast('Koin tidak cukup.');return;}state.player.coins-=item.price;if(type==='food')state.items.food=(state.items.food||0)+1;else state.items[type]=(state.items[type]||0)+1;save();closeModal();render();showToast(`${item.name} dibeli!`);}
+function startBattle(mode){const p=activePet();if(!p){showToast('Kamu belum punya pet!');return;}if(petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(p.happiness<20){showToast(battleMoodMessage(p));return;}if(p.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}if(battle)return;p.energy=clamp(p.energy-25,0,100);p.careUpdatedAt=Date.now();const pool=species.filter(s=>s.id!==p.species);const os=pool[Math.floor(Math.random()*pool.length)];const opponent={...os,level:Math.max(1,p.level),name:mode==='simulated'?['PixelPaw','StarMochi','DemoRanger'][Math.floor(Math.random()*3)]:`${os.name} liar`,stats:{...os.stats,hp:Math.round(os.stats.hp*(0.8+p.level*.08)),atk:os.stats.atk+p.level-1}};battle={mode,petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,turn:1,skillUsed:false,defending:false,log:[`${p.name} memasuki arena!`,`Lawan ${opponent.name} muncul!`],ended:false};render();}
 function elementMultiplier(a,b){const strong={Fire:'Nature',Nature:'Water',Water:'Fire',Light:'Fire'};if(strong[a]===b)return 1.25;if(strong[b]===a)return .8;return 1;}
-function battleAction(move){if(!battle||battle.ended)return;if(move==='skill'&&battle.skillUsed){showToast('Skill sudah digunakan pada battle ini.');return;}const p=petById(battle.petId);if(!p)return;const ps=speciesById(p.species),os=speciesById(battle.opponent.species);battle.actionFx=move;let log=battle.log;let damage=0;if(move==='attack'||move==='skill'){damage=Math.max(4,Math.round((p.stats.atk+(move==='skill'?10:0)-battle.opponent.stats.def*.35)*(0.85+Math.random()*.3)*elementMultiplier(ps.element,os.element)));if(Math.random()<.1)damage=Math.round(damage*1.5);battle.enemyHP-=damage;log.push(`${p.name} ${move==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage!`);if(move==='skill')battle.skillUsed=true;}else if(move==='defend'){battle.defending=true;log.push(`${p.name} bersiap bertahan.`);}else if(move==='item'){if(state.items.snack<1){showToast('Camilan habis.');return;}state.items.snack--;battle.playerHP=Math.min(p.stats.hp,battle.playerHP+25);log.push(`${p.name} memakai camilan dan memulihkan HP!`);}
+function battleAction(move){if(!battle||battle.ended)return;if(move==='skill'&&battle.skillUsed){showToast('Skill sudah digunakan pada battle ini.');return;}const p=petById(battle.petId);if(!p)return;const ps=speciesById(p.species),os=speciesById(battle.opponent.species);battle.actionFx=move;let log=battle.log;let damage=0;if(move==='attack'||move==='skill'){damage=Math.max(4,Math.round((p.stats.atk+(move==='skill'?10:0)-battle.opponent.stats.def*.35)*(0.85+Math.random()*.3)*elementMultiplier(ps.element,os.element)));if(Math.random()<.1)damage=Math.round(damage*1.5);battle.enemyHP-=damage;log.push(`${p.name} ${move==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage!`);if(move==='skill')battle.skillUsed=true;}else if(move==='defend'){battle.defending=true;log.push(`${p.name} bersiap bertahan.`);}else if(move==='item'){if(state.items.snack<1){showToast('Item battle habis.');return;}state.items.snack--;battle.playerHP=Math.min(p.stats.hp,battle.playerHP+25);log.push(`${p.name} memakai item battle dan memulihkan HP!`);}
   if(battle.enemyHP<=0){finishBattle('win');return;}const incoming=Math.max(3,Math.round((battle.opponent.stats.atk-p.stats.def*.3)*(0.85+Math.random()*.3)*elementMultiplier(os.element,ps.element)*(battle.defending?.45:1)));battle.playerHP-=incoming;battle.defending=false;log.push(`${battle.opponent.name} menyerang, ${incoming} damage.`);battle.turn++;if(battle.playerHP<=0){finishBattle('loss');return;}if(battle.turn>30){finishBattle('draw');return;}battle.log=log.slice(-30);render();}
 function finishBattle(result){if(!battle||battle.ended)return;battle.ended=true;const p=petById(battle.petId);if(result==='win'){state.player.wins++;state.player.rating+=battle.mode==='simulated'?12:5;state.player.coins+=35;playerXP(25);grantPetXP(p,20);state.quests.progress.win++;showToast('Menang! +35 koin, XP pet & pemain.');}else if(result==='loss'){state.player.losses++;state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);showToast('Kalah, tapi pet mendapat pengalaman.');}else{state.player.draws++;showToast('Battle berakhir seri.');}state.quests.progress.battle++;state.battleHistory.unshift({result,date:Date.now(),mode:battle.mode});state.battleHistory=state.battleHistory.slice(0,20);save();battle=null;render();showModal(`<div class="hatch-egg">${result==='win'?'🏆':result==='draw'?'🤝':'💫'}</div><h2 id="modalTitle" style="text-align:center">${result==='win'?'Kemenangan!':result==='draw'?'Seri!':'Pertarungan selesai'}</h2><p style="text-align:center">${result==='win'?'Hebat! Petmu memperoleh hadiah battle.':result==='draw'?'Pertarungan berakhir imbang.':'Jangan menyerah, petmu tetap mendapat XP.'}</p><button class="button full" data-action="close-modal">Lanjut</button>`);}
 function inspectPet(uid){const p=petById(uid);if(!p)return;const s=speciesById(p.species);selectedPetId=uid;showModal(`<div class="hatch-egg">${petImage(s.id, 'detail-pet-image')}</div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2 id="modalTitle">${esc(p.name)} · Lv.${p.level}</h2><p>${s.name} · Evolusi ${p.evolution}/100</p><div class="stats-row"><div class="stat-tile"><strong>${p.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${p.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${p.stats.def}</strong><span>DEF</span></div></div><div class="modal-actions"><button class="button secondary" data-action="nickname-pet">Ubah nama</button><button class="button" data-action="set-active" data-pet="${uid}">${uid===state.activePet?'Pet aktif':'Pilih aktif'}</button></div>`);}
-function showShop(){showModal(`<div class="eyebrow">TOKO LOKAL</div><h2 id="modalTitle">Perlengkapan pet</h2><p>Belanja memakai koin dalam game.</p>${[['snack','🍓 Camilan','25'],['energy','⚡ Ramuan energi','40'],['training','🏋️ Buku latihan','60']].map(x=>`<div class="quest-row"><span>${x[1]} · 🪙 ${x[2]}</span><button class="button" data-action="buy" data-item="${x[0]}">Beli</button></div>`).join('')}<button class="button secondary full" data-action="close-modal">Tutup</button>`);}
+function showShop(){showModal(`<div class="eyebrow">TAMAVERSE STORE</div><h2 id="modalTitle">Perlengkapan pet</h2><p>Belanja memakai Coins.</p>${[['food','🍓 Food','50'],['energy','⚡ Energy Potion','40'],['training','📘 Training Manual','120']].map(x=>`<div class="quest-row"><span>${x[1]} · 🪙 ${x[2]}</span><button class="button" data-action="buy" data-item="${x[0]}">Beli</button></div>`).join('')}<button class="button secondary full" data-action="close-modal">Tutup</button>`);}
 function doClaim(id){const q=questDefinitions().find(x=>x.id===id);if(!q||state.quests.claimed.includes(id)||(state.quests.progress[id]||0)<q.target)return;state.quests.claimed.push(id);state.player.coins+=q.reward;playerXP(10);save();render();showToast(`Quest selesai! +${q.reward} koin +10 XP pemain.`);}
 function resetGame(){showModal(`<div class="eyebrow">KONFIRMASI</div><h2 id="modalTitle">Hapus semua progres?</h2><p>Data lokal, pet, dan koin akan dihapus dari perangkat ini. Tindakan ini tidak bisa dibatalkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button danger" data-action="confirm-reset">Hapus data</button></div>`);}
 
@@ -456,10 +489,11 @@ function normalizeSavedState(saved){
         def:Number(oldStats.def||oldPet.defense)||kind.stats.def,
         spd:Number(oldStats.spd||oldStats.speed||oldPet.speed)||kind.stats.spd
       },
-      hunger:Number.isFinite(oldPet.hunger)?oldPet.hunger:35,
-      happiness:Number.isFinite(oldPet.happiness)?oldPet.happiness:75,
+      hunger:Number.isFinite(oldPet.hunger)?oldPet.hunger:100,
+      happiness:Number.isFinite(oldPet.happiness)?oldPet.happiness:100,
       energy:Number.isFinite(oldPet.energy)?oldPet.energy:80,
       cleanliness:Number.isFinite(oldPet.cleanliness)?oldPet.cleanliness:80,
+      sleeping:!!oldPet.sleeping,sleepStartedAt:Number(oldPet.sleepStartedAt)||0,careUpdatedAt:Number(oldPet.careUpdatedAt)||Date.now(),
       evolution:Number(oldPet.evolution)||Math.max(0,(Number(oldPet.evolutionStage)||1)-1)*25,
       fragments:Number(oldPet.fragments)||0
     };
@@ -467,7 +501,8 @@ function normalizeSavedState(saved){
   base.activePet=saved.activePet||saved.activePetId||base.pets[0]?.uid||null;
   const oldItems=saved.items||{},oldInventory=saved.inventory||{};
   base.items={
-    snack:Number(oldItems.snack??oldInventory.food??0),
+    food:Number(oldItems.food??oldInventory.food??0),
+    snack:Number(oldItems.snack??0),
     energy:Number(oldItems.energy??oldInventory.energy??0),
     training:Number(oldItems.training??oldInventory.training??0),
     fragments:{...(oldItems.fragments||oldInventory.fragments||{})}
@@ -556,7 +591,7 @@ function homePage(){
             <button class="care-action" data-action="care" data-care="feed" aria-label="Feed"><span class="care-icon">🍓</span><b>Feed</b></button>
             <button class="care-action" data-action="care" data-care="play" aria-label="Play"><span class="care-icon">💖</span><b>Play</b></button>
             <button class="care-action" data-action="care" data-care="clean" aria-label="Bath"><span class="care-icon">🫧</span><b>Bath</b></button>
-            <button class="care-action" data-action="care" data-care="sleep" aria-label="Sleep"><span class="care-icon">🌙</span><b>Sleep</b></button>
+            <button class="care-action" data-action="care" data-care="sleep" aria-label="${petSleeping(p)?'Wake Up':'Sleep'}"><span class="care-icon">${petSleeping(p)?'☀️':'🌙'}</span><b>${petSleeping(p)?'Wake Up':'Sleep'}</b></button>
             <button class="care-action" data-action="care" data-care="train" aria-label="Train"><span class="care-icon">🏋️</span><b>Train</b></button>
           </div>
         </div>
@@ -605,18 +640,25 @@ function dailyReset(){
     state.player.streak=state.player.lastLogin===yesterday?Math.max(1,(state.player.streak||1)+1):1;
     state.player.lastLogin=today;
   }
-  const now=Date.now(),lastUpdate=Number(state.lastCareUpdate)||now;
-  const elapsedHours=Math.floor((now-lastUpdate)/3600000);
-  if(elapsedHours>0){
-    state.pets.forEach(p=>{
-      p.hunger=clamp(p.hunger+elapsedHours*4,0,100);
-      p.cleanliness=clamp(p.cleanliness-elapsedHours*3,0,100);
-      p.happiness=clamp(p.happiness-elapsedHours*2,0,100);
-      p.energy=clamp(p.energy+elapsedHours*4,0,100);
-    });
-    state.lastCareUpdate=lastUpdate+elapsedHours*3600000;
-  }
+  const now=Date.now();
+  state.pets.forEach(p=>{
+    p.careUpdatedAt=Number(p.careUpdatedAt)||now;
+    const elapsed=Math.max(0,now-p.careUpdatedAt);
+    if(petSleeping(p)){
+      const sleepElapsed=Math.max(0,now-p.sleepStartedAt);
+      p.energy=clamp(p.energy+(sleepElapsed/900000)*100,0,100);
+      p.sleepStartedAt=now;
+      if(p.energy>=100){p.energy=100;p.sleeping=false;p.sleepStartedAt=0;}
+    }else{
+      const cleanFactor=p.cleanliness<15?1.5:1;
+      p.hunger=clamp(p.hunger-(elapsed/14400000)*100,0,100);
+      p.happiness=clamp(p.happiness-(elapsed/21600000)*100*cleanFactor,0,100);
+      p.cleanliness=clamp(p.cleanliness-(elapsed/28800000)*100,0,100);
+    }
+    p.careUpdatedAt=now;
+  });
 }
+
 function raritySummary(rates){
   return Object.entries(rates).map(([rarity,rate])=>`${rarity} ${rate}%`).join(' · ');
 }
@@ -947,10 +989,10 @@ function avatarPicker(){
 }
 
 document.addEventListener('click',event=>{
-  const nav=event.target.closest('.nav-item');if(nav){page=nav.dataset.page;render();return;}
+  const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
-  if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){page=btn.dataset.page;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
+  if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
   closeModal();
   save();
