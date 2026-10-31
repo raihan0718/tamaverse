@@ -2201,16 +2201,16 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   z-index:50!important;
 }
 
-/* Home-only position adjustment requested: frame left 47.5%, pet left 35% top 52%. */
+/* Home-only position adjustment requested: frame left 48.5%, pet left 40% top 48%. */
 .home-page .pet-stage > .companion-frame-art{
-  left:47.5%!important;
+  left:48.5%!important;
 }
 .home-page .pet-stage > .home-frame-aura,
 .home-page .pet-stage > .home-frame-ornaments{
-  left:47.5%!important;
+  left:48.5%!important;
 }
 .home-page .pet-stage > .stage-pet{
-  left:35%!important;
-  top:52%!important;
+  left:40%!important;
+  top:48%!important;
   transform:translate(-50%,-50%) scale(1.08)!important;
 }
