@@ -30,6 +30,8 @@ DECLARE
   v_actor_element text;
   v_target_element text;
   v_damage integer := 0;
+  v_heal integer := 0;
+  v_target_uid uuid;
   v_incoming_multiplier numeric := 1;
   v_element_multiplier numeric := 1;
   v_random numeric;
@@ -71,6 +73,7 @@ BEGIN
   IF v_room.host_id = v_uid THEN
     v_actor_is_host := true;
     v_actor_data := v_room.host_data;
+    v_target_uid := v_room.guest_id;
     v_target_data := v_room.guest_data;
     v_actor_hp_key := 'host_hp';
     v_target_hp_key := 'guest_hp';
@@ -81,6 +84,7 @@ BEGIN
   ELSIF v_room.guest_id = v_uid THEN
     v_actor_is_host := false;
     v_actor_data := v_room.guest_data;
+    v_target_uid := v_room.host_id;
     v_target_data := v_room.host_data;
     v_actor_hp_key := 'guest_hp';
     v_target_hp_key := 'host_hp';
@@ -148,8 +152,9 @@ BEGIN
     END IF;
 
     v_actor_hp := LEAST(v_actor_max_hp, v_actor_hp + 25);
+    v_heal := v_actor_hp - COALESCE((v_state->>v_actor_hp_key)::integer, 0);
     v_log := v_log || jsonb_build_array(
-      jsonb_build_object('text', v_actor_data->>'name' || ' memakai camilan dan memulihkan HP.', 'action', 'item')
+      jsonb_build_object('text', v_actor_data->>'name' || ' memulihkan ' || v_heal::text || ' HP!', 'action', 'item', 'actor_id', v_uid, 'heal', v_heal)
     );
   ELSIF p_action = 'defend' THEN
     v_state := jsonb_set(v_state, ARRAY[v_defend_key], 'true'::jsonb, true);
@@ -188,6 +193,8 @@ BEGIN
           CASE WHEN p_action = 'skill' THEN ' menggunakan Skill dan memberi ' ELSE ' menyerang dan memberi ' END ||
           v_damage::text || ' damage!',
         'action', p_action,
+        'actor_id', v_uid,
+        'target_id', v_target_uid,
         'damage', v_damage
       )
     );
