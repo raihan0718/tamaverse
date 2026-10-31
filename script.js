@@ -514,7 +514,13 @@ function createPet(speciesId,name){
 function clamp(value,min,max){return Math.min(Math.max(Number(value)||0,min),max);}
 function statusMeter(label,icon,value){
   const safe=clamp(Number(value)||0,0,100);
-  return `<div class="status-meter"><div><span>${icon} ${label}</span><b>${safe}/100</b></div><div class="progress-track"><div class="progress-fill ${label==='Hunger'?'hunger-fill':''}" style="width:${safe}%"></div></div></div>`;
+  const level=safe>=70?'Good':safe>=35?'Fair':'Low';
+  const key=label.toLowerCase().replace(/[^a-z]+/g,'-');
+  return `<div class="status-meter status-${key}">
+    <div class="status-meter-top"><span class="status-icon">${icon}</span><span class="status-name">${label}</span><b>${safe}<small>/100</small></b></div>
+    <div class="status-track"><span class="status-fill" style="width:${safe}%"></span></div>
+    <small class="status-level">${level}</small>
+  </div>`;
 }
 function homePage(){
   const p=activePet();
@@ -541,9 +547,20 @@ function homePage(){
         <div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
       </div>
     </section>
-    <div class="status-panel">${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}</div>
-    <div class="section-heading care-heading"><h2>Care for ${esc(p.name)}</h2><span class="muted-label">Aksi harian terbatas</span></div>
-    <div class="care-actions"><button class="care-action" data-action="care" data-care="feed"><span>🍓</span><b>Feed</b></button><button class="care-action" data-action="care" data-care="play"><span>💖</span><b>Play</b></button><button class="care-action" data-action="care" data-care="clean"><span>🫧</span><b>Bath</b></button><button class="care-action" data-action="care" data-care="sleep"><span>🌙</span><b>Sleep</b></button><button class="care-action" data-action="care" data-care="train"><span>🏋️</span><b>Train</b></button></div>
+    <section class="needs-section">
+      <div class="home-section-heading"><div><span class="home-section-kicker">COMPANION STATUS</span><h2>Pet condition</h2></div><span class="live-label"><i></i> LIVE</span></div>
+      <div class="status-panel">${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}</div>
+    </section>
+    <section class="care-section">
+      <div class="home-section-heading"><div><span class="home-section-kicker">DAILY ACTIVITIES</span><h2>Take care</h2></div><span class="care-hint">Choose an action</span></div>
+      <div class="care-actions">
+        <button class="care-action" data-action="care" data-care="feed"><span class="care-icon">🍓</span><span class="care-copy"><b>Feed</b><small>Fill hunger · ${Math.max(0,5-(state.careUses?.feed||0))}/5 left</small></span><span class="care-arrow">›</span></button>
+        <button class="care-action" data-action="care" data-care="play"><span class="care-icon">💖</span><span class="care-copy"><b>Play</b><small>Boost happiness · ${Math.max(0,5-(state.careUses?.play||0))}/5 left</small></span><span class="care-arrow">›</span></button>
+        <button class="care-action" data-action="care" data-care="clean"><span class="care-icon">🫧</span><span class="care-copy"><b>Bath</b><small>Keep it fresh</small></span><span class="care-arrow">›</span></button>
+        <button class="care-action" data-action="care" data-care="sleep"><span class="care-icon">🌙</span><span class="care-copy"><b>Sleep</b><small>Restore energy</small></span><span class="care-arrow">›</span></button>
+        <button class="care-action" data-action="care" data-care="train"><span class="care-icon">🏋️</span><span class="care-copy"><b>Train</b><small>Grow stronger · ${Math.max(0,4-(state.careUses?.train||0))}/4 left</small></span><span class="care-arrow">›</span></button>
+      </div>
+    </section>
     <div class="section-heading care-heading"><h2>🎁 Daily reward</h2><span class="muted-label">7-day login bonus</span></div>${dailyRewardCard()}
     <div class="quick-actions home-quick"><button class="button secondary" data-action="go" data-page="pets">🐾 Collection</button><button class="button secondary" data-action="go" data-page="gacha">🥚 Gacha</button><button class="button secondary" data-action="go" data-page="battle">⚔️ Battle</button><button class="button secondary" data-action="go" data-page="profile">🎒 Inventory & quests</button></div>
     <div class="section-heading"><h2>Daily quests</h2><button class="text-button" data-action="go" data-page="profile">See all</button></div>${questPreview()}
