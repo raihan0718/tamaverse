@@ -1956,3 +1956,22 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .accessory-equip{width:100%;min-height:31px;margin-top:3px;padding:6px 8px;border:1px solid #a994ff66;border-radius:9px;background:rgba(169,148,255,.13);color:var(--text);font-size:10px;font-weight:800;cursor:pointer}
 .accessory-equip.is-equipped{border-color:transparent;background:rgba(80,190,145,.14);color:#45b98b;cursor:default}
 @media(max-width:360px){.collection-page .collection-tabs{gap:7px}.collection-tab{padding:9px 8px;column-gap:6px}.accessory-grid{gap:8px}.accessory-art{height:190px}.accessory-info{padding:8px}}
+
+
+/* Equipped frame aura on Home: one aura tied to the active frame only */
+.home-page .home-frame-aura{position:absolute;z-index:2;left:50%;top:48%;width:min(90%,470px);aspect-ratio:684/768;transform:translate(-50%,-50%);pointer-events:none;border-radius:46%;opacity:.8;filter:blur(24px)}
+.home-page .companion-frame-art{animation:none!important;filter:drop-shadow(0 12px 18px #597ba540)!important}
+.home-page .home-frame-aura.aura-common{background:radial-gradient(ellipse,rgba(74,164,255,.23),rgba(74,164,255,0) 68%)}
+.home-page .frame-equipped-common .companion-frame-art{filter:drop-shadow(0 0 6px rgba(83,174,255,.42)) drop-shadow(0 12px 18px #597ba540)!important}
+.home-page .home-frame-aura.aura-uncommon{background:radial-gradient(ellipse,rgba(86,207,128,.23),rgba(86,207,128,0) 68%)}
+.home-page .frame-equipped-uncommon .companion-frame-art{filter:drop-shadow(0 0 6px rgba(90,211,132,.4)) drop-shadow(0 12px 18px #597ba540)!important}
+.home-page .home-frame-aura.aura-rare{background:radial-gradient(ellipse,rgba(255,190,78,.24),rgba(255,126,174,.16) 48%,transparent 72%)}
+.home-page .frame-equipped-rare .companion-frame-art{filter:drop-shadow(0 0 7px rgba(255,190,82,.4)) drop-shadow(0 0 7px rgba(255,132,181,.3)) drop-shadow(0 12px 18px #597ba540)!important}
+.home-page .home-frame-aura.aura-legendary{opacity:1;background:radial-gradient(ellipse,rgba(255,105,191,.42),rgba(190,112,255,.2) 48%,transparent 74%);animation:homeRoyalAura 2.8s ease-in-out infinite}
+.home-page .home-frame-aura.aura-legendary::after{content:"✦  ·  ✧       ✧  ·  ✦";position:absolute;inset:12% 0 auto;text-align:center;color:#ffd9f4;font-size:18px;letter-spacing:8px;text-shadow:0 0 7px #ff78d0,0 0 15px #d68cff;animation:frameSparkle 1.8s ease-in-out infinite}
+.home-page .frame-equipped-legendary .companion-frame-art{filter:drop-shadow(0 0 8px rgba(255,105,196,.72)) drop-shadow(0 0 15px rgba(191,117,255,.48)) drop-shadow(0 12px 18px #597ba540)!important}
+.home-page .home-frame-aura.aura-celestial{opacity:1;background:conic-gradient(from 0deg,rgba(255,120,160,.38),rgba(255,218,112,.36),rgba(115,224,194,.36),rgba(112,174,255,.4),rgba(193,132,255,.42),rgba(255,120,160,.38));animation:rainbowAura 5s linear infinite}
+.home-page .home-frame-aura.aura-celestial::after{content:"✧  ✦  ·  ✧  ✦  ·  ✧";position:absolute;inset:8% 0 auto;text-align:center;color:#fff4c9;font-size:19px;letter-spacing:5px;text-shadow:0 0 7px #fff,0 0 15px #ff8bd7,0 0 22px #8bcfff;animation:frameSparkle 1.35s ease-in-out infinite}
+.home-page .frame-equipped-celestial .companion-frame-art{filter:drop-shadow(0 0 8px rgba(255,153,213,.76)) drop-shadow(0 0 15px rgba(143,190,255,.66)) drop-shadow(0 0 20px rgba(255,220,132,.46)) drop-shadow(0 12px 18px #597ba540)!important}
+@keyframes homeRoyalAura{0%,100%{opacity:.72;scale:.96}50%{opacity:1;scale:1.04}}
+@media(prefers-reduced-motion:reduce){.home-page .home-frame-aura,.home-page .home-frame-aura::after{animation:none!important}}
