@@ -541,15 +541,17 @@ function homePage(){
       <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.png" alt="" aria-hidden="true">
       <div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div>
       <div class="companion-panel">
-        <div class="companion-panel-top"><span><i></i> COMPANION PROFILE</span><span class="companion-id">TV / 001</span></div>
-        <div class="companion-meta"><div><div class="eyebrow">${s.element} TYPE <span>·</span> ${s.rarity.toUpperCase()}</div><h2>${esc(p.name)}</h2></div><span class="pill">LVL ${p.level}</span></div>
-        <div class="companion-xp"><span>GROWTH PROGRESS</span><b>${p.xp} <small>/ ${p.level*40} XP</small></b></div>
+        <div class="companion-meta">
+          <h2>${esc(p.name)}</h2>
+          <span class="pill">LV. ${p.level}</span>
+        </div>
+        <div class="companion-xp"><span>EXP</span><b>${p.xp} / ${p.level*40}</b></div>
         <div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
         <div class="companion-tools">
           <div class="compact-needs">
-            ${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}
+            ${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Mood','💖',p.happiness)}${statusMeter('Energy','⚡',p.energy)}${statusMeter('Clean','🫧',p.cleanliness)}
           </div>
-          <div class="compact-care-label"><span>QUICK CARE</span><small>Daily actions</small></div>
+          <div class="compact-care-label"><span>QUICK CARE</span></div>
           <div class="compact-care">
             <button class="care-action" data-action="care" data-care="feed" aria-label="Feed"><span class="care-icon">🍓</span><b>Feed</b></button>
             <button class="care-action" data-action="care" data-care="play" aria-label="Play"><span class="care-icon">💖</span><b>Play</b></button>
