@@ -2734,3 +2734,28 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .store-item-card .accessory-info p{margin:0;font-size:11px}
 .store-item-price{font-size:12px;margin-top:auto}
 .store-item-card .button{margin-top:5px}
+
+
+/* Light-theme text contrast: keep accent/status colors readable on pale surfaces. */
+body[data-theme="light"] .rarity,
+body:not([data-theme="dark"]) .rarity{color:#765018}
+body[data-theme="light"] .rarity-Common,
+body:not([data-theme="dark"]) .rarity-Common{color:#62596a}
+body[data-theme="light"] .rarity-Rare,
+body:not([data-theme="dark"]) .rarity-Rare{color:#24658a}
+body[data-theme="light"] .rarity-Epic,
+body:not([data-theme="dark"]) .rarity-Epic{color:#754092}
+body[data-theme="light"] .rarity-Legendary,
+body:not([data-theme="dark"]) .rarity-Legendary{color:#79530d}
+body[data-theme="light"] .gacha-reel-status,
+body[data-theme="light"] .gacha-roll-status,
+body:not([data-theme="dark"]) .gacha-reel-status,
+body:not([data-theme="dark"]) .gacha-roll-status{color:#704b91}
+body[data-theme="light"] .accessory-equip.is-equipped,
+body:not([data-theme="dark"]) .accessory-equip.is-equipped{color:#19734f}
+body[data-theme="light"] .pool-owned,
+body:not([data-theme="dark"]) .pool-owned{background:#e1f3e7;color:#24643b}
+body[data-theme="light"] .collection-tab small,
+body:not([data-theme="dark"]) .collection-tab small{color:#716477}
+body[data-theme="light"] .eyebrow,
+body:not([data-theme="dark"]) .eyebrow{color:#874766}
