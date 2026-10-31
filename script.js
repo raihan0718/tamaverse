@@ -1254,6 +1254,16 @@ function onlineBattleView() {
   const rivalSpecies = speciesById(rival?.species);
   const log = Array.isArray(bs.log) ? bs.log : [];
   const turn = Number(bs.turn || 1);
+  const latestAction = log.length ? log[log.length - 1] : null;
+  const myUserId = window.TAMAVERSE_USER_ID;
+  const myFloat = latestAction?.target_id === myUserId && Number(latestAction?.damage) > 0
+    ? { text: '-' + latestAction.damage, kind: 'damage' }
+    : latestAction?.actor_id === myUserId && Number(latestAction?.heal) > 0
+      ? { text: '+' + latestAction.heal, kind: 'heal' } : null;
+  const rivalFloat = latestAction?.target_id && latestAction.target_id !== myUserId && Number(latestAction?.damage) > 0
+    ? { text: '-' + latestAction.damage, kind: 'damage' }
+    : latestAction?.actor_id && latestAction.actor_id !== myUserId && Number(latestAction?.heal) > 0
+      ? { text: '+' + latestAction.heal, kind: 'heal' } : null;
   const skillReadyKey = mineIsHost ? 'host_skill_ready_at' : 'guest_skill_ready_at';
   const skillReadyAt = bs[skillReadyKey] ? Date.parse(bs[skillReadyKey]) : 0;
   const skillCooldown = Math.max(0, Math.ceil((skillReadyAt - Date.now()) / 1000));
@@ -1285,7 +1295,7 @@ function onlineBattleView() {
             <span>${esc(mySpecies.element || mine?.element || 'Unknown')} · Lv.${Number(mine?.level || 1)}</span>
           </div>
           <div class="battle-sprite">${petImage(mine?.species, 'battle-pet-image')}</div>
-          <span class="battle-effect effect-player"></span><span class="battle-impact impact-player"></span>
+          <span class="battle-effect effect-player"></span><span class="battle-impact impact-player"></span>${myFloat ? `<span class="battle-floating-number ${myFloat.kind}">${myFloat.text}</span>` : ""}
           <div class="battle-hp-card"><div class="hp-label"><b>YOUR PET</b><span>${myHp} / ${myMax} HP</span></div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div></div>
         </div>
         <div class="arena-vs">VS</div>
@@ -1295,7 +1305,7 @@ function onlineBattleView() {
             <span>${esc(rivalSpecies.element || rival?.element || 'Unknown')} · Lv.${Number(rival?.level || 1)}</span>
           </div>
           <div class="battle-sprite">${petImage(rival?.species, 'battle-pet-image')}</div>
-          <span class="battle-effect effect-enemy"></span><span class="battle-impact impact-enemy"></span>
+          <span class="battle-effect effect-enemy"></span><span class="battle-impact impact-enemy"></span>${rivalFloat ? `<span class="battle-floating-number ${rivalFloat.kind}">${rivalFloat.text}</span>` : ""}
           <div class="battle-hp-card"><div class="hp-label"><b>OPPONENT</b><span>${rivalHp} / ${rivalMax} HP</span></div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div></div>
         </div>
         <div class="battle-arena-controls">
