@@ -17,18 +17,18 @@ const species = [
   {id:'wyrmling',name:'Dravaryn',emoji:'🐉',element:'Fire',rarity:'Legendary',stats:{hp:116,atk:24,def:16,spd:22},pool:['premium']}
  ];
 const petImages = {
-  fluffin: 'assets/pets/slime.png',
-  embercub: 'assets/pets/ice-pup.png',
-  bubblit: 'assets/pets/sprout-dino.png',
-  mossling: 'assets/pets/glow-frog.png',
-  voltkit: 'assets/pets/fire-cat.png',
-  coralyn: 'assets/pets/axolotl.png',
-  cinderowl: 'assets/pets/wizard.png',
-  petalyn: 'assets/pets/golden-fox.png',
-  lunabun: 'assets/pets/robo-bunny.png',
-  glacipup: 'assets/pets/panda.png',
-  starwhale: 'assets/pets/phoenix.png',
-  wyrmling: 'assets/pets/dragon.png'
+  fluffin: 'assets/pets/slime.webp',
+  embercub: 'assets/pets/ice-pup.webp',
+  bubblit: 'assets/pets/sprout-dino.webp',
+  mossling: 'assets/pets/glow-frog.webp',
+  voltkit: 'assets/pets/fire-cat.webp',
+  coralyn: 'assets/pets/axolotl.webp',
+  cinderowl: 'assets/pets/wizard.webp',
+  petalyn: 'assets/pets/golden-fox.webp',
+  lunabun: 'assets/pets/robo-bunny.webp',
+  glacipup: 'assets/pets/panda.webp',
+  starwhale: 'assets/pets/phoenix.webp',
+  wyrmling: 'assets/pets/dragon.webp'
 };
 function petImage(speciesId, className = '') {
   const src = petImages[speciesId];
