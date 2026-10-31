@@ -1300,3 +1300,45 @@ body[data-theme="dark"] .home-page .companion-panel{
   .home-page .pet-stage > .companion-panel .compact-care{gap:3px!important}
   .home-page .pet-stage > .companion-panel .compact-care .care-action{min-height:39px!important}
 }
+
+
+/* Verified compact override: shrink the full companion section */
+.home-page .pet-stage,
+.home-page .pet-stage[aria-label="Your companion"]{
+  min-height:660px!important;
+  height:660px!important;
+  padding-bottom:0!important;
+}
+.home-page .pet-stage > .companion-panel{
+  left:10px!important;right:10px!important;bottom:10px!important;
+  padding:7px!important;gap:4px!important;
+  transform:scale(.92)!important;
+  transform-origin:bottom center!important;
+  width:calc(100% - 20px)!important;
+}
+.home-page .pet-stage > .companion-panel .companion-panel-top{margin:0 0 3px!important}
+.home-page .pet-stage > .companion-panel .companion-meta{gap:3px!important}
+.home-page .pet-stage > .companion-panel .companion-meta h2{font-size:15px!important}
+.home-page .pet-stage > .companion-panel .companion-meta .eyebrow{font-size:6px!important}
+.home-page .pet-stage > .companion-panel .companion-meta .pill{font-size:7px!important;padding:3px 6px!important}
+.home-page .pet-stage > .companion-panel .companion-xp{margin:3px 0!important;font-size:6px!important}
+.home-page .pet-stage > .companion-panel .progress-track{height:3px!important}
+.home-page .pet-stage > .companion-panel .companion-tools{margin-top:3px!important;padding-top:4px!important}
+.home-page .pet-stage > .companion-panel .compact-needs{gap:3px!important}
+.home-page .pet-stage > .companion-panel .compact-needs .status-meter{padding:4px 3px!important}
+.home-page .pet-stage > .companion-panel .compact-needs .status-icon{width:13px!important;height:13px!important;font-size:8px!important}
+.home-page .pet-stage > .companion-panel .compact-needs .status-name{font-size:6px!important}
+.home-page .pet-stage > .companion-panel .compact-needs .status-meter-top>b{font-size:7px!important}
+.home-page .pet-stage > .companion-panel .compact-needs .status-track{height:2px!important;margin-top:3px!important}
+.home-page .pet-stage > .companion-panel .compact-care-label{margin:4px 1px 3px!important}
+.home-page .pet-stage > .companion-panel .compact-care-label span,
+.home-page .pet-stage > .companion-panel .compact-care-label small{font-size:6px!important}
+.home-page .pet-stage > .companion-panel .compact-care{gap:3px!important}
+.home-page .pet-stage > .companion-panel .compact-care .care-action{min-height:34px!important;padding:2px 1px!important;gap:1px!important}
+.home-page .pet-stage > .companion-panel .compact-care .care-icon{width:16px!important;height:16px!important;font-size:9px!important}
+.home-page .pet-stage > .companion-panel .compact-care .care-action b{font-size:6px!important}
+@media(max-width:380px){
+  .home-page .pet-stage,
+  .home-page .pet-stage[aria-label="Your companion"]{min-height:625px!important;height:625px!important}
+  .home-page .pet-stage > .companion-panel{left:8px!important;right:8px!important;bottom:8px!important;width:calc(100% - 16px)!important;transform:scale(.90)!important}
+}
