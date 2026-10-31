@@ -2723,3 +2723,14 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .store-preview-item>strong{grid-column:2;font-size:11px;white-space:nowrap}
 .store-browse-button{margin-top:12px}
 @media(max-width:360px){.store-item-preview{grid-template-columns:1fr}.store-preview-item{grid-template-columns:36px minmax(0,1fr) auto}.store-preview-icon{grid-row:auto}.store-preview-item>strong{grid-column:3;grid-row:1}}
+
+/* Store tabs reuse the Collection category cards */
+.store-tabs{margin-top:17px}
+.store-item-grid{margin-top:12px}
+.store-item-card{display:flex;flex-direction:column;min-height:190px}
+.store-item-art{min-height:104px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,rgba(169,148,255,.16),rgba(255,142,175,.10));font-size:48px}
+.store-item-card .accessory-info{display:flex;flex:1;flex-direction:column;align-items:stretch;gap:7px;padding:11px 2px 2px}
+.store-item-card .accessory-info h3{margin:0;font-size:14px}
+.store-item-card .accessory-info p{margin:0;font-size:11px}
+.store-item-price{font-size:12px;margin-top:auto}
+.store-item-card .button{margin-top:5px}
