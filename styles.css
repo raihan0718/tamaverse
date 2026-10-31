@@ -1912,3 +1912,5 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 /* Collection pet detail artwork */
 .pet-detail-art{display:grid;place-items:center;min-height:150px;margin:2px 0 14px;padding:14px;border-radius:18px;background:radial-gradient(circle at 50% 42%,#a994ff2b,transparent 68%),linear-gradient(145deg,#302744,#211b32);overflow:hidden}
 .pet-detail-art .detail-pet-image{display:block;width:116px!important;height:116px!important;max-width:100%;max-height:116px;object-fit:contain!important;object-position:center;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #0005)}
+
+.pet-detail-art .pet-image-fallback{display:grid;place-items:center;width:116px;height:116px;font-size:76px;filter:drop-shadow(0 8px 12px #0005)}
