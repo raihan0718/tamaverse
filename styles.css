@@ -730,6 +730,7 @@ body[data-theme="dark"].battle-fullscreen .battle-hp-card{
 }
 .home-page .stage-topline{position:relative;z-index:3}
 .home-page .orbit,.home-page .stage-spark{z-index:2}
+.home-page .orbit{display:none!important;}
 .home-page .pet-shadow{z-index:3}
 .home-page .stage-pet{z-index:5}
 .home-page .stage-pet>.stage-creature{
