@@ -1955,7 +1955,7 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   transform:translate(-50%,-50%)!important;
 }
 @media(max-width:380px){
-  .home-page .pet-stage{min-height:900px!important}
+  .home-page .pet-stage{min-height:900px!important;height:900px!important;overflow:visible!important}
   .home-page .companion-frame-art{
     width:90%!important;
     top:40%!important;
