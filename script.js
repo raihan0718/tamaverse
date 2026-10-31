@@ -39,7 +39,7 @@ function petImage(speciesId, className = '', eager = false) {
   return `<img class="pet-image ${esc(className)}" src="${src}?v=pet-detail-20261031-4" alt="${esc(pet.name)}" loading="${loading}" decoding="async" fetchpriority="${priority}" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'pet-image-fallback',textContent:'${pet.emoji}'}))">`;
 }
 const accessoryFrames = [
-  {id:'common',name:'Glassy Blue',rarity:'Common',src:'assets/ui/Common-GlassyBlue.webp'},
+  {id:'common',name:'Glossy Blue',rarity:'Common',src:'assets/ui/Common-GlassyBlue.webp'},
   {id:'uncommon',name:'Sprout Green',rarity:'Uncommon',src:'assets/ui/Uncommon-SproutGreen_1.webp'},
   {id:'rare',name:'Sunny Amber',rarity:'Rare',src:'assets/ui/Rare-SunnyAmber.webp'},
   {id:'legendary',name:'Royal Violet',rarity:'Legendary',src:'assets/ui/Legendary-RoyalViolet.webp'},
@@ -48,6 +48,9 @@ const accessoryFrames = [
 function accessoryFrameById(id){return accessoryFrames.find(frame=>frame.id===id)||accessoryFrames[0];}
 let collectionTab='pets';
 let storeTab='gacha';
+window.TAMAVERSE_PREMIUM_INVENTORY=window.TAMAVERSE_PREMIUM_INVENTORY||{rename_card_count:0,rename_pet_card_count:0,owned_frames:['common']};
+function premiumInventory(){return window.TAMAVERSE_PREMIUM_INVENTORY||{rename_card_count:0,rename_pet_card_count:0,owned_frames:['common']};}
+function ownsFrame(id){return id==='common'||(Array.isArray(premiumInventory().owned_frames)&&premiumInventory().owned_frames.includes(id));}
 
 const eggs = [
   {id:'basic',name:'Pixie Egg',image:'assets/eggs/pixie.webp',price:100,description:'Telur ajaib berisi pet Common hingga Legendary.'},
@@ -150,7 +153,7 @@ function petsPage(){
     '<button class="collection-tab '+(collectionTab==='pets'?'active':'')+'" role="tab" aria-selected="'+(collectionTab==='pets')+'" data-action="collection-tab" data-tab="pets"><span>🐾</span><b>Pets</b><small>'+state.pets.length+' collected</small></button>'+
     '<button class="collection-tab '+(collectionTab==='accessories'?'active':'')+'" role="tab" aria-selected="'+(collectionTab==='accessories')+'" data-action="collection-tab" data-tab="accessories"><span>🖼️</span><b>Accessories</b><small>'+accessoryFrames.length+' frames</small></button></div>';
   const petContent='<p class="subtle collection-description">'+owned.size+'/12 species collected · Select a pet to view its details or make it active.</p>'+(sortedPets.length?'<div class="collection-grid">'+sortedPets.map(p=>petCard(p,true)).join('')+'</div>':emptyPets())+'<div class="section-heading"><h2>Not discovered yet</h2></div><div class="collection-grid">'+undiscovered.map(s=>'<article class="creature-card locked"><div class="creature-thumb">❔</div><h3>???</h3><p>'+s.element+' · <span class="rarity rarity-'+s.rarity+'">'+s.rarity+'</span></p></article>').join('')+'</div>';
-  const accessoryContent='<p class="subtle collection-description">Give your companion a new look. Choose a frame to apply it to your home display.</p><div class="accessory-grid">'+accessoryFrames.map(frame=>{const equipped=state.equippedFrame===frame.id;return '<article class="accessory-card '+(equipped?'equipped':'')+'"><div class="accessory-art aura-'+frame.id+'"><img src="'+frame.src+'" alt="'+esc(frame.name)+' frame" loading="lazy" decoding="async"><span class="aura-ornament aura-ornament-top" aria-hidden="true">✦ · ✧</span><span class="aura-ornament aura-ornament-bottom" aria-hidden="true">✧ · ✦</span></div><div class="accessory-info"><span class="rarity rarity-'+frame.rarity+'">'+frame.rarity+'</span><h3>'+esc(frame.name)+'</h3><button class="accessory-equip '+(equipped?'is-equipped':'')+'" data-action="equip-frame" data-frame="'+frame.id+'" '+(equipped?'disabled':'')+'>'+(equipped?'✓ Equipped':'Use frame')+'</button></div></article>';}).join('')+'</div>';
+  const accessoryContent='<p class="subtle collection-description">Give your companion a new look. Frames from the Premium Store appear here after purchase.</p><div class="accessory-grid">'+accessoryFrames.map(frame=>{const ownedFrame=ownsFrame(frame.id);const equipped=state.equippedFrame===frame.id;return '<article class="accessory-card '+(equipped?'equipped':'')+' '+(!ownedFrame?'locked':'')+'"><div class="accessory-art aura-'+frame.id+'"><img src="'+frame.src+'" alt="'+esc(frame.name)+' frame" loading="lazy" decoding="async">'+(!ownedFrame?'<span class="frame-lock">🔒</span>':'')+'<span class="aura-ornament aura-ornament-top" aria-hidden="true">✦ · ✧</span><span class="aura-ornament aura-ornament-bottom" aria-hidden="true">✧ · ✦</span></div><div class="accessory-info"><span class="rarity rarity-'+frame.rarity+'">'+frame.rarity+'</span><h3>'+esc(frame.name)+'</h3><button class="accessory-equip '+(equipped?'is-equipped':'')+'" data-action="equip-frame" data-frame="'+frame.id+'" '+(!ownedFrame||equipped?'disabled':'')+'>'+(equipped?'✓ Equipped':ownedFrame?'Use frame':'🔒 Locked')+'</button></div></article>';}).join('')+'</div>';
   return '<section class="page collection-page"><div class="eyebrow">YOUR COLLECTION</div><h1 class="page-title">Collection</h1>'+tabs+(collectionTab==='accessories'?accessoryContent:petContent)+'</section>';
 }
 function petCard(p,owned){const s=speciesById(p.species);return `<button class="creature-card ${owned?'owned':''}" data-action="inspect" data-pet="${p.uid}"><div class="creature-thumb">${petImage(s.id, 'collection-pet-image')}</div><h3>${esc(p.name)} ${p.uid===state.activePet?'⭐':''}</h3><p>Lv.${p.level} · ${s.element}<br><span class="rarity rarity-${s.rarity}">${s.rarity}</span></p></button>`;}
@@ -724,7 +727,8 @@ function gachaPage(){
   ];
   const tabs='<div class="collection-tabs store-tabs" role="tablist" aria-label="Store categories">'+
     '<button class="collection-tab '+(storeTab==='gacha'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='gacha')+'" data-action="store-tab" data-tab="gacha"><span>🥚</span><b>Gacha</b><small>Discover new pets</small></button>'+
-    '<button class="collection-tab '+(storeTab==='item'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='item')+'" data-action="store-tab" data-tab="item"><span>🧰</span><b>Item</b><small>Supplies & boosts</small></button></div>';
+    '<button class="collection-tab '+(storeTab==='item'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='item')+'" data-action="store-tab" data-tab="item"><span>🧰</span><b>Item</b><small>Supplies & boosts</small></button>'+
+    '<button class="collection-tab '+(storeTab==='premium'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='premium')+'" data-action="store-tab" data-tab="premium"><span>💎</span><b>Premium</b><small>Cards & frames</small></button></div>';
   const gachaContent=`
     <p class="subtle collection-description">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Special: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p>
     <div class="notice">🎁 Gratis 1 Basic Egg setiap hari. Semua hadiah menggunakan mata uang dalam game—tanpa pembayaran asli.</div>
@@ -753,7 +757,14 @@ function gachaPage(){
   const itemContent=`
     <p class="subtle collection-description">Perlengkapan untuk membantu merawat dan melatih companion-mu.</p>
     <div class="accessory-grid store-item-grid">${storeItems.map(item=>`<article class="accessory-card store-item-card"><div class="store-item-art">${item.icon}</div><div class="accessory-info"><h3>${item.name}</h3><p class="subtle">${item.desc}</p><b class="store-item-price">🪙 ${item.price}</b><button class="button full" data-action="shop">Open Item Shop</button></div></article>`).join('')}</div>`;
-  return '<section class="page collection-page store-page"><div class="eyebrow">WELCOME TO TAMAVERSE</div><h1 class="page-title">Store</h1><p class="subtle collection-description">Temukan teman baru dan perlengkapan untuk pet-mu.</p>'+tabs+(storeTab==='item'?itemContent:gachaContent)+'</section>';
+  const inv=premiumInventory();
+  const premiumContent='<p class="subtle collection-description">Gunakan gem untuk membeli kartu rename dan frame permanen. Frame yang sudah dibeli tersimpan di Collection.</p><div class="notice">💎 Saldo gem: <b>'+Number(state.player.gems||0)+'</b></div><div class="accessory-grid store-item-grid">'+[
+    {id:'rename_card',icon:'🪪',name:'Rename Card',desc:'Kartu untuk mengganti nama pemain.',price:50,count:Number(inv.rename_card_count||0),unit:'cards'},
+    {id:'rename_pet_card',icon:'🐾',name:'Rename Pet Card',desc:'Kartu untuk mengganti nama companion.',price:50,count:Number(inv.rename_pet_card_count||0),unit:'cards'},
+    {id:'frame_royal',icon:'👑',name:'Frame Royal',desc:'Royal Violet · Permanent collection frame.',price:200,owned:ownsFrame('legendary')},
+    {id:'frame_celestial',icon:'✨',name:'Frame Celestial',desc:'Divine Princesses · Permanent collection frame.',price:300,owned:ownsFrame('celestial')}
+  ].map(item=>'<article class="accessory-card store-item-card"><div class="store-item-art">'+item.icon+'</div><div class="accessory-info"><h3>'+item.name+'</h3><p class="subtle">'+item.desc+'</p>'+(item.unit?'<b class="store-item-price">Owned: '+item.count+'</b>':'<b class="store-item-price">'+(item.owned?'✓ Owned':'Permanent unlock')+'</b>')+'<b class="store-item-price">💎 '+item.price+' gems</b><button class="button full" data-action="buy-premium" data-item="'+item.id+'" '+(item.owned?'disabled':'')+'>'+(item.owned?'Already owned':'Buy now')+'</button></div></article>').join('')+'</div>';
+  return '<section class="page collection-page store-page"><div class="eyebrow">WELCOME TO TAMAVERSE</div><h1 class="page-title">Store</h1><p class="subtle collection-description">Temukan teman baru dan perlengkapan untuk pet-mu.</p>'+tabs+(storeTab==='item'?itemContent:storeTab==='premium'?premiumContent:gachaContent)+'</section>';
 }
 function battlePage(){
   if (onlineRoom && ['playing', 'finished'].includes(onlineRoom.status)) {
@@ -1042,12 +1053,31 @@ function avatarPicker(){
   showModal(`<div class="eyebrow">AVATAR PEMAIN</div><h2 id="modalTitle">Pilih avatar</h2><div class="avatar-options">${avatars.map(avatar=>`<button class="avatar-option ${state.player.avatar===avatar?'selected':''}" data-action="set-avatar" data-avatar="${avatar}" aria-label="Pilih avatar ${avatar}">${avatar}</button>`).join('')}</div><button class="button secondary full" data-action="close-modal">Batal</button>`);
 }
 
+async function purchasePremiumItem(itemId){
+  const db=window.TAMAVERSE_SUPABASE_CLIENT;
+  if(!db||!window.TAMAVERSE_USER_ID){showToast('Akun belum tersambung. Tunggu sinkronisasi lalu coba lagi.');return;}
+  const costs={rename_card:50,rename_pet_card:50,frame_royal:200,frame_celestial:300};
+  if(!Object.prototype.hasOwnProperty.call(costs,itemId))return;
+  if(Number(state.player.gems||0)<costs[itemId]){showToast('Gem kamu belum cukup.');return;}
+  try{
+    const {data,error}=await db.rpc('purchase_tamaverse_premium_item',{p_item_id:itemId});
+    if(error)throw error;
+    const result=Array.isArray(data)?data[0]:data;
+    if(!result||result.success!==true){showToast(result?.message||'Pembelian gagal.');return;}
+    state.player.gems=Number(result.gems??state.player.gems);
+    window.TAMAVERSE_PREMIUM_INVENTORY={rename_card_count:Number(result.rename_card_count||0),rename_pet_card_count:Number(result.rename_pet_card_count||0),owned_frames:Array.isArray(result.owned_frames)?result.owned_frames:['common']};
+    save();render();showToast('Pembelian berhasil! Item masuk ke koleksi.');
+  }catch(error){console.error('Premium purchase failed:',error);showToast(error?.message||'Pembelian gagal.');}
+}
+window.purchasePremiumItem=purchasePremiumItem;
+
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
   if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
-  if(a==='store-tab'){storeTab=btn.dataset.tab==='item'?'item':'gacha';render();return;}
-  if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
+  if(a==='store-tab'){storeTab=['item','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
+  if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
+  if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
   if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
