@@ -1880,3 +1880,30 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   .daily-quest-info small{font-size:9px}
   .modal-card .daily-quest-claim{min-width:49px;min-height:28px;padding:0 7px;font-size:9px}
 }
+
+/* Compact 4-across Home shortcuts */
+.home-page .home-feature-shortcuts{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:7px!important;
+  margin:12px 0 10px!important;
+}
+.home-page .home-feature-tile{
+  min-height:76px!important;
+  padding:8px 3px!important;
+  gap:4px!important;
+  border-radius:13px!important;
+}
+.home-page .home-feature-art{
+  width:34px!important;
+  height:34px!important;
+  border-radius:10px!important;
+  font-size:21px!important;
+}
+.home-page .home-feature-tile b{font-size:10px!important;line-height:1.1}
+.home-page .home-feature-tile small{display:none!important}
+@media(max-width:380px){
+  .home-page .home-feature-shortcuts{gap:5px!important}
+  .home-page .home-feature-tile{min-height:68px!important;padding:7px 2px!important}
+  .home-page .home-feature-art{width:30px!important;height:30px!important;font-size:19px!important}
+  .home-page .home-feature-tile b{font-size:9px!important}
+}
