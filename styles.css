@@ -950,3 +950,113 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,
   outline:2px solid #b58cdb!important;
   outline-offset:3px;
 }
+
+
+/* Home v2 — clearer pet needs and larger, balanced care controls */
+.home-page .needs-section,
+.home-page .care-section{
+  margin:18px 0 0;
+}
+.home-page .home-section-heading{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:0 2px 11px;
+}
+.home-page .home-section-kicker{
+  display:block;margin-bottom:3px;color:#a47ba9;
+  font-size:8px;font-weight:900;letter-spacing:1.8px;
+}
+.home-page .home-section-heading h2{
+  margin:0;color:#3d3047;
+  font:700 19px 'Space Grotesk',sans-serif;
+}
+.home-page .live-label{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 9px;
+  border:1px solid #dcefe5;border-radius:99px;background:#f3fbf6;
+  color:#56866c;font-size:8px;font-weight:900;letter-spacing:1px;
+}
+.home-page .live-label i{
+  width:6px;height:6px;border-radius:50%;background:#65c58b;
+  box-shadow:0 0 0 3px #65c58b20;
+}
+.home-page .status-panel{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;margin:0;padding:11px;border:1px solid #eddfeb;
+  border-radius:21px;background:linear-gradient(145deg,#fff,#fff8fc);
+  box-shadow:0 5px 0 #f0e4ed,0 12px 22px #65445c08;
+}
+.home-page .status-meter{
+  position:relative;min-width:0;padding:11px 11px 9px;
+  border:1px solid #f0e7ef;border-radius:15px;background:#fff;
+}
+.home-page .status-meter-top{
+  display:grid;grid-template-columns:25px minmax(0,1fr) auto;
+  align-items:center;gap:6px;
+}
+.home-page .status-icon{
+  display:grid;place-items:center;width:25px;height:25px;
+  border-radius:9px;background:#f8edf5;font-size:14px;
+}
+.home-page .status-name{overflow:hidden;color:#75657d;font-size:10px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.home-page .status-meter-top>b{color:#4e3d58;font:700 13px 'Space Grotesk',sans-serif;white-space:nowrap}
+.home-page .status-meter-top>b small{color:#a99aaa;font:600 8px 'DM Sans',sans-serif}
+.home-page .status-track{height:6px;margin-top:9px;overflow:hidden;border-radius:99px;background:#f0eaf1}
+.home-page .status-fill{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#9a83d6,#d88db5);transition:width .3s ease}
+.home-page .status-hunger .status-fill{background:linear-gradient(90deg,#f2bd70,#e78a91)}
+.home-page .status-energi .status-fill{background:linear-gradient(90deg,#e9c66f,#e99b73)}
+.home-page .status-kebersihan .status-fill{background:linear-gradient(90deg,#79c9d2,#8f9de0)}
+.home-page .status-level{display:block;margin-top:5px;color:#a394a6;font-size:8px;font-weight:700}
+.home-page .care-section{margin-top:23px}
+.home-page .care-hint{color:#9c8b9e;font-size:9px;font-weight:700}
+.home-page .care-actions{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;margin:0;
+}
+.home-page .care-action{
+  display:flex;flex-direction:row;align-items:center;justify-content:flex-start;
+  gap:10px;min-width:0;min-height:68px;padding:10px 11px;
+  border:1px solid #eddfeb;border-radius:17px;background:#fff;
+  box-shadow:0 4px 0 #f0e5ef;color:#55445f;text-align:left;
+}
+.home-page .care-action:active{transform:translateY(2px) scale(.985);box-shadow:0 2px 0 #f0e5ef}
+.home-page .care-icon{
+  display:grid;place-items:center;flex:none;width:39px;height:39px;
+  border:1px solid #f0e5ef;border-radius:13px;background:linear-gradient(145deg,#fbf1f8,#f1edfb);
+  font-size:20px;
+}
+.home-page .care-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.home-page .care-copy b{color:#55445f;font-size:11px;font-weight:900}
+.home-page .care-copy small{overflow:hidden;color:#a090a3;font-size:8px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.home-page .care-arrow{flex:none;color:#b49cba;font-size:20px;font-weight:500;line-height:1}
+.home-page .care-action:last-child{grid-column:1/-1;min-height:58px}
+.home-page .care-action:last-child .care-icon{width:35px;height:35px}
+body[data-theme="dark"] .home-page .home-section-heading h2{color:#fff4fb}
+body[data-theme="dark"] .home-page .home-section-kicker{color:#d4a6cc}
+body[data-theme="dark"] .home-page .live-label{background:#253c32;border-color:#365b49;color:#a8e0bd}
+body[data-theme="dark"] .home-page .status-panel{background:linear-gradient(145deg,#2b2230,#241c29);border-color:#ffffff18;box-shadow:0 5px 0 #201923,0 12px 22px #0002}
+body[data-theme="dark"] .home-page .status-meter{background:#352a3a;border-color:#ffffff12}
+body[data-theme="dark"] .home-page .status-icon{background:#49384b}
+body[data-theme="dark"] .home-page .status-name,
+body[data-theme="dark"] .home-page .care-copy b{color:#f4e8f3}
+body[data-theme="dark"] .home-page .status-meter-top>b{color:#fff5fc}
+body[data-theme="dark"] .home-page .status-level,
+body[data-theme="dark"] .home-page .status-meter-top>b small,
+body[data-theme="dark"] .home-page .care-hint,
+body[data-theme="dark"] .home-page .care-copy small{color:#b9a9bc}
+body[data-theme="dark"] .home-page .status-track{background:#514354}
+body[data-theme="dark"] .home-page .care-action{background:#2b2230;border-color:#ffffff18;box-shadow:0 4px 0 #201923;color:#fff5fc}
+body[data-theme="dark"] .home-page .care-icon{background:#403146;border-color:#ffffff12}
+body[data-theme="dark"] .home-page .care-arrow{color:#d2b6d1}
+@media(max-width:380px){
+  .home-page .needs-section,.home-page .care-section{margin-top:16px}
+  .home-page .status-panel{gap:7px;padding:8px;border-radius:18px}
+  .home-page .status-meter{padding:9px 8px 8px;border-radius:13px}
+  .home-page .status-meter-top{grid-template-columns:22px minmax(0,1fr) auto;gap:5px}
+  .home-page .status-icon{width:22px;height:22px;font-size:12px}
+  .home-page .status-name{font-size:9px}
+  .home-page .status-meter-top>b{font-size:12px}
+  .home-page .care-actions{gap:7px}
+  .home-page .care-action{min-height:63px;padding:8px;gap:8px;border-radius:15px}
+  .home-page .care-icon{width:34px;height:34px;border-radius:11px;font-size:18px}
+  .home-page .care-copy b{font-size:10px}
+  .home-page .care-copy small{font-size:7px}
+}
