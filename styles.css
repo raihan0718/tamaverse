@@ -811,3 +811,27 @@ body[data-theme="dark"] .home-page .pet-stage{
 body[data-theme="dark"] .home-page .companion-panel{background:#2c2332eF;border-color:#57465f}
 body[data-theme="dark"] .home-page .companion-meta h2{color:#fff}
 body[data-theme="dark"] .home-page .tama-care-button{background:linear-gradient(180deg,#d8efff,#8fb8d8);color:#203e5b}
+
+
+/* Larger Tamagotchi shell; remove decorative orbit rings */
+.home-page .pet-stage{
+  min-height:700px;
+}
+.home-page .companion-frame-art{
+  width:min(116%,650px);
+  max-width:none;
+  top:49%;
+  transform:translate(-50%,-53%);
+}
+.home-page .orbit,
+.home-page .orbit::before,
+.home-page .orbit::after{
+  display:none!important;
+}
+@media(max-width:380px){
+  .home-page .pet-stage{min-height:660px}
+  .home-page .companion-frame-art{
+    width:116%;
+    top:49%;
+  }
+}
