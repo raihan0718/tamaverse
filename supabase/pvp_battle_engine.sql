@@ -35,6 +35,8 @@ DECLARE
   v_random numeric;
   v_turn integer;
   v_skill_key text;
+  v_skill_ready_key text;
+  v_skill_ready_at timestamptz;
   v_defend_key text;
   v_target_defend_key text;
   v_actor_hp_key text;
@@ -73,6 +75,7 @@ BEGIN
     v_actor_hp_key := 'host_hp';
     v_target_hp_key := 'guest_hp';
     v_skill_key := 'host_skill_used';
+    v_skill_ready_key := 'host_skill_ready_at';
     v_defend_key := 'host_defending';
     v_target_defend_key := 'guest_defending';
   ELSIF v_room.guest_id = v_uid THEN
@@ -82,6 +85,7 @@ BEGIN
     v_actor_hp_key := 'guest_hp';
     v_target_hp_key := 'host_hp';
     v_skill_key := 'guest_skill_used';
+    v_skill_ready_key := 'guest_skill_ready_at';
     v_defend_key := 'guest_defending';
     v_target_defend_key := 'host_defending';
   ELSE
@@ -127,8 +131,11 @@ BEGIN
     RAISE EXCEPTION 'Status HP battle tidak valid';
   END IF;
 
-  IF p_action = 'skill' AND COALESCE((v_state->>v_skill_key)::boolean, false) THEN
-    RAISE EXCEPTION 'Skill sudah digunakan pada battle ini';
+  IF p_action = 'skill' THEN
+    v_skill_ready_at := NULLIF(v_state->>v_skill_ready_key, '')::timestamptz;
+    IF v_skill_ready_at IS NOT NULL AND v_skill_ready_at > now() THEN
+      RAISE EXCEPTION 'Skill cooldown: tunggu % detik', CEIL(EXTRACT(EPOCH FROM (v_skill_ready_at - now())))::integer;
+    END IF;
   END IF;
 
   IF p_action = 'item' THEN
@@ -173,7 +180,7 @@ BEGIN
 
     v_target_hp := GREATEST(0, v_target_hp - v_damage);
     IF p_action = 'skill' THEN
-      v_state := jsonb_set(v_state, ARRAY[v_skill_key], 'true'::jsonb, true);
+      v_state := jsonb_set(v_state, ARRAY[v_skill_ready_key], to_jsonb((now() + interval '5 seconds')::text), true);
     END IF;
     v_log := v_log || jsonb_build_array(
       jsonb_build_object(
