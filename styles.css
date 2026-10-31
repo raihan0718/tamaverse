@@ -2135,3 +2135,17 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
     animation:none!important;
   }
 }
+
+
+/* Stable aura blur: keep Royal and Celestial glow intensity constant.
+   Decorative stars keep their own independent twinkle animations. */
+.accessory-art.aura-legendary::before,
+.accessory-art.aura-celestial::before{
+  animation:none!important;
+  opacity:1!important;
+}
+.home-page .home-frame-aura.aura-legendary,
+.home-page .home-frame-aura.aura-celestial{
+  animation:none!important;
+  opacity:1!important;
+}
