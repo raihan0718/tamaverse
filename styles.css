@@ -2201,7 +2201,7 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   z-index:50!important;
 }
 
-/* Home-only position adjustment requested: frame left 48.5%, pet left 40% top 48%. */
+/* Home-only position adjustment requested: frame left 48.5%, pet left 45% top 50%. */
 .home-page .pet-stage > .companion-frame-art{
   left:48.5%!important;
 }
@@ -2210,7 +2210,7 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   left:48.5%!important;
 }
 .home-page .pet-stage > .stage-pet{
-  left:40%!important;
-  top:48%!important;
+  left:45%!important;
+  top:50%!important;
   transform:translate(-50%,-50%) scale(1.08)!important;
 }
