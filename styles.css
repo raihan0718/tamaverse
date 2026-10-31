@@ -1569,3 +1569,9 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
   .home-page .compact-care .care-icon{font-size:14px!important}
   .home-page .compact-care .care-action b{font-size:7px!important}
 }
+
+
+/* Keep Train aligned with the other quick-care buttons */
+.home-page .compact-care .care-action:last-child{
+  grid-column:auto!important;
+}
