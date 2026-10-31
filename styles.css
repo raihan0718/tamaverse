@@ -904,3 +904,7 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 @media(prefers-reduced-motion:reduce){
   .home-page .stage-pet,.home-page .stage-pet>.stage-creature{animation:none!important}
 }
+
+/* Remove decorative rings behind the Home UI frame */
+.home-page .orbit,
+.home-page .orbit-two{display:none!important;}
