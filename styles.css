@@ -2875,3 +2875,30 @@ body[data-theme="dark"] .page :is(.stat-tile,.care-card,.profile-stat,.creature-
 .frame-lock{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,16,28,.38);font-size:28px;backdrop-filter:blur(1.5px)}
 .accessory-equip:disabled{opacity:.62;cursor:not-allowed}
 .store-item-card .accessory-info .store-item-price{display:block}
+
+
+/* Diamond top-up section */
+.diamond-store-hero{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px;padding:18px;margin:14px 0;border:1px solid rgba(133,111,220,.22);border-radius:22px;background:linear-gradient(135deg,rgba(124,105,219,.16),rgba(244,183,218,.18));}
+.diamond-store-orb{display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,.62);font-size:34px;box-shadow:0 8px 24px rgba(102,79,180,.12);}
+.diamond-store-hero h2{margin:3px 0 5px;font-size:1.35rem;}
+.diamond-store-hero p{margin:0;}
+.diamond-wallet{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.48);}
+.diamond-wallet small{font-size:.68rem;letter-spacing:.12em;font-weight:800;opacity:.7;}
+.diamond-wallet strong{font-size:1.05rem;}
+.diamond-package-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:12px 0 18px;}
+.diamond-package-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:17px 12px 13px;border:1px solid var(--border-color,rgba(120,100,160,.18));border-radius:18px;background:var(--card-bg,rgba(255,255,255,.72));text-align:center;overflow:hidden;}
+.diamond-package-card.featured{border-color:rgba(139,112,225,.65);box-shadow:0 7px 22px rgba(117,92,196,.12);}
+.diamond-package-icon{font-size:29px;filter:drop-shadow(0 4px 7px rgba(100,80,180,.2));}
+.diamond-package-card>strong{font-size:1.55rem;line-height:1.15;}
+.diamond-package-label,.diamond-package-name{font-size:.78rem;}
+.diamond-package-label{opacity:.7;}
+.diamond-package-name{margin-top:4px;}
+.diamond-package-price{min-height:30px;font-size:.72rem;opacity:.72;}
+.diamond-package-card .button{margin-top:5px;font-size:.78rem;}
+.diamond-package-card .button:disabled{opacity:.58;cursor:not-allowed;}
+.diamond-popular{position:absolute;top:0;right:0;padding:5px 8px;border-radius:0 0 0 10px;background:#8b70d8;color:white;font-size:.58rem;font-weight:900;letter-spacing:.08em;}
+.diamond-history-card{margin-top:14px;}
+.diamond-history-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 8px 10px;gap:7px;}
+.diamond-history-empty>span{font-size:30px;}
+.diamond-history-empty p{margin:0;max-width:260px;font-size:.82rem;}
+@media(min-width:520px){.diamond-package-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.diamond-store-hero{grid-template-columns:auto 1fr auto;}.diamond-wallet{grid-column:auto;flex-direction:column;align-items:flex-end;background:transparent;padding:0;}}
