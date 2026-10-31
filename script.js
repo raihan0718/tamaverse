@@ -439,14 +439,14 @@ function doCare(kind){
 function chooseRarity(){const r=Math.random()*100;return r<60?'Common':r<85?'Rare':r<97?'Epic':'Legendary';}
 function pullEgg(id,free){const e=eggs.find(x=>x.id===id);if(!e)return;if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}const currency=e.currency==='gem'?'gems':'coins';const cost=free?0:e.price;if(state.player[currency]<cost){showToast(`Koin/gem tidak cukup untuk ${e.name}.`);return;}if(!free)state.player[currency]-=cost;else state.gacha.lastFree=new Date().toDateString();
   const pool=species.filter(s=>s.pool.includes(id));let rarity=chooseRarity();if(state.gacha.pityRare>=9&&['Common'].includes(rarity))rarity='Rare';if(state.gacha.pityEpic>=49&&['Common','Rare'].includes(rarity))rarity='Epic';let candidates=pool.filter(s=>s.rarity===rarity);if(!candidates.length){const available=pool.filter(s=>s.rarity==='Common'||s.rarity==='Rare'||s.rarity==='Epic'||s.rarity==='Legendary');candidates=available;}const chosen=candidates[Math.floor(Math.random()*candidates.length)];state.gacha.pityRare=chosen.rarity==='Common'?state.gacha.pityRare+1:0;state.gacha.pityEpic=['Common','Rare'].includes(chosen.rarity)?state.gacha.pityEpic+1:0;state.quests.progress.egg++;const result=addPet(chosen.id);state.gacha.history.unshift({species:chosen.id,name:chosen.name,rarity:chosen.rarity,date:Date.now()});state.gacha.history=state.gacha.history.slice(0,20);save();render();showModal(`<div class="hatch-egg">${petImage(chosen.id, 'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${result.duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2><p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${result.duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p><div class="stats-row"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div></div><button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);}
-function buyItem(type){const p=activePet();if(p&&petActivityBlocked(p))return;const shop={food:{name:'Food',price:50},energy:{name:'Ramuan energi',price:40},training:{name:'Training Manual',price:120}};const item=shop[type];if(!item)return;if(state.player.coins<item.price){showToast('Koin tidak cukup.');return;}state.player.coins-=item.price;if(type==='food')state.items.food=(state.items.food||0)+1;else state.items[type]=(state.items[type]||0)+1;save();closeModal();render();showToast(`${item.name} dibeli!`);}
+function buyItem(type){const p=activePet();if(p&&petActivityBlocked(p))return;const shop={food:{name:'Apple',price:50},energy:{name:'Energy Potion',price:40},training:{name:'Training Manual',price:120}};const item=shop[type];if(!item)return;if(state.player.coins<item.price){showToast('Koin tidak cukup.');return;}state.player.coins-=item.price;if(type==='food')state.items.food=(state.items.food||0)+1;else state.items[type]=(state.items[type]||0)+1;save();closeModal();render();showToast(`${item.name} dibeli!`);}
 function startBattle(mode){const p=activePet();if(!p){showToast('Kamu belum punya pet!');return;}if(petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(p.happiness<20){showToast(battleMoodMessage(p));return;}if(p.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}if(battle)return;p.energy=clamp(p.energy-25,0,100);p.careUpdatedAt=Date.now();const pool=species.filter(s=>s.id!==p.species);const os=pool[Math.floor(Math.random()*pool.length)];const opponent={...os,level:Math.max(1,p.level),name:mode==='simulated'?['PixelPaw','StarMochi','DemoRanger'][Math.floor(Math.random()*3)]:`${os.name} liar`,stats:{...os.stats,hp:Math.round(os.stats.hp*(0.8+p.level*.08)),atk:os.stats.atk+p.level-1}};battle={mode,petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,turn:1,skillUsed:false,defending:false,log:[`${p.name} memasuki arena!`,`Lawan ${opponent.name} muncul!`],ended:false};render();}
 function elementMultiplier(a,b){const strong={Fire:'Nature',Nature:'Water',Water:'Fire',Light:'Fire'};if(strong[a]===b)return 1.25;if(strong[b]===a)return .8;return 1;}
 function battleAction(move){if(!battle||battle.ended)return;if(move==='skill'&&battle.skillUsed){showToast('Skill sudah digunakan pada battle ini.');return;}const p=petById(battle.petId);if(!p)return;const ps=speciesById(p.species),os=speciesById(battle.opponent.species);battle.actionFx=move;let log=battle.log;let damage=0;if(move==='attack'||move==='skill'){damage=Math.max(4,Math.round((p.stats.atk+(move==='skill'?10:0)-battle.opponent.stats.def*.35)*(0.85+Math.random()*.3)*elementMultiplier(ps.element,os.element)));if(Math.random()<.1)damage=Math.round(damage*1.5);battle.enemyHP-=damage;log.push(`${p.name} ${move==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage!`);if(move==='skill')battle.skillUsed=true;}else if(move==='defend'){battle.defending=true;log.push(`${p.name} bersiap bertahan.`);}else if(move==='item'){if(state.items.snack<1){showToast('Item battle habis.');return;}state.items.snack--;battle.playerHP=Math.min(p.stats.hp,battle.playerHP+25);log.push(`${p.name} memakai item battle dan memulihkan HP!`);}
   if(battle.enemyHP<=0){finishBattle('win');return;}const incoming=Math.max(3,Math.round((battle.opponent.stats.atk-p.stats.def*.3)*(0.85+Math.random()*.3)*elementMultiplier(os.element,ps.element)*(battle.defending?.45:1)));battle.playerHP-=incoming;battle.defending=false;log.push(`${battle.opponent.name} menyerang, ${incoming} damage.`);battle.turn++;if(battle.playerHP<=0){finishBattle('loss');return;}if(battle.turn>30){finishBattle('draw');return;}battle.log=log.slice(-30);render();}
 function finishBattle(result){if(!battle||battle.ended)return;battle.ended=true;const p=petById(battle.petId);if(result==='win'){state.player.wins++;state.player.rating+=battle.mode==='simulated'?12:5;state.player.coins+=35;playerXP(25);grantPetXP(p,20);state.quests.progress.win++;showToast('Menang! +35 koin, XP pet & pemain.');}else if(result==='loss'){state.player.losses++;state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);showToast('Kalah, tapi pet mendapat pengalaman.');}else{state.player.draws++;showToast('Battle berakhir seri.');}state.quests.progress.battle++;state.battleHistory.unshift({result,date:Date.now(),mode:battle.mode});state.battleHistory=state.battleHistory.slice(0,20);save();battle=null;render();showModal(`<div class="hatch-egg">${result==='win'?'🏆':result==='draw'?'🤝':'💫'}</div><h2 id="modalTitle" style="text-align:center">${result==='win'?'Kemenangan!':result==='draw'?'Seri!':'Pertarungan selesai'}</h2><p style="text-align:center">${result==='win'?'Hebat! Petmu memperoleh hadiah battle.':result==='draw'?'Pertarungan berakhir imbang.':'Jangan menyerah, petmu tetap mendapat XP.'}</p><button class="button full" data-action="close-modal">Lanjut</button>`);}
 function inspectPet(uid){const p=petById(uid);if(!p)return;const s=speciesById(p.species);selectedPetId=uid;showModal(`<div class="hatch-egg">${petImage(s.id, 'detail-pet-image')}</div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2 id="modalTitle">${esc(p.name)} · Lv.${p.level}</h2><p>${s.name} · Evolusi ${p.evolution}/100</p><div class="stats-row"><div class="stat-tile"><strong>${p.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${p.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${p.stats.def}</strong><span>DEF</span></div></div><div class="modal-actions"><button class="button secondary" data-action="nickname-pet">Ubah nama</button><button class="button" data-action="set-active" data-pet="${uid}">${uid===state.activePet?'Pet aktif':'Pilih aktif'}</button></div>`);}
-function showShop(){showModal(`<div class="eyebrow">TAMAVERSE STORE</div><h2 id="modalTitle">Perlengkapan pet</h2><p>Belanja memakai Coins.</p>${[['food','🍓 Food','50'],['energy','⚡ Energy Potion','40'],['training','📘 Training Manual','120']].map(x=>`<div class="quest-row"><span>${x[1]} · 🪙 ${x[2]}</span><button class="button" data-action="buy" data-item="${x[0]}">Beli</button></div>`).join('')}<button class="button secondary full" data-action="close-modal">Tutup</button>`);}
+function showShop(){showModal(`<div class="eyebrow">TAMAVERSE STORE</div><h2 id="modalTitle">Perlengkapan pet</h2><p>Belanja memakai Coins.</p>${[['food','🍎 Apple','50'],['energy','⚡ Energy Potion','40'],['training','📘 Training Manual','120']].map(x=>`<div class="quest-row"><span>${x[1]} · 🪙 ${x[2]}</span><button class="button" data-action="buy" data-item="${x[0]}">Beli</button></div>`).join('')}<button class="button secondary full" data-action="close-modal">Tutup</button>`);}
 function doClaim(id){const q=questDefinitions().find(x=>x.id===id);if(!q||state.quests.claimed.includes(id)||(state.quests.progress[id]||0)<q.target)return;state.quests.claimed.push(id);state.player.coins+=q.reward;playerXP(10);save();render();showToast(`Quest selesai! +${q.reward} koin +10 XP pemain.`);}
 function resetGame(){showModal(`<div class="eyebrow">KONFIRMASI</div><h2 id="modalTitle">Hapus semua progres?</h2><p>Data lokal, pet, dan koin akan dihapus dari perangkat ini. Tindakan ini tidak bisa dibatalkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button danger" data-action="confirm-reset">Hapus data</button></div>`);}
 
@@ -599,28 +599,46 @@ function homePage(){
   </section>`;
 }
 function doCare(kind){
-  const p=activePet();if(!p){showToast('Tetaskan pet lebih dulu!');return;}
-  if(kind==='feed'){
-    if(p.hunger<=0){showToast(`${p.name} sudah kenyang.`);return;}
-    triggerPetAnimation('eat');p.hunger=clamp(p.hunger-25,0,100);grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Lapar turun, +4 XP.`);
+  const p=activePet();
+  if(!p){showToast('Tetaskan pet lebih dulu!');return;}
+  if(kind==='sleep'&&petSleeping(p)){
+    const elapsed=Math.max(0,Date.now()-p.sleepStartedAt);
+    p.energy=clamp(p.energy+(elapsed/900000)*100,0,100);
+    p.sleeping=false;p.sleepStartedAt=0;p.careUpdatedAt=Date.now();
+    save();render();showToast(`${p.name} sudah bangun. Pemulihan energi dihentikan.`);return;
+  }
+  if(petActivityBlocked(p))return;
+  if(kind==='energy'){
+    if((state.items.energy||0)<1){showToast('Energy Potion habis. Beli di Store.');return;}
+    if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}
+    state.items.energy--;p.energy=clamp(p.energy+30,0,100);
+    showToast('Energy Potion digunakan! Energy +30.');
+  }else if(kind==='feed'){
+    if(p.hunger>=100){showToast(`${p.name} belum lapar.`);return;}
+    if((state.items.food||0)<1){showToast('Apple habis. Beli Apple di Store seharga 50 Coins.');return;}
+    state.items.food--;triggerPetAnimation('eat');p.hunger=clamp(p.hunger+50,0,100);grantPetXP(p,4);
+    if(state.quests?.progress)state.quests.progress.feed++;
+    showToast(`${p.name} makan Apple! Hunger +50.`);
   }else if(kind==='play'){
-    if(p.energy<15){showToast('Energi pet terlalu rendah untuk bermain.');return;}
+    if(p.energy<10){showToast('Energi pet terlalu rendah untuk bermain.');return;}
     if(p.happiness>=100){showToast(`${p.name} sudah sangat bahagia!`);return;}
-    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-15,0,100);grantPetXP(p,4);state.quests.progress.play++;showToast('Waktu bermain menyenangkan! +4 XP.');
+    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-10,0,100);grantPetXP(p,4);
+    if(state.quests?.progress)state.quests.progress.play++;
+    showToast('Waktu bermain menyenangkan! Energy -10.');
   }else if(kind==='clean'){
     if(p.cleanliness>=100){showToast(`${p.name} sudah bersih!`);return;}
     triggerPetAnimation('bath');p.cleanliness=100;showToast(`${p.name} jadi bersih dan segar!`);
   }else if(kind==='sleep'){
     if(p.energy>=100){showToast(`${p.name} sudah penuh energi.`);return;}
-    triggerPetAnimation('sleep');p.energy=clamp(p.energy+35,0,100);showToast('Pet beristirahat. Energi +35.');
+    p.sleeping=true;p.sleepStartedAt=Date.now();triggerPetAnimation('sleep');
+    showToast(`${p.name} mulai tidur. Energi pulih penuh dalam 15 menit.`);
   }else if(kind==='train'){
     if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
-    triggerPetAnimation('train');
-    if(state.items.training>0){state.items.training--;grantPetXP(p,14);p.evolution=clamp(p.evolution+8,0,100);showToast('Latihan selesai! +14 XP dan progres evolusi.');}
-    else{grantPetXP(p,6);p.evolution=clamp(p.evolution+4,0,100);showToast('Latihan selesai! +6 XP.');}
-    p.energy=clamp(p.energy-20,0,100);
+    if((state.items.training||0)<1){showToast('Training Manual habis. Beli di Store untuk latihan.');return;}
+    state.items.training--;triggerPetAnimation('train');grantPetXP(p,30);p.energy=clamp(p.energy-20,0,100);p.evolution=Math.min(100,p.evolution+12);
+    showToast('Training Manual digunakan! +30 XP dan progres evolusi.');
   }else return;
-  save();render();
+  p.careUpdatedAt=Date.now();save();render();
 }
 function dailyReset(){
   const today=new Date().toDateString();
@@ -757,8 +775,8 @@ function profilePage(){
       <div class="profile-edit-actions"><button class="button secondary" data-action="rename-player">✏️ Ubah nama</button><button class="button secondary" data-action="avatar-picker">🙂 Ubah avatar</button></div>
     </div>
     <div class="section-heading"><h2>🎒 Inventori</h2></div><div class="card">
-      <div class="rank-row"><span>🍓</span><span>Camilan<br><small class="muted-label">Memulihkan HP saat battle</small></span><b>${state.items.snack}</b></div>
-      <div class="rank-row"><span>⚡</span><span>Ramuan energi<br><small class="muted-label">Pulihkan energi pet</small></span><b>${state.items.energy}</b></div>
+      <div class="rank-row"><span>🍎</span><span>Apple<br><small class="muted-label">Memulihkan Hunger pet +50</small></span><b>${state.items.food||0}</b><button class="button secondary" data-action="care" data-care="feed" ${(state.items.food||0)<1?"disabled":""}>Use</button></div>
+      <div class="rank-row"><span>⚡</span><span>Energy Potion<br><small class="muted-label">Memulihkan Energy pet +30</small></span><b>${state.items.energy}</b><button class="button secondary" data-action="care" data-care="energy" ${(state.items.energy||0)<1?"disabled":""}>Use</button></div>
       <div class="rank-row"><span>🏋️</span><span>Buku latihan<br><small class="muted-label">Latihan ekstra untuk pet</small></span><b>${state.items.training}</b></div>
       <button class="button secondary full" data-action="shop">Buka toko item</button>
     </div>
