@@ -1652,6 +1652,7 @@ async function subscribeOnlineRoom(roomId) {
 
 
 function onlineBattlePage() {
+  if (onlineRoom && ['playing', 'finished'].includes(onlineRoom.status)) return onlineBattleView();
   return `
     <section class="page">
       <div class="eyebrow">TAMAVERSE ONLINE ARENA</div>
