@@ -37,15 +37,15 @@ function petImage(speciesId, className = '') {
     : esc(speciesById(speciesId).emoji);
 }
 const eggs = [
-  {id:'basic',name:'Pixie Egg',image:'assets/eggs/pixie.png',price:100,description:'Telur ajaib berisi pet Common hingga Legendary.'},
-  {id:'premium',name:'Astral Egg',image:'assets/eggs/astral.png',price:5,description:'Telur astral eksklusif berisi pet Rare hingga Legendary.',currency:'gem'}
+  {id:'basic',name:'Pixie Egg',image:'assets/eggs/pixie.webp',price:100,description:'Telur ajaib berisi pet Common hingga Legendary.'},
+  {id:'premium',name:'Astral Egg',image:'assets/eggs/astral.webp',price:5,description:'Telur astral eksklusif berisi pet Rare hingga Legendary.',currency:'gem'}
 ];
 function eggImage(eggId){
   const egg=eggs.find(item=>item.id===eggId);
   if(!egg?.image)return '🥚';
   const imagePath=egg.id==='basic'
-    ?'/tamaverse/assets/eggs/pixie.png'
-    :'/tamaverse/assets/eggs/astral.png';
+    ?'/tamaverse/assets/eggs/pixie.webp'
+    :'/tamaverse/assets/eggs/astral.webp';
   return `<img class="egg-art" src="${imagePath}" alt="${esc(egg.name)}" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'egg-fallback',textContent:'🥚'}))">`;
 }
 const eggRates = {
@@ -572,7 +572,7 @@ function homePage(){
       <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
       <div class="stage-caption"><span class="caption-kicker">A LITTLE FRIEND FROM</span><b>THE TAMAVERSE</b><span class="caption-line"></span></div>
-      <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.png" alt="" aria-hidden="true">
+      <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.webp" alt="" aria-hidden="true">
       <div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div>
       <div class="companion-panel">
         <div class="companion-meta">
