@@ -1975,3 +1975,63 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .home-page .frame-equipped-celestial .companion-frame-art{filter:drop-shadow(0 0 8px rgba(255,153,213,.76)) drop-shadow(0 0 15px rgba(143,190,255,.66)) drop-shadow(0 0 20px rgba(255,220,132,.46)) drop-shadow(0 12px 18px #597ba540)!important}
 @keyframes homeRoyalAura{0%,100%{opacity:.72;scale:.96}50%{opacity:1;scale:1.04}}
 @media(prefers-reduced-motion:reduce){.home-page .home-frame-aura,.home-page .home-frame-aura::after{animation:none!important}}
+
+
+/* Frame aura visibility + separated top/bottom ornaments */
+.accessory-art .aura-ornament,
+.home-page .home-frame-aura .aura-ornament{
+  display:none;
+  position:absolute;
+  z-index:4;
+  left:0;
+  right:0;
+  width:100%;
+  text-align:center;
+  font-style:normal;
+  font-weight:800;
+  line-height:1;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.accessory-art.aura-legendary .aura-ornament,
+.home-page .home-frame-aura.aura-legendary .aura-ornament{
+  display:block;
+  color:#ffe0f5;
+  font-size:clamp(12px,3.8vw,18px);
+  letter-spacing:7px;
+  text-shadow:0 0 6px #ff78d0,0 0 14px #d68cff,0 0 20px #fff;
+  animation:frameSparkle 1.8s ease-in-out infinite;
+}
+.accessory-art.aura-celestial .aura-ornament,
+.home-page .home-frame-aura.aura-celestial .aura-ornament{
+  display:block;
+  color:#fff8d8;
+  font-size:clamp(13px,4vw,19px);
+  letter-spacing:5px;
+  text-shadow:0 0 7px #fff,0 0 15px #ff8bd7,0 0 22px #8bcfff;
+  animation:frameSparkle 1.35s ease-in-out infinite;
+}
+.aura-ornament-top{top:5%}
+.aura-ornament-bottom{bottom:5%}
+.accessory-art.aura-legendary::after,
+.accessory-art.aura-celestial::after,
+.home-page .home-frame-aura.aura-legendary::after,
+.home-page .home-frame-aura.aura-celestial::after{content:none!important}
+.home-page .pet-stage > .home-frame-aura{
+  display:block!important;
+  z-index:3!important;
+  opacity:1;
+  filter:blur(0);
+}
+.home-page .pet-stage > .companion-frame-art{
+  z-index:4!important;
+}
+.home-page .home-frame-aura.aura-common{opacity:.92;background:radial-gradient(ellipse,rgba(74,164,255,.42),rgba(74,164,255,.12) 42%,rgba(74,164,255,0) 74%)}
+.home-page .home-frame-aura.aura-uncommon{opacity:.92;background:radial-gradient(ellipse,rgba(86,207,128,.4),rgba(86,207,128,.12) 42%,rgba(86,207,128,0) 74%)}
+.home-page .home-frame-aura.aura-rare{opacity:.96;background:radial-gradient(ellipse,rgba(255,190,78,.4),rgba(255,126,174,.24) 48%,rgba(255,126,174,0) 76%)}
+.home-page .home-frame-aura.aura-legendary{opacity:1;background:radial-gradient(ellipse,rgba(255,105,191,.48),rgba(190,112,255,.24) 48%,transparent 76%)}
+.home-page .home-frame-aura.aura-celestial{opacity:1;background:conic-gradient(from 0deg,rgba(255,120,160,.48),rgba(255,218,112,.44),rgba(115,224,194,.44),rgba(112,174,255,.48),rgba(193,132,255,.5),rgba(255,120,160,.48))}
+@media(prefers-reduced-motion:reduce){
+  .accessory-art .aura-ornament,
+  .home-page .home-frame-aura .aura-ornament{animation:none!important}
+}
