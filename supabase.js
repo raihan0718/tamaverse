@@ -257,48 +257,7 @@
 
   window.loadPlayerFromSupabase = loadPlayerFromSupabase;
 
-  // Coalesce rapid local saves into one cloud save to avoid Supabase rate limits.
-  let cloudSaveTimer = null;
-  let cloudSavePromise = null;
-  let cloudSavePending = false;
-
-  function scheduleCloudSave(delay = 1000) {
-    if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
-    cloudSaveTimer = setTimeout(() => {
-      cloudSaveTimer = null;
-      runCloudSave().catch((error) => {
-        console.warn('Cloud save failed:', error);
-      });
-    }, delay);
-  }
-
-  async function runCloudSave() {
-    if (cloudSaveTimer) {
-      clearTimeout(cloudSaveTimer);
-      cloudSaveTimer = null;
-    }
-
-    if (cloudSavePromise) {
-      cloudSavePending = true;
-      return cloudSavePromise;
-    }
-
-    cloudSavePromise = savePlayerToSupabase();
-    try {
-      return await cloudSavePromise;
-    } finally {
-      cloudSavePromise = null;
-      if (cloudSavePending) {
-        cloudSavePending = false;
-        scheduleCloudSave(500);
-      }
-    }
-  }
-
-  // Explicit online matchmaking saves can await this same serialized pipeline.
-  window.savePlayerToSupabase = runCloudSave;
-
-  // Keep local saves immediate; debounce only the network synchronization.
+  // Keep the existing local save and also save to Supabase.
   const originalSave =
     typeof window.save === 'function' ? window.save : null;
 
@@ -307,7 +266,9 @@
       try {
         return originalSave.apply(this, arguments);
       } finally {
-        scheduleCloudSave();
+        savePlayerToSupabase().catch((error) => {
+          console.warn('Cloud save failed:', error);
+        });
       }
     };
   }
