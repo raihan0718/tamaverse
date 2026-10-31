@@ -1846,3 +1846,37 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   .modal-card .store-max{padding:0 5px}
   .modal-card .store-buy{min-width:39px;padding:0 6px}
 }
+
+
+/* Daily Quests — compact rows, all missions visible together */
+.modal-card .daily-quest-list{display:grid;gap:7px;margin:10px 0 12px}
+.modal-card .daily-quest-item{
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  min-height:64px;
+  padding:8px 9px;
+  border:1px solid var(--line,rgba(130,120,190,.2));
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(235,232,255,.58));
+}
+.daily-quest-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:rgba(130,111,220,.13);font-size:19px}
+.daily-quest-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+.daily-quest-info strong{font-size:12px;line-height:1.2}
+.daily-quest-info small{font-size:10px;color:var(--muted,#77718d)}
+.daily-quest-track{display:block;height:4px;overflow:hidden;border-radius:99px;background:rgba(130,111,220,.13)}
+.daily-quest-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#9b83e8,#d69bcf)}
+.modal-card .daily-quest-claim{min-width:55px;min-height:30px;padding:0 9px;border-radius:9px;font-size:10px}
+.modal-card .daily-quest-claim:disabled{opacity:.62}
+[data-theme="dark"] .daily-quest-item{background:linear-gradient(145deg,rgba(52,45,91,.94),rgba(35,31,66,.92));border-color:rgba(190,175,255,.18)}
+[data-theme="dark"] .daily-quest-info small{color:#b8b0d5}
+[data-theme="dark"] .daily-quest-icon{background:rgba(190,175,255,.13)}
+@media(max-width:390px){
+  .modal-card .daily-quest-list{gap:6px;margin:8px 0 10px}
+  .modal-card .daily-quest-item{grid-template-columns:32px minmax(0,1fr) auto;gap:7px;min-height:59px;padding:7px}
+  .daily-quest-icon{width:30px;height:30px;font-size:17px}
+  .daily-quest-info strong{font-size:11px}
+  .daily-quest-info small{font-size:9px}
+  .modal-card .daily-quest-claim{min-width:49px;min-height:28px;padding:0 7px;font-size:9px}
+}
