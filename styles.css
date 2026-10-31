@@ -2868,3 +2868,10 @@ body[data-theme="dark"] .page :is(.stat-tile,.care-card,.profile-stat,.creature-
   background:var(--card-bg-soft);
   color:var(--card-ink);
 }
+
+
+/* Premium frame collection lock state */
+.accessory-card.locked .accessory-art{position:relative;filter:saturate(.58)}
+.frame-lock{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,16,28,.38);font-size:28px;backdrop-filter:blur(1.5px)}
+.accessory-equip:disabled{opacity:.62;cursor:not-allowed}
+.store-item-card .accessory-info .store-item-price{display:block}
