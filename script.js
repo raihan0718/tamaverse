@@ -33,7 +33,7 @@ const petImages = {
 function petImage(speciesId, className = '') {
   const src = petImages[speciesId];
   return src
-    ? `<img class="pet-image ${esc(className)}" src="/tamaverse/${src}" alt="${esc(speciesById(speciesId).name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.style.display='none'">`
+    ? `<img class="pet-image ${esc(className)}" src="/tamaverse/${src}" alt="${esc(speciesById(speciesId).name)}" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.style.display='none'">`
     : esc(speciesById(speciesId).emoji);
 }
 const eggs = [
@@ -46,7 +46,7 @@ function eggImage(eggId){
   const imagePath=egg.id==='basic'
     ?'/tamaverse/assets/eggs/pixie.png'
     :'/tamaverse/assets/eggs/astral.png';
-  return `<img class="egg-art" src="${imagePath}" alt="${esc(egg.name)}" loading="eager" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'egg-fallback',textContent:'🥚'}))">`;
+  return `<img class="egg-art" src="${imagePath}" alt="${esc(egg.name)}" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'egg-fallback',textContent:'🥚'}))">`;
 }
 const eggRates = {
   basic:{Common:60,Rare:28,Epic:8,Legendary:4},
