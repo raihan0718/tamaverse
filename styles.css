@@ -2778,3 +2778,93 @@ body:not([data-theme="dark"]) .store-page .store-item-card .store-item-price{
 body:not([data-theme="dark"]) .store-page .store-item-card .accessory-info p{
   color:#817582;
 }
+
+
+/* GLOBAL CARD THEME SYNC
+   Every content card uses the active light/dark palette instead of retaining
+   hard-coded dark surfaces from individual sections. */
+:root{--card-bg:#fff;--card-bg-soft:#fff5f8;--card-border:#eddfeb;--card-ink:#302638;--card-muted:#817582}
+body[data-theme="dark"]{
+  --card-bg:#2b2230;
+  --card-bg-soft:#352a3a;
+  --card-border:#ffffff1c;
+  --card-ink:#fff7fc;
+  --card-muted:#b4a4b5;
+}
+body:not([data-theme="dark"]) .page :is(
+  .card,.stat-tile,.care-card,.profile-stat,.creature-card,.creature-thumb,
+  .profile-card,.egg-card,.quest-row,.notice,.battle-arena,.battle-log,
+  .collection-tab,.accessory-card,.accessory-art,.gacha-reel-card,
+  .store-item-card,.store-item-art,.status-panel,.status-meter,
+  .featured-banner,.player-card,.companion-panel,.home-feature-tile,
+  .daily-reward-card,.daily-reward-day,.inventory-item-card,
+  .inventory-fragment-card,.inventory-item-detail,.rank-me,.pet-detail-art,
+  .battle-hp-card,.battle-log-panel
+){
+  color:var(--card-ink);
+  border-color:var(--card-border);
+}
+body:not([data-theme="dark"]) .page :is(
+  .card,.stat-tile,.care-card,.profile-stat,.creature-card,.profile-card,
+  .egg-card,.quest-row,.notice,.battle-arena,.battle-log,.collection-tab,
+  .accessory-card,.gacha-reel-card,.store-item-card,.status-panel,
+  .status-meter,.player-card,.companion-panel,.home-feature-tile,
+  .daily-reward-card,.daily-reward-day,.inventory-item-card,
+  .inventory-fragment-card,.rank-me,.battle-log-panel
+){
+  background:var(--card-bg);
+  box-shadow:0 4px 14px #65445c08;
+}
+body:not([data-theme="dark"]) .page :is(
+  .stat-tile,.care-card,.profile-stat,.creature-thumb,.accessory-art,
+  .store-item-art,.inventory-item-icon,.inventory-fragment-card,
+  .daily-reward-day,.status-meter
+){
+  background-color:var(--card-bg-soft);
+}
+body:not([data-theme="dark"]) .page :is(
+  .card,.stat-tile,.care-card,.profile-stat,.creature-card,.profile-card,
+  .egg-card,.quest-row,.notice,.battle-arena,.battle-log,.collection-tab,
+  .accessory-card,.store-item-card,.status-panel,.status-meter,
+  .player-card,.companion-panel,.home-feature-tile,.daily-reward-card,
+  .daily-reward-day,.inventory-item-card,.inventory-fragment-card,
+  .rank-me,.battle-log-panel
+) :is(h1,h2,h3,h4,b,strong,p,small,span,label){
+  color:inherit;
+}
+body:not([data-theme="dark"]) .page :is(
+  .card,.stat-tile,.care-card,.profile-stat,.creature-card,.profile-card,
+  .egg-card,.quest-row,.notice,.battle-arena,.battle-log,.collection-tab,
+  .accessory-card,.store-item-card,.status-panel,.status-meter,
+  .player-card,.companion-panel,.home-feature-tile,.daily-reward-card,
+  .daily-reward-day,.inventory-item-card,.inventory-fragment-card,
+  .rank-me,.battle-log-panel
+) :is(p,small,.subtle,.muted-label,.accessory-description){
+  color:var(--card-muted);
+}
+body:not([data-theme="dark"]) .page .collection-tab.active{
+  background:linear-gradient(145deg,#f0e7fb,#fff0f5);
+  border-color:#c9afe8;
+  color:#49334f;
+}
+body:not([data-theme="dark"]) .page .gacha-reel-card{
+  background:linear-gradient(160deg,#fff,#f5edf8);
+  color:#302638;
+  border-color:#e7d9eb;
+}
+body:not([data-theme="dark"]) .page .pet-detail-art{
+  background:radial-gradient(circle at 50% 42%,#e7dafa,transparent 68%),linear-gradient(145deg,#f7edf8,#fff1f5);
+}
+body:not([data-theme="dark"]) .page .battle-hp-card,
+body:not([data-theme="dark"]) .page .battle-log-panel{
+  color:#302638;
+}
+body[data-theme="dark"] .page :is(.collection-tab,.accessory-card,.store-item-card,.gacha-reel-card){
+  background:var(--card-bg);
+  color:var(--card-ink);
+  border-color:var(--card-border);
+}
+body[data-theme="dark"] .page :is(.stat-tile,.care-card,.profile-stat,.creature-thumb,.accessory-art,.store-item-art,.status-meter){
+  background:var(--card-bg-soft);
+  color:var(--card-ink);
+}
