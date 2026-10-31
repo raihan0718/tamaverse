@@ -651,3 +651,13 @@ body[data-theme="dark"].battle-fullscreen .battle-hp-card{
 }
 body[data-theme="dark"].battle-fullscreen .battle-hp-card .hp-value,
 body[data-theme="dark"].battle-fullscreen .battle-hp-card .battle-pet-caption{color:#fff!important}
+
+/* Raise the HP bars and turn label close to the arena's top edge */
+body.battle-fullscreen .battle-side{top:8px!important}
+body.battle-fullscreen .battle-hp-card{top:0!important}
+body.battle-fullscreen .battle-turn-overlay{top:8px!important}
+body.battle-fullscreen .battle-sprite{top:185px!important}
+@media(max-height:740px){
+  body.battle-fullscreen .battle-sprite{top:175px!important}
+  body.battle-fullscreen .battle-turn-overlay{top:8px!important}
+}
