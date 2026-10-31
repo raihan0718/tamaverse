@@ -1180,3 +1180,52 @@ body[data-theme="dark"] .home-page .compact-care .care-icon{background:#4b3a51}
 body[data-theme="dark"] .home-page .companion-panel{
   background:linear-gradient(150deg,#302638f5,#261f30f5)!important;
 }
+
+
+/* FINAL FIX: keep every companion control inside the profile card */
+.home-page .pet-stage{
+  min-height:790px!important;
+  overflow:hidden!important;
+}
+.home-page .pet-stage > .companion-panel{
+  position:absolute!important;
+  z-index:8!important;
+  display:block!important;
+  left:10px!important;
+  right:10px!important;
+  bottom:10px!important;
+  width:auto!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
+.home-page .pet-stage > .companion-panel .companion-tools{
+  display:block!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  width:100%!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  width:100%!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care .care-action{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:0!important;
+  min-height:49px!important;
+  padding:4px 1px!important;
+  gap:3px!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care .care-icon{
+  width:23px!important;height:23px!important;font-size:13px!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care .care-action b{
+  font-size:8px!important;line-height:1!important;
+}
