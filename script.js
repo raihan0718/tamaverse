@@ -936,7 +936,7 @@ function avatarPicker(){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){page=nav.dataset.page;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}
+  if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
   if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){page=btn.dataset.page;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='pet-tap'){triggerPetAnimation('greet');showToast(`${activePet()?.name||'Pet'} menyapamu!`);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
   closeModal();
@@ -1271,6 +1271,16 @@ function onlineBattleView() {
 }
 
 let leavingOnlineRoom = false;
+
+async function dismissOnlineResult() {
+  const db = window.TAMAVERSE_SUPABASE_CLIENT;
+  if (onlineChannel && db) { await db.removeChannel(onlineChannel); onlineChannel = null; }
+  if (onlineRoomPoller) { clearInterval(onlineRoomPoller); onlineRoomPoller = null; }
+  onlineRoom = null;
+  page = 'battle';
+  render();
+  showToast('Kembali ke halaman Battle.');
+}
 
 async function onlineLeaveRoom() {
   if (leavingOnlineRoom) return;
@@ -1677,7 +1687,7 @@ function onlineBattlePage() {
         <p class="subtle">Menunggu host memulai pertandingan...</p>
       ` : ''}
 
-    ${onlineRoom.status === 'playing' || onlineRoom.status === 'finished' ? onlineBattleView() : ''}
+    ${onlineRoom.status === 'playing' ? onlineBattleView() : onlineRoom.status === 'finished' ? `<div class="card" style="margin-top:14px;padding:18px;text-align:center"><div class="eyebrow">MATCH COMPLETE</div><h2>Battle selesai</h2><p class="subtle">Hasil: ${onlineRoom.battle_state?.result === 'draw' ? 'Seri' : onlineRoom.battle_state?.winner_id === window.TAMAVERSE_USER_ID ? 'Menang' : 'Kalah'}</p><button class="button full" data-action="online-result-dismiss">Kembali ke Battle</button></div>` : ''}
 <button
   class="button secondary full"
   style="margin-top:12px"
