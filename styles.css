@@ -1639,3 +1639,51 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
 
 /* Slightly enlarge the companion pet */
 .home-page .stage-pet{transform:scale(1.08)!important;transform-origin:center center!important}
+
+
+/* Home feature shortcuts: Inventory and Daily Reward */
+.home-page .home-feature-shortcuts{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin:18px 0 14px;
+}
+.home-page .home-feature-tile{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:15px 10px 13px;
+  border:1px solid rgba(255,255,255,.78);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(246,226,244,.72));
+  color:var(--text-color,#302638);
+  box-shadow:0 7px 18px rgba(100,70,110,.08);
+  cursor:pointer;
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.home-page .home-feature-tile:active{transform:scale(.97)}
+.home-page .home-feature-art{
+  width:58px;height:58px;
+  display:grid;place-items:center;
+  border-radius:17px;
+  font-size:34px;
+  line-height:1;
+  background:rgba(255,255,255,.78);
+  box-shadow:inset 0 1px 4px rgba(255,255,255,.9),0 4px 12px rgba(100,70,110,.08);
+}
+.home-page .home-feature-tile b{font-size:13px;font-weight:800}
+.home-page .home-feature-tile small{font-size:10px;color:var(--muted-color,#8c7b91)}
+body[data-theme="dark"] .home-page .home-feature-tile{
+  background:linear-gradient(145deg,rgba(66,51,81,.94),rgba(45,35,59,.92));
+  border-color:rgba(255,255,255,.18);
+  color:#fff4fb;
+}
+body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255,.10)}
+@media(max-width:380px){
+  .home-page .home-feature-shortcuts{gap:9px;margin:14px 0 12px}
+  .home-page .home-feature-tile{padding:12px 7px;border-radius:15px}
+  .home-page .home-feature-art{width:52px;height:52px;font-size:30px}
+}
