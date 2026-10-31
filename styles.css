@@ -2200,3 +2200,16 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .home-page .pet-stage > .companion-panel{
   z-index:50!important;
 }
+
+/* Home-only position adjustment requested: frame left 47%, pet left 50% top 43%. */
+.home-page .pet-stage > .companion-frame-art{
+  left:47%!important;
+}
+.home-page .pet-stage > .home-frame-aura,
+.home-page .pet-stage > .home-frame-ornaments{
+  left:47%!important;
+}
+.home-page .pet-stage > .stage-pet{
+  left:50%!important;
+  top:43%!important;
+}
