@@ -2216,3 +2216,26 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   top:50%!important;
   transform:translate(-50%,-50%) scale(1.08)!important;
 }
+
+
+/* Individual Home companion tuning — scoped per species only */
+.home-page .pet-stage > .stage-pet.pet-species-fluffin{
+  width:49.3%!important;
+  height:32.045%!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-bubblit,
+.home-page .pet-stage > .stage-pet.pet-species-mossling,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale,
+.home-page .pet-stage > .stage-pet.pet-species-wyrmling{
+  top:48%!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-mossling{
+  width:49.3%!important;
+  height:32.045%!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-voltkit,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale{
+  width:55.1%!important;
+  height:35.815%!important;
+}
