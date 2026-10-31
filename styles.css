@@ -1060,3 +1060,72 @@ body[data-theme="dark"] .home-page .care-arrow{color:#d2b6d1}
   .home-page .care-copy b{font-size:10px}
   .home-page .care-copy small{font-size:7px}
 }
+
+
+/* Compact all-in-one companion dashboard */
+.home-page .pet-stage{min-height:735px;margin-bottom:20px}
+.home-page .companion-panel{
+  left:12px;right:12px;bottom:12px;
+  padding:14px 13px 13px;
+  border:1px solid #ffffffd9;border-radius:24px;
+  background:linear-gradient(150deg,#ffffffef,#fdf7ffef);
+  box-shadow:0 7px 0 #baa5df45,0 12px 28px #66517b18;
+}
+.home-page .companion-panel .companion-panel-top{margin-bottom:7px;font-size:8px}
+.home-page .companion-panel .companion-meta h2{font-size:22px;margin:1px 0}
+.home-page .companion-panel .companion-meta .pill{padding:8px 10px;font-size:9px}
+.home-page .companion-panel .companion-xp{margin:9px 0 6px;font-size:9px}
+.home-page .companion-panel .progress-track{height:5px}
+.home-page .companion-tools{margin-top:11px;padding-top:10px;border-top:1px solid #eee4f0}
+.home-page .compact-needs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.home-page .compact-needs .status-meter{
+  min-width:0;padding:7px 6px 6px;border:1px solid #eee5f0;
+  border-radius:11px;background:#fff;
+}
+.home-page .compact-needs .status-meter-top{
+  display:flex;flex-wrap:wrap;justify-content:space-between;gap:3px;
+}
+.home-page .compact-needs .status-icon{width:18px;height:18px;border-radius:6px;font-size:11px}
+.home-page .compact-needs .status-name{width:100%;order:3;font-size:8px;line-height:1.1}
+.home-page .compact-needs .status-meter-top>b{font-size:10px}
+.home-page .compact-needs .status-meter-top>b small{font-size:7px}
+.home-page .compact-needs .status-track{height:4px;margin-top:6px}
+.home-page .compact-needs .status-level{display:none}
+.home-page .compact-care-label{display:flex;align-items:center;justify-content:space-between;margin:10px 1px 7px}
+.home-page .compact-care-label span{color:#a47ba9;font-size:8px;font-weight:900;letter-spacing:1.5px}
+.home-page .compact-care-label small{color:#a394a6;font-size:8px}
+.home-page .compact-care{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.home-page .compact-care .care-action{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  min-width:0;min-height:57px;padding:6px 2px;border:1px solid #eee3ef;
+  border-radius:12px;background:linear-gradient(145deg,#fff,#fbf5fc);
+  box-shadow:0 3px 0 #eee4f0;color:#675474;text-align:center;
+}
+.home-page .compact-care .care-icon{
+  width:27px;height:27px;border:0;border-radius:9px;
+  background:#f5edf8;font-size:15px;
+}
+.home-page .compact-care .care-action b{font-size:8px;line-height:1}
+.home-page .compact-care .care-action:active{transform:translateY(2px) scale(.97);box-shadow:0 1px 0 #eee4f0}
+.home-page .stage-pet{top:36%!important}
+@media(max-width:380px){
+  .home-page .pet-stage{min-height:715px}
+  .home-page .companion-panel{left:10px;right:10px;bottom:10px;padding:12px 10px}
+  .home-page .compact-needs{gap:4px}
+  .home-page .compact-needs .status-meter{padding:6px 5px}
+  .home-page .compact-care{gap:4px}
+  .home-page .compact-care .care-action{min-height:53px}
+  .home-page .stage-pet{top:36%!important}
+}
+body[data-theme="dark"] .home-page .companion-panel{
+  background:linear-gradient(150deg,#302638f5,#261f30f5);
+  border-color:#ffffff20;box-shadow:0 7px 0 #17121d88,0 12px 28px #0003;
+}
+body[data-theme="dark"] .home-page .companion-tools{border-color:#ffffff18}
+body[data-theme="dark"] .home-page .compact-needs .status-meter{background:#3a2e40;border-color:#ffffff16}
+body[data-theme="dark"] .home-page .compact-needs .status-name,
+body[data-theme="dark"] .home-page .compact-needs .status-meter-top>b{color:#f3e7f3}
+body[data-theme="dark"] .home-page .compact-needs .status-meter-top>b small,
+body[data-theme="dark"] .home-page .compact-care-label small{color:#b9a9bc}
+body[data-theme="dark"] .home-page .compact-care .care-action{background:#3a2e40;border-color:#ffffff18;color:#f4e8f3;box-shadow:0 3px 0 #201923}
+body[data-theme="dark"] .home-page .compact-care .care-icon{background:#4b3a51}
