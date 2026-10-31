@@ -1263,7 +1263,7 @@ function onlineBattleView() {
         <div class="battle-side battle-player">
           <div class="battle-nameplate">
             <b>${esc(mine?.name || mine?.display_name || 'Your Pet')}</b>
-            <span>${esc(mineSpecies.element || mine?.element || 'Unknown')} · Lv.${Number(mine?.level || 1)}</span>
+            <span>${esc(mySpecies.element || mine?.element || 'Unknown')} · Lv.${Number(mine?.level || 1)}</span>
           </div>
           <div class="battle-sprite">${petImage(mine?.species, 'battle-pet-image')}</div>
           <span class="battle-effect effect-player"></span>
