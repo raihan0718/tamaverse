@@ -531,14 +531,21 @@ function homePage(){
       <div class="stage-topline"><span><i></i> YOUR COMPANION</span><b>/ 01</b></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
       <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.png" alt="" aria-hidden="true"><div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div><div class="action-bubble">${petActionLabel(petAnimation)}</div>
+      <div class="tama-care-controls" aria-label="Pet interactions">
+        <button class="tama-care-button" data-action="care" data-care="feed" aria-label="Feed"><span>🍓</span><small>FEED</small></button>
+        <button class="tama-care-button" data-action="care" data-care="play" aria-label="Play"><span>♡</span><small>PLAY</small></button>
+        <button class="tama-care-button" data-action="care" data-care="clean" aria-label="Bath"><span>🫧</span><small>BATH</small></button>
+        <button class="tama-care-button" data-action="care" data-care="sleep" aria-label="Sleep"><span>☾</span><small>SLEEP</small></button>
+        <button class="tama-care-button" data-action="care" data-care="train" aria-label="Train"><span>✦</span><small>TRAIN</small></button>
+      </div>
+      </section>
       <div class="companion-panel"><div class="companion-meta"><div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2>${esc(p.name)}</h2></div><span class="pill">Lv. ${p.level}</span></div>
         <div class="companion-xp"><span>Companion level</span><b>${p.xp} / ${p.level*40} XP</b></div><div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
         <div class="stage-stats"><span>🍓 Lapar ${p.hunger}%</span><span>💖 ${p.happiness}%</span><span>⚡ ${p.energy}%</span><span>🫧 ${p.cleanliness}%</span></div>
       </div>
-    </section>
     <div class="status-panel">${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}</div>
     <div class="section-heading care-heading"><h2>Care for ${esc(p.name)}</h2><span class="muted-label">Aksi harian terbatas</span></div>
-    <div class="care-actions"><button class="care-action" data-action="care" data-care="feed"><span>🍓</span><b>Feed</b></button><button class="care-action" data-action="care" data-care="play"><span>💖</span><b>Play</b></button><button class="care-action" data-action="care" data-care="clean"><span>🫧</span><b>Bath</b></button><button class="care-action" data-action="care" data-care="sleep"><span>🌙</span><b>Sleep</b></button><button class="care-action" data-action="care" data-care="train"><span>🏋️</span><b>Train</b></button></div>
+    
     <div class="section-heading care-heading"><h2>🎁 Daily reward</h2><span class="muted-label">7-day login bonus</span></div>${dailyRewardCard()}
     <div class="quick-actions home-quick"><button class="button secondary" data-action="go" data-page="pets">🐾 Collection</button><button class="button secondary" data-action="go" data-page="gacha">🥚 Gacha</button><button class="button secondary" data-action="go" data-page="battle">⚔️ Battle</button><button class="button secondary" data-action="go" data-page="profile">🎒 Inventory & quests</button></div>
     <div class="section-heading"><h2>Daily quests</h2><button class="text-button" data-action="go" data-page="profile">See all</button></div>${questPreview()}
