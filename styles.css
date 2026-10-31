@@ -2481,3 +2481,27 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   .home-page .pet-stage .stage-creature-clean,
   .battle-scene .battle-sprite,.battle-floating-number{animation:none!important}
 }
+
+
+/* Global care animation fallback for every non-isolated Home pet */
+.home-page .pet-stage.pet-action-eat .stage-pet > .stage-creature:not(.stage-creature-clean){
+  animation:globalCareEat .72s cubic-bezier(.34,1.25,.64,1) 3!important;
+}
+.home-page .pet-stage.pet-action-play .stage-pet > .stage-creature:not(.stage-creature-clean),
+.home-page .pet-stage.pet-action-greet .stage-pet > .stage-creature:not(.stage-creature-clean){
+  animation:globalCarePlay .9s cubic-bezier(.34,1.25,.64,1) 2!important;
+}
+.home-page .pet-stage.pet-action-bath .stage-pet > .stage-creature:not(.stage-creature-clean){
+  animation:globalCareBath .85s cubic-bezier(.42,0,.24,1) 3!important;
+}
+.home-page .pet-stage.pet-action-sleep .stage-pet > .stage-creature:not(.stage-creature-clean){
+  animation:globalCareSleep 2.8s cubic-bezier(.37,0,.23,1) 1!important;
+}
+.home-page .pet-stage.pet-action-train .stage-pet > .stage-creature:not(.stage-creature-clean){
+  animation:globalCareTrain .78s cubic-bezier(.34,1.2,.64,1) 3!important;
+}
+@keyframes globalCareEat{0%,100%{transform:translateY(0) rotate(0) scale(1)}30%{transform:translateY(3px) rotate(-5deg) scale(1.025)}65%{transform:translateY(-1px) rotate(4deg) scale(.99)}}
+@keyframes globalCarePlay{0%,100%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-5px) rotate(-5deg) scale(1.035)}70%{transform:translateY(-10px) rotate(6deg) scale(1.045)}}
+@keyframes globalCareBath{0%,100%{transform:translateY(0) rotate(0)}28%{transform:translateY(-2px) rotate(-4deg)}72%{transform:translateY(-2px) rotate(4deg)}}
+@keyframes globalCareSleep{0%,100%{transform:translateY(0) rotate(0) scale(1)}45%,65%{transform:translateY(2px) rotate(-4deg) scale(.985)}}
+@keyframes globalCareTrain{0%,100%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-5px) rotate(-5deg) scale(1.035)}70%{transform:translateY(0) rotate(5deg) scale(1.015)}}
