@@ -1935,29 +1935,3 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .accessory-equip{width:100%;min-height:31px;margin-top:3px;padding:6px 8px;border:1px solid #a994ff66;border-radius:9px;background:rgba(169,148,255,.13);color:var(--text);font-size:10px;font-weight:800;cursor:pointer}
 .accessory-equip.is-equipped{border-color:transparent;background:rgba(80,190,145,.14);color:#45b98b;cursor:default}
 @media(max-width:360px){.collection-page .collection-tabs{gap:7px}.collection-tab{padding:9px 8px;column-gap:6px}.accessory-grid{gap:8px}.accessory-art{height:108px}.accessory-info{padding:8px}}
-
-/* Expand the Home preview stage so the equipped frame can keep its full size */
-.home-page .pet-stage{
-  min-height:980px!important;
-  height:auto!important;
-  overflow:hidden;
-}
-.home-page .companion-frame-art{
-  width:min(90%,470px)!important;
-  height:auto!important;
-  max-width:90%!important;
-  max-height:none!important;
-  aspect-ratio:684/768;
-  object-fit:contain!important;
-  object-position:center;
-  left:50%;
-  top:41%!important;
-  transform:translate(-50%,-50%)!important;
-}
-@media(max-width:380px){
-  .home-page .pet-stage{min-height:900px!important;height:900px!important;overflow:visible!important}
-  .home-page .companion-frame-art{
-    width:90%!important;
-    top:40%!important;
-  }
-}
