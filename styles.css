@@ -911,3 +911,17 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 /* Remove decorative rings behind the Home UI frame */
 .home-page .orbit,
 .home-page .orbit-two{display:none!important;}
+
+
+/* Global interaction feedback: remove browser tap tint and add a soft press animation */
+*{-webkit-tap-highlight-color:transparent;}
+button,[onclick],[role="button"],a,.button,.care-action,.nav-item,.text-button,.icon-button,.coin-pill,.creature-card,.rank-tab,.daily-reward-day,.battle-action-btn{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  transition:transform .14s cubic-bezier(.2,.8,.2,1),filter .14s ease,box-shadow .14s ease;
+}
+button:active:not(:disabled),[onclick]:active,[role="button"]:active,a:active,.button:active:not(:disabled),.care-action:active,.nav-item:active,.text-button:active,.icon-button:active,.coin-pill:active,.creature-card:active,.rank-tab:active,.daily-reward-day:active,.battle-action-btn:active:not(:disabled){
+  transform:scale(.96);
+  filter:brightness(.96);
+}
+:focus:not(:focus-visible){outline:none;}
