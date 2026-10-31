@@ -2556,3 +2556,94 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   animation:cleanPetTrain .78s cubic-bezier(.34,1.3,.64,1) 3!important;
   transform-origin:50% 82%!important;
 }
+
+
+/* TAMAVERSE FIX: guaranteed motion layer for the four isolated companion sprites.
+   Animate the clean wrapper (not the calibrated image) so sizing/orientation stay intact. */
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-starwhale > .stage-creature-clean {
+  animation: cleanPetIdle 6.8s cubic-bezier(.37,0,.23,1) infinite !important;
+  animation-play-state: running !important;
+  transform-origin: 50% 82% !important;
+  will-change: transform;
+}
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-starwhale > .stage-creature-clean {
+  animation: cleanPetEat .72s cubic-bezier(.34,1.4,.64,1) 3 !important;
+  animation-play-state: running !important;
+}
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-starwhale > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-starwhale > .stage-creature-clean {
+  animation: cleanPetPlay .9s cubic-bezier(.34,1.35,.64,1) 2 !important;
+  animation-play-state: running !important;
+}
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-starwhale > .stage-creature-clean {
+  animation: cleanPetBath .85s cubic-bezier(.42,0,.24,1) 3 !important;
+  animation-play-state: running !important;
+}
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-starwhale > .stage-creature-clean {
+  animation: cleanPetSleep 2.8s cubic-bezier(.37,0,.23,1) 1 !important;
+  animation-play-state: running !important;
+}
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-starwhale > .stage-creature-clean {
+  animation: cleanPetTrain .78s cubic-bezier(.34,1.3,.64,1) 3 !important;
+  animation-play-state: running !important;
+}
+
+/* The same four image assets receive the battle motion on their existing sprite wrapper. */
+.battle-scene .battle-sprite:has(.pet-image[src*="fluffin"]),
+.battle-scene .battle-sprite:has(.pet-image[src*="mossling"]),
+.battle-scene .battle-sprite:has(.pet-image[src*="voltkit"]),
+.battle-scene .battle-sprite:has(.pet-image[src*="starwhale"]) {
+  animation: arenaPetIdle 2.5s ease-in-out infinite !important;
+  animation-play-state: running !important;
+}
+.battle-fx-attack .battle-sprite:has(.pet-image[src*="fluffin"]),
+.battle-fx-attack .battle-sprite:has(.pet-image[src*="mossling"]),
+.battle-fx-attack .battle-sprite:has(.pet-image[src*="voltkit"]),
+.battle-fx-attack .battle-sprite:has(.pet-image[src*="starwhale"]) {
+  animation: arenaLungeSmooth .78s cubic-bezier(.22,.72,.28,1) 1 !important;
+}
+.battle-fx-skill .battle-player .battle-sprite:has(.pet-image[src*="fluffin"]),
+.battle-fx-skill .battle-player .battle-sprite:has(.pet-image[src*="mossling"]),
+.battle-fx-skill .battle-player .battle-sprite:has(.pet-image[src*="voltkit"]),
+.battle-fx-skill .battle-player .battle-sprite:has(.pet-image[src*="starwhale"]) {
+  animation: arenaSkillSmooth .95s cubic-bezier(.22,.72,.28,1) 1 !important;
+}
+.battle-fx-skill .battle-enemy .battle-sprite:has(.pet-image[src*="fluffin"]),
+.battle-fx-skill .battle-enemy .battle-sprite:has(.pet-image[src*="mossling"]),
+.battle-fx-skill .battle-enemy .battle-sprite:has(.pet-image[src*="voltkit"]),
+.battle-fx-skill .battle-enemy .battle-sprite:has(.pet-image[src*="starwhale"]) {
+  animation: arenaHitSmooth .82s cubic-bezier(.22,.72,.28,1) 1 !important;
+}
+.battle-fx-defend .battle-player .battle-sprite:has(.pet-image[src*="fluffin"]),
+.battle-fx-defend .battle-player .battle-sprite:has(.pet-image[src*="mossling"]),
+.battle-fx-defend .battle-player .battle-sprite:has(.pet-image[src*="voltkit"]),
+.battle-fx-defend .battle-player .battle-sprite:has(.pet-image[src*="starwhale"]) {
+  animation: arenaGuardSmooth .8s cubic-bezier(.22,.72,.28,1) 1 !important;
+}
+.battle-fx-item .battle-player .battle-sprite:has(.pet-image[src*="fluffin"]),
+.battle-fx-item .battle-player .battle-sprite:has(.pet-image[src*="mossling"]),
+.battle-fx-item .battle-player .battle-sprite:has(.pet-image[src*="voltkit"]),
+.battle-fx-item .battle-player .battle-sprite:has(.pet-image[src*="starwhale"]) {
+  animation: arenaHealSmooth .95s cubic-bezier(.22,.72,.28,1) 1 !important;
+}
