@@ -633,6 +633,9 @@ function gachaPage(){
   </section>`;
 }
 function battlePage(){
+  if (onlineRoom && ['playing', 'finished'].includes(onlineRoom.status)) {
+    return onlineBattleView();
+  }
   if(battle) return battleView();
 
   const rewarded = state.careUses.battleRewards || 0;
@@ -646,39 +649,26 @@ function battlePage(){
         <p class="subtle" style="text-align:center">
          Berburu Hadiah menang: 35 koin + XP
         </p>
-        <button class="button full"
-          data-action="battle-start"
-          data-mode="practice">
+        <button class="button full" data-action="battle-start" data-mode="practice">
           Mulai latihan
         </button>
       </div>
-
       <div class="card" style="margin-top:12px">
         <h2>Simulated PvP</h2>
-        <p class="subtle">
-          Training Damage dengan monster.
-        </p>
-        <button class="button secondary full"
-          data-action="battle-start"
-          data-mode="simulated">
+        <p class="subtle">Training Damage dengan monster.</p>
+        <button class="button secondary full" data-action="battle-start" data-mode="simulated">
           Training
         </button>
       </div>
-
       <div class="notice">
-        Hadiah XP dan koin tersedia pada
-        ${Math.max(0,5-rewarded)} battle berikutnya hari ini.
+        Hadiah XP dan koin tersedia pada ${Math.max(0,5-rewarded)} battle berikutnya hari ini.
       </div>
-
       ${state.battleHistory.length ? `
         <div class="section-heading"><h2>Battle terakhir</h2></div>
         ${state.battleHistory.slice(0,5).map(item=>`
           <div class="card battle-history-row">
-            <span>${item.result==='win'?'🏆':item.result==='draw'?'🤝':'💫'}
-            ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span>
-            <span class="muted-label">
-              ${new Date(item.date).toLocaleDateString('id-ID')}
-            </span>
+            <span>${item.result==='win'?'🏆':item.result==='draw'?'🤝':'💫'} ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span>
+            <span class="muted-label">${new Date(item.date).toLocaleDateString('id-ID')}</span>
           </div>
         `).join('')}
       ` : ''}
