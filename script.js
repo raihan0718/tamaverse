@@ -528,12 +528,19 @@ function homePage(){
     </div>
     <div class="section-heading universe-heading"><div><div class="eyebrow">YOUR LITTLE UNIVERSE</div><h1 class="page-title">Good day, ${esc(state.player.name)}!</h1></div><button class="icon-button" data-action="go" data-page="profile" aria-label="Buka profil">☾</button></div>
     <section class="pet-stage pet-action-${petAnimation}" data-action="pet-tap" aria-label="Sentuh untuk menyapa ${esc(p.name)}">
-      <div class="stage-topline"><span><i></i> YOUR COMPANION</span><b>/ 01</b></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+      <div class="stage-topline"><span><i></i> YOUR COMPANION</span><b>NO. 01 <em>✦</em></b></div>
+      <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
-      <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.png" alt="" aria-hidden="true"><div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div><div class="action-bubble">${petActionLabel(petAnimation)}</div>
-      <div class="companion-panel"><div class="companion-meta"><div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2>${esc(p.name)}</h2></div><span class="pill">Lv. ${p.level}</span></div>
-        <div class="companion-xp"><span>Companion level</span><b>${p.xp} / ${p.level*40} XP</b></div><div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
-        <div class="stage-stats"><span>🍓 Lapar ${p.hunger}%</span><span>💖 ${p.happiness}%</span><span>⚡ ${p.energy}%</span><span>🫧 ${p.cleanliness}%</span></div>
+      <div class="stage-caption"><span class="caption-kicker">A LITTLE FRIEND FROM</span><b>THE TAMAVERSE</b><span class="caption-line"></span></div>
+      <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.png" alt="" aria-hidden="true">
+      <div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div><div class="action-bubble">${petActionLabel(petAnimation)}</div>
+      <div class="stage-bottom-note"><span>✧</span> TAP YOUR COMPANION <span>✧</span></div>
+      <div class="companion-panel">
+        <div class="companion-panel-top"><span><i></i> COMPANION PROFILE</span><span class="companion-id">TV / 001</span></div>
+        <div class="companion-meta"><div><div class="eyebrow">${s.element} TYPE <span>·</span> ${s.rarity.toUpperCase()}</div><h2>${esc(p.name)}</h2></div><span class="pill">LVL ${p.level}</span></div>
+        <div class="companion-xp"><span>GROWTH PROGRESS</span><b>${p.xp} <small>/ ${p.level*40} XP</small></b></div>
+        <div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
+        <div class="stage-stats"><span><i>🍓</i><small>HUNGER</small><b>${p.hunger}%</b></span><span><i>💗</i><small>MOOD</small><b>${p.happiness}%</b></span><span><i>⚡</i><small>ENERGY</small><b>${p.energy}%</b></span><span><i>🫧</i><small>HYGIENE</small><b>${p.cleanliness}%</b></span></div>
       </div>
     </section>
     <div class="status-panel">${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}</div>
