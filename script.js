@@ -540,7 +540,6 @@ function homePage(){
         <div class="companion-meta"><div><div class="eyebrow">${s.element} TYPE <span>·</span> ${s.rarity.toUpperCase()}</div><h2>${esc(p.name)}</h2></div><span class="pill">LVL ${p.level}</span></div>
         <div class="companion-xp"><span>GROWTH PROGRESS</span><b>${p.xp} <small>/ ${p.level*40} XP</small></b></div>
         <div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
-        <div class="stage-stats"><span><i>🍓</i><small>HUNGER</small><b>${p.hunger}%</b></span><span><i>💗</i><small>MOOD</small><b>${p.happiness}%</b></span><span><i>⚡</i><small>ENERGY</small><b>${p.energy}%</b></span><span><i>🫧</i><small>HYGIENE</small><b>${p.cleanliness}%</b></span></div>
       </div>
     </section>
     <div class="status-panel">${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}</div>
