@@ -1129,3 +1129,54 @@ body[data-theme="dark"] .home-page .compact-needs .status-meter-top>b small,
 body[data-theme="dark"] .home-page .compact-care-label small{color:#b9a9bc}
 body[data-theme="dark"] .home-page .compact-care .care-action{background:#3a2e40;border-color:#ffffff18;color:#f4e8f3;box-shadow:0 3px 0 #201923}
 body[data-theme="dark"] .home-page .compact-care .care-icon{background:#4b3a51}
+
+
+/* Home layout repair — balanced pet stage and compact companion panel */
+.home-page .pet-stage{
+  position:relative;
+  min-height:760px;
+  margin:18px 0 22px;
+  padding:20px 14px 14px;
+  overflow:hidden;
+}
+.home-page .stage-caption{top:12%;gap:3px}
+.home-page .stage-pet{
+  left:60%!important;
+  top:40%!important;
+  width:58%;
+  height:36.4%;
+}
+.home-page .pet-shadow{top:59%!important}
+.home-page .stage-bottom-note{display:none!important}
+.home-page .companion-panel{
+  left:12px!important;
+  right:12px!important;
+  bottom:12px!important;
+  padding:12px!important;
+  border-radius:21px!important;
+}
+.home-page .companion-panel-top{margin-bottom:6px!important}
+.home-page .companion-meta{align-items:center}
+.home-page .companion-meta h2{font-size:21px!important;line-height:1.15}
+.home-page .companion-meta .pill{padding:7px 9px!important}
+.home-page .companion-xp{margin:8px 0 5px!important}
+.home-page .companion-tools{margin-top:9px!important;padding-top:9px!important}
+.home-page .compact-needs{gap:5px!important}
+.home-page .compact-needs .status-meter{padding:7px 5px 6px!important}
+.home-page .compact-care-label{margin:8px 1px 6px!important}
+.home-page .compact-care{gap:5px!important}
+.home-page .compact-care .care-action{min-height:53px!important;padding:5px 2px!important}
+.home-page .compact-care .care-icon{width:25px!important;height:25px!important;font-size:14px!important}
+@media(max-width:380px){
+  .home-page .pet-stage{min-height:745px;padding-left:10px;padding-right:10px}
+  .home-page .stage-pet{top:39%!important;width:60%;height:35.5%}
+  .home-page .companion-panel{left:9px!important;right:9px!important;bottom:9px!important;padding:10px!important}
+  .home-page .compact-needs{gap:4px!important}
+  .home-page .compact-needs .status-meter{padding:6px 4px!important}
+  .home-page .compact-needs .status-name{font-size:7px!important}
+  .home-page .compact-care{gap:4px!important}
+  .home-page .compact-care .care-action{min-height:50px!important}
+}
+body[data-theme="dark"] .home-page .companion-panel{
+  background:linear-gradient(150deg,#302638f5,#261f30f5)!important;
+}
