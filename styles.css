@@ -925,3 +925,28 @@ button:active:not(:disabled),[onclick]:active,[role="button"]:active,a:active,.b
   filter:brightness(.96);
 }
 :focus:not(:focus-visible){outline:none;}
+
+
+/* Hard-disable Android/WebKit blue tap and default focus highlights */
+html,body,*,
+*::before,*::after{
+  -webkit-tap-highlight-color:rgba(0,0,0,0)!important;
+}
+button,a,[role="button"],[onclick],.button,.care-action,.nav-item,
+.text-button,.icon-button,.coin-pill,.creature-card,.rank-tab,
+.daily-reward-day,.battle-action-btn{
+  -webkit-tap-highlight-color:rgba(0,0,0,0)!important;
+  outline:none;
+}
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible),
+[onclick]:focus:not(:focus-visible){
+  outline:none!important;
+  box-shadow:inherit;
+}
+button:focus-visible,a:focus-visible,[role="button"]:focus-visible,
+[onclick]:focus-visible{
+  outline:2px solid #b58cdb!important;
+  outline-offset:3px;
+}
