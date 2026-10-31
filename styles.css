@@ -2250,3 +2250,47 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   top:50%!important;
   transform:translate(-50%,-50%) scale(1.08)!important;
 }
+
+/* Final geometry fix: give the four Home pets a real centered image box. */
+.home-page .pet-stage > .stage-pet.pet-species-fluffin,
+.home-page .pet-stage > .stage-pet.pet-species-mossling,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale{
+  position:absolute!important;
+  left:51.5%!important;
+  top:50%!important;
+  width:58%!important;
+  height:37.7%!important;
+  margin:0!important;
+  display:block!important;
+  transform:translate(-50%,-50%)!important;
+  animation:none!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-fluffin > .stage-creature,
+.home-page .pet-stage > .stage-pet.pet-species-mossling > .stage-creature,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit > .stage-creature,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature{
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  transform:none!important;
+}
+.home-page .pet-stage > .stage-pet.pet-species-fluffin .pet-image,
+.home-page .pet-stage > .stage-pet.pet-species-mossling .pet-image,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit .pet-image,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale .pet-image{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:50% 50%!important;
+  margin:0!important;
+  transform:none!important;
+}
