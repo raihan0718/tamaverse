@@ -815,7 +815,7 @@ function inspectPet(uid){
   selectedPetId=uid;
   const statRows=(pet,label)=>`<div class="comparison-pet"><b>${esc(label)}${pet.uid===state.activePet?' · Aktif':''}</b><span>HP ${pet.stats.hp}</span><span>ATK ${pet.stats.atk}</span><span>DEF ${pet.stats.def}</span><span>SPD ${pet.stats.spd}</span></div>`;
   const comparison=active&&active.uid!==p.uid?`<div class="comparison-grid">${statRows(p,p.name)}${statRows(active,active.name)}</div>`:`<div class="stats-row"><div class="stat-tile"><strong>${p.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${p.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${p.stats.def}</strong><span>DEF</span></div></div><p class="subtle">Speed: ${p.stats.spd}</p>`;
-  showModal(`<div class="hatch-egg">${s.emoji}</div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2 id="modalTitle">${esc(p.name)} · Lv.${p.level}</h2>
+  showModal(`<div class="pet-detail-art">${petImage(s.id, 'detail-pet-image', true)}</div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2 id="modalTitle">${esc(p.name)} · Lv.${p.level}</h2>
     <p>${s.name} · Evolusi ${p.evolution}/100 · XP ${p.xp}/${p.level*40}</p><div class="section-heading"><h2>Perbandingan stat</h2></div>${comparison}
     <div class="modal-actions"><button class="button secondary" data-action="nickname-pet">Ubah nama</button><button class="button" data-action="set-active" data-pet="${uid}">${uid===state.activePet?'Pet aktif':'Pilih aktif'}</button></div>`);
 }
