@@ -111,7 +111,7 @@ function triggerPetAnimation(action){
   petAnimationTimer=setTimeout(()=>{
     petAnimation='idle';
     const currentStage=document.querySelector('.pet-stage');
-    if(currentStage){currentStage.className=currentStage.className.replace(/pet-action-[\\w-]+/g,'').trim();currentStage.classList.add('pet-action-idle');}
+    if(currentStage){currentStage.className=currentStage.className.replace(/pet-action-[\w-]+/g,'').trim();currentStage.classList.add('pet-action-idle');}
     const currentBubble=document.querySelector('.action-bubble');
     if(currentBubble)currentBubble.textContent='';
   },1800);
