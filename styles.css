@@ -868,3 +868,37 @@ body[data-theme="dark"] .home-page .tama-care-button{background:linear-gradient(
 body[data-theme="dark"] .home-page .tama-care-button{
   color:#234e70;background:linear-gradient(145deg,#f5fcff,#b9def3);
 }
+
+
+/* Keep the five interaction keys inside the LCD opening, hugging its bezel */
+.home-page .tama-care-controls{
+  position:absolute;z-index:8;
+  left:25.5%;right:25.5%;
+  top:34%;bottom:29%;
+  display:block;pointer-events:none;
+}
+.home-page .tama-care-button{
+  position:absolute;pointer-events:auto;
+  width:clamp(25px,7vw,33px);
+  height:clamp(25px,7vw,33px);
+  padding:0;min-width:0;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;
+  border:1px solid #78a9cc;
+  background:linear-gradient(145deg,#f5fcff,#b9def3);
+  box-shadow:0 1px 0 #6b9abb,0 2px 4px #193e5928;
+}
+.home-page .tama-care-button span{font-size:clamp(13px,3.7vw,17px);line-height:1}
+.home-page .tama-care-button small{display:none}
+.home-page .tama-care-button:nth-child(1){left:0;top:0}
+.home-page .tama-care-button:nth-child(2){right:0;top:0}
+.home-page .tama-care-button:nth-child(3){left:0;bottom:0}
+.home-page .tama-care-button:nth-child(4){right:0;bottom:0}
+.home-page .tama-care-button:nth-child(5){left:50%;bottom:0;transform:translateX(-50%)}
+.home-page .tama-care-button:active{transform:translateY(1px);box-shadow:none}
+.home-page .tama-care-button:nth-child(5):active{transform:translate(-50%,1px)}
+@media(max-width:380px){
+  .home-page .tama-care-controls{left:25.5%;right:25.5%;top:34%;bottom:29%}
+  .home-page .tama-care-button{width:25px;height:25px;border-radius:7px}
+  .home-page .tama-care-button span{font-size:13px}
+}
