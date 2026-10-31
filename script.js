@@ -602,17 +602,15 @@ function homePage(){
           <div class="compact-needs">
             ${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Mood','💖',p.happiness)}${statusMeter('Energy','⚡',p.energy)}${statusMeter('Clean','🫧',p.cleanliness)}
           </div>
+          <div class="compact-care-label"><span>QUICK CARE</span></div>
+          <div class="compact-care">
+            <button class="care-action" data-action="inventory-use" data-care="feed" aria-label="Feed"><span class="care-icon">🍓</span><b>Feed</b></button>
+            <button class="care-action" data-action="care" data-care="play" aria-label="Play"><span class="care-icon">💖</span><b>Play</b></button>
+            <button class="care-action" data-action="care" data-care="clean" aria-label="Bath"><span class="care-icon">🫧</span><b>Bath</b></button>
+            <button class="care-action" data-action="care" data-care="sleep" aria-label="${petSleeping(p)?'Wake Up':'Sleep'}"><span class="care-icon">${petSleeping(p)?'☀️':'🌙'}</span><b>${petSleeping(p)?'Wake Up':'Sleep'}</b></button>
+            <button class="care-action" data-action="care" data-care="train" aria-label="Train"><span class="care-icon">🏋️</span><b>Train</b></button>
+          </div>
         </div>
-      </div>
-    </section>
-    <section class="home-care-bar" aria-label="Quick care">
-      <div class="compact-care-label"><span>QUICK CARE</span><small>Take care of your companion</small></div>
-      <div class="compact-care">
-        <button class="care-action" data-action="inventory-use" data-care="feed" aria-label="Feed"><span class="care-icon">🍓</span><b>Feed</b></button>
-        <button class="care-action" data-action="care" data-care="play" aria-label="Play"><span class="care-icon">💖</span><b>Play</b></button>
-        <button class="care-action" data-action="care" data-care="clean" aria-label="Bath"><span class="care-icon">🫧</span><b>Bath</b></button>
-        <button class="care-action" data-action="care" data-care="sleep" aria-label="${petSleeping(p)?'Wake Up':'Sleep'}"><span class="care-icon">${petSleeping(p)?'☀️':'🌙'}</span><b>${petSleeping(p)?'Wake Up':'Sleep'}</b></button>
-        <button class="care-action" data-action="care" data-care="train" aria-label="Train"><span class="care-icon">🏋️</span><b>Train</b></button>
       </div>
     </section>
     <div class="home-feature-shortcuts">
@@ -827,17 +825,12 @@ function profilePage(){
 }
 function inspectPet(uid){
   const p=petById(uid);if(!p)return;
-  const s=speciesById(p.species);
+  const s=speciesById(p.species),active=activePet();
   selectedPetId=uid;
-  showModal(`<div class="pet-detail-art compact-detail-art">${petImage(s.id,'detail-pet-image',true)}</div>
-    <div class="eyebrow">${s.element} · ${s.rarity}</div>
-    <h2 id="modalTitle">${esc(p.name)} · Lv.${p.level}</h2>
-    <p class="subtle">${s.name} · Evolution ${p.evolution}/100 · ${p.xp}/${p.level*40} XP</p>
-    <div class="stats-row compact-detail-stats">
-      <div class="stat-tile"><strong>${p.stats.hp}</strong><span>HP</span></div>
-      <div class="stat-tile"><strong>${p.stats.atk}</strong><span>ATK</span></div>
-      <div class="stat-tile"><strong>${p.stats.def}</strong><span>DEF</span></div>
-    </div>
+  const statRows=(pet,label)=>`<div class="comparison-pet"><b>${esc(label)}${pet.uid===state.activePet?' · Aktif':''}</b><span>HP ${pet.stats.hp}</span><span>ATK ${pet.stats.atk}</span><span>DEF ${pet.stats.def}</span><span>SPD ${pet.stats.spd}</span></div>`;
+  const comparison=active&&active.uid!==p.uid?`<div class="comparison-grid">${statRows(p,p.name)}${statRows(active,active.name)}</div>`:`<div class="stats-row"><div class="stat-tile"><strong>${p.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${p.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${p.stats.def}</strong><span>DEF</span></div></div><p class="subtle">Speed: ${p.stats.spd}</p>`;
+  showModal(`<div class="pet-detail-art">${petImage(s.id, 'detail-pet-image', true)}</div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2 id="modalTitle">${esc(p.name)} · Lv.${p.level}</h2>
+    <p>${s.name} · Evolusi ${p.evolution}/100 · XP ${p.xp}/${p.level*40}</p><div class="section-heading"><h2>Perbandingan stat</h2></div>${comparison}
     <div class="modal-actions"><button class="button secondary" data-action="nickname-pet">Ubah nama</button><button class="button" data-action="set-active" data-pet="${uid}">${uid===state.activePet?'Pet aktif':'Pilih aktif'}</button></div>`);
 }
 function chooseRarityForEgg(egg){
