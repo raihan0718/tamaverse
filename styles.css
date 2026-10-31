@@ -661,3 +661,35 @@ body.battle-fullscreen .battle-sprite{top:185px!important}
   body.battle-fullscreen .battle-sprite{top:175px!important}
   body.battle-fullscreen .battle-turn-overlay{top:8px!important}
 }
+
+/* Boxless battle HUD with a dedicated lane for the turn label */
+body.battle-fullscreen .battle-hp-card{
+  top:0!important;bottom:auto!important;
+  height:auto!important;min-height:0!important;
+  padding:2px 3px!important;
+  background:transparent!important;
+  border:0!important;border-radius:0!important;
+  box-shadow:none!important;
+}
+body.battle-fullscreen .battle-turn-overlay{
+  top:54px!important;left:50%!important;
+  width:auto!important;min-width:0!important;
+  max-width:calc(100% - 24px)!important;
+  padding:0!important;gap:2px!important;
+  background:transparent!important;
+  border:0!important;border-radius:0!important;
+  box-shadow:none!important;
+  transform:translateX(-50%)!important;
+  color:#49354f!important;
+  text-shadow:0 1px 3px #fff9!important;
+}
+body.battle-fullscreen .battle-turn-overlay b{font-size:11px!important}
+body.battle-fullscreen .battle-turn-overlay span{font-size:9px!important}
+body[data-theme="dark"].battle-fullscreen .battle-turn-overlay{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  color:#fff!important;text-shadow:0 1px 4px #211728!important;
+}
+body[data-theme="dark"].battle-fullscreen .battle-turn-overlay span{color:#f5c5e8!important}
+@media(max-height:740px){
+  body.battle-fullscreen .battle-turn-overlay{top:54px!important}
+}
