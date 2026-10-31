@@ -849,8 +849,8 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 .home-page .stage-pet{
   position:absolute!important;
   z-index:5;
-  left:60%!important;
-  top:58%!important;
+  left:48%!important;
+  top:50%!important;
   width:58%;
   height:37.7%;
   margin:0!important;
@@ -860,7 +860,7 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 }
 @media(max-width:380px){
   .home-page .stage-pet{
-    top:58%!important;
+    top:50%!important;
     width:58%;
     height:36.4%;
   }
