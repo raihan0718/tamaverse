@@ -36,7 +36,7 @@ function petImage(speciesId, className = '', eager = false) {
   if (!src) return esc(pet.emoji);
   const loading = eager ? 'eager' : 'lazy';
   const priority = eager ? 'high' : 'low';
-  return `<img class="pet-image ${esc(className)}" src="/tamaverse/${src}?v=pet-detail-20261031" alt="${esc(pet.name)}" loading="${loading}" decoding="async" fetchpriority="${priority}" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'pet-image-fallback',textContent:'${pet.emoji}'}))">`;
+  return `<img class="pet-image ${esc(className)}" src="${src}?v=pet-detail-20261031-4" alt="${esc(pet.name)}" loading="${loading}" decoding="async" fetchpriority="${priority}" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'pet-image-fallback',textContent:'${pet.emoji}'}))">`;
 }
 const eggs = [
   {id:'basic',name:'Pixie Egg',image:'assets/eggs/pixie.webp',price:100,description:'Telur ajaib berisi pet Common hingga Legendary.'},
