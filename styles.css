@@ -1630,3 +1630,8 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
 /* Set companion pet vertical position */
 .home-page .stage-pet{top:52%!important}
 @media(max-width:380px){.home-page .stage-pet{top:52%!important}}
+
+
+/* Fine-tune companion pet slightly higher */
+.home-page .stage-pet{top:49%!important}
+@media(max-width:380px){.home-page .stage-pet{top:49%!important}}
