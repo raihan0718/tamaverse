@@ -535,7 +535,7 @@ function homePage(){
         <button class="tama-care-button" data-action="care" data-care="feed" aria-label="Feed"><span>🍓</span><small>FEED</small></button>
         <button class="tama-care-button" data-action="care" data-care="play" aria-label="Play"><span>💖</span><small>PLAY</small></button>
         <button class="tama-care-button" data-action="care" data-care="clean" aria-label="Bath"><span>🫧</span><small>BATH</small></button>
-        <button class="tama-care-button" data-action="care" data-care="sleep" aria-label="Sleep"><span>☾</span><small>SLEEP</small></button>
+        <button class="tama-care-button" data-action="care" data-care="sleep" aria-label="Sleep"><span>🌙</span><small>SLEEP</small></button>
         <button class="tama-care-button" data-action="care" data-care="train" aria-label="Train"><span>🏋️</span><small>TRAIN</small></button>
       </div>
       </section>
