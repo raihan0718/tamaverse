@@ -604,10 +604,9 @@ function doCare(kind){
     p.sleeping=true;p.sleepStartedAt=Date.now();triggerPetAnimation('sleep');
     showToast(`${p.name} mulai tidur. Energi pulih penuh dalam 15 menit.`);
   }else if(kind==='train'){
-    if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
-    if((state.items.training||0)<1){showToast('Training Manual habis. Beli di Store untuk latihan.');return;}
-    state.items.training--;triggerPetAnimation('train');grantPetXP(p,30);p.energy=clamp(p.energy-20,0,100);p.evolution=Math.min(100,p.evolution+12);
-    showToast('Training Manual digunakan! +30 XP dan progres evolusi.');
+    if(p.energy<35){showToast('Energi minimal 35% untuk latihan.');return;}
+    triggerPetAnimation('train');grantPetXP(p,30);p.energy=clamp(p.energy-35,0,100);p.evolution=Math.min(100,p.evolution+12);
+    showToast('Training berhasil! -35% Energy, +30 XP dan progres evolusi.');
   }else return;
   p.careUpdatedAt=Date.now();save();render();
 }
