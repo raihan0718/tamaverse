@@ -430,7 +430,7 @@ function doCare(kind){
   }else if(kind==='sleep'){
     if(p.energy>=100){showToast(`${p.name} sudah penuh energi.`);return;}
     p.sleeping=true;p.sleepStartedAt=Date.now();triggerPetAnimation('sleep');showToast(`${p.name} mulai tidur. Energi pulih penuh dalam 15 menit.`);
-  }else if(kind==='energy'){if(state.items.energy<1){showToast('Ramuan energi habis.');return;}if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}state.items.energy--;p.energy=clamp(p.energy+30,0,100);showToast('Ramuan energi digunakan! Energy +30.');}else if(kind==='train'){
+  }else if(kind==='train'){
     if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
     if(state.items.training<1){showToast('Training Manual habis. Beli di Store untuk latihan.');return;}
     triggerPetAnimation('train');state.careUses.train++;state.items.training--;grantPetXP(p,30);p.energy=clamp(p.energy-20,0,100);p.evolution=Math.min(100,p.evolution+12);showToast('Training Manual digunakan! +30 XP dan progres evolusi.');
@@ -989,7 +989,7 @@ function avatarPicker(){
 }
 
 document.addEventListener('click',event=>{
-  const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}
+  const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
   if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
