@@ -1130,19 +1130,24 @@ async function syncOnlinePetBeforeRoom() {
   }
 
   const userId = window.TAMAVERSE_USER_ID;
-  const { data: cloudPet, error } = await db
+  // Re-assert the selected pet as active after the cloud save. This avoids
+  // strict UID type mismatches leaving every cloud pet inactive.
+  const { error: deactivateError } = await db
     .from('pets')
-    .select('client_uid, is_active')
+    .update({ is_active: false })
+    .eq('owner_id', userId);
+  if (deactivateError) throw deactivateError;
+
+  const { data: selectedPet, error: activateError } = await db
+    .from('pets')
+    .update({ is_active: true })
     .eq('owner_id', userId)
     .eq('client_uid', petData.pet_uid)
+    .select('client_uid, is_active')
     .maybeSingle();
-
-  if (error) throw error;
-  if (!cloudPet) {
-    throw new Error('Pet aktif belum tersimpan di cloud. Coba refresh game, lalu pilih pet lagi.');
-  }
-  if (!cloudPet.is_active) {
-    throw new Error('Pet pilihan belum ditandai aktif di cloud. Pilih ulang pet tersebut.');
+  if (activateError) throw activateError;
+  if (!selectedPet?.is_active) {
+    throw new Error('Pet pilihan belum tersimpan di cloud. Pilih ulang pet, lalu coba lagi.');
   }
 }
 
@@ -1497,6 +1502,21 @@ async function refreshOnlineRoom(roomId, shouldRender = true) {
     return null;
   }
   if (!data) return null;
+
+  if (data.status === 'closed') {
+    if (onlineChannel) {
+      await db.removeChannel(onlineChannel);
+      onlineChannel = null;
+    }
+    if (onlineRoomPoller) {
+      clearInterval(onlineRoomPoller);
+      onlineRoomPoller = null;
+    }
+    onlineRoom = null;
+    if (page === 'battle') render();
+    showToast('Host telah menutup room.');
+    return data;
+  }
 
   onlineRoom = { ...onlineRoom, ...data, id: data.id };
   if (shouldRender && page === 'battle') render();
