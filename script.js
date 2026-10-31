@@ -1246,14 +1246,18 @@ function onlineBattleView() {
   const turn = Number(bs.turn || 1);
   const latestAction = log.length ? log[log.length - 1] : null;
   const myUserId = window.TAMAVERSE_USER_ID;
-  const myFloat = latestAction?.target_id === myUserId && Number(latestAction?.damage) > 0
-    ? { text: '-' + latestAction.damage, kind: 'damage' }
-    : latestAction?.actor_id === myUserId && Number(latestAction?.heal) > 0
-      ? { text: '+' + latestAction.heal, kind: 'heal' } : null;
-  const rivalFloat = latestAction?.target_id && latestAction.target_id !== myUserId && Number(latestAction?.damage) > 0
-    ? { text: '-' + latestAction.damage, kind: 'damage' }
-    : latestAction?.actor_id && latestAction.actor_id !== myUserId && Number(latestAction?.heal) > 0
-      ? { text: '+' + latestAction.heal, kind: 'heal' } : null;
+  const actionDamage = Number(latestAction?.damage || 0);
+  const actionHeal = Number(latestAction?.heal || 0);
+  const actionActor = latestAction?.actor_id;
+  const actionTarget = latestAction?.target_id;
+  const myFloat = actionDamage > 0 && actionTarget === myUserId
+    ? { text: '-' + actionDamage, kind: 'damage' }
+    : actionHeal > 0 && actionActor === myUserId
+      ? { text: '+' + actionHeal, kind: 'heal' } : null;
+  const rivalFloat = actionDamage > 0 && actionTarget && actionTarget !== myUserId
+    ? { text: '-' + actionDamage, kind: 'damage' }
+    : actionHeal > 0 && actionActor && actionActor !== myUserId
+      ? { text: '+' + actionHeal, kind: 'heal' } : null;
   const skillReadyKey = mineIsHost ? 'host_skill_ready_at' : 'guest_skill_ready_at';
   const skillReadyAt = bs[skillReadyKey] ? Date.parse(bs[skillReadyKey]) : 0;
   const skillCooldown = Math.max(0, Math.ceil((skillReadyAt - Date.now()) / 1000));
