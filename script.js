@@ -527,7 +527,7 @@ function homePage(){
       <button class="coin-pill" data-action="go" data-page="profile" aria-label="Buka inventori">🪙 <b>${state.player.coins.toLocaleString('id-ID')}</b><span>＋</span></button>
     </div>
     <div class="section-heading universe-heading"><div><div class="eyebrow">YOUR LITTLE UNIVERSE</div><h1 class="page-title">Good day, ${esc(state.player.name)}!</h1></div><button class="icon-button" data-action="go" data-page="profile" aria-label="Buka profil">☾</button></div>
-    <section class="pet-stage pet-action-${petAnimation}" data-action="pet-tap" aria-label="Sentuh untuk menyapa ${esc(p.name)}">
+    <section class="pet-stage pet-action-${petAnimation}" aria-label="Area pet ${esc(p.name)}">
       <div class="stage-topline"><span><i></i> YOUR COMPANION</span><b>/ 01</b></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
       <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.png" alt="" aria-hidden="true"><div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div><div class="action-bubble">${petActionLabel(petAnimation)}</div>
@@ -934,7 +934,7 @@ document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){page=nav.dataset.page;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
-  if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){page=btn.dataset.page;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='pet-tap'){triggerPetAnimation('greet');showToast(`${activePet()?.name||'Pet'} menyapamu!`);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
+  if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){page=btn.dataset.page;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
   closeModal();
   save();
