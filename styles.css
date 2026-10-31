@@ -1342,3 +1342,107 @@ body[data-theme="dark"] .home-page .companion-panel{
   .home-page .pet-stage[aria-label="Your companion"]{min-height:625px!important;height:625px!important}
   .home-page .pet-stage > .companion-panel{left:8px!important;right:8px!important;bottom:8px!important;width:calc(100% - 16px)!important;transform:scale(.90)!important}
 }
+
+
+/* HOME REFINEMENT: clean, background-light companion dashboard */
+.home-page .pet-stage,
+.home-page .pet-stage[aria-label="Your companion"]{
+  min-height:620px!important;height:620px!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  border-radius:0!important;overflow:visible!important;
+}
+.home-page .stage-topline,
+.home-page .stage-caption,
+.home-page .orbit,
+.home-page .stage-spark,
+.home-page .companion-frame-art{display:none!important}
+.home-page .stage-pet{top:35%!important;left:50%!important;width:66%!important;height:40%!important}
+.home-page .pet-shadow{top:56%!important}
+.home-page .pet-stage > .companion-panel{
+  left:0!important;right:0!important;bottom:0!important;width:100%!important;
+  padding:0!important;margin:0!important;transform:none!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  border-radius:0!important;color:var(--text)!important;
+}
+.home-page .pet-stage > .companion-panel .companion-meta{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:8px!important;margin:0!important;
+}
+.home-page .pet-stage > .companion-panel .companion-meta h2{
+  margin:0!important;font-size:20px!important;line-height:1.2!important;color:var(--text)!important;
+}
+.home-page .pet-stage > .companion-panel .companion-meta .pill{
+  background:transparent!important;border:1px solid var(--line)!important;
+  color:var(--text)!important;padding:4px 8px!important;font-size:9px!important;
+}
+.home-page .pet-stage > .companion-panel .companion-xp{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  margin:7px 0 5px!important;color:var(--muted)!important;font-size:9px!important;
+}
+.home-page .pet-stage > .companion-panel .companion-xp b{color:var(--text)!important;font-size:10px!important}
+.home-page .pet-stage > .companion-panel .companion-xp small{color:var(--muted)!important}
+.home-page .pet-stage > .companion-panel .progress-track{height:5px!important;background:var(--line)!important}
+.home-page .pet-stage > .companion-panel .companion-tools{
+  margin-top:12px!important;padding-top:10px!important;border-top:1px solid var(--line)!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs .status-meter{
+  min-width:0!important;padding:0!important;background:transparent!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs .status-meter-top{
+  display:grid!important;grid-template-columns:auto 1fr!important;align-items:center!important;
+  column-gap:4px!important;row-gap:3px!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs .status-icon{
+  width:17px!important;height:17px!important;background:transparent!important;
+  font-size:12px!important;grid-row:1!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs .status-name{
+  min-width:0!important;font-size:8px!important;line-height:1.1!important;
+  color:var(--muted)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs .status-meter-top>b{
+  grid-column:1/-1!important;font-size:10px!important;color:var(--text)!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs .status-meter-top>b small{color:var(--muted)!important}
+.home-page .pet-stage > .companion-panel .compact-needs .status-track{
+  height:3px!important;margin-top:5px!important;background:var(--line)!important;border-radius:9px!important;
+}
+.home-page .pet-stage > .companion-panel .compact-needs .status-level{display:none!important}
+.home-page .pet-stage > .companion-panel .compact-care-label{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  margin:13px 0 7px!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care-label span{
+  font-size:9px!important;letter-spacing:1.2px!important;color:var(--muted)!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care-label small{font-size:8px!important;color:var(--muted)!important}
+.home-page .pet-stage > .companion-panel .compact-care{
+  display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care .care-action{
+  min-width:0!important;min-height:48px!important;padding:4px 1px!important;gap:3px!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  background:transparent!important;border:1px solid var(--line)!important;border-radius:11px!important;
+  box-shadow:none!important;color:var(--text)!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care .care-icon{
+  width:20px!important;height:20px!important;background:transparent!important;
+  font-size:13px!important;border-radius:0!important;
+}
+.home-page .pet-stage > .companion-panel .compact-care .care-action b{
+  font-size:8px!important;line-height:1!important;color:var(--text)!important;
+}
+@media(max-width:380px){
+  .home-page .pet-stage,.home-page .pet-stage[aria-label="Your companion"]{
+    min-height:600px!important;height:600px!important;
+  }
+  .home-page .stage-pet{top:34%!important;width:70%!important;height:39%!important}
+  .home-page .pet-stage > .companion-panel .compact-needs{gap:6px!important}
+  .home-page .pet-stage > .companion-panel .compact-needs .status-name{font-size:7px!important}
+  .home-page .pet-stage > .companion-panel .compact-care{gap:4px!important}
+  .home-page .pet-stage > .companion-panel .compact-care .care-action{min-height:45px!important}
+}
