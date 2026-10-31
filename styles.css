@@ -1575,3 +1575,10 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
 .home-page .compact-care .care-action:last-child{
   grid-column:auto!important;
 }
+
+
+/* Lift companion details, indicators and care controls away from the stage border */
+.home-page .pet-stage > .companion-panel{bottom:26px!important}
+@media(max-width:380px){
+  .home-page .pet-stage > .companion-panel{bottom:22px!important}
+}
