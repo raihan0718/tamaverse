@@ -629,3 +629,25 @@ body[data-theme="dark"].battle-fullscreen .battle-turn-overlay span{color:#f5c5e
  body.battle-fullscreen .battle-sprite .pet-image{width:clamp(145px,38vw,205px)!important;height:clamp(145px,38vw,205px)!important}
  body.battle-fullscreen .battle-turn-overlay{top:98px!important}
 }
+
+/* Fix stretched battle HUD: HP cards must size to content, not fill fighter height */
+body.battle-fullscreen .battle-hp-card{
+  top:0!important;
+  bottom:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+  padding:5px 6px!important;
+  background:#fffaf2ee!important;
+  border:1px solid #ffffffcc!important;
+  border-radius:10px!important;
+  box-shadow:0 2px 8px #30203922!important;
+}
+body.battle-fullscreen .battle-hp-card .progress-track{height:7px!important}
+body.battle-fullscreen .battle-side{height:61%!important}
+body[data-theme="dark"].battle-fullscreen .battle-hp-card{
+  background:#30263bee!important;
+  border-color:#ffffff35!important;
+}
+body[data-theme="dark"].battle-fullscreen .battle-hp-card .hp-value,
+body[data-theme="dark"].battle-fullscreen .battle-hp-card .battle-pet-caption{color:#fff!important}
