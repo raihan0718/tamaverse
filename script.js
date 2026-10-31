@@ -38,6 +38,16 @@ function petImage(speciesId, className = '', eager = false) {
   const priority = eager ? 'high' : 'low';
   return `<img class="pet-image ${esc(className)}" src="${src}?v=pet-detail-20261031-4" alt="${esc(pet.name)}" loading="${loading}" decoding="async" fetchpriority="${priority}" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'pet-image-fallback',textContent:'${pet.emoji}'}))">`;
 }
+const accessoryFrames = [
+  {id:'common',name:'Glassy Blue',rarity:'Common',src:'assets/ui/Common-GlassyBlue.webp'},
+  {id:'uncommon',name:'Sprout Green',rarity:'Uncommon',src:'assets/ui/Uncommon-SproutGreen_1.webp'},
+  {id:'rare',name:'Sunny Amber',rarity:'Rare',src:'assets/ui/Rare-SunnyAmber.webp'},
+  {id:'legendary',name:'Royal Violet',rarity:'Legendary',src:'assets/ui/Legendary-RoyalViolet.webp'},
+  {id:'celestial',name:'Divine Princesses',rarity:'Celestial',src:'assets/ui/Celestial-DivinePrinceses.webp'}
+];
+function accessoryFrameById(id){return accessoryFrames.find(frame=>frame.id===id)||accessoryFrames[0];}
+let collectionTab='pets';
+
 const eggs = [
   {id:'basic',name:'Pixie Egg',image:'assets/eggs/pixie.webp',price:100,description:'Telur ajaib berisi pet Common hingga Legendary.'},
   {id:'premium',name:'Astral Egg',image:'assets/eggs/astral.webp',price:5,description:'Telur astral eksklusif berisi pet Rare hingga Legendary.',currency:'gem'}
@@ -88,7 +98,7 @@ function save(){
   }
 }
 function freshState(name){
-  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,gems:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
+  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,gems:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,equippedFrame:'common',items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
 }
 function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function petById(id){return state?.pets.find(p=>p.uid===id)||null;}
@@ -138,7 +148,17 @@ function welcomePage(){return `<section class="page welcome"><div class="eyebrow
 function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',bath:'Splash! 🫧',sleep:'Zzz... 🌙',train:'Go! 💪',greet:'Hello! ♥',idle:''})[action]||'';}
 function emptyPets(){return `<div class="card empty"><div style="font-size:42px">🥚</div><p>Belum ada pet. Tetaskan telur pertamamu untuk memulai!</p><button class="button" data-action="start">Tetaskan telur gratis</button></div>`;}
 function rarityRank(rarity){return ({Common:1,Rare:2,Epic:3,Legendary:4})[rarity]||0;}
-function petsPage(){const owned=new Set(state.pets.map(p=>p.species));const sortedPets=[...state.pets].sort((a,b)=>rarityRank(speciesById(a.species).rarity)-rarityRank(speciesById(b.species).rarity));const undiscovered=species.filter(s=>!owned.has(s.id)).sort((a,b)=>rarityRank(a.rarity)-rarityRank(b.rarity));return `<section class="page"><div class="eyebrow">KOLEKSI PET</div><h1 class="page-title">Teman-temanmu</h1><p class="subtle">${owned.size}/12 spesies terkumpul · Pilih pet untuk melihat detail atau menjadikannya aktif.</p>${sortedPets.length?`<div class="collection-grid">${sortedPets.map(p=>petCard(p,true)).join('')}</div>`:''}<div class="section-heading"><h2>Belum ditemukan</h2></div><div class="collection-grid">${undiscovered.map(s=>`<article class="creature-card locked"><div class="creature-thumb">❔</div><h3>???</h3><p>${s.element} · <span class="rarity rarity-${s.rarity}">${s.rarity}</span></p></article>`).join('')}</div></section>`;}
+function petsPage(){
+  const owned=new Set(state.pets.map(p=>p.species));
+  const sortedPets=[...state.pets].sort((a,b)=>rarityRank(speciesById(a.species).rarity)-rarityRank(speciesById(b.species).rarity));
+  const undiscovered=species.filter(s=>!owned.has(s.id)).sort((a,b)=>rarityRank(a.rarity)-rarityRank(b.rarity));
+  const tabs='<div class="collection-tabs" role="tablist" aria-label="Collection categories">'+
+    '<button class="collection-tab '+(collectionTab==='pets'?'active':'')+'" role="tab" aria-selected="'+(collectionTab==='pets')+'" data-action="collection-tab" data-tab="pets"><span>🐾</span><b>Pets</b><small>'+state.pets.length+' collected</small></button>'+
+    '<button class="collection-tab '+(collectionTab==='accessories'?'active':'')+'" role="tab" aria-selected="'+(collectionTab==='accessories')+'" data-action="collection-tab" data-tab="accessories"><span>🖼️</span><b>Accessories</b><small>'+accessoryFrames.length+' frames</small></button></div>';
+  const petContent='<p class="subtle collection-description">'+owned.size+'/12 species collected · Select a pet to view its details or make it active.</p>'+(sortedPets.length?'<div class="collection-grid">'+sortedPets.map(p=>petCard(p,true)).join('')+'</div>':emptyPets())+'<div class="section-heading"><h2>Not discovered yet</h2></div><div class="collection-grid">'+undiscovered.map(s=>'<article class="creature-card locked"><div class="creature-thumb">❔</div><h3>???</h3><p>'+s.element+' · <span class="rarity rarity-'+s.rarity+'">'+s.rarity+'</span></p></article>').join('')+'</div>';
+  const accessoryContent='<p class="subtle collection-description">Give your companion a new look. Choose a frame to apply it to your home display.</p><div class="accessory-grid">'+accessoryFrames.map(frame=>{const equipped=state.equippedFrame===frame.id;return '<article class="accessory-card '+(equipped?'equipped':'')+'"><div class="accessory-art"><img src="'+frame.src+'" alt="'+esc(frame.name)+' frame" loading="lazy" decoding="async"></div><div class="accessory-info"><span class="rarity rarity-'+frame.rarity+'">'+frame.rarity+'</span><h3>'+esc(frame.name)+'</h3><button class="accessory-equip '+(equipped?'is-equipped':'')+'" data-action="equip-frame" data-frame="'+frame.id+'" '+(equipped?'disabled':'')+'>'+(equipped?'✓ Equipped':'Use frame')+'</button></div></article>';}).join('')+'</div>';
+  return '<section class="page collection-page"><div class="eyebrow">YOUR COLLECTION</div><h1 class="page-title">Collection</h1>'+tabs+(collectionTab==='accessories'?accessoryContent:petContent)+'</section>';
+}
 function petCard(p,owned){const s=speciesById(p.species);return `<button class="creature-card ${owned?'owned':''}" data-action="inspect" data-pet="${p.uid}"><div class="creature-thumb">${petImage(s.id, 'collection-pet-image')}</div><h3>${esc(p.name)} ${p.uid===state.activePet?'⭐':''}</h3><p>Lv.${p.level} · ${s.element}<br><span class="rarity rarity-${s.rarity}">${s.rarity}</span></p></button>`;}
 function gachaPage(){return `<section class="page"><div class="eyebrow">TEMUKAN TEMAN BARU</div><h1 class="page-title">Telur ajaib</h1><p class="subtle">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Premium: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p><div class="notice">🎁 Gratis 1 Basic Egg setiap hari. Semua hadiah menggunakan mata uang dalam game—tanpa pembayaran asli.</div><div class="collection-grid">${eggs.map(e=>`<article class="card egg-card"><span class="egg-icon">${eggImage(e.id)}</span><h3>${e.name}</h3><p class="subtle">${e.description}</p><p class="muted-label">${e.currency==='gem'?`💎 ${e.price} gem`:`🪙 ${e.price} koin`}</p><button class="button full" data-action="pull" data-egg="${e.id}">Buka 1 telur</button></article>`).join('')}</div><div class="card" style="margin-top:12px"><div class="section-heading" style="margin-top:0"><h2>Hadiah gratis harian</h2></div><button class="button secondary full" data-action="freeegg">${state.gacha.lastFree===new Date().toDateString()?'Sudah diklaim hari ini':'Klaim Basic Egg gratis'}</button><div class="section-heading"><h2>Progress pity</h2></div><p class="subtle">Rare+: ${state.gacha.pityRare}/10 · Epic+: ${state.gacha.pityEpic}/50</p><div class="section-heading"><h2>Riwayat tarikan</h2></div>${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>{const s=speciesById(h.species||species.find(x=>x.name===h.name)?.id);return `<p class="subtle gacha-history-row"><span class="gacha-history-icon">${petImage(s.id,'history-pet-image')}</span><b>${esc(h.name)}</b> · <span class="rarity rarity-${h.rarity}">${h.rarity}</span></p>`;}).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}</div></section>`;}
 function battlePage(){if(battle)return battleView();return `<section class="page"><div class="eyebrow">ARENA TAMAVERSE</div><h1 class="page-title">Battle</h1><p class="subtle">Latih petmu dalam pertarungan turn-based melawan lawan simulasi.</p><div class="card"><div style="font-size:42px;text-align:center;margin:8px">⚔️</div><h2 style="text-align:center">Practice Battle</h2><p class="subtle" style="text-align:center">Lawan AI lokal · Hadiah: 35 koin + XP saat menang</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai latihan</button></div><div class="card" style="margin-top:12px"><h2>Simulated PvP</h2><p class="subtle">Mode demonstrasi melawan lawan sampel. Belum terhubung ke pemain sungguhan atau matchmaking online.</p><button class="button secondary full" data-action="battle-start" data-mode="simulated">Tantang lawan demo</button></div>${state.battleHistory.length?`<div class="section-heading"><h2>Battle terakhir</h2></div>${state.battleHistory.slice(0,4).map(b=>`<div class="card" style="margin:7px 0"><span>${b.result==='win'?'🏆':b.result==='draw'?'🤝':'💫'} ${b.result==='win'?'Menang':b.result==='draw'?'Seri':'Kalah'}</span><span style="float:right" class="muted-label">${new Date(b.date).toLocaleDateString('id-ID')}</span></div>`).join('')}`:''}<div class="notice">🛡️ Pertarungan dan rating tersimpan lokal. Hasil ini bukan ranking kompetitif online.</div></section>`;}
@@ -539,6 +559,7 @@ function normalizeSavedState(saved){
     rebought:Array.isArray(oldQuests.rebought)?oldQuests.rebought:[]
   };
   const today=new Date().toDateString();
+  base.equippedFrame=accessoryFrames.some(frame=>frame.id===saved.equippedFrame)?saved.equippedFrame:'common';
   base.lastCareUpdate=Number(saved.lastCareUpdate)||Date.now();
   base.dailyReward=saved.dailyReward||{lastClaimDate:'',day:0};
   base.battleHistory=Array.isArray(saved.battleHistory)?saved.battleHistory:[];
@@ -575,7 +596,7 @@ function homePage(){
       <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
       <div class="stage-caption"><span class="caption-kicker">A LITTLE FRIEND FROM</span><b>THE TAMAVERSE</b><span class="caption-line"></span></div>
-      <img class="companion-frame-art" src="assets/ui/Common-GlassyBlue.webp" alt="" aria-hidden="true">
+      <img class="companion-frame-art" src="${accessoryFrameById(state.equippedFrame).src}" alt="" aria-hidden="true">
       <div class="pet-shadow"></div><div class="stage-pet" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div>
       <div class="companion-panel">
         <div class="companion-meta">
@@ -1019,6 +1040,8 @@ function avatarPicker(){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
+  if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
   if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
