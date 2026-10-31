@@ -1582,3 +1582,8 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
 @media(max-width:380px){
   .home-page .pet-stage > .companion-panel{bottom:22px!important}
 }
+
+
+/* Move the companion pet lower in the stage */
+.home-page .stage-pet{top:55%!important}
+@media(max-width:380px){.home-page .stage-pet{top:55%!important}}
