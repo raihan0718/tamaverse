@@ -731,14 +731,7 @@ body[data-theme="dark"].battle-fullscreen .battle-hp-card{
 .home-page .stage-topline{position:relative;z-index:3}
 .home-page .orbit,.home-page .stage-spark{z-index:2}
 .home-page .pet-shadow{z-index:3}
-.home-page .stage-pet{
-  z-index:4;
-  top:43%;
-  left:50%;
-  width:34%;
-  height:27%;
-  transform:translate(-50%,-50%);
-}
+.home-page .stage-pet{z-index:5}
 .home-page .stage-pet>.stage-creature{
   width:100%;
   height:100%;
@@ -753,17 +746,12 @@ body[data-theme="dark"].battle-fullscreen .battle-hp-card{
   bottom:12px;
   margin:0;
 }
-.home-page .stage-pet{
-  top:58%;
-  width:32%;
-  height:25%;
-}
+
 .home-page .pet-shadow{top:72%}
 .home-page .orbit{top:53%}
 .home-page .orbit-two{top:53%}
 @media(max-width:380px){
   .home-page .pet-stage{min-height:610px;padding-left:12px;padding-right:12px}
-  .home-page .stage-pet{top:56%;width:36%;height:25%}
 }
 body[data-theme="dark"] .home-page .pet-stage{
   background:radial-gradient(ellipse at 50% 43%,#59476e 0%,#493754 54%,#35283f 100%);
@@ -788,7 +776,7 @@ body[data-theme="dark"] .home-page .pet-stage{
 .home-page .stage-spark{z-index:4;color:#fff;font-size:25px;text-shadow:0 2px 10px #80a9d8aa}
 .home-page .spark-one{top:29%;left:15%}.home-page .spark-two{top:42%;right:13%}.home-page .spark-three{top:61%;right:22%}
 .home-page .pet-shadow{z-index:4;top:70%;width:150px;height:20px;background:#547ba533;filter:blur(12px)}
-.home-page .stage-pet{z-index:5;top:54%;width:49.4%;height:37.7%;font-size:clamp(120px,36vw,190px);filter:drop-shadow(0 16px 13px #496a8b38)}
+.home-page .stage-pet{z-index:5;font-size:clamp(120px,36vw,190px);filter:drop-shadow(0 16px 13px #496a8b38)}
 .home-page .stage-pet>.stage-creature{width:100%;height:100%;background:transparent;clip-path:none;filter:drop-shadow(0 5px 5px #45627b20)}
 .home-page .stage-pet>.stage-creature .pet-image{width:100%;height:100%;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 9px 12px #53718b35)}
 .home-page .pet-heart{color:#ff8eb8;text-shadow:0 2px 8px #fff;font-size:29px}
@@ -823,7 +811,7 @@ body[data-theme="dark"] .home-page .companion-xp b{color:#d5e6f7}
 body[data-theme="dark"] .home-page .stage-stats>span{background:#40536a;border-color:#ffffff16;color:#d7e8f8}
 body[data-theme="dark"] .home-page .stage-stats>span small{color:#aec4d9}
 body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
-@media(max-width:380px){.home-page .pet-stage{min-height:660px;padding:20px 13px 14px}.home-page .stage-caption{top:13%}.home-page .stage-pet{top:53%;width:54.6%;height:36.4%}.home-page .stage-bottom-note{top:72%;font-size:7px}.home-page .companion-panel{left:11px;right:11px;bottom:11px;padding:13px 12px}.home-page .stage-stats{gap:3px}.home-page .stage-stats>span{grid-template-columns:15px 1fr;padding:6px 3px}.home-page .stage-stats>span small{font-size:5.5px}}
+@media(max-width:380px){.home-page .pet-stage{min-height:660px;padding:20px 13px 14px}.home-page .stage-caption{top:13%}.home-page .stage-bottom-note{top:72%;font-size:7px}.home-page .companion-panel{left:11px;right:11px;bottom:11px;padding:13px 12px}.home-page .stage-stats{gap:3px}.home-page .stage-stats>span{grid-template-columns:15px 1fr;padding:6px 3px}.home-page .stage-stats>span small{font-size:5.5px}}
 @media(prefers-reduced-motion:reduce){.home-page .stage-pet,.home-page .stage-spark{animation:none!important}}
 
 
@@ -842,28 +830,31 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 
 
 
-/* Align the companion's center with the artwork's center */
-.home-page .stage-pet{
-  position:absolute!important;
-  left:50%!important;
-  top:48%!important;
-  margin:0!important;
-}
+/* Remove mobile tap flash on the Home companion frame */
 .home-page .pet-stage,
 .home-page .pet-stage *{-webkit-tap-highlight-color:transparent;}
 .home-page .pet-stage{cursor:default;-webkit-tap-highlight-color:transparent;}
-@media(max-width:380px){
-  .home-page .stage-pet{left:50%!important;top:48%!important;}
-}
 
 
-/* Stable Home pet anchor: keep centering on the wrapper, animate only the sprite */
+/* Single source of truth: Home companion position and size */
 .home-page .stage-pet{
+  position:absolute!important;
+  z-index:5;
   left:50%!important;
   top:48%!important;
+  width:49.4%;
+  height:37.7%;
+  margin:0!important;
   transform:translate(-50%,-50%)!important;
   animation:none!important;
   transform-origin:50% 50%;
+}
+@media(max-width:380px){
+  .home-page .stage-pet{
+    top:48%!important;
+    width:54.6%;
+    height:36.4%;
+  }
 }
 .home-page .stage-pet>.stage-creature{
   transform-origin:50% 88%;
