@@ -1241,38 +1241,72 @@ function onlineBattleView() {
   const snackUseful = myHp < myMax;
   const myTurn = room.current_turn === window.TAMAVERSE_USER_ID;
   const finished = room.status === 'finished';
+  const mySpecies = speciesById(mine?.species);
+  const rivalSpecies = speciesById(rival?.species);
   const log = Array.isArray(bs.log) ? bs.log : [];
+  const turn = Number(bs.turn || 1);
   return `
-    <div class="online-arena card" style="margin-top:14px">
-      <div class="eyebrow">LIVE PVP ARENA</div>
-      <h2>${finished ? 'Battle selesai' : myTurn ? 'Giliranmu' : 'Giliran lawan'}</h2>
-      <div class="online-fighters">
-        <div class="online-fighter">
-          <b>${esc(mine?.display_name || 'Kamu')}</b>
-          <span>${esc(mine?.name || 'Pet')} · Lv.${mine?.level || 1}</span>
-          <strong>${myHp} / ${myMax} HP</strong>
-          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div>
+    <section class="page online-battle-page">
+      <div class="eyebrow">TAMAVERSE ONLINE ARENA · ${room.room_type === 'public' ? 'RANDOM MATCH' : 'PLAY WITH FRIENDS'}</div>
+      <h1 class="page-title">Battle Arena</h1>
+      <div class="battle-scene battle-fx-idle" aria-label="Online battle arena">
+        <div class="arena-sky">
+          <span class="arena-moon">✦</span>
+          <span class="arena-cloud cloud-one">☁</span>
+          <span class="arena-cloud cloud-two">☁</span>
+          <span class="arena-light light-one"></span>
+          <span class="arena-light light-two"></span>
         </div>
-        <div class="online-vs">VS</div>
-        <div class="online-fighter">
-          <b>${esc(rival?.display_name || 'Opponent')}</b>
-          <span>${esc(rival?.name || 'Pet')} · Lv.${rival?.level || 1}</span>
-          <strong>${rivalHp} / ${rivalMax} HP</strong>
-          <div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div>
+        <div class="arena-banner"><span>✨ TAMAVERSE ARENA ✨</span><b>TURN ${turn}</b></div>
+        <div class="arena-platform platform-player"></div>
+        <div class="arena-platform platform-enemy"></div>
+        <div class="battle-side battle-player">
+          <div class="battle-nameplate">
+            <b>${esc(mine?.name || mine?.display_name || 'Your Pet')}</b>
+            <span>${esc(mineSpecies.element || mine?.element || 'Unknown')} · Lv.${Number(mine?.level || 1)}</span>
+          </div>
+          <div class="battle-sprite">${petImage(mine?.species, 'battle-pet-image')}</div>
+          <span class="battle-effect effect-player"></span>
+          <span class="battle-impact impact-player"></span>
+          <div class="battle-hp-card">
+            <div class="hp-label"><b>YOUR PET</b><span>${myHp} / ${myMax} HP</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div>
+          </div>
+        </div>
+        <div class="arena-vs">VS</div>
+        <div class="battle-side battle-enemy">
+          <div class="battle-nameplate">
+            <b>${esc(rival?.name || rival?.display_name || 'Opponent Pet')}</b>
+            <span>${esc(rivalSpecies.element || rival?.element || 'Unknown')} · Lv.${Number(rival?.level || 1)}</span>
+          </div>
+          <div class="battle-sprite">${petImage(rival?.species, 'battle-pet-image')}</div>
+          <span class="battle-effect effect-enemy"></span>
+          <span class="battle-impact impact-enemy"></span>
+          <div class="battle-hp-card">
+            <div class="hp-label"><b>OPPONENT</b><span>${rivalHp} / ${rivalMax} HP</span></div>
+            <div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,rivalHp/rivalMax*100)}%"></div></div>
+          </div>
         </div>
       </div>
-      ${finished ? `<p class="subtle">Hasil: ${bs.result === 'draw' ? 'Seri' : bs.winner_id === window.TAMAVERSE_USER_ID ? 'Menang' : 'Kalah'}</p>` : `
-        <div class="online-action-grid">
+      <div class="card online-turn-card" style="text-align:center;margin-top:4px">
+        <div class="eyebrow">${finished ? 'MATCH COMPLETE' : myTurn ? 'YOUR TURN' : "OPPONENT'S TURN"}</div>
+        <h2 style="margin:6px 0">${finished ? 'Battle selesai' : myTurn ? 'Giliranmu!' : 'Menunggu lawan...'}</h2>
+        <p class="subtle" style="margin:0">${finished ? (bs.result === 'draw' ? 'Pertandingan berakhir seri.' : bs.winner_id === window.TAMAVERSE_USER_ID ? 'Kamu memenangkan pertandingan!' : 'Lawan memenangkan pertandingan.') : myTurn ? 'Pilih aksi untuk pet-mu.' : 'Aksi lawan akan muncul otomatis di arena.'}</p>
+      </div>
+      ${finished ? `<button class="button full" style="margin-top:14px" data-action="online-result-dismiss">Kembali ke Battle</button>` : `
+        <div class="section-heading"><h2>Aksimu</h2></div>
+        <div class="button-row">
           <button class="button" data-action="online-battle-action" data-move="attack" ${myTurn ? '' : 'disabled'}>⚔️ Attack</button>
           <button class="button soft" data-action="online-battle-action" data-move="skill" ${myTurn && !bs[mineIsHost ? 'host_skill_used' : 'guest_skill_used'] ? '' : 'disabled'}>✨ Skill</button>
           <button class="button secondary" data-action="online-battle-action" data-move="defend" ${myTurn ? '' : 'disabled'}>🛡️ Defend</button>
-          <button class="button secondary" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}>🍓 Snack (${snackCount})</button>
+          <button class="button secondary" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}>🍓 Item (${snackCount})</button>
         </div>
-        <p class="muted-label">${myTurn ? 'Pilih satu aksi. Damage dan giliran dihitung server.' : 'Menunggu lawan memilih aksi...'}</p>
+        <p class="muted-label">Skill sekali per battle · Damage dan giliran dihitung server.</p>
       `}
-      <div class="section-heading"><h3>Battle log</h3><span class="pill">Turn ${Number(bs.turn || 1)}</span></div>
+      <div class="section-heading"><h2>Battle log</h2><span class="pill">Turn ${turn}</span></div>
       <div class="battle-log">${log.slice(-8).map(item => `<div>• ${esc(item.text || '')}</div>`).join('') || '<div>Battle dimulai. Pilih aksi pertamamu.</div>'}</div>
-    </div>`;
+    </section>
+  `;
 }
 
 let leavingOnlineRoom = false;
