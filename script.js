@@ -602,7 +602,7 @@ function homePage(){
       <button class="home-feature-tile" data-action="daily-quests" aria-label="Buka Daily Quests"><span class="home-feature-art quest-art">📜</span><b>Daily Quests</b><small>Missions & rewards</small></button>
       <button class="home-feature-tile" data-action="shop" aria-label="Buka Store"><span class="home-feature-art store-art">🛍️</span><b>Store</b><small>Items & supplies</small></button>
     </div>
-    <div class="quick-actions home-quick"><button class="button secondary" data-action="go" data-page="pets">🐾 Collection</button><button class="button secondary" data-action="go" data-page="gacha">🥚 Gacha</button><button class="button secondary" data-action="go" data-page="battle">⚔️ Battle</button></div>
+    
   </section>`;
 }
 function doCare(kind){
