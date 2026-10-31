@@ -838,3 +838,11 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 .home-page .companion-xp{display:flex;justify-content:space-between;align-items:center;margin:7px 0 5px;font-size:7px;letter-spacing:1.1px}
 .home-page .companion-panel .progress-track{height:5px}
 @media(max-width:380px){.home-page .pet-stage{min-height:620px}.home-page .companion-panel{left:14px;right:14px;bottom:14px;padding:11px 12px}.home-page .companion-meta h2{font-size:19px}}
+
+
+/* Home companion alignment + remove Android tap flash */
+.home-page .stage-pet{top:48%!important;left:50%;}
+.home-page .pet-stage,
+.home-page .pet-stage *{-webkit-tap-highlight-color:transparent;}
+.home-page .pet-stage{cursor:default;-webkit-tap-highlight-color:transparent;}
+@media(max-width:380px){.home-page .stage-pet{top:48%!important;}}
