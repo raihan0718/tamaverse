@@ -1587,3 +1587,41 @@ body[data-theme="dark"] .home-page .compact-care .care-action{
 /* Move the companion pet lower in the stage */
 .home-page .stage-pet{top:55%!important}
 @media(max-width:380px){.home-page .stage-pet{top:55%!important}}
+
+
+/* Frosted glass surfaces for companion details, indicators and care */
+.home-page .pet-stage > .companion-panel{
+  padding:12px!important;
+  border:1px solid #ffffff80!important;
+  border-radius:20px!important;
+  background:rgba(255,248,253,.72)!important;
+  box-shadow:0 8px 26px rgba(100,70,110,.10)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+  backdrop-filter:blur(12px)!important;
+}
+.home-page .compact-needs .status-meter{
+  padding:7px 6px!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  border-radius:11px!important;
+  background:rgba(255,255,255,.72)!important;
+  -webkit-backdrop-filter:blur(10px)!important;
+  backdrop-filter:blur(10px)!important;
+}
+.home-page .compact-care .care-action{
+  border:1px solid rgba(255,255,255,.76)!important;
+  background:rgba(255,255,255,.72)!important;
+  box-shadow:0 4px 12px rgba(100,70,110,.07)!important;
+  -webkit-backdrop-filter:blur(10px)!important;
+  backdrop-filter:blur(10px)!important;
+}
+body[data-theme="dark"] .home-page .pet-stage > .companion-panel{
+  background:rgba(43,34,59,.74)!important;
+  border-color:rgba(255,255,255,.22)!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.16)!important;
+}
+body[data-theme="dark"] .home-page .compact-needs .status-meter,
+body[data-theme="dark"] .home-page .compact-care .care-action{
+  background:rgba(54,43,68,.74)!important;
+  border-color:rgba(255,255,255,.22)!important;
+  color:#fff4fb!important;
+}
