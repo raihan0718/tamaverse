@@ -2241,12 +2241,12 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 }
 
 
-/* Center only the four companions identified by the user on the Home frame. */
+/* Single position source for the four Home companions; other pets remain untouched. */
 .home-page .pet-stage > .stage-pet.pet-species-fluffin,
 .home-page .pet-stage > .stage-pet.pet-species-mossling,
 .home-page .pet-stage > .stage-pet.pet-species-voltkit,
 .home-page .pet-stage > .stage-pet.pet-species-starwhale{
-  left:48.5%!important;
-  top:46.5%!important;
+  left:51.5%!important;
+  top:50%!important;
   transform:translate(-50%,-50%) scale(1.08)!important;
 }
