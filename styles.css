@@ -773,8 +773,11 @@ body[data-theme="dark"] .home-page .pet-stage{
 .home-page .caption-line{width:42px;height:2px;border-radius:9px;background:linear-gradient(90deg,transparent,#fff,#9fc9e9,transparent)}
 .home-page .companion-frame-art{z-index:3;width:min(90%,470px);max-width:none;top:48%;transform:translate(-50%,-50%);filter:drop-shadow(0 20px 24px #355b8055) drop-shadow(0 5px 9px #597ba540);animation:homeFrameGlow 3.2s ease-in-out infinite;}
 @keyframes homeFrameGlow{
-  0%,100%{filter:drop-shadow(0 18px 20px #75cfff38) drop-shadow(0 0 7px #9ee8ff55) drop-shadow(0 5px 9px #597ba540)}
-  50%{filter:drop-shadow(0 20px 27px #75cfff88) drop-shadow(0 0 19px #a8eaffcc) drop-shadow(0 0 32px #b9a5ff66) drop-shadow(0 5px 9px #597ba540)}
+  0%,100%{filter:drop-shadow(-2px 2px 10px #8de8ff88) drop-shadow(2px -3px 16px #a8caff77) drop-shadow(0 0 7px #9ee8ff66) drop-shadow(0 5px 9px #597ba540)}
+  20%{filter:drop-shadow(3px -4px 14px #9beeffaa) drop-shadow(-2px 2px 21px #b5a5ff88) drop-shadow(0 0 10px #a8eaff88) drop-shadow(0 5px 9px #597ba540)}
+  42%{filter:drop-shadow(-4px -2px 18px #8bdcffbb) drop-shadow(3px 4px 25px #c3a8ff99) drop-shadow(0 0 13px #a8eaffaa) drop-shadow(0 5px 9px #597ba540)}
+  67%{filter:drop-shadow(2px 4px 13px #a4edff99) drop-shadow(-3px -4px 23px #b6a0ff99) drop-shadow(0 0 9px #9ee8ff99) drop-shadow(0 5px 9px #597ba540)}
+  84%{filter:drop-shadow(-3px -3px 17px #8de8ffbb) drop-shadow(4px 2px 20px #c1a8ff88) drop-shadow(0 0 12px #a8eaff99) drop-shadow(0 5px 9px #597ba540)}
 }
 @media(prefers-reduced-motion:reduce){.home-page .companion-frame-art{animation:none;}}
 .home-page .orbit{z-index:2;top:51%;border-color:#ffffff9c;box-shadow:0 0 30px #ffffff38,inset 0 0 24px #ffffff26}
