@@ -545,20 +545,19 @@ function homePage(){
         <div class="companion-meta"><div><div class="eyebrow">${s.element} TYPE <span>·</span> ${s.rarity.toUpperCase()}</div><h2>${esc(p.name)}</h2></div><span class="pill">LVL ${p.level}</span></div>
         <div class="companion-xp"><span>GROWTH PROGRESS</span><b>${p.xp} <small>/ ${p.level*40} XP</small></b></div>
         <div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
-      </div>
-    </section>
-    <section class="needs-section">
-      <div class="home-section-heading"><div><span class="home-section-kicker">COMPANION STATUS</span><h2>Pet condition</h2></div><span class="live-label"><i></i> LIVE</span></div>
-      <div class="status-panel">${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}</div>
-    </section>
-    <section class="care-section">
-      <div class="home-section-heading"><div><span class="home-section-kicker">DAILY ACTIVITIES</span><h2>Take care</h2></div><span class="care-hint">Choose an action</span></div>
-      <div class="care-actions">
-        <button class="care-action" data-action="care" data-care="feed"><span class="care-icon">🍓</span><span class="care-copy"><b>Feed</b><small>Fill hunger · ${Math.max(0,5-(state.careUses?.feed||0))}/5 left</small></span><span class="care-arrow">›</span></button>
-        <button class="care-action" data-action="care" data-care="play"><span class="care-icon">💖</span><span class="care-copy"><b>Play</b><small>Boost happiness · ${Math.max(0,5-(state.careUses?.play||0))}/5 left</small></span><span class="care-arrow">›</span></button>
-        <button class="care-action" data-action="care" data-care="clean"><span class="care-icon">🫧</span><span class="care-copy"><b>Bath</b><small>Keep it fresh</small></span><span class="care-arrow">›</span></button>
-        <button class="care-action" data-action="care" data-care="sleep"><span class="care-icon">🌙</span><span class="care-copy"><b>Sleep</b><small>Restore energy</small></span><span class="care-arrow">›</span></button>
-        <button class="care-action" data-action="care" data-care="train"><span class="care-icon">🏋️</span><span class="care-copy"><b>Train</b><small>Grow stronger · ${Math.max(0,4-(state.careUses?.train||0))}/4 left</small></span><span class="care-arrow">›</span></button>
+        <div class="companion-tools">
+          <div class="compact-needs">
+            ${statusMeter('Hunger','🍓',p.hunger)}${statusMeter('Bahagia','💖',p.happiness)}${statusMeter('Energi','⚡',p.energy)}${statusMeter('Kebersihan','🫧',p.cleanliness)}
+          </div>
+          <div class="compact-care-label"><span>QUICK CARE</span><small>Daily actions</small></div>
+          <div class="compact-care">
+            <button class="care-action" data-action="care" data-care="feed" aria-label="Feed"><span class="care-icon">🍓</span><b>Feed</b></button>
+            <button class="care-action" data-action="care" data-care="play" aria-label="Play"><span class="care-icon">💖</span><b>Play</b></button>
+            <button class="care-action" data-action="care" data-care="clean" aria-label="Bath"><span class="care-icon">🫧</span><b>Bath</b></button>
+            <button class="care-action" data-action="care" data-care="sleep" aria-label="Sleep"><span class="care-icon">🌙</span><b>Sleep</b></button>
+            <button class="care-action" data-action="care" data-care="train" aria-label="Train"><span class="care-icon">🏋️</span><b>Train</b></button>
+          </div>
+        </div>
       </div>
     </section>
     <div class="section-heading care-heading"><h2>🎁 Daily reward</h2><span class="muted-label">7-day login bonus</span></div>${dailyRewardCard()}
