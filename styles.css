@@ -1936,22 +1936,23 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .accessory-equip.is-equipped{border-color:transparent;background:rgba(80,190,145,.14);color:#45b98b;cursor:default}
 @media(max-width:360px){.collection-page .collection-tabs{gap:7px}.collection-tab{padding:9px 8px;column-gap:6px}.accessory-grid{gap:8px}.accessory-art{height:108px}.accessory-info{padding:8px}}
 
-/* Keep the equipped frame fully visible in the Home preview */
+/* Keep the entire equipped frame visible above the companion info panel */
 .home-page .companion-frame-art{
-  width:min(82%,430px);
-  max-width:430px;
-  max-height:68%;
-  height:auto;
+  width:auto!important;
+  height:50%!important;
+  max-width:86%!important;
+  max-height:none!important;
   aspect-ratio:684/768;
-  object-fit:contain;
+  object-fit:contain!important;
   object-position:center;
-  top:47%;
-  transform:translate(-50%,-50%);
+  left:50%;
+  top:43%!important;
+  transform:translate(-50%,-50%)!important;
 }
 @media(max-width:380px){
   .home-page .companion-frame-art{
-    width:82%;
-    max-height:66%;
-    top:47%;
+    height:47%!important;
+    max-width:84%!important;
+    top:42%!important;
   }
 }
