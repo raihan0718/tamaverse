@@ -83,18 +83,11 @@ let petAnimationTimer;
 let pullInProgress = false;
 
 function save(){
-  if(state){
-    try{
-      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    }catch(e){
-      showToast('Penyimpanan penuh. Hapus sebagian data browser.');
-    }
-  }
-
-  if(typeof window.savePlayerToSupabase === 'function'){
-    window.savePlayerToSupabase().catch(e=>{
-      console.warn('Cloud save failed:', e);
-    });
+  if(!state)return;
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  }catch(e){
+    showToast('Penyimpanan penuh. Hapus sebagian data browser.');
   }
 }
 function freshState(name){
@@ -141,7 +134,7 @@ function render(){
   if(!state){root.innerHTML=welcomePage();return;}
   dailyReset();
   const pages={home:homePage,pets:petsPage,gacha:gachaPage,battle:battlePage,ranking:rankingPage,profile:profilePage};
-  root.innerHTML=(pages[page]||homePage)(); save();
+  root.innerHTML=(pages[page]||homePage)();
 }
 window.render = render;
 function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau gem, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 gem</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
