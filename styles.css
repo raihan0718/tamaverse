@@ -855,3 +855,55 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 @media(max-width:380px){
   .home-page .stage-pet{left:50%!important;top:48%!important;}
 }
+
+
+/* Stable Home pet anchor: keep centering on the wrapper, animate only the sprite */
+.home-page .stage-pet{
+  left:50%!important;
+  top:48%!important;
+  transform:translate(-50%,-50%)!important;
+  animation:none!important;
+  transform-origin:50% 50%;
+}
+.home-page .stage-pet>.stage-creature{
+  transform-origin:50% 88%;
+  animation:homeSpriteIdle 6.8s cubic-bezier(.37,0,.23,1) infinite;
+  will-change:transform;
+}
+.home-page .pet-action-eat .stage-pet>.stage-creature{animation:homeSpriteEat .38s ease-in-out 5}
+.home-page .pet-action-play .stage-pet>.stage-creature,
+.home-page .pet-action-greet .stage-pet>.stage-creature{animation:homeSpritePlay .45s ease-in-out 4}
+.home-page .pet-action-bath .stage-pet>.stage-creature{animation:homeSpriteBath .5s ease-in-out 4}
+.home-page .pet-action-sleep .stage-pet>.stage-creature{animation:homeSpriteSleep 1.8s ease-in-out 1}
+.home-page .pet-action-train .stage-pet>.stage-creature{animation:homeSpriteTrain .42s ease-in-out 5}
+@keyframes homeSpriteIdle{
+  0%,100%{transform:translateY(0) rotate(-.25deg) scale(1)}
+  25%{transform:translateY(-1.5px) rotate(.15deg) scale(1.008)}
+  50%{transform:translateY(-3px) rotate(.35deg) scale(1.016)}
+  75%{transform:translateY(-1px) rotate(-.15deg) scale(1.006)}
+}
+@keyframes homeSpriteEat{
+  0%,100%{transform:translateY(0) rotate(0)}
+  35%{transform:translateY(7px) rotate(-7deg) scale(1.04)}
+  70%{transform:translateY(-2px) rotate(6deg) scale(.98)}
+}
+@keyframes homeSpritePlay{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-13px) rotate(12deg) scale(1.05)}
+}
+@keyframes homeSpriteBath{
+  0%,100%{transform:translateX(0) rotate(0)}
+  25%{transform:translateX(-5px) rotate(-8deg)}
+  75%{transform:translateX(5px) rotate(8deg)}
+}
+@keyframes homeSpriteSleep{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(2px) rotate(-10deg) scale(.97)}
+}
+@keyframes homeSpriteTrain{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-11px) rotate(-8deg) scale(1.06)}
+}
+@media(prefers-reduced-motion:reduce){
+  .home-page .stage-pet,.home-page .stage-pet>.stage-creature{animation:none!important}
+}
