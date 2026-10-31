@@ -1637,7 +1637,7 @@ function onlineBattlePage() {
      ${onlineRoom ? `
   <div class="card" style="margin-top:14px;padding:20px">
     <div class="eyebrow">${onlineRoom.room_type === 'public' ? 'RANDOM MATCH ROOM' : 'PRIVATE FRIEND ROOM'}</div>
-    ${onlineRoom.room_type === 'public' ? '<h3>Random Match</h3>' : `<h3>Room: ${esc(onlineRoom.invite_code || '')}</h3>`}
+    ${onlineRoom.room_type === 'public' ? '<h3>Random Match</h3>' : `<h3>Private Room</h3><div style="display:flex;gap:8px;align-items:center;margin:12px 0"><input id="onlineInviteLink" class="text-input" value="${esc(onlineRoom.invite_code || '')}" readonly aria-label="Kode private room" style="flex:1;min-width:0;text-align:center;letter-spacing:3px;font-weight:700"><button class="button" data-action="copy-online-link" type="button">Copy Code</button></div>`}
 
 <div style="
   display:grid;
