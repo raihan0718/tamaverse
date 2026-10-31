@@ -2759,3 +2759,22 @@ body[data-theme="light"] .collection-tab small,
 body:not([data-theme="dark"]) .collection-tab small{color:#716477}
 body[data-theme="light"] .eyebrow,
 body:not([data-theme="dark"]) .eyebrow{color:#874766}
+
+
+/* Store item cards need their own light palette; the shared accessory card is dark by default. */
+body:not([data-theme="dark"]) .store-page .store-item-card{
+  background:#fff;
+  color:#302638;
+  border-color:#eddfeb;
+  box-shadow:0 4px 0 #f0e4ef,0 10px 22px #65445c08;
+}
+body:not([data-theme="dark"]) .store-page .store-item-card .store-item-art{
+  background:linear-gradient(145deg,#f3e9fb,#fff0f5);
+}
+body:not([data-theme="dark"]) .store-page .store-item-card .accessory-info h3,
+body:not([data-theme="dark"]) .store-page .store-item-card .store-item-price{
+  color:#302638;
+}
+body:not([data-theme="dark"]) .store-page .store-item-card .accessory-info p{
+  color:#817582;
+}
