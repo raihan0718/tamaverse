@@ -2505,3 +2505,54 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 @keyframes globalCareBath{0%,100%{transform:translateY(0) rotate(0)}28%{transform:translateY(-2px) rotate(-4deg)}72%{transform:translateY(-2px) rotate(4deg)}}
 @keyframes globalCareSleep{0%,100%{transform:translateY(0) rotate(0) scale(1)}45%,65%{transform:translateY(2px) rotate(-4deg) scale(.985)}}
 @keyframes globalCareTrain{0%,100%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-5px) rotate(-5deg) scale(1.035)}70%{transform:translateY(0) rotate(5deg) scale(1.015)}}
+
+
+/* Explicit care animation override for the four isolated Home sprites.
+   Their base isolation intentionally disables animation, so action states must re-enable it here. */
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-idle > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  animation:cleanPetIdle 6.8s cubic-bezier(.37,0,.23,1) infinite!important;
+  transform-origin:50% 82%!important;
+  will-change:transform;
+}
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-eat > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  animation:cleanPetEat .72s cubic-bezier(.34,1.4,.64,1) 3!important;
+  transform-origin:50% 82%!important;
+}
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-play > .stage-pet.pet-species-starwhale > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-greet > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  animation:cleanPetPlay .9s cubic-bezier(.34,1.35,.64,1) 2!important;
+  transform-origin:50% 82%!important;
+}
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-bath > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  animation:cleanPetBath .85s cubic-bezier(.42,0,.24,1) 3!important;
+  transform-origin:50% 82%!important;
+}
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-sleep > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  animation:cleanPetSleep 2.8s cubic-bezier(.37,0,.23,1) 1!important;
+  transform-origin:50% 82%!important;
+}
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-fluffin > .stage-creature-clean,
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-mossling > .stage-creature-clean,
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-voltkit > .stage-creature-clean,
+.home-page .pet-stage.pet-action-train > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  animation:cleanPetTrain .78s cubic-bezier(.34,1.3,.64,1) 3!important;
+  transform-origin:50% 82%!important;
+}
