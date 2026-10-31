@@ -2180,3 +2180,23 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
     animation:none!important;
   }
 }
+
+
+/* Home-only positioning: nudge the frame slightly up and left.
+   Keep the aura and ornaments aligned with the frame, and place the pet in front. */
+.home-page .pet-stage > .companion-frame-art{
+  left:49%!important;
+  top:46.5%!important;
+  z-index:10!important;
+}
+.home-page .pet-stage > .home-frame-aura,
+.home-page .pet-stage > .home-frame-ornaments{
+  left:49%!important;
+  top:46.5%!important;
+}
+.home-page .pet-stage > .stage-pet{
+  z-index:40!important;
+}
+.home-page .pet-stage > .companion-panel{
+  z-index:50!important;
+}
