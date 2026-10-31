@@ -575,8 +575,11 @@ function homePage(){
         </div>
       </div>
     </section>
-    <div class="section-heading care-heading"><h2>🎁 Daily reward</h2><span class="muted-label">7-day login bonus</span></div><button class="button secondary full daily-reward-open" data-action="daily-reward">🎁 Lihat Daily Reward</button>
-    <div class="quick-actions home-quick"><button class="button secondary" data-action="go" data-page="pets">🐾 Collection</button><button class="button secondary" data-action="go" data-page="gacha">🥚 Gacha</button><button class="button secondary" data-action="go" data-page="battle">⚔️ Battle</button><button class="button secondary" data-action="go" data-page="profile">🎒 Inventory & quests</button></div>
+    <div class="home-feature-shortcuts">
+      <button class="home-feature-tile" data-action="inventory" aria-label="Buka Inventory"><span class="home-feature-art inventory-art">🎒</span><b>Inventory</b><small>Item & fragments</small></button>
+      <button class="home-feature-tile" data-action="daily-reward" aria-label="Buka Daily Reward"><span class="home-feature-art reward-art">🎁</span><b>Daily Reward</b><small>7-day login bonus</small></button>
+    </div>
+    <div class="quick-actions home-quick"><button class="button secondary" data-action="go" data-page="pets">🐾 Collection</button><button class="button secondary" data-action="go" data-page="gacha">🥚 Gacha</button><button class="button secondary" data-action="go" data-page="battle">⚔️ Battle</button></div>
     <div class="section-heading"><h2>Daily quests</h2><button class="text-button" data-action="go" data-page="profile">See all</button></div>${questPreview()}
   </section>`;
 }
