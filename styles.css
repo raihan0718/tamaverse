@@ -1711,3 +1711,22 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   .home-page .home-feature-tile{min-height:104px!important;padding:10px 6px!important}
   .home-page .home-feature-art{width:48px!important;height:48px!important;font-size:28px!important}
 }
+
+/* Inventory popup styled like the Daily Reward panel */
+.inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.inventory-item-card{position:relative;display:flex;min-width:0;min-height:142px;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:13px 9px;border:1px solid var(--line,rgba(130,120,190,.2));border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(235,232,255,.78));color:var(--text,#29234b);text-align:center;cursor:pointer}
+.inventory-item-card:active{transform:scale(.98)}
+.inventory-item-icon{display:grid;place-items:center;width:54px;height:54px;border-radius:16px;background:rgba(151,133,238,.14);font-size:30px}
+.inventory-item-card b{font-size:13px}
+.inventory-item-card small,.inventory-fragment-card small{font-size:10px;line-height:1.35;color:var(--muted,#77718d)}
+.inventory-item-count{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;background:rgba(130,111,220,.14)}
+.inventory-fragment-card{grid-column:1/-1;display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:16px;background:rgba(130,111,220,.1)}
+.inventory-fragment-card>span{font-size:25px}
+.inventory-fragment-card div{display:flex;flex:1;flex-direction:column;gap:3px}
+.inventory-fragment-card strong{font-size:17px}
+.inventory-item-detail{text-align:center;padding:8px 0 2px}
+.inventory-detail-icon{display:grid;place-items:center;width:84px;height:84px;margin:12px auto;border-radius:25px;background:linear-gradient(145deg,rgba(188,174,255,.35),rgba(230,220,255,.65));font-size:46px}
+.inventory-detail-count{display:flex;justify-content:space-between;align-items:center;margin:15px 0;padding:12px 14px;border-radius:14px;background:rgba(130,111,220,.1);font-size:13px}
+.inventory-item-detail .muted-label{margin:8px 0 14px}
+[data-theme="dark"] .inventory-item-card{background:linear-gradient(145deg,rgba(52,45,91,.96),rgba(35,31,66,.96));color:#f3efff;border-color:rgba(190,175,255,.18)}
+[data-theme="dark"] .inventory-item-card small,[data-theme="dark"] .inventory-fragment-card small{color:#b8b0d5}
