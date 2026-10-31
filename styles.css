@@ -607,3 +607,8 @@ body[data-theme="dark"].battle-fullscreen .battle-mode-top,
 body[data-theme="dark"].battle-fullscreen .battle-mode-top h1{color:#fff7fc!important}
 body[data-theme="dark"].battle-fullscreen .battle-turn-chip,
 body[data-theme="dark"].battle-fullscreen .battle-exit{background:#352a3a!important;color:#ffe6f4!important;border-color:#ffffff30!important}
+
+
+/* Slightly larger battle pets; VS badge removed */
+body.battle-fullscreen .battle-sprite .pet-image{width:clamp(125px,34vw,190px)!important;height:clamp(125px,34vw,190px)!important}
+body.battle-fullscreen .arena-vs{display:none!important}
