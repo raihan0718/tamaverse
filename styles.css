@@ -1935,3 +1935,23 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .accessory-equip{width:100%;min-height:31px;margin-top:3px;padding:6px 8px;border:1px solid #a994ff66;border-radius:9px;background:rgba(169,148,255,.13);color:var(--text);font-size:10px;font-weight:800;cursor:pointer}
 .accessory-equip.is-equipped{border-color:transparent;background:rgba(80,190,145,.14);color:#45b98b;cursor:default}
 @media(max-width:360px){.collection-page .collection-tabs{gap:7px}.collection-tab{padding:9px 8px;column-gap:6px}.accessory-grid{gap:8px}.accessory-art{height:108px}.accessory-info{padding:8px}}
+
+/* Keep the equipped frame fully visible in the Home preview */
+.home-page .companion-frame-art{
+  width:min(82%,430px);
+  max-width:430px;
+  max-height:68%;
+  height:auto;
+  aspect-ratio:684/768;
+  object-fit:contain;
+  object-position:center;
+  top:47%;
+  transform:translate(-50%,-50%);
+}
+@media(max-width:380px){
+  .home-page .companion-frame-art{
+    width:82%;
+    max-height:66%;
+    top:47%;
+  }
+}
