@@ -86,7 +86,7 @@ function save(){
   }
 }
 function freshState(name){
-  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,gems:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},careUses:{date:new Date().toDateString(),feed:0,play:0,train:0},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
+  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,gems:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
 }
 function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function petById(id){return state?.pets.find(p=>p.uid===id)||null;}
@@ -533,8 +533,6 @@ function normalizeSavedState(saved){
     claimed:Array.isArray(oldQuests.claimed)?oldQuests.claimed:[]
   };
   const today=new Date().toDateString();
-  base.careUses=saved.careUses?{...base.careUses,...saved.careUses,date:toLocalDay(saved.careUses.date)}:
-    {date:today,feed:0,play:0,train:0,battleRewards:0};
   base.lastCareUpdate=Number(saved.lastCareUpdate)||Date.now();
   base.dailyReward=saved.dailyReward||{lastClaimDate:'',day:0};
   base.battleHistory=Array.isArray(saved.battleHistory)?saved.battleHistory:[];
@@ -604,11 +602,11 @@ function doCare(kind){
   const p=activePet();if(!p){showToast('Tetaskan pet lebih dulu!');return;}
   if(kind==='feed'){
     if(p.hunger<=0){showToast(`${p.name} sudah kenyang.`);return;}
-    triggerPetAnimation('eat');p.hunger=clamp(p.hunger-25,0,100);state.careUses.feed++;grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Lapar turun, +4 XP.`);
+    triggerPetAnimation('eat');p.hunger=clamp(p.hunger-25,0,100);grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Lapar turun, +4 XP.`);
   }else if(kind==='play'){
     if(p.energy<15){showToast('Energi pet terlalu rendah untuk bermain.');return;}
     if(p.happiness>=100){showToast(`${p.name} sudah sangat bahagia!`);return;}
-    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-15,0,100);state.careUses.play++;grantPetXP(p,4);state.quests.progress.play++;showToast('Waktu bermain menyenangkan! +4 XP.');
+    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-15,0,100);grantPetXP(p,4);state.quests.progress.play++;showToast('Waktu bermain menyenangkan! +4 XP.');
   }else if(kind==='clean'){
     if(p.cleanliness>=100){showToast(`${p.name} sudah bersih!`);return;}
     triggerPetAnimation('bath');p.cleanliness=100;showToast(`${p.name} jadi bersih dan segar!`);
@@ -617,7 +615,7 @@ function doCare(kind){
     triggerPetAnimation('sleep');p.energy=clamp(p.energy+35,0,100);showToast('Pet beristirahat. Energi +35.');
   }else if(kind==='train'){
     if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
-    triggerPetAnimation('train');state.careUses.train++;
+    triggerPetAnimation('train');
     if(state.items.training>0){state.items.training--;grantPetXP(p,14);p.evolution=clamp(p.evolution+8,0,100);showToast('Latihan selesai! +14 XP dan progres evolusi.');}
     else{grantPetXP(p,6);p.evolution=clamp(p.evolution+4,0,100);showToast('Latihan selesai! +6 XP.');}
     p.energy=clamp(p.energy-20,0,100);
