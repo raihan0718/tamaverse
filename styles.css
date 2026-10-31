@@ -1794,3 +1794,18 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 @media(prefers-reduced-motion:reduce){
   .modal-backdrop,.modal-card,.modal-card .button{transition:none!important}
 }
+
+
+/* Store bulk quantity controls */
+.store-list{display:grid;gap:9px;margin:14px 0}
+.store-item{display:flex;flex-wrap:wrap;padding:11px 12px;border-radius:15px;gap:9px!important}
+.store-quantity{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.store-quantity>strong{min-width:22px;text-align:center;font-variant-numeric:tabular-nums}
+.modal-card .store-step{width:32px;min-width:32px;height:32px;min-height:32px;padding:0;border-radius:10px;font-size:18px;line-height:1}
+.modal-card .store-max{min-height:32px;padding:0 10px;border-radius:10px;font-size:12px}
+.modal-card .store-buy{min-height:36px;padding:0 13px;border-radius:11px}
+@media(max-width:390px){
+ .store-item{gap:8px!important}
+ .store-item>div:first-child{flex-basis:100%}
+ .store-quantity{margin-left:auto}
+}
