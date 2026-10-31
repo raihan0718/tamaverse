@@ -2137,15 +2137,46 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 }
 
 
-/* Stable aura blur: keep Royal and Celestial glow intensity constant.
-   Decorative stars keep their own independent twinkle animations. */
-.accessory-art.aura-legendary::before,
-.accessory-art.aura-celestial::before{
-  animation:none!important;
-  opacity:1!important;
+/* Restore a steady, visible pulse for Royal and Celestial auras */
+@keyframes royalAuraSteadyPulse{
+  0%,100%{opacity:.72;transform:scale(.96)}
+  50%{opacity:1;transform:scale(1.04)}
 }
-.home-page .home-frame-aura.aura-legendary,
+@keyframes celestialAuraSteadyPulse{
+  0%,100%{opacity:.76;transform:scale(.96);filter:blur(23px) hue-rotate(0deg)}
+  50%{opacity:1;transform:scale(1.04);filter:blur(23px) hue-rotate(180deg)}
+}
+@keyframes homeRoyalAuraSteadyPulse{
+  0%,100%{opacity:.74;scale:.96}
+  50%{opacity:1;scale:1.04}
+}
+@keyframes homeCelestialAuraSteadyPulse{
+  0%,100%{opacity:.78;scale:.96;filter:blur(23px) hue-rotate(0deg)}
+  50%{opacity:1;scale:1.04;filter:blur(23px) hue-rotate(180deg)}
+}
+.accessory-art.aura-legendary::before{
+  filter:blur(20px)!important;
+  animation:royalAuraSteadyPulse 2.8s ease-in-out infinite!important;
+  opacity:1;
+}
+.accessory-art.aura-celestial::before{
+  filter:blur(23px)!important;
+  animation:celestialAuraSteadyPulse 5s ease-in-out infinite!important;
+  opacity:1;
+}
+.home-page .home-frame-aura.aura-legendary{
+  filter:blur(23px)!important;
+  animation:homeRoyalAuraSteadyPulse 2.8s ease-in-out infinite!important;
+}
 .home-page .home-frame-aura.aura-celestial{
-  animation:none!important;
-  opacity:1!important;
+  filter:blur(23px)!important;
+  animation:homeCelestialAuraSteadyPulse 5s ease-in-out infinite!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .accessory-art.aura-legendary::before,
+  .accessory-art.aura-celestial::before,
+  .home-page .home-frame-aura.aura-legendary,
+  .home-page .home-frame-aura.aura-celestial{
+    animation:none!important;
+  }
 }
