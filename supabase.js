@@ -126,7 +126,7 @@
             energy: Math.min(100, Math.max(0, Number(pet.energy) || 0)),
             cleanliness: Math.min(100, Math.max(0, Number(pet.cleanliness) || 0)),
             evolution: Math.max(0, Number(pet.evolution) || 0),
-            is_active: pet.uid === window.state.activePet,
+            is_active: String(pet.uid) === String(window.state.activePet),
           }));
 
         if (petsPayload.length > 0) {
