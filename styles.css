@@ -2902,3 +2902,63 @@ body[data-theme="dark"] .page :is(.stat-tile,.care-card,.profile-stat,.creature-
 .diamond-history-empty>span{font-size:30px;}
 .diamond-history-empty p{margin:0;max-width:260px;font-size:.82rem;}
 @media(min-width:520px){.diamond-package-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.diamond-store-hero{grid-template-columns:auto 1fr auto;}.diamond-wallet{grid-column:auto;flex-direction:column;align-items:flex-end;background:transparent;padding:0;}}
+
+
+/* NEXORA-era Item Shop page refresh */
+.shop-page{padding-bottom:28px}
+.shop-page-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.shop-back{min-height:34px;padding:0 12px;border-radius:11px;font-size:12px}
+.shop-kicker{font-size:9px;font-weight:900;letter-spacing:.16em;opacity:.55}
+.shop-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:20px;border:1px solid rgba(150,125,210,.2);border-radius:23px;background:linear-gradient(135deg,rgba(157,133,225,.17),rgba(246,184,211,.16));overflow:hidden}
+.shop-hero .page-title{margin:5px 0 8px;font-size:clamp(25px,6vw,36px);line-height:1.05}
+.shop-hero .subtle{max-width:360px;margin:0;font-size:12px;line-height:1.55}
+.shop-hero-art{position:relative;display:grid;place-items:center;width:76px;height:76px;border-radius:24px;background:rgba(255,255,255,.48);font-size:42px;box-shadow:0 12px 28px rgba(98,76,151,.1)}
+.shop-hero-art span{position:absolute;top:5px;right:8px;font-size:16px;color:#9878d9}
+.shop-wallet{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:15px;background:rgba(255,255,255,.42)}
+.shop-wallet>div{display:flex;flex-direction:column;gap:4px}
+.shop-wallet small{font-size:8px;font-weight:900;letter-spacing:.13em;opacity:.62}
+.shop-wallet strong{font-size:13px}
+.shop-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:22px 0 11px}
+.shop-section-head h2{margin:4px 0 0;font-size:20px}
+.shop-count{font-size:9px;font-weight:900;letter-spacing:.1em;opacity:.55}
+.shop-catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.shop-product-card{display:flex;flex-direction:column;min-width:0;padding:11px;border:1px solid var(--card-border,#eaddec);border-radius:18px;background:var(--card-bg,#fff);color:var(--card-ink,#302638);box-shadow:0 5px 16px rgba(70,45,80,.045)}
+.shop-product-top{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.shop-product-category{font-size:8px;font-weight:900;letter-spacing:.1em;opacity:.58}
+.shop-product-owned{font-size:8px;font-weight:800;opacity:.62;white-space:nowrap}
+.shop-product-art{position:relative;display:grid;place-items:center;min-height:94px;margin:9px 0;border-radius:13px;background:linear-gradient(145deg,#f3e9fb,#fff0f5);overflow:hidden}
+.shop-product-art>span{font-size:43px;filter:drop-shadow(0 6px 8px rgba(95,75,130,.15))}
+.shop-product-art>i{position:absolute;top:9px;right:12px;color:#a58bd7;font-style:normal;font-size:13px}
+.shop-art-energy{background:linear-gradient(145deg,#e7f4ff,#f3efff)}
+.shop-art-snack{background:linear-gradient(145deg,#fff0e4,#fff5ed)}
+.shop-art-training{background:linear-gradient(145deg,#e9f5eb,#f7f5e8)}
+.shop-product-info{flex:1}
+.shop-product-tag{font-size:8px;font-weight:900;letter-spacing:.08em;color:#9873bd}
+.shop-product-info h3{margin:4px 0;font-size:14px}
+.shop-product-info p{min-height:44px;margin:0;font-size:10px;line-height:1.45;opacity:.68}
+.shop-product-footer{margin-top:10px;padding-top:9px;border-top:1px solid var(--card-border,#eaddec)}
+.shop-product-footer>strong{font-size:12px}
+.shop-product-footer>strong small{font-size:9px;font-weight:500;opacity:.58}
+.shop-quantity{display:flex;align-items:center;gap:6px;margin:9px 0}
+.shop-quantity>b{min-width:20px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums}
+.shop-qty-btn,.shop-max-btn{display:grid;place-items:center;min-width:28px;height:27px;padding:0 7px;border:1px solid var(--card-border,#eaddec);border-radius:8px;background:var(--card-bg-soft,#f8f1fa);color:inherit;font-weight:900}
+.shop-qty-btn{font-size:16px}
+.shop-max-btn{margin-left:auto;font-size:8px;letter-spacing:.06em}
+.shop-buy-row{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.shop-buy-row>span{font-size:9px;opacity:.65}
+.shop-buy-row>span b{display:block;margin-top:2px;color:var(--card-ink,#302638);font-size:11px}
+.shop-buy-btn{min-height:31px;padding:0 10px;border-radius:9px;font-size:10px}
+.shop-buy-btn:disabled{opacity:.45;cursor:not-allowed}
+.shop-footer-note{display:flex;gap:12px;margin-top:16px;padding:15px;border:1px solid var(--card-border,#eaddec);border-radius:16px;background:var(--card-bg,#fff)}
+.shop-footer-note>span{font-size:24px;color:#9873bd}
+.shop-footer-note b{font-size:12px}
+.shop-footer-note p{margin:4px 0 10px;font-size:10px;line-height:1.5;opacity:.68}
+.shop-footer-note .button{min-height:30px;padding:0 10px;font-size:10px}
+body[data-theme="dark"] .shop-hero-art{background:rgba(255,255,255,.08)}
+body[data-theme="dark"] .shop-wallet{background:rgba(255,255,255,.06)}
+body[data-theme="dark"] .shop-product-art{background:linear-gradient(145deg,#3a3048,#302a3a)}
+body[data-theme="dark"] .shop-art-energy{background:linear-gradient(145deg,#26394a,#342f49)}
+body[data-theme="dark"] .shop-art-snack{background:linear-gradient(145deg,#49372e,#3c3036)}
+body[data-theme="dark"] .shop-art-training{background:linear-gradient(145deg,#2c4036,#39392e)}
+@media(min-width:560px){.shop-catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.shop-hero{grid-template-columns:minmax(0,1fr) auto auto}.shop-wallet{grid-column:auto;min-width:190px;flex-direction:column;justify-content:center;background:rgba(255,255,255,.35)}.shop-hero-art{width:88px;height:88px}}
+@media(max-width:360px){.shop-catalog-grid{gap:8px}.shop-product-card{padding:8px}.shop-product-info h3{font-size:12px}.shop-product-info p{font-size:9px}.shop-product-art{min-height:78px}.shop-buy-btn{padding:0 7px;font-size:9px}}
