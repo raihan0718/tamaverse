@@ -1730,3 +1730,67 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
 .inventory-item-detail .muted-label{margin:8px 0 14px}
 [data-theme="dark"] .inventory-item-card{background:linear-gradient(145deg,rgba(52,45,91,.96),rgba(35,31,66,.96));color:#f3efff;border-color:rgba(190,175,255,.18)}
 [data-theme="dark"] .inventory-item-card small,[data-theme="dark"] .inventory-fragment-card small{color:#b8b0d5}
+
+
+/* Global popup refinement — responsive sizing, cleaner spacing and smooth motion */
+.modal-backdrop{
+  display:grid;
+  place-items:center;
+  padding:clamp(12px,3.5vw,24px);
+  background:rgba(20,14,27,.58);
+  -webkit-backdrop-filter:blur(9px);
+  backdrop-filter:blur(9px);
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transition:opacity .24s ease,visibility .24s ease,background .24s ease;
+}
+.modal-backdrop.hidden{
+  display:grid;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .22s ease,visibility 0s linear .22s;
+}
+.modal-card{
+  width:min(100%,420px);
+  max-height:min(86dvh,760px);
+  padding:clamp(17px,4vw,23px);
+  border-radius:22px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#b99bc766 transparent;
+  transform:translateY(0) scale(1);
+  opacity:1;
+  animation:none;
+  transition:transform .26s cubic-bezier(.2,.8,.2,1),opacity .22s ease,box-shadow .22s ease;
+  box-shadow:0 22px 70px rgba(24,14,32,.2),0 3px 12px rgba(24,14,32,.08);
+}
+.modal-backdrop.hidden .modal-card{
+  transform:translateY(12px) scale(.975);
+  opacity:0;
+}
+.modal-card h2{
+  font-size:clamp(19px,5vw,22px);
+  line-height:1.2;
+  letter-spacing:-.025em;
+}
+.modal-card p{margin:7px 0 12px;line-height:1.55}
+.modal-card .button{min-height:40px;border-radius:12px;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.modal-card .button:active{transform:scale(.97)}
+.modal-card input,.modal-card select,.modal-card textarea{max-width:100%;min-width:0}
+.modal-card .quest-row{border-radius:14px}
+.modal-card .modal-actions{gap:9px;margin-top:16px}
+.modal-card :focus-visible{outline:2px solid var(--purple,#a78bfa);outline-offset:3px}
+@media(max-width:480px){
+  .modal-backdrop{padding:12px}
+  .modal-card{width:100%;max-height:84dvh;border-radius:20px;padding:18px}
+}
+@media(max-height:560px){
+  .modal-card{max-height:88dvh}
+}
+@media(prefers-reduced-motion:reduce){
+  .modal-backdrop,.modal-card,.modal-card .button{transition:none!important}
+}
