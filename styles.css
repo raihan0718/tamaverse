@@ -2239,3 +2239,14 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   width:55.1%!important;
   height:35.815%!important;
 }
+
+
+/* Center only the four companions identified by the user on the Home frame. */
+.home-page .pet-stage > .stage-pet.pet-species-fluffin,
+.home-page .pet-stage > .stage-pet.pet-species-mossling,
+.home-page .pet-stage > .stage-pet.pet-species-voltkit,
+.home-page .pet-stage > .stage-pet.pet-species-starwhale{
+  left:48.5%!important;
+  top:46.5%!important;
+  transform:translate(-50%,-50%) scale(1.08)!important;
+}
