@@ -590,7 +590,7 @@ function homePage(){
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
       <div class="stage-caption"><span class="caption-kicker">A LITTLE FRIEND FROM</span><b>THE TAMAVERSE</b><span class="caption-line"></span></div>
       <span class="home-frame-aura aura-${state.equippedFrame}" aria-hidden="true"></span><img class="companion-frame-art" src="${accessoryFrameById(state.equippedFrame).src}" alt="" aria-hidden="true"><span class="home-frame-ornaments aura-${state.equippedFrame}" aria-hidden="true"><i class="aura-ornament aura-ornament-top">✦ · ✧</i><i class="aura-ornament aura-ornament-bottom">✧ · ✦</i></span>
-      <div class="pet-shadow"></div><div class="stage-pet pet-species-${s.id}" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div>
+      <div class="pet-shadow"></div><div class="stage-pet pet-species-${s.id}" style="${['fluffin','mossling','voltkit','starwhale'].includes(s.id)?'left:48.5%!important;top:46.5%!important;transform:translate(-50%,-50%) scale(1.08)!important;':''}" aria-hidden="true"><span class="creature stage-creature element-${s.element.toLowerCase()}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div>
       <div class="companion-panel">
         <div class="companion-meta">
           <h2>${esc(p.name)}</h2>
