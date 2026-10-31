@@ -407,35 +407,6 @@ function createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'p
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;state.player.coins+=20;return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
 function grantPetXP(p,amount){p.xp+=amount;while(p.xp>=p.level*40){p.xp-=p.level*40;p.level++;p.stats.hp+=5;p.stats.atk+=1;p.stats.def+=1;showToast(`${p.name} naik ke Level ${p.level}!`);}}
 function playerXP(amount){state.player.xp+=amount;while(state.player.xp>=state.player.level*100){state.player.xp-=state.player.level*100;state.player.level++;state.player.coins+=50;showToast(`Level pemain naik! Hadiah +50 koin.`);}}
-function doCare(kind){
-  const p=activePet();if(!p){showToast('Tetaskan pet lebih dulu!');return;}
-  if(kind==='sleep'&&petSleeping(p)){
-    const elapsed=Math.max(0,Date.now()-p.sleepStartedAt);p.energy=clamp(p.energy+(elapsed/900000)*100,0,100);p.sleeping=false;p.sleepStartedAt=0;p.careUpdatedAt=Date.now();save();render();showToast(`${p.name} sudah bangun. Pemulihan energi dihentikan.`);return;
-  }
-  if(petActivityBlocked(p))return;
-  if(kind==='energy'){if(state.items.energy<1){showToast('Ramuan energi habis.');return;}if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}state.items.energy--;p.energy=clamp(p.energy+30,0,100);save();render();showToast('Ramuan energi digunakan! Energy +30.');return;}
-  if(kind==='feed'){
-    if(p.hunger>=100){showToast(`${p.name} belum lapar.`);return;}
-    if(state.items.food<1){showToast('Food habis. Beli Food di Store seharga 50 Coins.');return;}
-    state.items.food--;triggerPetAnimation('eat');p.hunger=clamp(p.hunger+50,0,100);grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Hunger +50.`);
-  }else if(kind==='play'){
-    if(p.energy<10){showToast('Energi pet terlalu rendah untuk bermain.');return;}
-    if(p.happiness>=100){showToast(`${p.name} sudah sangat bahagia!`);return;}
-    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-10,0,100);grantPetXP(p,4);state.quests.progress.play++;showToast('Waktu bermain yang menyenangkan! Energy -10.');
-  }else if(kind==='clean'){
-    if(p.cleanliness>=100){showToast(`${p.name} sudah bersih!`);return;}
-    triggerPetAnimation('bath');p.cleanliness=100;showToast(`${p.name} jadi bersih dan segar!`);
-  }else if(kind==='sleep'){
-    if(p.energy>=100){showToast(`${p.name} sudah penuh energi.`);return;}
-    p.sleeping=true;p.sleepStartedAt=Date.now();triggerPetAnimation('sleep');showToast(`${p.name} mulai tidur. Energi pulih penuh dalam 15 menit.`);
-  }else if(kind==='train'){
-    if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
-    if(state.items.training<1){showToast('Training Manual habis. Beli di Store untuk latihan.');return;}
-    triggerPetAnimation('train');state.items.training--;grantPetXP(p,30);p.energy=clamp(p.energy-20,0,100);p.evolution=Math.min(100,p.evolution+12);showToast('Training Manual digunakan! +30 XP dan progres evolusi.');
-  }
-  p.careUpdatedAt=Date.now();save();render();
-}
-
 function chooseRarity(){const r=Math.random()*100;return r<60?'Common':r<85?'Rare':r<97?'Epic':'Legendary';}
 function pullEgg(id,free){const e=eggs.find(x=>x.id===id);if(!e)return;if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}const currency=e.currency==='gem'?'gems':'coins';const cost=free?0:e.price;if(state.player[currency]<cost){showToast(`Koin/gem tidak cukup untuk ${e.name}.`);return;}if(!free)state.player[currency]-=cost;else state.gacha.lastFree=new Date().toDateString();
   const pool=species.filter(s=>s.pool.includes(id));let rarity=chooseRarity();if(state.gacha.pityRare>=9&&['Common'].includes(rarity))rarity='Rare';if(state.gacha.pityEpic>=49&&['Common','Rare'].includes(rarity))rarity='Epic';let candidates=pool.filter(s=>s.rarity===rarity);if(!candidates.length){const available=pool.filter(s=>s.rarity==='Common'||s.rarity==='Rare'||s.rarity==='Epic'||s.rarity==='Legendary');candidates=available;}const chosen=candidates[Math.floor(Math.random()*candidates.length)];state.gacha.pityRare=chosen.rarity==='Common'?state.gacha.pityRare+1:0;state.gacha.pityEpic=['Common','Rare'].includes(chosen.rarity)?state.gacha.pityEpic+1:0;state.quests.progress.egg++;const result=addPet(chosen.id);state.gacha.history.unshift({species:chosen.id,name:chosen.name,rarity:chosen.rarity,date:Date.now()});state.gacha.history=state.gacha.history.slice(0,20);save();render();showModal(`<div class="hatch-egg">${petImage(chosen.id, 'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${result.duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2><p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${result.duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p><div class="stats-row"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div></div><button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);}
