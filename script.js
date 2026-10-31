@@ -1245,18 +1245,23 @@ function onlineBattleView() {
   const log = Array.isArray(bs.log) ? bs.log : [];
   const turn = Number(bs.turn || 1);
   const latestAction = log.length ? log[log.length - 1] : null;
-  const myUserId = window.TAMAVERSE_USER_ID;
-  const actionDamage = Number(latestAction?.damage || 0);
-  const actionHeal = Number(latestAction?.heal || 0);
-  const actionActor = latestAction?.actor_id;
-  const actionTarget = latestAction?.target_id;
-  const myFloat = actionDamage > 0 && actionTarget === myUserId
+  const actionDamage = Number(latestAction?.damage || String(latestAction?.text || '').match(/(\\d+)\\s*damage/i)?.[1] || 0);
+  const actionHeal = Number(latestAction?.heal || String(latestAction?.text || '').match(/memulihkan\\s+(\\d+)\\s+HP/i)?.[1] || 0);
+  const actionActor = latestAction?.actor_id || null;
+  const actionTarget = latestAction?.target_id || null;
+  const actorIsMine = actionActor
+    ? actionActor === window.TAMAVERSE_USER_ID
+    : String(latestAction?.text || '').startsWith(String(mine?.name || mine?.display_name || '__no_match__'));
+  const targetIsMine = actionTarget
+    ? actionTarget === window.TAMAVERSE_USER_ID
+    : actionDamage > 0 && !actorIsMine;
+  const myFloat = actionDamage > 0 && targetIsMine
     ? { text: '-' + actionDamage, kind: 'damage' }
-    : actionHeal > 0 && actionActor === myUserId
+    : actionHeal > 0 && actorIsMine
       ? { text: '+' + actionHeal, kind: 'heal' } : null;
-  const rivalFloat = actionDamage > 0 && actionTarget && actionTarget !== myUserId
+  const rivalFloat = actionDamage > 0 && !targetIsMine
     ? { text: '-' + actionDamage, kind: 'damage' }
-    : actionHeal > 0 && actionActor && actionActor !== myUserId
+    : actionHeal > 0 && !actorIsMine
       ? { text: '+' + actionHeal, kind: 'heal' } : null;
   const skillReadyKey = mineIsHost ? 'host_skill_ready_at' : 'guest_skill_ready_at';
   const skillReadyAt = bs[skillReadyKey] ? Date.parse(bs[skillReadyKey]) : 0;
