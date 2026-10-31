@@ -501,3 +501,39 @@ body[data-theme="dark"] .gacha-reel-window{border-color:#ffffff30}
 .online-action-grid .button:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.5)}
 body[data-theme="dark"] .online-fighter{background:#352a3a;border-color:#ffffff20}
 @media(max-width:360px){.online-fighters{grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);gap:4px}.online-fighter{padding:8px}.online-fighter b{font-size:11px}}
+
+
+/* Dedicated full-screen online battle mode */
+body.battle-fullscreen{overflow:hidden;background:#fff8fc}
+body.battle-fullscreen .topbar,
+body.battle-fullscreen .bottom-nav{display:none!important}
+body.battle-fullscreen #mainContent{width:100%;max-width:none;min-height:100dvh;margin:0;padding:0}
+body.battle-fullscreen .online-battle-page{min-height:100dvh;box-sizing:border-box;padding:calc(12px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;background:radial-gradient(ellipse at 50% 0%,#f4e4fa 0%,#fff8fc 54%,#fff 100%);animation:none}
+.battle-mode-top{display:flex;align-items:center;gap:12px;min-height:48px;color:#39283f}
+.battle-mode-top h1{font:800 21px 'Space Grotesk',sans-serif;margin:0}
+.battle-mode-top .eyebrow{margin:0 0 2px;color:#a15f91;font-size:9px;letter-spacing:2px}
+.battle-exit{width:40px;height:40px;border:1px solid #ead7e7;border-radius:13px;background:#fff;color:#9d5d91;font-size:25px}
+.battle-turn-chip{margin-left:auto;padding:9px 12px;border:1px solid #e8d4e8;border-radius:999px;background:#fff;color:#965d91;font-size:10px;font-weight:900;letter-spacing:1px}
+body.battle-fullscreen .battle-scene{flex:1;min-height:480px;height:auto;max-height:calc(100dvh - 190px);margin:0;border:2px solid #e6c9e8;border-radius:27px;box-shadow:0 7px 0 #d4b8dc,0 16px 30px #6b426c18}
+body.battle-fullscreen .battle-side{top:17%;height:61%;width:49%}
+body.battle-fullscreen .battle-nameplate{font-size:clamp(11px,3.2vw,15px)}
+body.battle-fullscreen .battle-nameplate span{font-size:10px}
+body.battle-fullscreen .battle-sprite{top:23%;height:42%}
+body.battle-fullscreen .battle-sprite .pet-image{width:clamp(92px,25vw,150px);height:clamp(92px,25vw,150px);object-fit:contain;image-rendering:pixelated}
+body.battle-fullscreen .battle-hp-card{bottom:4%;padding:10px 11px;border-radius:14px}
+body.battle-fullscreen .arena-vs{top:43%;width:48px;height:48px;font-size:14px}
+.battle-arena-controls{position:absolute;z-index:8;left:12px;right:12px;bottom:12px;padding:11px;border:1px solid #ffffffd9;border-radius:19px;background:linear-gradient(145deg,#fffaffef,#f7eafaed);box-shadow:0 7px 22px #51385a25;backdrop-filter:blur(12px)}
+.battle-action-status{text-align:center;margin:0 0 9px;color:#98608e;font-size:10px;font-weight:900;letter-spacing:1.5px}
+.battle-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.battle-action-btn{min-height:48px;border:1px solid #e8d4e9;border-radius:13px;background:#fff;color:#49344f;font:800 13px 'Space Grotesk',sans-serif;box-shadow:0 3px 0 #e6d5e8;display:flex;align-items:center;justify-content:center;gap:8px}
+.battle-action-btn span{font-size:18px}
+.battle-action-main{background:linear-gradient(135deg,#9b78ce,#c77db3);border-color:#a77ac5;color:#fff;box-shadow:0 3px 0 #805d9f}
+.battle-action-skill{background:linear-gradient(135deg,#f4d9f0,#e8d9fb);color:#794d91}
+.battle-action-defend{background:linear-gradient(135deg,#e6e1fb,#fff);color:#7561a4}
+.battle-action-item{background:linear-gradient(135deg,#ffe5ef,#fff4f8);color:#a65e83}
+.battle-action-btn:disabled{opacity:.42;filter:grayscale(.25);box-shadow:none}
+.battle-log-panel{flex:none;max-height:104px;overflow:hidden;padding:10px 13px;border:1px solid #edddea;border-radius:15px;background:#fffdfd}
+.battle-log-heading{display:flex;justify-content:space-between;color:#a06491;font-size:9px;font-weight:900;letter-spacing:1.4px;margin-bottom:5px}
+.battle-log{font-size:10px;line-height:1.45;color:#78677e}
+.battle-log>div:nth-last-child(-n+2){display:block}
+@media(max-height:700px){body.battle-fullscreen .online-battle-page{gap:7px;padding-top:8px}body.battle-fullscreen .battle-scene{min-height:430px;max-height:calc(100dvh - 145px)}.battle-log-panel{max-height:72px}.battle-action-btn{min-height:42px}}
