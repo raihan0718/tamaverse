@@ -693,3 +693,13 @@ body[data-theme="dark"].battle-fullscreen .battle-turn-overlay span{color:#f5c5e
 @media(max-height:740px){
   body.battle-fullscreen .battle-turn-overlay{top:54px!important}
 }
+
+/* Fully transparent HP bar area */
+body.battle-fullscreen .battle-hp-card,
+body[data-theme="dark"].battle-fullscreen .battle-hp-card{
+  background:transparent!important;
+  background-color:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
