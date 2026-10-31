@@ -2102,3 +2102,36 @@ body[data-theme="dark"] .home-page .home-feature-art{background:rgba(255,255,255
   position:absolute!important;
   z-index:31!important;
 }
+
+
+/* Independent sparkle timing: top and bottom ornaments never blink in sync */
+@keyframes ornamentTwinkleTop{
+  0%,100%{opacity:.38;transform:translateY(0) scale(.88)}
+  42%{opacity:1;transform:translateY(-2px) scale(1.12)}
+  68%{opacity:.62;transform:translateY(1px) scale(.96)}
+}
+@keyframes ornamentTwinkleBottom{
+  0%,100%{opacity:.92;transform:translateY(0) scale(1.04)}
+  28%{opacity:.34;transform:translateY(2px) scale(.86)}
+  63%{opacity:1;transform:translateY(-1px) scale(1.1)}
+}
+.accessory-art.aura-legendary .aura-ornament-top,
+.accessory-art.aura-celestial .aura-ornament-top,
+.home-page .pet-stage > .home-frame-ornaments.aura-legendary .aura-ornament-top,
+.home-page .pet-stage > .home-frame-ornaments.aura-celestial .aura-ornament-top{
+  animation:ornamentTwinkleTop 1.7s ease-in-out infinite;
+  animation-delay:-.18s;
+}
+.accessory-art.aura-legendary .aura-ornament-bottom,
+.accessory-art.aura-celestial .aura-ornament-bottom,
+.home-page .pet-stage > .home-frame-ornaments.aura-legendary .aura-ornament-bottom,
+.home-page .pet-stage > .home-frame-ornaments.aura-celestial .aura-ornament-bottom{
+  animation:ornamentTwinkleBottom 2.35s ease-in-out infinite;
+  animation-delay:-1.05s;
+}
+@media(prefers-reduced-motion:reduce){
+  .accessory-art .aura-ornament,
+  .home-page .pet-stage > .home-frame-ornaments .aura-ornament{
+    animation:none!important;
+  }
+}
