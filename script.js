@@ -727,7 +727,7 @@ function gachaPage(){
   ];
   const tabs='<div class="collection-tabs store-tabs" role="tablist" aria-label="Store categories">'+
     '<button class="collection-tab '+(storeTab==='gacha'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='gacha')+'" data-action="store-tab" data-tab="gacha"><span>🥚</span><b>Gacha</b><small>Discover new pets</small></button>'+
-    '<button class="collection-tab '+(storeTab==='item'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='item')+'" data-action="store-tab" data-tab="item"><span>🧰</span><b>Item</b><small>Supplies & boosts</small></button>'+
+    '<button class="collection-tab '+(storeTab==='diamond'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='diamond')+'" data-action="store-tab" data-tab="diamond"><span>💎</span><b>Diamond</b><small>Top up balance</small></button>'+
     '<button class="collection-tab '+(storeTab==='premium'?'active':'')+'" role="tab" aria-selected="'+(storeTab==='premium')+'" data-action="store-tab" data-tab="premium"><span>💎</span><b>Premium</b><small>Cards & frames</small></button></div>';
   const gachaContent=`
     <p class="subtle collection-description">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Special: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p>
@@ -754,9 +754,30 @@ function gachaPage(){
       <div class="section-heading"><h2>Riwayat tarikan</h2></div>
       ${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>{const sp=speciesById(h.species||species.find(x=>x.name===h.name)?.id);const petName=h.name||sp.name;return `<p class="subtle gacha-history-row"><span class="gacha-history-icon">${petImage(sp.id,'history-pet-image')}</span><b>${esc(petName)}</b> · <span class="rarity rarity-${h.rarity||sp.rarity}">${h.rarity||sp.rarity}</span></p>`;}).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}
     </div>`;
-  const itemContent=`
-    <p class="subtle collection-description">Perlengkapan untuk membantu merawat dan melatih companion-mu.</p>
-    <div class="accessory-grid store-item-grid">${storeItems.map(item=>`<article class="accessory-card store-item-card"><div class="store-item-art">${item.icon}</div><div class="accessory-info"><h3>${item.name}</h3><p class="subtle">${item.desc}</p><b class="store-item-price">🪙 ${item.price}</b><button class="button full" data-action="shop">Open Item Shop</button></div></article>`).join('')}</div>`;
+  const diamondContent=`
+    <div class="diamond-store-hero">
+      <div class="diamond-store-orb">💎</div>
+      <div><span class="eyebrow">TAMAVERSE TOP UP</span><h2>Diamond Store</h2><p class="subtle">Isi saldo Diamond untuk membuka lebih banyak hal di Tamaverse.</p></div>
+      <div class="diamond-wallet"><small>DIAMOND BALANCE</small><strong>💎 ${Number(state.player.diamonds||0).toLocaleString('id-ID')}</strong></div>
+    </div>
+    <div class="notice">Pembayaran asli sedang dipersiapkan. Paket belum bisa dibeli sampai sistem pembayaran resmi aktif.</div>
+    <div class="section-heading"><h2>Pilih Paket Diamond</h2><span class="muted-label">COMING SOON</span></div>
+    <div class="diamond-package-grid">
+      ${[{amount:50,label:'Starter'},{amount:120,label:'Popular'},{amount:300,label:'Value Pack'},{amount:700,label:'Mega Pack'}].map((pack,index)=>`
+        <article class="diamond-package-card ${index===1?'featured':''}">
+          ${index===1?'<span class="diamond-popular">POPULAR</span>':''}
+          <span class="diamond-package-icon">💎</span>
+          <strong>${pack.amount.toLocaleString('id-ID')}</strong>
+          <span class="diamond-package-label">Diamonds</span>
+          <b class="diamond-package-name">${pack.label}</b>
+          <span class="diamond-package-price">Harga segera hadir</span>
+          <button class="button full" disabled>Segera hadir</button>
+        </article>`).join('')}
+    </div>
+    <div class="card diamond-history-card">
+      <div class="section-heading"><h2>Riwayat Transaksi</h2><span class="muted-label">PAYMENT HISTORY</span></div>
+      <div class="diamond-history-empty"><span>🧾</span><b>Belum ada transaksi</b><p class="subtle">Riwayat top up akan muncul di sini setelah pembayaran tersedia.</p></div>
+    </div>`;
   const inv=premiumInventory();
   const premiumContent='<p class="subtle collection-description">Gunakan gem untuk membeli kartu rename dan frame permanen. Frame yang sudah dibeli tersimpan di Collection.</p><div class="notice">💎 Saldo gem: <b>'+Number(state.player.gems||0)+'</b></div><div class="accessory-grid store-item-grid">'+[
     {id:'rename_card',icon:'🪪',name:'Rename Card',desc:'Kartu untuk mengganti nama pemain.',price:50,count:Number(inv.rename_card_count||0),unit:'cards'},
@@ -764,7 +785,7 @@ function gachaPage(){
     {id:'frame_royal',icon:'👑',name:'Frame Royal',desc:'Royal Violet · Permanent collection frame.',price:200,owned:ownsFrame('legendary')},
     {id:'frame_celestial',icon:'✨',name:'Frame Celestial',desc:'Divine Princesses · Permanent collection frame.',price:300,owned:ownsFrame('celestial')}
   ].map(item=>'<article class="accessory-card store-item-card"><div class="store-item-art">'+item.icon+'</div><div class="accessory-info"><h3>'+item.name+'</h3><p class="subtle">'+item.desc+'</p>'+(item.unit?'<b class="store-item-price">Owned: '+item.count+'</b>':'<b class="store-item-price">'+(item.owned?'✓ Owned':'Permanent unlock')+'</b>')+'<b class="store-item-price">💎 '+item.price+' gems</b><button class="button full" data-action="buy-premium" data-item="'+item.id+'" '+(item.owned?'disabled':'')+'>'+(item.owned?'Already owned':'Buy now')+'</button></div></article>').join('')+'</div>';
-  return '<section class="page collection-page store-page"><div class="eyebrow">WELCOME TO TAMAVERSE</div><h1 class="page-title">Store</h1><p class="subtle collection-description">Temukan teman baru dan perlengkapan untuk pet-mu.</p>'+tabs+(storeTab==='item'?itemContent:storeTab==='premium'?premiumContent:gachaContent)+'</section>';
+  return '<section class="page collection-page store-page"><div class="eyebrow">WELCOME TO TAMAVERSE</div><h1 class="page-title">Store</h1><p class="subtle collection-description">Temukan teman baru dan perlengkapan untuk pet-mu.</p>'+tabs+(storeTab==='diamond'?diamondContent:storeTab==='premium'?premiumContent:gachaContent)+'</section>';
 }
 function battlePage(){
   if (onlineRoom && ['playing', 'finished'].includes(onlineRoom.status)) {
@@ -1075,7 +1096,7 @@ document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
   if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
-  if(a==='store-tab'){storeTab=['item','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
+  if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
