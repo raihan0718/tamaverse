@@ -746,13 +746,24 @@ body[data-theme="dark"].battle-fullscreen .battle-hp-card{
 }
 .home-page .pet-heart,.home-page .action-bubble{z-index:5}
 .home-page .companion-panel{
-  position:relative;
-  z-index:4;
-  margin-top:auto;
+  position:absolute;
+  z-index:6;
+  left:12px;
+  right:12px;
+  bottom:12px;
+  margin:0;
 }
+.home-page .stage-pet{
+  top:58%;
+  width:32%;
+  height:25%;
+}
+.home-page .pet-shadow{top:72%}
+.home-page .orbit{top:53%}
+.home-page .orbit-two{top:53%}
 @media(max-width:380px){
   .home-page .pet-stage{min-height:610px;padding-left:12px;padding-right:12px}
-  .home-page .stage-pet{top:42%;width:38%;height:26%}
+  .home-page .stage-pet{top:56%;width:36%;height:25%}
 }
 body[data-theme="dark"] .home-page .pet-stage{
   background:radial-gradient(ellipse at 50% 43%,#59476e 0%,#493754 54%,#35283f 100%);
