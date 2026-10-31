@@ -84,7 +84,7 @@
       const inventoryPayload = {
         owner_id: user.id,
         coins: Number(player.coins || 0),
-        gems: Number(player.gems || 0),
+        // Gems are authoritative in Supabase and are changed only by secure RPCs.
         snack: Number(items.snack || 0),
         energy: Number(items.energy || 0),
         training: Number(items.training || 0),
@@ -207,6 +207,22 @@
         );
         window.state.items.fragments =
           inventoryData.fragments || window.state.items.fragments || {};
+      }
+
+      // Load premium ownership and consumable card balances from the protected table.
+      const { data: premiumData, error: premiumError } = await supabase
+        .from('premium_inventory')
+        .select('rename_card_count, rename_pet_card_count, owned_frames')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+      if (premiumError) {
+        console.warn('Load premium inventory failed:', premiumError);
+      } else if (premiumData) {
+        window.TAMAVERSE_PREMIUM_INVENTORY = {
+          rename_card_count: Number(premiumData.rename_card_count || 0),
+          rename_pet_card_count: Number(premiumData.rename_pet_card_count || 0),
+          owned_frames: Array.isArray(premiumData.owned_frames) ? premiumData.owned_frames : ['common']
+        };
       }
 
       // Refresh cloud pet XP/levels after authoritative online battle rewards.
