@@ -842,7 +842,7 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
   z-index:5;
   left:52%!important;
   top:60%!important;
-  width:49.4%;
+  width:58%;
   height:37.7%;
   margin:0!important;
   transform:translate(-50%,-50%)!important;
@@ -852,7 +852,7 @@ body[data-theme="dark"] .home-page .stage-stats>span b{color:#f1f6ff}
 @media(max-width:380px){
   .home-page .stage-pet{
     top:60%!important;
-    width:54.6%;
+    width:58%;
     height:36.4%;
   }
 }
