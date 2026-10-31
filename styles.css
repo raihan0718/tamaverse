@@ -546,3 +546,29 @@ body.battle-fullscreen .arena-vs{top:43%;width:48px;height:48px;font-size:14px}
 .battle-player .battle-floating-number{left:67%}
 .battle-enemy .battle-floating-number{left:24%}
 @keyframes battleHpFloat{0%{opacity:0;transform:translate(-50%,18px) scale(.65)}18%{opacity:1;transform:translate(-50%,0) scale(1.15)}72%{opacity:1;transform:translate(-50%,-28px) scale(1)}100%{opacity:0;transform:translate(-50%,-48px) scale(.95)}}
+
+
+/* Battle layout correction: reserve separate lanes for HP, pets and controls */
+body.battle-fullscreen{overflow-y:auto!important;overflow-x:hidden!important}
+body.battle-fullscreen #mainContent{min-height:100svh!important;height:auto!important;overflow:visible!important}
+body.battle-fullscreen .online-battle-page{min-height:100svh!important;height:auto!important;display:flex!important;flex-direction:column!important;overflow:visible!important;padding:calc(8px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))!important;gap:8px!important}
+body.battle-fullscreen .battle-mode-top{flex:0 0 44px!important}
+body.battle-fullscreen .battle-scene{position:relative!important;flex:none!important;width:100%!important;height: min(690px, calc(100svh - 170px))!important;min-height:560px!important;max-height:none!important;margin:0!important;overflow:hidden!important}
+body.battle-fullscreen .battle-side{top:66px!important;width:48%!important;height:calc(100% - 235px)!important}
+body.battle-fullscreen .battle-hp-card{position:absolute!important;top:0!important;bottom:auto!important;left:5%!important;right:5%!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;text-align:left!important}
+body.battle-fullscreen .battle-hp-card .hp-value{font:700 10px 'Space Grotesk',sans-serif;color:#49354f;margin-bottom:5px;text-align:left}
+body.battle-fullscreen .battle-hp-card .progress-track{height:9px!important;border-radius:99px!important;background:#ffffffa8!important;overflow:hidden}
+body.battle-fullscreen .battle-hp-card .progress-fill{height:100%!important;border-radius:99px!important}
+body.battle-fullscreen .battle-pet-caption{display:flex;align-items:center;gap:7px;margin-top:6px;color:#49354f;text-shadow:0 1px 3px #fff9;font:700 12px 'Space Grotesk',sans-serif}
+body.battle-fullscreen .battle-pet-caption span{font:600 10px 'Space Grotesk',sans-serif;color:#765e7c}
+body.battle-fullscreen .battle-nameplate{display:none!important}
+body.battle-fullscreen .battle-sprite{top:155px!important;left:50%!important}
+body.battle-fullscreen .battle-sprite .pet-image{width:clamp(105px,29vw,170px)!important;height:clamp(105px,29vw,170px)!important;object-fit:contain!important;image-rendering:pixelated}
+body.battle-fullscreen .arena-vs{top:49%!important}
+body.battle-fullscreen .battle-arena-controls{left:10px!important;right:10px!important;bottom:10px!important;padding:10px!important}
+body.battle-fullscreen .battle-log-panel{max-height:90px!important}
+@media(max-height:740px){
+ body.battle-fullscreen .battle-scene{height:590px!important;min-height:590px!important}
+ body.battle-fullscreen .battle-side{height:355px!important}
+ body.battle-fullscreen .battle-sprite{top:135px!important}
+}
