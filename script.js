@@ -1099,6 +1099,9 @@ let onlineChannel = null;
 let onlineRoomPoller = null;
 
 const onlineActionLocks = new Set();
+let onlineSkillCooldownTicker = null;
+let onlineBattleFxTimer = null;
+window.onlineBattleFx = 'idle';
 
 async function runOnlineAction(key, button, loadingLabel, task) {
   if (onlineActionLocks.has(key)) return;
@@ -1200,6 +1203,9 @@ async function onlineBattleAction(move) {
     const { data, error } = await db.rpc('pvp_battle_action', { p_room_id: onlineRoom.id, p_action: move });
     if (error) throw error;
     onlineRoom = { ...onlineRoom, ...data };
+    window.onlineBattleFx = move;
+    if (onlineBattleFxTimer) clearTimeout(onlineBattleFxTimer);
+    onlineBattleFxTimer = setTimeout(() => { window.onlineBattleFx = 'idle'; if (onlineRoom?.id) render(); }, 1100);
 
     const { data: inventory, error: inventoryError } = await db.from('inventory').select('snack').eq('owner_id', window.TAMAVERSE_USER_ID).maybeSingle();
     if (!inventoryError && inventory) state.items.snack = Number(inventory.snack || 0);
@@ -1245,11 +1251,16 @@ function onlineBattleView() {
   const rivalSpecies = speciesById(rival?.species);
   const log = Array.isArray(bs.log) ? bs.log : [];
   const turn = Number(bs.turn || 1);
+  const skillReadyKey = mineIsHost ? 'host_skill_ready_at' : 'guest_skill_ready_at';
+  const skillReadyAt = bs[skillReadyKey] ? Date.parse(bs[skillReadyKey]) : 0;
+  const skillCooldown = Math.max(0, Math.ceil((skillReadyAt - Date.now()) / 1000));
+  if (onlineSkillCooldownTicker) clearTimeout(onlineSkillCooldownTicker);
+  if (skillCooldown > 0 && myTurn && !finished) onlineSkillCooldownTicker = setTimeout(() => { if (onlineRoom?.id === room.id && page === 'battle') render(); }, 1000);
   return `
     <section class="page online-battle-page">
       <div class="eyebrow">TAMAVERSE ONLINE ARENA · ${room.room_type === 'public' ? 'RANDOM MATCH' : 'PLAY WITH FRIENDS'}</div>
       <h1 class="page-title">Battle Arena</h1>
-      <div class="battle-scene battle-fx-idle" aria-label="Online battle arena">
+      <div class="battle-scene battle-fx-${esc(window.onlineBattleFx || 'idle')}" aria-label="Online battle arena">
         <div class="arena-sky">
           <span class="arena-moon">✦</span>
           <span class="arena-cloud cloud-one">☁</span>
@@ -1301,7 +1312,7 @@ function onlineBattleView() {
           <button class="button secondary" data-action="online-battle-action" data-move="defend" ${myTurn ? '' : 'disabled'}>🛡️ Defend</button>
           <button class="button secondary" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}>🍓 Item (${snackCount})</button>
         </div>
-        <p class="muted-label">Skill sekali per battle · Damage dan giliran dihitung server.</p>
+        <p class="muted-label">Skill memiliki cooldown 5 detik · Damage dan giliran dihitung server.</p>
       `}
       <div class="section-heading"><h2>Battle log</h2><span class="pill">Turn ${turn}</span></div>
       <div class="battle-log">${log.slice(-8).map(item => `<div>• ${esc(item.text || '')}</div>`).join('') || '<div>Battle dimulai. Pilih aksi pertamamu.</div>'}</div>
