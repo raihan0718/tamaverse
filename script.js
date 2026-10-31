@@ -414,16 +414,14 @@ function doCare(kind){
   }
   if(petActivityBlocked(p))return;
   if(kind==='energy'){if(state.items.energy<1){showToast('Ramuan energi habis.');return;}if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}state.items.energy--;p.energy=clamp(p.energy+30,0,100);save();render();showToast('Ramuan energi digunakan! Energy +30.');return;}
-  const limits={feed:5,play:5,train:4};
-  if(limits[kind]&&state.careUses[kind]>=limits[kind]){showToast('Batas aksi harian tercapai.');return;}
   if(kind==='feed'){
     if(p.hunger>=100){showToast(`${p.name} belum lapar.`);return;}
     if(state.items.food<1){showToast('Food habis. Beli Food di Store seharga 50 Coins.');return;}
-    state.items.food--;triggerPetAnimation('eat');p.hunger=clamp(p.hunger+50,0,100);state.careUses.feed++;grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Hunger +50.`);
+    state.items.food--;triggerPetAnimation('eat');p.hunger=clamp(p.hunger+50,0,100);grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Hunger +50.`);
   }else if(kind==='play'){
     if(p.energy<10){showToast('Energi pet terlalu rendah untuk bermain.');return;}
     if(p.happiness>=100){showToast(`${p.name} sudah sangat bahagia!`);return;}
-    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-10,0,100);state.careUses.play++;grantPetXP(p,4);state.quests.progress.play++;showToast('Waktu bermain yang menyenangkan! Energy -10.');
+    triggerPetAnimation('play');p.happiness=clamp(p.happiness+22,0,100);p.energy=clamp(p.energy-10,0,100);grantPetXP(p,4);state.quests.progress.play++;showToast('Waktu bermain yang menyenangkan! Energy -10.');
   }else if(kind==='clean'){
     if(p.cleanliness>=100){showToast(`${p.name} sudah bersih!`);return;}
     triggerPetAnimation('bath');p.cleanliness=100;showToast(`${p.name} jadi bersih dan segar!`);
@@ -433,7 +431,7 @@ function doCare(kind){
   }else if(kind==='train'){
     if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
     if(state.items.training<1){showToast('Training Manual habis. Beli di Store untuk latihan.');return;}
-    triggerPetAnimation('train');state.careUses.train++;state.items.training--;grantPetXP(p,30);p.energy=clamp(p.energy-20,0,100);p.evolution=Math.min(100,p.evolution+12);showToast('Training Manual digunakan! +30 XP dan progres evolusi.');
+    triggerPetAnimation('train');state.items.training--;grantPetXP(p,30);p.energy=clamp(p.energy-20,0,100);p.evolution=Math.min(100,p.evolution+12);showToast('Training Manual digunakan! +30 XP dan progres evolusi.');
   }
   p.careUpdatedAt=Date.now();save();render();
 }
@@ -548,7 +546,7 @@ function createPet(speciesId,name){
 }
 function clamp(value,min,max){return Math.min(Math.max(Number(value)||0,min),max);}
 function statusMeter(label,icon,value){
-  const safe=clamp(Number(value)||0,0,100);
+  const safe=Math.round(clamp(Number(value)||0,0,100));
   const level=safe>=70?'Good':safe>=35?'Fair':'Low';
   const key=label.toLowerCase().replace(/[^a-z]+/g,'-');
   return `<div class="status-meter status-${key}">
@@ -604,8 +602,6 @@ function homePage(){
 }
 function doCare(kind){
   const p=activePet();if(!p){showToast('Tetaskan pet lebih dulu!');return;}
-  const limits={feed:5,play:5,train:4};
-  if(limits[kind]&&state.careUses[kind]>=limits[kind]){showToast('Batas aksi harian tercapai.');return;}
   if(kind==='feed'){
     if(p.hunger<=0){showToast(`${p.name} sudah kenyang.`);return;}
     triggerPetAnimation('eat');p.hunger=clamp(p.hunger-25,0,100);state.careUses.feed++;grantPetXP(p,4);state.quests.progress.feed++;showToast(`${p.name} makan dengan lahap! Lapar turun, +4 XP.`);
@@ -620,7 +616,6 @@ function doCare(kind){
     if(p.energy>=100){showToast(`${p.name} sudah penuh energi.`);return;}
     triggerPetAnimation('sleep');p.energy=clamp(p.energy+35,0,100);showToast('Pet beristirahat. Energi +35.');
   }else if(kind==='train'){
-    if(state.careUses.train>=limits.train){showToast('Batas latihan harian tercapai.');return;}
     if(p.energy<20){showToast('Energi minimal 20 untuk latihan.');return;}
     triggerPetAnimation('train');state.careUses.train++;
     if(state.items.training>0){state.items.training--;grantPetXP(p,14);p.evolution=clamp(p.evolution+8,0,100);showToast('Latihan selesai! +14 XP dan progres evolusi.');}
@@ -632,8 +627,6 @@ function doCare(kind){
 function dailyReset(){
   const today=new Date().toDateString();
   if(!state.quests||state.quests.date!==today)state.quests={date:today,progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]};
-  if(!state.careUses||state.careUses.date!==today)state.careUses={date:today,feed:0,play:0,train:0,battleRewards:0};
-  if(!Number.isFinite(state.careUses.battleRewards))state.careUses.battleRewards=0;
   if(!state.dailyReward)state.dailyReward={lastClaimDate:'',day:0};
   if(state.player.lastLogin!==today){
     const yesterday=new Date(Date.now()-86400000).toDateString();
@@ -703,7 +696,6 @@ function battlePage(){
   }
   if(battle) return battleView();
 
-  const rewarded = state.careUses.battleRewards || 0;
 
   return `
     ${onlineBattlePage()}
@@ -726,7 +718,7 @@ function battlePage(){
         </button>
       </div>
       <div class="notice">
-        Hadiah XP dan koin tersedia pada ${Math.max(0,5-rewarded)} battle berikutnya hari ini.
+        Setiap battle memberikan XP dan hadiah sesuai hasil pertarungan.
       </div>
       ${state.battleHistory.length ? `
         <div class="section-heading"><h2>Battle terakhir</h2></div>
@@ -959,17 +951,14 @@ function finishBattle(result){
   if(!battle||battle.ended)return;
   dailyReset();battle.ended=true;
   const p=petById(battle.petId);
-  const rewardAllowed=state.careUses.battleRewards<5;
-  if(rewardAllowed)state.careUses.battleRewards++;
   if(result==='win'){
     state.player.wins++;
-    if(rewardAllowed){state.player.rating+=battle.mode==='simulated'?12:5;state.player.coins+=35;playerXP(25);grantPetXP(p,20);showToast('Menang! +35 koin, XP pet & pemain.');}
-    else showToast('Menang! Hadiah battle harian sudah mencapai batas.');
+    state.player.rating+=battle.mode==='simulated'?12:5;state.player.coins+=35;playerXP(25);grantPetXP(p,20);showToast('Menang! +35 koin, XP pet & pemain.');
     state.quests.progress.win++;
   }else if(result==='loss'){
     state.player.losses++;
-    if(rewardAllowed){state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);}
-    showToast(rewardAllowed?'Kalah, tapi pet mendapat pengalaman.':'Hadiah battle harian sudah mencapai batas.');
+    state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);
+    showToast('Kalah, tapi pet mendapat pengalaman.');
   }else{
     state.player.draws++;showToast('Battle berakhir seri.');
   }
