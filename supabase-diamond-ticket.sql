@@ -219,3 +219,26 @@ end;
 $$;
 revoke all on function public.approve_tamaverse_diamond_order(uuid) from public, anon, authenticated;
 grant execute on function public.approve_tamaverse_diamond_order(uuid) to service_role;
+
+
+-- Protect purchased Diamonds from direct client-side inventory updates.
+-- SECURITY DEFINER game RPCs (owned by postgres) and service_role backend
+-- operations can still change gems; authenticated table updates cannot.
+create or replace function public.guard_tamaverse_gem_balance()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  if new.gems is distinct from old.gems
+     and current_user not in ('postgres', 'service_role', 'supabase_admin') then
+    raise exception 'GEM_BALANCE_SERVER_CONTROLLED';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists tamaverse_guard_gem_balance on public.inventory;
+create trigger tamaverse_guard_gem_balance
+before update of gems on public.inventory
+for each row execute function public.guard_tamaverse_gem_balance();
