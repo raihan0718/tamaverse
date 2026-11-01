@@ -4149,3 +4149,28 @@ body[data-theme="light"] .ranking-state{background:linear-gradient(145deg,#e5d7f
  .ranking-podium-score{font-size:16px}
  .ranking-list-row{gap:8px}
 }
+
+
+/* Classic sports podium: silver left, champion center, bronze right. */
+.ranking-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:9px}
+.ranking-podium-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:176px;padding:12px 6px 0}
+.ranking-podium-card.rank-place-1{order:2;min-height:226px;transform:translateY(-9px);padding-top:15px;z-index:2}
+.ranking-podium-card.rank-place-2{order:1;min-height:184px}
+.ranking-podium-card.rank-place-3{order:3;min-height:164px}
+.ranking-podium-medal{font-size:23px;line-height:1.15}
+.ranking-podium-card.rank-place-1 .ranking-podium-medal{font-size:29px}
+.ranking-podium-avatar{flex:none}
+.ranking-podium-name{width:100%;margin-top:2px}
+.ranking-podium-score{margin-top:auto;padding-top:8px}
+.ranking-podium-base{width:calc(100% + 12px);height:24px;margin:10px -6px 0;border-radius:5px 5px 0 0;position:relative;flex:none}
+.ranking-podium-card.rank-place-1 .ranking-podium-base{height:39px}
+.ranking-podium-card.rank-place-2 .ranking-podium-base{height:29px}
+.ranking-podium-base i{width:38%;height:3px;border-radius:5px;background:#ffffff80}
+@media(max-width:420px){
+ .ranking-podium{gap:5px}
+ .ranking-podium-card{padding-left:3px;padding-right:3px;min-height:158px}
+ .ranking-podium-card.rank-place-1{min-height:202px;transform:translateY(-7px)}
+ .ranking-podium-card.rank-place-2{min-height:168px}
+ .ranking-podium-card.rank-place-3{min-height:150px}
+ .ranking-podium-base{width:calc(100% + 6px);margin-left:-3px;margin-right:-3px}
+}
