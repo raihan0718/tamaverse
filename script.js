@@ -818,10 +818,10 @@ function gachaPage(){
           <span class="diamond-package-label">Diamonds</span>
           <b class="diamond-package-price">${pack.price}</b>
           <span class="subtle diamond-unit-price">${pack.unit}</span>
-          <button class="button full" type="button" disabled aria-disabled="true">Purchase</button>
+          <button class="button full" type="button" data-action="diamond-bot">Purchase</button>
         </article>`).join('')}
     </div>
-    <div class="notice">Paket dan harga baru sedang disiapkan. Tombol Purchase akan diaktifkan setelah harga di game dan Nexora Bot sudah sinkron.</div>
+    <div class="notice">Tekan Purchase untuk membuka Nexora Bot. Pilih paket dan ikuti informasi resmi yang tersedia di bot.</div>
     <div class="card diamond-history-card">
       <div class="section-heading"><h2>Riwayat Transaksi</h2><span class="muted-label">PAYMENT HISTORY</span></div>
       <div class="diamond-history-empty"><span>🧾</span><b>Riwayat belum tersedia</b><p class="subtle">Riwayat pembelian akan ditampilkan di sini setelah fitur riwayat akun aktif. Untuk saat ini, simpan bukti transaksi secara pribadi.</p></div>
@@ -1147,6 +1147,11 @@ document.addEventListener('click',event=>{
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
+  if(a==='diamond-bot'){
+    window.open('https://t.me/Nexorapaymbot','_blank','noopener');
+    showToast('Nexora Bot dibuka. Pilih paket di Telegram.');
+    return;
+  }
   if(a==='diamond-purchase'){
     const amount=Number(btn.dataset.amount);
     const label=String(btn.dataset.label||'Diamond Pack');
