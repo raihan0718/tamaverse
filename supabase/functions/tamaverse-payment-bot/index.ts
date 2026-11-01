@@ -107,7 +107,7 @@ async function handleCallback(q: any) {
   }
   if (payload === "menu:topup") {
     await answer("Pilih paket");
-    await say(chatId, "PILIH NOMINAL DIAMOND", { reply_markup: { inline_keyboard: [
+    await say(chatId, "PILIH NOMINAL DIAMOND\n\n⚠️ CATATAN PENGUJIAN\nDaftar harga target Tamaverse:\n5 💎 — Rp1.000\n10 💎 — Rp1.800\n25 💎 — Rp3.500\n50 💎 — Rp5.000\n120 💎 — Rp10.800\n300 💎 — Rp24.000\n700 💎 — Rp49.000\n\nHarga di atas BELUM AKTIF untuk transaksi. Tombol di bawah masih menampilkan paket dan harga lama yang berlaku di sistem. Jangan melakukan pembayaran berdasarkan daftar harga target ini.", { reply_markup: { inline_keyboard: [
       [{ text: "5 💎 — Rp2.000", callback_data: "pack:1" }, { text: "10 💎 — Rp4.000", callback_data: "pack:2" }],
       [{ text: "25 💎 — Rp8.000", callback_data: "pack:3" }, { text: "50 💎 — Rp12.000", callback_data: "pack:4" }],
       [{ text: "100 💎 — Rp20.000", callback_data: "pack:5" }],
