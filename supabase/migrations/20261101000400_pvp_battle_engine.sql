@@ -2,6 +2,14 @@
 -- Requires existing pvp_rooms, pets.client_uid, matchmaking and start-match RPCs.
 -- Fix battle_history mode constraint before recording online match results.
 
+-- Keep the room lifecycle values used by matchmaking and battle completion.
+ALTER TABLE public.pvp_rooms
+  DROP CONSTRAINT IF EXISTS pvp_rooms_status_check;
+
+ALTER TABLE public.pvp_rooms
+  ADD CONSTRAINT pvp_rooms_status_check
+  CHECK (status IN ('waiting', 'ready', 'playing', 'finished', 'closed'));
+
 ALTER TABLE public.battle_history
   DROP CONSTRAINT IF EXISTS battle_history_mode_check;
 
