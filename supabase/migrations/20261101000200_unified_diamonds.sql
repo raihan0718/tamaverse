@@ -132,6 +132,10 @@ begin
   values (new.id)
   on conflict (owner_id) do nothing;
 
+  insert into public.premium_inventory (owner_id)
+  values (new.id)
+  on conflict (owner_id) do nothing;
+
   return new;
 end;
 $$;
@@ -231,4 +235,3 @@ grant execute on function public.tamaverse_claim_daily_reward() to authenticated
 
 -- Diamond exchange from fragments is intentionally disabled until fragment
 -- counts are written by trusted server-side game events.
-revoke all on function public.tamaverse_exchange_fragments_for_diamond(text) from public, anon, authenticated;
