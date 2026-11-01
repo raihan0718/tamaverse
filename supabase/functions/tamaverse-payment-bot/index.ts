@@ -174,12 +174,35 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_m
   }
   if (payload.startsWith("approve:")) {
     if (!isAdmin(Number(id))) { await answer("Khusus admin"); return; }
-    const orderId = payload.split(":")[1]; await answer("Memproses approve...");
+    const orderId = payload.split(":")[1];
+    await answer("Memproses persetujuan...");
+    const { data: orderMeta, error: metaError } = await db.from("diamond_orders")
+      .select("telegram_topic_id")
+      .eq("id", orderId)
+      .maybeSingle();
+    if (metaError) { await say(chatId, "Data pesanan gagal diperiksa: " + metaError.message); return; }
+
     const { data, error } = await db.rpc("approve_tamaverse_diamond_order", { p_order_id: orderId });
-    if (error) { await say(chatId, "Approve gagal: " + error.message); return; }
-    await say(data.telegram_user_id, `Pembayaran disetujui. +${data.diamonds} Diamonds telah masuk. Order: ${orderId}`);
-    await say(chatId, `ORDER APPROVED — +${data.diamonds} Diamonds.\\n${orderId}`);
-    try { await sendOrderTopic(orderId, `APPROVED — +${data.diamonds} Diamonds dikreditkan.`); } catch (e) { console.error(e); }
+    if (error) { await say(chatId, "Persetujuan gagal: " + error.message); return; }
+
+    await say(data.telegram_user_id,
+      `🎉 PEMBELIAN BERHASIL!\\n\\n💎 ${data.diamonds} Diamond telah berhasil ditambahkan ke akun Tamaverse Anda.\\n🧾 ID Pesanan: ${orderId}\\n\\nTerima kasih telah melakukan pembelian. Selamat bermain!`);
+    await say(chatId, `✅ PESANAN DISETUJUI\\n+${data.diamonds} Diamond dikreditkan.\\nID: ${orderId}`);
+
+    if (orderMeta?.telegram_topic_id) {
+      try {
+        await telegram("deleteForumTopic", {
+          chat_id: ticketGroupId,
+          message_thread_id: orderMeta.telegram_topic_id,
+        });
+        await say(chatId, `🗑️ Topic pesanan ${orderId.slice(0, 8).toUpperCase()} berhasil dihapus.`);
+      } catch (deleteError) {
+        console.error("Could not delete approved order topic:", deleteError);
+        await say(chatId, `⚠️ Pesanan berhasil disetujui, tetapi Topic gagal dihapus. Silakan hapus manual.\\nID: ${orderId}`);
+      }
+    } else {
+      await say(chatId, `⚠️ ID Topic tidak ditemukan untuk pesanan ${orderId}. Silakan periksa Topic secara manual.`);
+    }
     return;
   }
   if (payload.startsWith("price:")) {
