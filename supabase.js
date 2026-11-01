@@ -192,7 +192,7 @@
         player.coins = Number(
           inventoryData.coins ?? player.coins ?? 0
         );
-                // Purchased Diamonds are server-credited and never included in client save payloads.
+        // Purchased Diamonds are server-credited and never included in client save payloads.
         player.diamonds = Number(
           inventoryData.diamonds ?? player.diamonds ?? 0
         );
