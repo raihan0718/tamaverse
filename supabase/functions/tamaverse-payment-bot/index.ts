@@ -332,7 +332,28 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
   }
 
   if (text.startsWith("/start") || text === "/help") {
-    await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
+    const startPayload = text.startsWith("/start") ? (text.split(/\\s+/)[1] || "") : "";
+    const handoff = /^tv_(50|120|300|700)_(qris|gopay)$/i.exec(startPayload);
+    if (handoff) {
+      const [, rawAmount, rawMethod] = handoff;
+      const amount = Number(rawAmount);
+      const method = rawMethod.toLowerCase() === "qris" ? "QRIS" : "GoPay";
+      await say(chatId,
+        `NEXORA PAY • TAMAVERSE
+
+Pilihan dari Tamaverse berhasil diterima.
+
+Paket: ${amount} Diamonds
+Metode pilihan: ${method}
+
+Ini hanya konfirmasi pilihan dari aplikasi. Untuk informasi dan bantuan, gunakan menu di bawah.`,
+        { reply_markup: { inline_keyboard: [
+          [{ text: "📋 Panduan", callback_data: "menu:help" }],
+          [{ text: "🏠 Menu Utama", callback_data: "menu:home" }]
+        ] } });
+      return;
+    }
+    await say(chatId, "NEXORA PAY • TAMAVERSE\\n\\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
       [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
       [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
       [{ text: "📋 Panduan", callback_data: "menu:help" }]
