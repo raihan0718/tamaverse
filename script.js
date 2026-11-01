@@ -418,10 +418,10 @@ async function claimDailyReward(){
     const reward=dailyRewards[day-1];
     if(result?.success!==true||!reward)throw new Error('Hadiah harian tidak valid.');
     state.dailyReward={lastClaimDate:new Date().toISOString().slice(0,10),day};
+    state.player.coins=Number(result.coins??state.player.coins);
     state.player.diamonds=Number(result.diamonds??state.player.diamonds);
-    if(reward.type==='coins')state.player.coins+=reward.amount;
-    else if(reward.type==='grand')state.player.coins+=100;
-    else if(reward.type!=='diamonds')state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
+    state.items.snack=Number(result.snack??state.items.snack??0);
+    state.items.energy=Number(result.energy??state.items.energy??0);
     save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
   }catch(error){
     console.error('Daily reward claim failed:',error);
