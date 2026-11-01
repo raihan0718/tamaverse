@@ -370,14 +370,14 @@ const dailyRewards=[
 ];
 function dailyRewardDay(){
   const reward=state.dailyReward||{lastClaimDate:'',day:0};
-  const today=new Date().toDateString();
+  const today=new Date().toISOString().slice(0,10);
   if(reward.lastClaimDate===today)return reward.day||1;
-  const yesterday=new Date(Date.now()-86400000).toDateString();
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
   return reward.lastClaimDate===yesterday?(reward.day%7)+1:1;
 }
 function dailyRewardCard(){
   const reward=state.dailyReward||{lastClaimDate:'',day:0};
-  const claimed=reward.lastClaimDate===new Date().toDateString();
+  const claimed=reward.lastClaimDate===new Date().toISOString().slice(0,10);
   const day=dailyRewardDay();
   return `<div class="card daily-reward-card"><div class="daily-reward-days">${dailyRewards.map((item,index)=>`<div class="daily-reward-day ${index+1===day?'today':''} ${claimed&&index+1===day?'claimed':''}"><span>${claimed&&index+1===day?'✓':item.icon}</span><small>Hari ${index+1}</small></div>`).join('')}</div><div class="daily-reward-footer"><div><b>${claimed?'Hadiah hari ini sudah diklaim':`Hadiah hari ${day}: ${dailyRewards[day-1].label}`}</b><p>${claimed?'Kembali besok untuk hadiah berikutnya.':'Klaim hadiah login hari ini!'}</p></div><button class="button" data-action="claim-daily" ${claimed?'disabled':''}>${claimed?'Diklaim':'Klaim'}</button></div></div>`;
 }
@@ -407,7 +407,7 @@ async function claimDailyReward(){
       const day=Number(result?.day||0);
       const reward=dailyRewards[day-1];
       if(!reward)throw new Error('Hadiah harian tidak valid.');
-      state.dailyReward={lastClaimDate:new Date().toDateString(),day};
+      state.dailyReward={lastClaimDate:new Date().toISOString().slice(0,10),day};
       state.player.diamonds=Number(result.diamonds??state.player.diamonds);
       if(reward.type==='coins')state.player.coins+=reward.amount;
       else if(reward.type==='grand')state.player.coins+=100;
@@ -416,7 +416,7 @@ async function claimDailyReward(){
     }catch(error){console.error('Daily reward claim failed:',error);showToast(error?.message||'Hadiah harian gagal diklaim.');}
     return;
   }
-  const today=new Date().toDateString();
+  const today=new Date().toISOString().slice(0,10);
   if(!state.dailyReward)state.dailyReward={lastClaimDate:'',day:0};
   if(state.dailyReward.lastClaimDate===today){showToast('Hadiah hari ini sudah diklaim.');return;}
   const day=dailyRewardDay(),reward=dailyRewards[day-1];
@@ -645,7 +645,7 @@ function normalizeSavedState(saved){
   const today=new Date().toDateString();
   base.equippedFrame=accessoryFrames.some(frame=>frame.id===saved.equippedFrame)?saved.equippedFrame:'common';
   base.lastCareUpdate=Number(saved.lastCareUpdate)||Date.now();
-  base.dailyReward=saved.dailyReward||{lastClaimDate:'',day:0};
+  base.dailyReward=saved.dailyReward?{...saved.dailyReward,lastClaimDate:(()=>{const value=saved.dailyReward.lastClaimDate;if(!value)return '';if(/^\\d{4}-\\d{2}-\\d{2}$/.test(value))return value;const d=new Date(value);return Number.isNaN(d.getTime())?'':[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');})()}:{lastClaimDate:'',day:0};
   base.battleHistory=Array.isArray(saved.battleHistory)?saved.battleHistory:[];
   return base;
 }
