@@ -157,7 +157,7 @@ create or replace function public.nexora_transition(
 ) returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   o public.nexora_orders;
@@ -189,7 +189,7 @@ create or replace function public.nexora_approve_order(p_code text, p_actor text
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   o   public.nexora_orders;
@@ -242,7 +242,7 @@ create or replace function public.nexora_expire_stale()
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   r jsonb;
