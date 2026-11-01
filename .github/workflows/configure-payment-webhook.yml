@@ -1,0 +1,28 @@
+name: Configure Tamaverse Telegram Webhook
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  set-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Telegram webhook
+        env:
+          TELEGRAM_BOT_TOKEN2: ${{ secrets.TELEGRAM_BOT_TOKEN2 }}
+          TELEGRAM_WEBHOOK_SECRET: ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "$TELEGRAM_BOT_TOKEN2" ] || [ -z "$TELEGRAM_WEBHOOK_SECRET" ]; then
+            echo "Missing TELEGRAM_BOT_TOKEN2 or TELEGRAM_WEBHOOK_SECRET in GitHub Actions secrets."
+            exit 1
+          fi
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN2}/setWebhook" \
+            --data-urlencode "url=https://uziyhbgxvdetzlujzozu.supabase.co/functions/v1/tamaverse-payment-bot" \
+            --data-urlencode "secret_token=${TELEGRAM_WEBHOOK_SECRET}"
