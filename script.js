@@ -284,90 +284,101 @@ function rankingPage() {
     ['wins', 'Wins'],
     ['coins', 'Coins']
   ];
-
   const category = window.TAMAVERSE_RANKING_SORT || 'rating';
-
-  const labels = {
-    rating: 'Rating Battle',
-    level: 'Level',
-    wins: 'Total Wins',
-    coins: 'Coins'
-  };
-
+  const labels = {rating:'Rating Battle',level:'Level',wins:'Total Wins',coins:'Coins'};
   const data = window.TAMAVERSE_RANKING_DATA || [];
 
-  if (
-    !data.length &&
-    !window.TAMAVERSE_RANKING_LOADING &&
-    !window.TAMAVERSE_RANKING_ERROR
-  ) {
+  if (!data.length && !window.TAMAVERSE_RANKING_LOADING && !window.TAMAVERSE_RANKING_ERROR) {
     loadGlobalRankings();
   }
 
-  const rows = [...data].sort((a, b) => {
-    const diff =
-      Number(b[category] || 0) -
-      Number(a[category] || 0);
-
+  const rows = [...data].sort((a,b) => {
+    const diff = Number(b[category] || 0) - Number(a[category] || 0);
     return diff || a.name.localeCompare(b.name);
   });
+  const currentIndex = rows.findIndex(r => r.me);
+  const current = currentIndex >= 0 ? rows[currentIndex] : null;
+  const podium = rows.slice(0,3);
+  const rest = rows.slice(3,10);
+  const medal = ['🥇','🥈','🥉'];
+  const metric = r => Number(r[category] || 0).toLocaleString('id-ID');
 
-  const current = rows.find(r => r.me);
+  return `<section class="page ranking-page">
+    <div class="ranking-heading">
+      <div>
+        <div class="eyebrow">TAMAVERSE LEADERBOARD</div>
+        <h1 class="page-title">Hall of Fame</h1>
+        <p class="subtle">Para petualang terbaik di dunia Tamaverse.</p>
+      </div>
+      <div class="ranking-heading-mark">✦</div>
+    </div>
 
-  return `<section class="page">
-    <div class="eyebrow">PAPAN PERINGKAT</div>
-    <h1 class="page-title">Ranking</h1>
+    <div class="ranking-hero">
+      <div class="ranking-hero-glow"></div>
+      <div class="ranking-hero-copy">
+        <span class="ranking-live-tag"><i></i> GLOBAL RANKING</span>
+        <h2>Rise to the top.</h2>
+        <p>Pilih kategori dan lihat siapa yang memimpin leaderboard.</p>
+      </div>
+      <div class="ranking-hero-art" aria-hidden="true"><span>🏆</span><i>✦</i><b>✧</b></div>
+    </div>
 
-    <div class="card">
+    <div class="ranking-filter-wrap">
+      <div class="ranking-filter-label">RANKING CATEGORY</div>
       <div class="rank-tabs">
-        ${categories.map(([key, label]) => `
-          <button
-            class="rank-tab ${category === key ? 'active' : ''}"
-            onclick="window.setRankingSort('${key}')"
-          >${label}</button>
+        ${categories.map(([key,label]) => `
+          <button class="rank-tab ${category===key?'active':''}" onclick="window.setRankingSort('${key}')">
+            ${key==='rating'?'✦':key==='level'?'⬆':key==='wins'?'⚔':'◈'} <span>${label}</span>
+          </button>
         `).join('')}
       </div>
-
-      ${window.TAMAVERSE_RANKING_LOADING && !data.length
-        ? '<p class="muted-label">📡 Memuat ranking global...</p>'
-        : ''}
-
-      ${window.TAMAVERSE_RANKING_ERROR
-        ? `<p class="muted-label">${esc(window.TAMAVERSE_RANKING_ERROR)}</p>`
-        : ''}
-
-      ${!window.TAMAVERSE_RANKING_LOADING &&
-        !data.length &&
-        !window.TAMAVERSE_RANKING_ERROR
-        ? '<p class="muted-label">Belum ada data pemain.</p>'
-        : ''}
-
-      ${current ? `
-        <div class="rank-row">
-          <span>🏅</span>
-          <span>Peringkatmu · ${esc(labels[category])}</span>
-          <b>#${rows.findIndex(r => r.id === current.id) + 1}</b>
-        </div>
-      ` : ''}
-
-      ${rows.slice(0, 5).map((r, i) => `
-        <div class="rank-row ${r.me ? 'rank-me' : ''}">
-          <b>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</b>
-          <span>
-            <span class="rank-avatar">${esc(String(r.avatar))}</span>
-            ${esc(r.name)}${r.me ? ' (kamu)' : ''}
-            <br>
-            <span class="muted-label">
-              Lv.${r.level} · ${r.wins} menang / ${r.losses} kalah
-            </span>
-          </span>
-          <b>${Number(r[category] || 0).toLocaleString('id-ID')}</b>
-        </div>
-      `).join('')}
     </div>
+
+    ${current ? `
+      <div class="ranking-you-card">
+        <div class="ranking-you-avatar">${esc(String(current.avatar))}</div>
+        <div class="ranking-you-copy"><small>YOUR POSITION</small><b>${esc(current.name)}</b><span>${esc(labels[category])}</span></div>
+        <div class="ranking-you-place"><small>RANK</small><strong>#${currentIndex+1}</strong></div>
+      </div>
+    ` : ''}
+
+    ${window.TAMAVERSE_RANKING_LOADING && !data.length ? '<div class="ranking-state"><span class="ranking-loader"></span><b>Memuat leaderboard...</b><small>Sedang mengambil data pemain global</small></div>' : ''}
+    ${window.TAMAVERSE_RANKING_ERROR ? `<div class="ranking-state ranking-error"><b>Leaderboard belum tersedia</b><small>${esc(window.TAMAVERSE_RANKING_ERROR)}</small></div>` : ''}
+    ${!window.TAMAVERSE_RANKING_LOADING && !data.length && !window.TAMAVERSE_RANKING_ERROR ? '<div class="ranking-state"><b>Belum ada pemain</b><small>Jadilah salah satu petualang pertama di Tamaverse.</small></div>' : ''}
+
+    ${podium.length ? `
+      <div class="ranking-section-title"><div><small>THE ELITE THREE</small><h2>Top Players</h2></div><span>${rows.length} PLAYERS</span></div>
+      <div class="ranking-podium">
+        ${podium.map((r,i)=>`
+          <article class="ranking-podium-card rank-place-${i+1} ${r.me?'is-you':''}">
+            <div class="ranking-podium-medal">${medal[i]}</div>
+            <div class="ranking-podium-avatar">${esc(String(r.avatar))}</div>
+            <b class="ranking-podium-name">${esc(r.name)}${r.me?' · You':''}</b>
+            <small>LEVEL ${Number(r.level||1)}</small>
+            <strong class="ranking-podium-score">${metric(r)}</strong>
+            <span class="ranking-podium-metric">${esc(labels[category])}</span>
+            <div class="ranking-podium-base"><i></i></div>
+          </article>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    ${rest.length ? `
+      <div class="ranking-section-title ranking-list-title"><div><small>KEEP CLIMBING</small><h2>Leaderboard</h2></div><span>RANK 04–10</span></div>
+      <div class="ranking-list-card">
+        ${rest.map((r,i)=>`
+          <div class="ranking-list-row ${r.me?'is-you':''}">
+            <div class="ranking-list-position">${String(i+4).padStart(2,'0')}</div>
+            <div class="ranking-list-avatar">${esc(String(r.avatar))}</div>
+            <div class="ranking-list-player"><b>${esc(r.name)}${r.me?' <small>YOU</small>':''}</b><span>Lv. ${Number(r.level||1)} · ${Number(r.wins||0)} wins</span></div>
+            <strong>${metric(r)}<small>${esc(labels[category])}</small></strong>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+    <div class="ranking-footnote">Ranking diperbarui dari data akun Tamaverse.</div>
   </section>`;
 }
-
 
 function legacy_profilePage(){const p=activePet();return `<section class="page"><div class="eyebrow">AKUN TAMAVERSE</div><h1 class="page-title">Profile & Tas</h1><div class="card profile-card"><div class="avatar">${state.player.avatar}</div><h2>${esc(state.player.name)}</h2><div class="user-id-box" style="margin:12px 0;padding:12px;background:var(--card-bg,#f4d4e3);border-radius:12px">
   <small class="muted-label">UUID AKUN TAMAVERSE</small>
