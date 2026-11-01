@@ -5,6 +5,7 @@ alter table public.inventory
   check (diamonds >= 0);
 
 -- Remove the old Gems guard before migrating legacy balances.
+drop trigger if exists tamaverse_guard_diamond_balance on public.inventory;
 drop trigger if exists tamaverse_guard_gem_balance on public.inventory;
 drop function if exists public.guard_tamaverse_gem_balance();
 
@@ -12,6 +13,11 @@ update public.inventory
 set diamonds = coalesce(diamonds, 0) + coalesce(gems, 0),
     gems = 0
 where coalesce(gems, 0) > 0;
+
+-- Reinstall the balance guard after the one-time legacy balance migration.
+create trigger tamaverse_guard_diamond_balance
+before insert or update of diamonds on public.inventory
+for each row execute function public.guard_tamaverse_diamond_balance();
 
 -- The old Gems column is intentionally retained temporarily for compatibility
 -- with older installed SQL functions. The game no longer reads or writes it.
@@ -223,38 +229,6 @@ revoke all on function public.tamaverse_claim_daily_reward() from public, anon;
 grant execute on function public.tamaverse_claim_daily_reward() to authenticated;
 
 
--- Exchange only consumes the server-stored fragment count before granting a Diamond.
-create or replace function public.tamaverse_exchange_fragments_for_diamond(p_species_id text)
-returns jsonb
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  v_owner uuid := auth.uid();
-  v_fragments jsonb;
-  v_count integer;
-  v_balance bigint;
-begin
-  if v_owner is null then raise exception 'AUTH_REQUIRED'; end if;
-  if p_species_id is null or length(p_species_id) < 1 or length(p_species_id) > 64 then
-    raise exception 'INVALID_SPECIES';
-  end if;
-
-  select coalesce(fragments, '{}'::jsonb) into v_fragments
-  from public.inventory where owner_id = v_owner for update;
-  if not found then raise exception 'INVENTORY_NOT_FOUND'; end if;
-
-  v_count := coalesce((v_fragments ->> p_species_id)::integer, 0);
-  if v_count < 5 then raise exception 'NOT_ENOUGH_FRAGMENTS'; end if;
-
-  v_fragments := jsonb_set(v_fragments, array[p_species_id], to_jsonb(v_count - 5), true);
-  update public.inventory
-  set fragments = v_fragments, diamonds = diamonds + 1, updated_at = now()
-  where owner_id = v_owner returning diamonds into v_balance;
-
-  return jsonb_build_object('success', true, 'diamonds', v_balance, 'fragments', v_fragments);
-end;
-$$;
-revoke all on function public.tamaverse_exchange_fragments_for_diamond(text) from public, anon;
-grant execute on function public.tamaverse_exchange_fragments_for_diamond(text) to authenticated;
+-- Diamond exchange from fragments is intentionally disabled until fragment
+-- counts are written by trusted server-side game events.
+revoke all on function public.tamaverse_exchange_fragments_for_diamond(text) from public, anon, authenticated;
