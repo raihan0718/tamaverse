@@ -1,3 +1,15 @@
+-- Unified wallet compatibility: Diamonds replace Gems; Coins remain unchanged.
+alter table public.inventory
+  add column if not exists diamonds bigint not null default 0
+  check (diamonds >= 0);
+
+update public.inventory
+set diamonds = coalesce(diamonds, 0) + coalesce(gems, 0),
+    gems = 0
+where coalesce(gems, 0) > 0;
+
+alter table public.inventory alter column gems set default 0;
+
 -- Tamaverse Telegram payment tickets (manual QRIS verification)
 -- Run after the base Tamaverse schema. Never expose the service-role key.
 
