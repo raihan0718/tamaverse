@@ -83,6 +83,7 @@ let page = 'home';
 let selectedPetId = null;
 let battle = null;
 let huntingSkillCooldownTimer = null;
+let onlineSkillClientReadyAt = 0;
 let battleSection = 'online';
 let toastTimer;
 let petAnimation = 'idle';
@@ -1678,6 +1679,7 @@ async function onlineBattleAction(move) {
     const actionResult = Array.isArray(data) ? data[0] : data;
     if (!actionResult || typeof actionResult !== 'object') throw new Error('Server tidak mengembalikan status battle yang valid.');
     onlineRoom = { ...onlineRoom, ...actionResult };
+    if(move==='skill')onlineSkillClientReadyAt=Date.now()+5000;
     window.onlineBattleFx = move;
     if (onlineBattleFxTimer) clearTimeout(onlineBattleFxTimer);
     onlineBattleFxTimer = setTimeout(() => { window.onlineBattleFx = 'idle'; if (onlineRoom?.id) render(); }, 1100);
@@ -1749,7 +1751,8 @@ function onlineBattleView() {
     : actionHeal > 0 && !actorIsMine
       ? { text: '+' + actionHeal, kind: 'heal' } : null;
   const skillReadyKey = mineIsHost ? 'host_skill_ready_at' : 'guest_skill_ready_at';
-  const skillReadyAt = bs[skillReadyKey] ? Date.parse(bs[skillReadyKey]) : 0;
+  const serverSkillReadyAt = bs[skillReadyKey] ? Date.parse(bs[skillReadyKey]) : 0;
+  const skillReadyAt = Math.max(serverSkillReadyAt || 0, onlineSkillClientReadyAt);
   const skillCooldown = Math.max(0, Math.ceil((skillReadyAt - Date.now()) / 1000));
   if (onlineSkillCooldownTicker) clearTimeout(onlineSkillCooldownTicker);
   if (skillCooldown > 0 && myTurn && !finished) onlineSkillCooldownTicker = setTimeout(() => {
