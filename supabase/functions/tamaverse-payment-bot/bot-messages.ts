@@ -20,7 +20,7 @@ export const BOT_MESSAGES = {
     saveFailed: "⚠️ UUID belum berhasil disimpan. Silakan coba kembali beberapa saat lagi.",
   },
   order: {
-    choosePackage: "💎 Silakan pilih paket Diamond yang tersedia:",
+    choosePackage: "💎 DAFTAR HARGA DIAMOND\\n\\n5 💎 — Rp1.000 (Rp200/diamond)\\n10 💎 — Rp1.800 (Rp180/diamond)\\n25 💎 — Rp3.500 (Rp140/diamond)\\n50 💎 — Rp5.000 (Rp100/diamond)\\n120 💎 — Rp10.800 (Rp90/diamond)\\n300 💎 — Rp24.000 (Rp80/diamond)\\n700 💎 — Rp49.000 (Rp70/diamond)\\n\\nSemakin besar paket, semakin hemat harga per Diamond. Daftar ini merupakan informasi harga rancangan; ketersediaan transaksi mengikuti paket yang ditampilkan pada menu bot.",
     creating: "⏳ Sedang menyiapkan pesanan Anda. Mohon tunggu sebentar...",
     createFailed: "⚠️ Pesanan belum berhasil dibuat. Silakan coba kembali beberapa saat lagi.",
     created: (id: string, pack: string, diamonds: number, total: string) =>
