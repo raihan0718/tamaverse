@@ -2026,7 +2026,7 @@ async function subscribeOnlineRoom(roomId) {
       return;
     }
     await refreshOnlineRoom(roomId, true);
-  }, onlineRoom?.status === 'playing' ? 1500 : 2500);
+  }, 1500);
 
   await refreshOnlineRoom(roomId, true);
 }
