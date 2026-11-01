@@ -91,12 +91,19 @@
         fragments: items.fragments || {},
       };
 
-      const { error: inventoryError } = await window.TAMAVERSE_SUPABASE_CLIENT
-  .from('inventory')
-        .upsert(inventoryPayload, { onConflict: 'owner_id' });
+      // Auth signup trigger + schema backfill guarantee this row exists.
+      // Update only client-owned fields: never upsert or overwrite the server Diamond balance.
+      const { data: savedInventory, error: inventoryError } = await window.TAMAVERSE_SUPABASE_CLIENT
+        .from('inventory')
+        .update(inventoryPayload)
+        .eq('owner_id', user.id)
+        .select('owner_id')
+        .maybeSingle();
 
       if (inventoryError) {
         console.warn('Save inventory failed:', inventoryError);
+      } else if (!savedInventory) {
+        console.warn('Save inventory skipped: account inventory row is missing.');
       }
 
       // Sync the local pet collection without deleting existing cloud rows.
