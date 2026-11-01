@@ -3398,3 +3398,12 @@ body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8e
  .solo-hunting-page .battle-turn-preview>div{grid-template-columns:32px minmax(0,1fr)!important;column-gap:5px!important}
  .solo-hunting-page .battle-turn-preview .turn-preview-icon{width:32px!important;height:32px!important}
 }
+
+
+/* Hunting Tower spacing correction: keep fighters clearly separated. */
+.solo-hunting-page .battle-player .battle-sprite{left:54%!important}
+.solo-hunting-page .battle-enemy .battle-sprite{left:46%!important}
+@media(max-width:390px){
+ .solo-hunting-page .battle-player .battle-sprite{left:54%!important}
+ .solo-hunting-page .battle-enemy .battle-sprite{left:46%!important}
+}
