@@ -1149,27 +1149,30 @@ document.addEventListener('click',event=>{
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
   if(a==='diamond-purchase'){
     const amount=Number(btn.dataset.amount);
-    const prices={5:'Rp1.000',10:'Rp1.800',25:'Rp3.500',50:'Rp5.000',120:'Rp10.800',300:'Rp24.000',700:'Rp49.000'};
+    const prices={5:'Rp1.000',10:'Rp1.800',25:'Rp3.500',50:'Rp5.000',100:'Rp20.000',120:'Rp10.800',300:'Rp24.000',700:'Rp49.000'};
     if(!Object.prototype.hasOwnProperty.call(prices,amount))return;
     showModal(`<div class="eyebrow">TAMAVERSE · DIAMOND STORE</div>
       <h2 id="modalTitle">Purchase ${amount} Diamonds</h2>
       <p class="subtle">Paket ${amount} 💎 · ${prices[amount]}</p>
       <div class="card" style="margin:14px 0;text-align:center"><strong style="font-size:24px">💎 ${amount.toLocaleString('id-ID')}</strong><p class="muted-label">${prices[amount]}</p></div>
-      <p class="notice">Catatan: harga dan paket pada menu transaksi bot masih berbeda. Periksa nominal di bot dan jangan bayar jika tidak sama.</p>
+      <p class="notice">Pastikan akun Telegram sudah terhubung ke akun Tamaverse sebelum melanjutkan. Pembayaran hanya dilakukan setelah instruksi bot diterima.</p>
       <h3 style="margin:12px 0">Pilih metode pembayaran</h3>
       <div class="modal-actions" style="display:grid;grid-template-columns:1fr;gap:9px">
-        <button class="button full" data-action="diamond-payment" data-method="qris">QRIS</button>
-        <button class="button secondary full" data-action="diamond-payment" data-method="gopay">GoPay</button>
+        <button class="button full" data-action="diamond-payment" data-amount="${amount}" data-method="qris">QRIS</button>
+        <button class="button secondary full" data-action="diamond-payment" data-amount="${amount}" data-method="gopay">GoPay</button>
         <button class="button secondary full" data-action="close-modal">Batal</button>
       </div>`);
     return;
   }
   if(a==='diamond-payment'){
+    const amount=Number(btn.dataset.amount);
     const method=btn.dataset.method;
-    if(!['qris','gopay'].includes(method))return;
+    const packageIds={5:'mini_5',10:'basic_10',25:'plus_25',50:'pro_50',100:'max_100',120:'popular_120',300:'value_300',700:'mega_700'};
+    if(!packageIds[amount]||!['qris','gopay'].includes(method))return;
+    const payload='tv_'+amount+'_'+method;
     closeModal();
-    window.open('https://t.me/Nexorapaymbot','_blank','noopener');
-    showToast(`Bot dibuka. Cek ulang nominal dan metode ${method.toUpperCase()}; jangan bayar jika harga berbeda.`);
+    window.open('https://t.me/Nexorapaymbot?start='+encodeURIComponent(payload),'_blank','noopener');
+    showToast('Bot dibuka dengan detail paket '+amount+' Diamonds dan metode '+method.toUpperCase()+'.');
     return;
   }
 
