@@ -800,7 +800,15 @@ function gachaPage(){
       <div class="diamond-wallet"><small>DIAMOND BALANCE</small><strong>💎 ${Number(state.player.diamonds||0).toLocaleString('id-ID')}</strong></div>
     </div>
     <div class="notice">Pilih paket di sini, lalu lanjutkan pembelian melalui Nexora Bot. UUID akun game tidak perlu dikirim lewat chat publik.</div>
-    <div class="section-heading"><h2>Pilih Paket Diamond</h2><span class="muted-label">NEXORA BOT</span></div>
+    <div class="section-heading"><h2>Daftar Harga Diamond</h2><span class="muted-label">PRICE LIST</span></div>
+    <div class="card" style="padding:14px;margin-bottom:14px">
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;font-size:13px">
+        <b>Paket</b><b>Harga</b><b>Per Diamond</b>
+        <span>💎 5</span><b>Rp1.000</b><span class="subtle">Rp200</span><span>💎 10</span><b>Rp1.800</b><span class="subtle">Rp180</span><span>💎 25</span><b>Rp3.500</b><span class="subtle">Rp140</span><span>💎 50</span><b>Rp5.000</b><span class="subtle">Rp100</span><span>💎 120</span><b>Rp10.800</b><span class="subtle">Rp90</span><span>💎 300</span><b>Rp24.000</b><span class="subtle">Rp80</span><span>💎 700</span><b>Rp49.000</b><span class="subtle">Rp70</span>
+      </div>
+      <p class="subtle" style="margin:12px 0 0;font-size:11px">Daftar harga ini merupakan rancangan informasi. Paket dan harga baru belum tersedia untuk transaksi melalui tombol Purchase.</p>
+    </div>
+    <div class="section-heading"><h2>Paket yang tersedia di aplikasi</h2><span class="muted-label">NEXORA BOT</span></div>
     <div class="diamond-package-grid">
       ${[{amount:50,label:'Starter'},{amount:120,label:'Popular'},{amount:300,label:'Value Pack'},{amount:700,label:'Mega Pack'}].map((pack,index)=>`
         <article class="diamond-package-card ${index===1?'featured':''}">
