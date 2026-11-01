@@ -4234,3 +4234,24 @@ body[data-theme="light"] .profile-action-button{background:#ffffff35;border-colo
 body[data-theme="light"] .profile-change-button{background:linear-gradient(120deg,#f5e7ff,#ffe5f0);color:#654b78}
 body[data-theme="light"] .profile-uuid-value{color:#fff}
 @media(max-width:390px){.profile-identity-buttons{gap:6px}.profile-action-button{font-size:9px;padding:7px 8px}.profile-battle-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-battle-stats .profile-stat:last-child{grid-column:1/-1}}
+/* Profile identity card layout v2 */
+.profile-identity-card{position:relative;grid-template-columns:96px minmax(0,1fr);grid-template-rows:auto;align-items:center;column-gap:15px;row-gap:12px;padding:42px 16px 14px}
+.profile-avatar-shell{width:96px;height:96px;border-radius:28px;grid-column:1;grid-row:1;align-self:center}
+.profile-identity-copy{grid-column:2;grid-row:1;min-width:0;padding-right:0}
+.profile-identity-copy h2{font-size:20px;margin:6px 0 3px}
+.profile-telegram-id{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:0 0 4px!important;color:#d9cce9!important;font-size:9px!important;letter-spacing:.45px}
+.profile-telegram-id strong{font-size:10px;color:#fff;letter-spacing:.2px;font-weight:800}
+.profile-level-label{font-size:10px!important;margin:0!important}
+.profile-identity-buttons{gap:6px;margin-top:9px}
+.profile-action-button{min-height:30px;padding:6px 9px;font-size:9px}
+.profile-uuid-row{position:absolute;top:9px;right:10px;z-index:3;display:flex;align-items:center;gap:5px;width:auto;max-width:48%;padding:4px 5px 4px 8px;border:1px solid #ffffff30;border-radius:9px;background:#ffffff18}
+.profile-uuid-icon{font-size:11px}
+.profile-uuid-value{font-size:8px;letter-spacing:.2px;max-width:82px;color:#fff}
+.profile-copy-uuid{width:22px;height:22px;padding:0;border-radius:6px;font-size:12px}
+.profile-battle-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.profile-battle-stats .profile-stat{padding:12px 6px}
+.profile-battle-stats .profile-stat strong{font-size:17px;overflow-wrap:anywhere}
+.profile-battle-stats .profile-stat span{font-size:8px;letter-spacing:.45px}
+body[data-theme="light"] .profile-telegram-id{color:#fff!important}
+body[data-theme="light"] .profile-telegram-id strong{color:#fff}
+@media(max-width:390px){.profile-identity-card{grid-template-columns:82px minmax(0,1fr);column-gap:11px;padding:40px 12px 12px}.profile-avatar-shell{width:82px;height:82px;border-radius:24px}.profile-identity-copy h2{font-size:17px}.profile-action-button{font-size:8px;padding:6px 7px}.profile-uuid-row{top:8px;right:8px;max-width:52%}.profile-uuid-value{max-width:70px}.profile-battle-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
