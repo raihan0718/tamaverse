@@ -1226,12 +1226,22 @@ async function exchangeFragments(speciesId,reward){
 function battleAction(move){
   if(!battle||battle.ended||battle.busy||battle.phase!=='player')return;
   if(!['attack','skill','defend','item'].includes(move))return;
-  if(move==='skill'&&Number(battle.skillReadyAt||0)>Date.now()){showToast(`Skill cooldown: tunggu ${Math.ceil((battle.skillReadyAt-Date.now())/1000)} detik.`);return;}
+  const now=Date.now();
+  const playerSkillReadyAt=Number(battle.skillReadyAt||0);
+  if(move==='skill'&&playerSkillReadyAt>now){
+    showToast(`Skill cooldown: tunggu ${Math.ceil((playerSkillReadyAt-now)/1000)} detik.`);
+    return;
+  }
   const p=petById(battle.petId);if(!p)return;
   if(move==='item'&&Number(state.items.snack||0)<1){showToast('Camilan habis.');return;}
-  const activeBattle=battle,ps=speciesById(p.species),os=speciesById(activeBattle.opponent.species),log=activeBattle.log;
-  activeBattle.busy=true;activeBattle.actionFx=move;
+  const activeBattle=battle;
+  const ps=speciesById(p.species);
+  const log=activeBattle.log;
+  activeBattle.busy=true;
+  activeBattle.actionFx=move;
+
   if(move==='attack'||move==='skill'){
+    const os=speciesById(activeBattle.opponent.species);
     const dodge=clamp(.035+(activeBattle.opponent.stats.spd-p.stats.spd)*.003,.01,.12);
     if(Math.random()<dodge)log.push(`${activeBattle.opponent.name} menghindari serangan ${p.name}.`);
     else{
@@ -1243,21 +1253,44 @@ function battleAction(move){
     }
     activeBattle.enemyDefending=false;
     if(move==='skill')activeBattle.skillReadyAt=Date.now()+5000;
-  }else if(move==='defend'){activeBattle.defending=true;log.push(`${p.name} bersiap bertahan.`);}
-  else{state.items.snack--;const healed=Math.min(25,p.stats.hp-activeBattle.playerHP);activeBattle.playerHP+=healed;log.push(`${p.name} memakai Battle Snack dan memulihkan ${healed} HP.`);}
-  activeBattle.log=log.slice(-30);save();
+  }else if(move==='defend'){
+    activeBattle.defending=true;
+    log.push(`${p.name} bersiap bertahan.`);
+  }else{
+    state.items.snack--;
+    const healed=Math.min(25,p.stats.hp-activeBattle.playerHP);
+    activeBattle.playerHP+=healed;
+    log.push(`${p.name} memakai Battle Snack dan memulihkan ${healed} HP.`);
+  }
+
+  activeBattle.log=log.slice(-30);
+  save();
   if(activeBattle.enemyHP<=0){advanceHuntingLevel();return;}
-  activeBattle.phase='ai';render();
+
+  // Keep the player's action visible for a full 1.5 seconds before the AI responds.
+  activeBattle.phase='player-action';
   activeBattle.aiTimer=setTimeout(()=>{
-    if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='ai')return;
-    const enemy=activeBattle.opponent,choices=['attack','attack','attack','defend'];
+    if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='player-action')return;
+    const enemy=activeBattle.opponent;
+    const choices=['attack','attack','attack','defend'];
     if(Date.now()>=Number(activeBattle.enemySkillReadyAt||0))choices.push('skill');
     if(!activeBattle.enemyItemUsed&&activeBattle.enemyHP<=Math.ceil(enemy.stats.hp*.4))choices.push('item');
     const aiMove=choices[Math.floor(Math.random()*choices.length)];
-    if(aiMove==='defend'){activeBattle.enemyDefending=true;log.push(`${enemy.name} memilih bertahan.`);activeBattle.actionFx='ai-defend';}
-    else if(aiMove==='item'){activeBattle.enemyItemUsed=true;const healed=Math.min(Math.round(enemy.stats.hp*.16),enemy.stats.hp-activeBattle.enemyHP);activeBattle.enemyHP+=healed;log.push(`${enemy.name} memulihkan ${healed} HP.`);activeBattle.actionFx='ai-item';}
-    else{
-      const skill=aiMove==='skill';if(skill)activeBattle.enemySkillReadyAt=Date.now()+5000;
+
+    if(aiMove==='defend'){
+      activeBattle.enemyDefending=true;
+      log.push(`${enemy.name} memilih bertahan.`);
+      activeBattle.actionFx='ai-defend';
+    }else if(aiMove==='item'){
+      activeBattle.enemyItemUsed=true;
+      const healed=Math.min(Math.round(enemy.stats.hp*.16),enemy.stats.hp-activeBattle.enemyHP);
+      activeBattle.enemyHP+=healed;
+      log.push(`${enemy.name} memulihkan ${healed} HP.`);
+      activeBattle.actionFx='ai-item';
+    }else{
+      const skill=aiMove==='skill';
+      if(skill)activeBattle.enemySkillReadyAt=Date.now()+5000;
+      const os=speciesById(enemy.species);
       const dodge=clamp(.025+(p.stats.spd-enemy.stats.spd)*.003,.01,.12);
       if(Math.random()<dodge)log.push(`${p.name} menghindari serangan ${enemy.name}.`);
       else{
@@ -1269,14 +1302,27 @@ function battleAction(move){
       }
       activeBattle.actionFx=aiMove;
     }
-    activeBattle.defending=false;activeBattle.turn++;activeBattle.log=log.slice(-30);save();
-    activeBattle.phase='cooldown';activeBattle.busy=true;activeBattle.log=log.slice(-30);save();render();
+
+    activeBattle.defending=false;
+    activeBattle.turn++;
+    activeBattle.log=log.slice(-30);
+    activeBattle.phase='ai-action';
+    activeBattle.busy=true;
+    save();
+    render();
+
+    // Hold the AI action animation for 1.5 seconds before returning control.
     activeBattle.aiTimer=setTimeout(()=>{
-      if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='cooldown')return;
+      if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='ai-action')return;
       if(activeBattle.playerHP<=0){finishBattle('loss');return;}
-      activeBattle.phase='player';activeBattle.busy=false;activeBattle.actionFx='idle';render();
+      activeBattle.phase='player';
+      activeBattle.busy=false;
+      activeBattle.actionFx='idle';
+      render();
     },1500);
+    render();
   },1500);
+  render();
 }
 function finishBattle(result){
   if(!battle||battle.ended)return;
