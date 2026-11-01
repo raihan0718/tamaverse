@@ -3,9 +3,9 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN2")!;
-const adminId = Deno.env.get("TELEGRAM_ADMIN_ID")!;
-const webhookSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET")!;
-const ticketGroupId = "-1004322036078";
+const adminId = Deno.env.get("TELEGRAM_ADMIN_ID") ?? Deno.env.get("ADMIN_TELEGRAM_ID") ?? "";
+const webhookSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET") ?? "";
+const ticketGroupId = Deno.env.get("ADMIN_FORUM_CHAT_ID") ?? "-1004322036078";
 const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 const api = (method: string) => `https://api.telegram.org/bot${botToken}/${method}`;
 
@@ -14,8 +14,11 @@ async function telegram(method: string, body: Record<string, unknown>) {
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
-  if (!res.ok || !data.ok) throw new Error(data.description || "Telegram API error");
+  const raw = await res.text();
+  let data: any;
+  try { data = raw ? JSON.parse(raw) : null; }
+  catch { throw new Error(`Telegram API returned invalid JSON (HTTP ${res.status})`); }
+  if (!res.ok || !data?.ok) throw new Error(data?.description || `Telegram API error (HTTP ${res.status})`);
   return data.result;
 }
 async function say(chatId: number | string, text: string, extra: Record<string, unknown> = {}) {
