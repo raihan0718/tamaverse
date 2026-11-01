@@ -983,7 +983,7 @@ function battleView(){
   const log=Array.isArray(battle.log)?battle.log:[];
   const aiTurn=battle.phase==='ai', transition=battle.phase==='transition';
   return `
-    <section class="page online-battle-page battle-mode-screen battle-live-page">
+    <section class="page online-battle-page battle-mode-screen solo-hunting-page">
       <div class="battle-mode-top">
         <button class="battle-exit" data-action="battle-cancel" type="button" aria-label="Leave hunting">←</button>
         <div><div class="eyebrow">SOLO HUNTING</div><h1>Hunting Tower</h1><small class="battle-wave-subtitle">LEVEL ${battle.wave} / ${species.length} · ${battle.clearedLevels} CLEARED</small></div>
@@ -1028,13 +1028,13 @@ function battlePage(){
         <button class="battle-hub-tab ${battleSection==='solo'?'active':''}" data-action="battle-section" data-section="solo" role="tab" aria-selected="${battleSection==='solo'}"><span>🌿</span><b>Solo / Hunting</b><small>Player vs AI</small></button>
       </div>
       ${battleSection==='online' ? onlineBattlePage() : `
-        <div class="battle-mode-banner solo-banner"><span class="battle-mode-icon">🌿</span><div><div class="eyebrow">WILDERNESS MODE</div><h2>Solo Hunting</h2><p>Temui monster liar dan bertarung bergiliran melawan AI.</p></div></div>
+        <div class="battle-mode-banner solo-banner"><span class="battle-mode-icon solo-banner-pet">${petImage(activePet()?.species||species[0].id,"solo-hub-pet")}</span><div><div class="eyebrow">WILDERNESS MODE</div><h2>Solo Hunting</h2><p>Temui monster liar dan bertarung bergiliran melawan AI.</p></div></div>
         <div class="battle-turn-preview">
-          <div><span class="turn-preview-icon">🧑‍🚀</span><b>PLAYER</b><small>Your action</small></div>
-          <span class="turn-preview-arrow">↔</span>
-          <div><span class="turn-preview-icon">🤖</span><b>AI BOT</b><small>Random action</small></div>
+          <div><span class="turn-preview-icon turn-preview-pet">${petImage(activePet()?.species||species[0].id,"solo-preview-pet")}</span><b>PLAYER</b><small>Your action</small></div>
+          <span class="turn-preview-arrow">VS</span>
+          <div><span class="turn-preview-icon turn-preview-pet">${petImage(species[0].id,"solo-preview-pet")}</span><b>AI BOT</b><small>Random action</small></div>
         </div>
-        <div class="battle-option-card"><div class="battle-option-art">⚔️</div><span class="pill">TURN-BASED · AI</span><h3>Hunt in the Wild</h3><p>Serang, gunakan skill, bertahan, atau pulihkan HP. AI memilih aksi secara acak pada gilirannya.</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai Hunting</button></div>
+        <div class="battle-option-card"><div class="battle-option-art solo-option-art">${petImage(activePet()?.species||species[0].id,"solo-option-pet")}<span class="solo-option-vs">VS</span>${petImage(species[0].id,"solo-option-pet")}</div><span class="pill">TURN-BASED · AI</span><h3>Hunt in the Wild</h3><p>Serang, gunakan skill, bertahan, atau pulihkan HP. AI memilih aksi secara acak pada gilirannya.</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai Hunting</button></div>
         <div class="notice">Giliran berjalan bergantian: Player → AI → Player. AI tidak menyerang bersamaan dengan aksimu.</div>
       `}
       ${state.battleHistory.length ? `<div class="section-heading"><h2>Battle terakhir</h2></div>${state.battleHistory.slice(0,5).map(item=>`<div class="card battle-history-row"><span>${item.result==='win'?'🏆':item.result==='draw'?'🤝':'💫'} ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span><span class="muted-label">${new Date(item.date).toLocaleDateString('id-ID')}</span></div>`).join('')}` : ''}
