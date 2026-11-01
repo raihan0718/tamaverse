@@ -81,17 +81,24 @@ async function handleCallback(q: any) {
     const choice = payload.split(":")[1], pack = packages[choice];
     if (!pack) { await answer("Paket tidak valid"); return; }
     if (id === adminId) { await answer("Admin tidak dapat membuat order pemain"); return; }
-    const { data: link } = await db.from("tamaverse_telegram_links").select("owner_id").eq("telegram_user_id", id).maybeSingle();
-    if (!link) { await answer("UUID belum terhubung"); await say(chatId, "UUID belum terdeteksi. Hubungkan akun dulu.", { reply_markup: { inline_keyboard: [[{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }]] } }); return; }
-    await answer("Membuat tiket...");
+    const { data: link, error: linkError } = await db.from("tamaverse_telegram_links").select("owner_id").eq("telegram_user_id", id).maybeSingle();
+    if (linkError) { await answer("Gagal memeriksa akun"); await say(chatId, "Akun belum bisa diperiksa. Coba lagi beberapa saat."); return; }
+    if (!link) { await answer("UUID belum terhubung"); await say(chatId, "UUID belum terdeteksi. Hubungkan akun dulu.", { reply_markup: { inline_keyboard: [[{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }], [{ text: "⬅️ Menu utama", callback_data: "menu:home" }]] } }); return; }
+
+    await answer("Memproses pesanan...");
+    const progress = await say(chatId, "⏳ Sedang membuat tiket Diamond kamu...");
     const packageId = ({ "1": "starter_50", "2": "popular_120", "3": "value_300", "4": "mega_700" } as Record<string,string>)[choice];
     const { data, error } = await db.rpc("create_tamaverse_diamond_order", { p_telegram_user_id: id, p_package_id: packageId });
-    if (error) { await say(chatId, "Tiket gagal dibuat: " + error.message); return; }
-    await say(chatId, `TIKET BERHASIL DIBUAT\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu instruksi pembayaran admin.\n\nJangan membayar sebelum menerima instruksi resmi.`);
+    if (error) {
+      await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: "Tiket gagal dibuat.\n" + error.message });
+      return;
+    }
+    await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: `TIKET BERHASIL DIBUAT\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu instruksi pembayaran admin.\n\nAdmin akan mengirim nominal dan instruksi pembayaran. Jangan membayar sebelum menerima instruksi resmi.` });
     await say(adminId, `TIKET DIAMOND BARU\nOrder: ${data.id}\nTelegram: ${id}\nPaket: ${pack.label} — ${pack.diamonds} Diamonds\n\nPilih nominal pembayaran:`, { reply_markup: { inline_keyboard: [
       [5000,10000,15000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n })),
       [20000,25000,50000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n }))
-    ] } }); return;
+    ] } });
+    return;
   }
   if (payload.startsWith("price:")) {
     if (id !== adminId) { await answer("Khusus admin"); return; }
