@@ -149,7 +149,7 @@ window.showTopupSuccessModal = function(diamonds){
 function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('diamondBalance').textContent=state?state.player.diamonds:0;}
 function applyTheme(){let dark=false;try{dark=localStorage.getItem('tamaverse_theme')==='dark';}catch(e){}document.body.dataset.theme=dark?'dark':'light';const button=document.querySelector('.theme-toggle');if(button){button.textContent=dark?'☀':'☾';button.setAttribute('aria-label',dark?'Gunakan tema terang':'Gunakan tema gelap');}}
 function render(){
-  document.body.classList.toggle('battle-fullscreen', Boolean(page === 'battle' && onlineRoom && ['playing','finished'].includes(onlineRoom.status)));
+  document.body.classList.toggle('battle-fullscreen', Boolean(page === 'battle' && ((onlineRoom && ['playing','finished'].includes(onlineRoom.status)) || battle)));
   updateWallet(); document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   const root=document.getElementById('mainContent');
   if(!state){root.innerHTML=welcomePage();return;}
@@ -978,25 +978,44 @@ function gachaPage(){
 }
 function battleView(){
   const p=petById(battle.petId);if(!p){battle=null;return battlePage();}
-  const enemy=battle.opponent, mySpecies=speciesById(p.species), enemySpecies=speciesById(enemy.species);
+  const enemy=battle.opponent, mySpecies=speciesById(p.species);
   const hp=Math.max(0,battle.playerHP), ehp=Math.max(0,battle.enemyHP), max=Math.max(1,p.stats.hp), emax=Math.max(1,enemy.stats.hp);
+  const playerFloat=battle.lastFloat?.side==='player'?battle.lastFloat:null;
+  const enemyFloat=battle.lastFloat?.side==='enemy'?battle.lastFloat:null;
   return `
-    <section class="page battle-live-page">
-      <div class="battle-live-top"><button class="battle-exit" data-action="battle-cancel">←</button><div><div class="eyebrow">SOLO HUNTING</div><h1>Hunting Tower</h1><small class="battle-wave-subtitle">LEVEL ${battle.wave} / ${species.length} · ${battle.clearedLevels} CLEARED</small></div><span class="battle-turn-chip">TURN ${battle.turn}</span></div>
-      <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}">
-        <div class="arena-sky"><span class="arena-moon">✦</span><span class="arena-cloud cloud-one">☁</span><span class="arena-cloud cloud-two">☁</span><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
-        <div class="battle-turn-overlay ${battle.phase==='transition'?'wave-transition':''}"><b>${battle.phase==='ai'?'BOT TURN':battle.phase==='transition'?'LEVEL CLEAR!':'YOUR TURN'}</b><span>${battle.phase==='ai'?'AI is choosing a random action':battle.phase==='transition'?'Next opponent is entering the arena...':'Choose your move'}</span></div>
-        <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
-        <div class="battle-side battle-player"><div class="battle-nameplate"><b>${esc(p.name)}</b><span>${mySpecies.element} · Lv.${p.level}</span></div><div class="battle-sprite" data-species="${esc(p.species)}">${petImage(p.species,'battle-pet-image')}</div><div class="battle-hp-card"><div class="hp-value">${hp} / ${max} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,hp/max*100)}%"></div></div></div></div>
-        <div class="battle-side battle-enemy"><div class="battle-nameplate"><b>${esc(enemy.name)}</b><span>AI TIER · ${enemy.rarity}</span></div><div class="battle-sprite" data-species="${esc(enemy.species)}">${petImage(enemy.species,'battle-pet-image')}</div><div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="battle-enemy-tier">LEVEL ${battle.wave} · ${enemy.name}</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div></div></div>
-        <div class="battle-arena-controls"><div class="battle-action-status">${battle.phase==='ai'?'🤖 BOT SEDANG MEMILIH AKSI...':battle.phase==='transition'?'✨ LEVEL CLEAR — MENYIAPKAN LAWAN BERIKUTNYA':'✨ GILIRAN KAMU — PILIH AKSI'}</div><div class="battle-action-grid">
-          <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
-          <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||battle.skillUsed?'disabled':''}><span>✨</span>Skill</button>
-          <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>🛡️</span>Defend</button>
-          <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}><span>🍓</span>Item · ${state.items.snack}</button>
-        </div></div>
+    <section class="page battle-live-page online-battle-page battle-mode-screen">
+      <div class="battle-mode-top">
+        <button class="battle-exit" data-action="battle-cancel" type="button" aria-label="Leave hunting">←</button>
+        <div><div class="eyebrow">TAMAVERSE ARENA</div><h1>Hunting Tower</h1><small class="battle-wave-subtitle">LEVEL ${battle.wave} / ${species.length} · ${battle.clearedLevels} CLEARED</small></div>
+        <div class="battle-turn-chip">TURN ${battle.turn}</div>
       </div>
-      <div class="battle-log-panel"><div class="battle-log-heading">BATTLE LOG <span>TURN ${battle.turn}</span></div><div class="battle-log">${battle.log.slice(-5).map(line=>`<div>• ${esc(line)}</div>`).join('')}</div></div>
+      <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}" aria-label="Solo hunting arena">
+        <div class="arena-sky"><span class="arena-moon"></span><span class="arena-cloud cloud-one"></span><span class="arena-cloud cloud-two"></span><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
+        <div class="battle-turn-overlay ${battle.phase==='transition'?'wave-transition':''}"><b>${battle.phase==='ai'?'OPPONENT’S TURN':battle.phase==='transition'?'LEVEL CLEAR': 'YOUR TURN'}</b><span>${battle.phase==='ai'?'Opponent is choosing an action':battle.phase==='transition'?'Next opponent is entering the arena':'Choose your action'}</span></div>
+        <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
+        <div class="battle-side battle-player">
+          <div class="battle-nameplate"><b>${esc(p.name)}</b><span>${esc(mySpecies.element)} · Lv.${p.level}</span></div>
+          <div class="battle-sprite" data-species="${esc(p.species)}">${petImage(p.species,'battle-pet-image',true)}</div>
+          <span class="battle-effect effect-player"></span><span class="battle-impact impact-player"></span>${playerFloat?'<span class="battle-floating-number '+playerFloat.kind+'">'+esc(playerFloat.text)+'</span>':''}
+          <div class="battle-hp-card"><div class="hp-value">${hp} / ${max} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,hp/max*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(p.name)}</b><span>Lv.${p.level}</span></div></div>
+        </div>
+        <div class="battle-side battle-enemy">
+          <div class="battle-nameplate"><b>${esc(enemy.name)}</b><span>AI TIER · ${esc(enemy.rarity)}</span></div>
+          <div class="battle-sprite" data-species="${esc(enemy.species)}">${petImage(enemy.species,'battle-pet-image',true)}</div>
+          <span class="battle-effect effect-enemy"></span><span class="battle-impact impact-enemy"></span>${enemyFloat?'<span class="battle-floating-number '+enemyFloat.kind+'">'+esc(enemyFloat.text)+'</span>':''}
+          <div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(enemy.name)}</b><span>LEVEL ${battle.wave}</span></div></div>
+        </div>
+        <div class="battle-arena-controls">
+          <div class="battle-action-status">${battle.phase==='ai'?'OPPONENT IS THINKING...':battle.phase==='transition'?'LEVEL CLEAR — NEXT OPPONENT INCOMING':'YOUR TURN — CHOOSE ACTION'}</div>
+          <div class="battle-action-grid">
+            <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}>Attack</button>
+            <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||battle.skillUsed?'disabled':''}>Skill</button>
+            <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}>Defend</button>
+            <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}>Item · ${state.items.snack}</button>
+          </div>
+        </div>
+      </div>
+      <div class="battle-log-panel"><div class="battle-log-heading">BATTLE LOG <span>TURN ${battle.turn}</span></div><div class="battle-log">${battle.log.slice(-4).map(line=>`<div>• ${esc(line)}</div>`).join('') || '<div>Battle started. Choose your first action.</div>'}</div></div>
     </section>`;
 }
 function battlePage(){
