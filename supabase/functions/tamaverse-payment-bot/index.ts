@@ -25,7 +25,7 @@ async function say(chatId: number | string, text: string, extra: Record<string, 
 async function createOrderTopic(orderId: string, label: string, diamonds: number, telegramId: string) {
   const topic = await telegram("createForumTopic", {
     chat_id: ticketGroupId,
-    name: `ORDER ${orderId.slice(0, 8).toUpperCase()} • ${diamonds} 💎`,
+    name: `🟡 ORDER ${orderId.slice(0, 8).toUpperCase()} • ${diamonds} 💎`,
   });
   const threadId = Number(topic.message_thread_id);
   const { error } = await db.from("diamond_orders")
