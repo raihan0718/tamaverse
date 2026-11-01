@@ -1175,6 +1175,12 @@ document.addEventListener('click',event=>{
       try{
         const db=window.TAMAVERSE_SUPABASE_CLIENT;
         if(!db?.functions?.invoke)throw new Error('Koneksi akun belum siap. Muat ulang Tamaverse lalu coba lagi.');
+        const {data:{session},error:sessionError}=await db.auth.getSession();
+        if(sessionError)throw sessionError;
+        if(!session){
+          const {error:signInError}=await db.auth.signInAnonymously();
+          if(signInError)throw signInError;
+        }
         const {data,error}=await db.functions.invoke('create-checkout',{
           body:{diamonds:amount,method:method.toUpperCase()}
         });
