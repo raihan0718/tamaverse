@@ -43,6 +43,10 @@ export const BOT_MESSAGES = {
     newTicket: (id: string, telegramId: string, pack: string, diamonds: number) =>
       `🧾 PESANAN DIAMOND BARU\\n\\nID Pesanan: ${id}\\nTelegram: ${telegramId}\\nPaket: ${pack}\\nJumlah: ${diamonds} Diamond\\n\\n🟡 Status: Menunggu pemeriksaan admin.`,
     proofTitle: "📥 BUKTI PESANAN DITERIMA",
+    reviewButtons: {
+      approve: "✅ Approve",
+      decline: "❌ Decline",
+    },
     approve: (diamonds: number, id: string) =>
       `✅ PESANAN DISETUJUI\\n\\n💎 ${diamonds} Diamond telah ditambahkan.\\n🧾 ID Pesanan: ${id}`,
     rejected: (id: string) =>
