@@ -17,11 +17,19 @@
 | `ORDER_TTL_MINUTES` | tidak | default `120` |
 
 ## Setup
-1. Jalankan migration. **Baca blok "WALLET" paling atas dulu**: tabel saldo Diamond asli tidak terlihat oleh saya, jadi migration membuat `tamaverse_wallets` bila belum ada. Kalau saldo lu ada di tabel lain, ubah blok "KREDIT SALDO" di `nexora_approve_order()`.
-2. Deploy function: `supabase functions deploy tamaverse-payment-bot --no-verify-jwt`
-3. Set webhook (wajib `allowed_updates` dan `secret_token`):
+1. Pastikan schema dasar Tamaverse sudah diterapkan (termasuk tabel `auth.users`, `public.inventory`, dan `public.profiles`).
+2. Pastikan `public.tamaverse_telegram_links` sudah dibuat oleh `supabase-diamond-ticket.sql`. Migration Nexora memakai tabel itu untuk memverifikasi ikatan Telegram ↔ akun game.
+3. Terapkan berurutan:
+   - `supabase-diamond-ticket.sql` (tabel link Telegram dan tabel tiket lama; jalankan/ulang setelah memperbaiki SQL bila sebelumnya berhenti di error).
+   - `supabase/migrations/20261101000000_nexora_orders.sql`.
+   - `supabase/migrations/20261101000200_unified_diamonds.sql`.
+   - `supabase/migrations/20261101000300_harden_diamond_wallet.sql`.
+   Jangan jalankan urutan ini secara membabi buta pada database produksi yang sudah punya riwayat migrasi berbeda; cek tabel dan migration history dulu.
+4. Saldo Nexora dikredit langsung ke `public.inventory.diamonds` dalam transaksi `nexora_approve_order()`; tidak memakai tabel `tamaverse_wallets`.
+5. Deploy function: `supabase functions deploy tamaverse-payment-bot --no-verify-jwt`.
+6. Set webhook (wajib `allowed_updates` dan `secret_token`):
    `https://api.telegram.org/bot<TOKEN>/setWebhook?url=<FUNCTION_URL>&secret_token=<SECRET>&allowed_updates=["message","callback_query"]`
-4. Grup admin: Supergroup + Topics aktif, bot jadi admin dengan izin **Manage Topics**.
+7. Grup admin: Supergroup + Topics aktif, bot jadi admin dengan izin **Manage Topics**.
    Bot hanya menerima semua pesan grup bila ia admin.
 
 ## Struktur database
