@@ -61,7 +61,7 @@ const packages: Record<string, { label: string; diamonds: number; price: number;
   "2": { label: "Basic", diamonds: 10, price: 1800, packageId: "basic_10" },
   "3": { label: "Plus", diamonds: 25, price: 3500, packageId: "plus_25" },
   "4": { label: "Pro", diamonds: 50, price: 5000, packageId: "pro_50" },
-  "5": { label: "Max", diamonds: 100, price: 20000, packageId: "max_100" },
+  "5": { label: "Max", diamonds: 100, price: 7500, packageId: "max_100" },
   "6": { label: "Popular", diamonds: 120, price: 10800, packageId: "popular_120" },
   "7": { label: "Value", diamonds: 300, price: 24000, packageId: "value_300" },
   "8": { label: "Mega", diamonds: 700, price: 49000, packageId: "mega_700" },
@@ -126,7 +126,7 @@ async function handleCallback(q: any) {
   if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
   if (payload.startsWith("packageinfo:")) {
     const amount = Number(payload.split(":")[1]);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 20000, 120: 10800, 300: 24000, 700: 49000 };
+    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 7500, 120: 10800, 300: 24000, 700: 49000 };
     const price = prices[amount];
     if (!price) { await answer("Paket tidak valid"); return; }
     await answer("Detail paket");
@@ -139,7 +139,7 @@ async function handleCallback(q: any) {
   if (payload.startsWith("methodpreview:")) {
     const [, rawAmount, method] = payload.split(":");
     const amount = Number(rawAmount);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 20000, 120: 10800, 300: 24000, 700: 49000 };
+    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 7500, 120: 10800, 300: 24000, 700: 49000 };
     const price = prices[amount];
     if (!price || !["qris", "gopay"].includes(method)) { await answer("Pilihan tidak valid"); return; }
     await answer("Metode dipilih");
