@@ -818,10 +818,10 @@ function gachaPage(){
           <span class="diamond-package-label">Diamonds</span>
           <b class="diamond-package-price">${pack.price}</b>
           <span class="subtle diamond-unit-price">${pack.unit}</span>
-          <button class="button full" type="button" data-action="diamond-bot">Purchase</button>
+          <button class="button full" type="button" data-action="diamond-purchase" data-amount="${pack.amount}" data-label="${pack.price}">Purchase</button>
         </article>`).join('')}
     </div>
-    <div class="notice">Tekan Purchase untuk membuka Nexora Bot. Pilih paket dan ikuti informasi resmi yang tersedia di bot.</div>
+    <div class="notice">Pilih nominal, tentukan metode pembayaran, lalu lanjutkan melalui Nexora Bot. Detail akhir tetap dikonfirmasi di bot.</div>
     <div class="card diamond-history-card">
       <div class="section-heading"><h2>Riwayat Transaksi</h2><span class="muted-label">PAYMENT HISTORY</span></div>
       <div class="diamond-history-empty"><span>🧾</span><b>Riwayat belum tersedia</b><p class="subtle">Riwayat pembelian akan ditampilkan di sini setelah fitur riwayat akun aktif. Untuk saat ini, simpan bukti transaksi secara pribadi.</p></div>
@@ -1147,35 +1147,28 @@ document.addEventListener('click',event=>{
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
-  if(a==='diamond-bot'){
-    window.open('https://t.me/Nexorapaymbot','_blank','noopener');
-    showToast('Nexora Bot dibuka. Pilih paket di Telegram.');
-    return;
-  }
   if(a==='diamond-purchase'){
     const amount=Number(btn.dataset.amount);
-    const label=String(btn.dataset.label||'Diamond Pack');
-    if(![50,120,300,700].includes(amount))return;
+    const prices={5:'Rp1.000',10:'Rp1.800',25:'Rp3.500',50:'Rp5.000',120:'Rp10.800',300:'Rp24.000',700:'Rp49.000'};
+    if(!Object.prototype.hasOwnProperty.call(prices,amount))return;
     showModal(`<div class="eyebrow">TAMAVERSE · DIAMOND STORE</div>
       <h2 id="modalTitle">Purchase ${amount} Diamonds</h2>
-      <p class="subtle">${esc(label)} · Pilih metode untuk melanjutkan ke Nexora Bot.</p>
-      <div class="card" style="margin:14px 0;text-align:center"><strong style="font-size:24px">💎 ${amount.toLocaleString('id-ID')}</strong><p class="muted-label">DIAMOND PACKAGE</p></div>
+      <p class="subtle">Paket ${amount} 💎 · ${prices[amount]}</p>
+      <div class="card" style="margin:14px 0;text-align:center"><strong style="font-size:24px">💎 ${amount.toLocaleString('id-ID')}</strong><p class="muted-label">${prices[amount]}</p></div>
+      <h3 style="margin:12px 0">Pilih metode pembayaran</h3>
       <div class="modal-actions" style="display:grid;grid-template-columns:1fr;gap:9px">
-        <button class="button full" data-action="diamond-payment" data-amount="${amount}" data-method="qris">QRIS</button>
-        <button class="button secondary full" data-action="diamond-payment" data-amount="${amount}" data-method="gopay">GoPay</button>
+        <button class="button full" data-action="diamond-payment" data-method="qris">QRIS</button>
+        <button class="button secondary full" data-action="diamond-payment" data-method="gopay">GoPay</button>
         <button class="button secondary full" data-action="close-modal">Batal</button>
       </div>`);
     return;
   }
   if(a==='diamond-payment'){
-    const amount=Number(btn.dataset.amount);
     const method=btn.dataset.method;
-    if(![50,120,300,700].includes(amount)||!['qris','gopay'].includes(method))return;
-    const payload=`tv_${amount}_${method}`;
-    const url=`https://t.me/Nexorapaymbot?start=${payload}`;
-    window.open(url,'_blank','noopener');
+    if(!['qris','gopay'].includes(method))return;
     closeModal();
-    showToast('Nexora Bot dibuka. Lanjutkan di Telegram.');
+    window.open('https://t.me/Nexorapaymbot','_blank','noopener');
+    showToast(`Nexora Bot dibuka. Konfirmasi paket dan ${method.toUpperCase()} di bot.`);
     return;
   }
 
