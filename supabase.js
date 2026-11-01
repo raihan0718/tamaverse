@@ -189,6 +189,8 @@
           Number(profileData.losses || 0);
         window.state.player.draws =
           Number(profileData.draws || 0);
+        const telegramPhoto = window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url;
+        if (telegramPhoto) window.state.player.avatar = telegramPhoto;
       }
 
       const { data: inventoryData, error: inventoryError } =
