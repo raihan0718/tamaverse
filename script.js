@@ -130,6 +130,21 @@ function clearIntroSequence(){
 }
 function showModal(html){document.getElementById('modalCard').innerHTML=html;document.getElementById('modalBackdrop').classList.remove('hidden');}
 function closeModal(){clearIntroSequence();document.getElementById('modalBackdrop').classList.add('hidden');}
+window.showTopupSuccessModal = function(diamonds){
+  const amount = Math.max(0, Math.floor(Number(diamonds) || 0));
+  showModal(`
+    <div class="topup-success-modal">
+      <div class="topup-success-icon">💎</div>
+      <div class="topup-success-eyebrow">NEXORA PAYMENT</div>
+      <h2>TOP UP BERHASIL!</h2>
+      <p class="topup-success-copy">Diamond kamu berhasil ditambahkan ke wallet Tamaverse.</p>
+      <div class="topup-success-amount">+${amount.toLocaleString('id-ID')} <span>DIAMOND</span></div>
+      <p class="topup-success-thanks">Thank you for supporting Tamaverse!</p>
+      <button class="button primary topup-success-close" type="button" onclick="closeModal()">Tutup</button>
+      <div class="topup-success-note">Nexora loves you 💖</div>
+    </div>
+  `);
+};
 function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('diamondBalance').textContent=state?state.player.diamonds:0;}
 function applyTheme(){let dark=false;try{dark=localStorage.getItem('tamaverse_theme')==='dark';}catch(e){}document.body.dataset.theme=dark?'dark':'light';const button=document.querySelector('.theme-toggle');if(button){button.textContent=dark?'☀':'☾';button.setAttribute('aria-label',dark?'Gunakan tema terang':'Gunakan tema gelap');}}
 function render(){
