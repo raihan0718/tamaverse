@@ -332,6 +332,10 @@
 
       if (balance !== previous) {
         if (typeof window.render === 'function') window.render();
+        if (balance > previous && typeof window.showToast === 'function') {
+          const added = balance - previous;
+          window.showToast(`🎉 TOP UP BERHASIL! +${added} Diamond ditambahkan. Terima kasih!`);
+        }
         // Persist the refreshed display locally without ever writing Diamonds
         // back to Supabase; the cloud save payload intentionally omits them.
         try {
@@ -374,9 +378,14 @@
           const value = Number(payload.new?.diamonds);
           if (!Number.isFinite(value) || !window.state?.player) return;
           const balance = Math.max(0, value);
-          if (Number(window.state.player.diamonds) === balance) return;
+          const previous = Number(window.state.player.diamonds ?? 0);
+          if (previous === balance) return;
           window.state.player.diamonds = balance;
           if (typeof window.render === 'function') window.render();
+          if (balance > previous && typeof window.showToast === 'function') {
+            const added = balance - previous;
+            window.showToast(`🎉 TOP UP BERHASIL! +${added} Diamond ditambahkan. Terima kasih!`);
+          }
         }
       )
       .subscribe((status) => {
