@@ -346,17 +346,17 @@ function rankingPage() {
 
 
 function profilePage(){const p=activePet();return `<section class="page"><div class="eyebrow">AKUN TAMAVERSE</div><h1 class="page-title">Profile & Tas</h1><div class="card profile-card"><div class="avatar">${state.player.avatar}</div><h2>${esc(state.player.name)}</h2><div class="user-id-box" style="margin:12px 0;padding:12px;background:var(--card-bg,#f4d4e3);border-radius:12px">
-  <small class="muted-label">TAMAVERSE USER ID</small>
+  <small class="muted-label">UUID AKUN TAMAVERSE</small>
   <p id="supabaseUserId" style="overflow-wrap:anywhere;margin:8px 0;color:var(--text-color,#302638)">
     ${esc(window.TAMAVERSE_USER_ID || 'Memuat ID...')}
   </p>
   <button class="button secondary full" data-action="copy-user-id">
-    📋 Salin User ID
+    📋 Salin UUID
   </button>
   <button class="button primary full" data-action="create-telegram-link" style="margin-top:8px">
     🔗 Hubungkan Telegram Bot
   </button>
-  <small class="muted-label">Kode berlaku 10 menit. Kirim ke @Nexorapaymbot dengan format /link KODE.</small>
+  <small class="muted-label">Salin UUID untuk identitas akun. Buka @Nexorapaymbot jika ingin menghubungkan akun.</small>
 </div>
 <div class="profile-stats"><div class="profile-stat"><strong>Lv. ${state.player.level}</strong><span>LEVEL PEMAIN</span></div><div class="profile-stat"><strong>${state.player.rating}</strong><span>RATING</span></div><div class="profile-stat"><strong>${state.player.wins}/${state.player.losses}/${state.player.draws}</strong><span>W/L/D</span></div><div class="profile-stat"><strong>${state.pets.length}/12</strong><span>KOLEKSI</span></div><div class="profile-stat"><strong>${state.player.streak} hari</strong><span>LOGIN STREAK</span></div><div class="profile-stat"><strong>${state.player.xp}/${state.player.level*100}</strong><span>PLAYER XP</span></div></div><button class="button secondary full" style="margin-top:13px" data-action="rename-player">✏️ Ubah nama</button></div><div class="section-heading"><h2>🎒 Inventori</h2></div><button class="button secondary full" data-action="inventory">🎒 Buka Inventori</button><div class="notice">☁️ Progres game disimpan di perangkat ini dan disinkronkan ke akun TAMAVERSE saat koneksi tersedia.</div><button class="button danger full" data-action="reset">Reset semua data</button></section>`;}
 const dailyRewards=[
@@ -815,7 +815,7 @@ function gachaPage(){
     </div>
     <div class="card diamond-history-card">
       <div class="section-heading"><h2>Riwayat Transaksi</h2><span class="muted-label">PAYMENT HISTORY</span></div>
-      <div class="diamond-history-empty"><span>🧾</span><b>Belum ada transaksi</b><p class="subtle">Riwayat top up akan muncul di sini setelah pembayaran tersedia.</p></div>
+      <div class="diamond-history-empty"><span>🧾</span><b>Riwayat belum tersedia</b><p class="subtle">Riwayat pembelian akan ditampilkan di sini setelah fitur riwayat akun aktif. Untuk saat ini, simpan bukti transaksi secara pribadi.</p></div>
     </div>`;
   const inv=premiumInventory();
   const premiumContent='<p class="subtle collection-description">Gunakan gem untuk membeli kartu rename dan frame permanen. Frame yang sudah dibeli tersimpan di Collection.</p><div class="notice">💎 Saldo gem: <b>'+Number(state.player.gems||0)+'</b></div><div class="accessory-grid store-item-grid">'+[
