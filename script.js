@@ -532,7 +532,7 @@ function startBattle(mode){
   const pool=species.filter(s=>s.id!==p.species);
   const os=pool[Math.floor(Math.random()*pool.length)];
   const opponent={...os,level:Math.max(1,p.level),name:`${os.name} liar`,stats:{...os.stats,hp:Math.round(os.stats.hp*(0.8+p.level*.08)),atk:os.stats.atk+p.level-1}};
-  battle={mode:'practice',petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,turn:1,skillUsed:false,enemySkillUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:[`${p.name} memasuki arena!`,`Lawan ${opponent.name} muncul!`],ended:false};
+  battle={mode:'practice',petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,enemySnacks:1,turn:1,skillUsed:false,enemySkillUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:[`${p.name} memasuki arena!`,`Lawan ${opponent.name} muncul!`],ended:false};
   save();render();
 }
 function elementMultiplier(a,b){const strong={Fire:'Nature',Nature:'Water',Water:'Fire',Light:'Fire'};if(strong[a]===b)return 1.25;if(strong[b]===a)return .8;return 1;}
@@ -578,11 +578,17 @@ function runHuntingAiTurn(){
   const ps=speciesById(p.species),os=speciesById(enemy.species);
   const choices=['attack','attack','defend'];
   if(!battle.enemySkillUsed)choices.push('skill');
+  if(battle.enemySnacks>0&&battle.enemyHP<=enemy.stats.hp*.55)choices.push('item');
   const move=choices[Math.floor(Math.random()*choices.length)];
   battle.actionFx=move;
   if(move==='defend'){
     battle.enemyDefending=true;
     battle.log.push(`${enemy.name} memilih bertahan.`);
+  }else if(move==='item'){
+    battle.enemySnacks--;
+    const healed=Math.min(25,Math.max(0,enemy.stats.hp-battle.enemyHP));
+    battle.enemyHP=Math.min(enemy.stats.hp,battle.enemyHP+25);
+    battle.log.push(`${enemy.name} menggunakan item dan memulihkan ${healed} HP.`);
   }else{
     const skill=move==='skill';
     let damage=Math.max(3,Math.round((enemy.stats.atk+(skill?8:0)-p.stats.def*.3)*(0.85+Math.random()*.3)*elementMultiplier(os.element,ps.element)*(battle.defending?.45:1)));
