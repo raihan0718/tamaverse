@@ -1999,9 +1999,6 @@ async function onlineJoinRoom(code) {
       .eq('id', roomId)
       .single();
 
-console.log('ROOM DATA:', roomData);
-console.log('ROOM ERROR:', roomError);
-
     if (roomError) throw roomError;
 
     onlineRoom = roomData;
