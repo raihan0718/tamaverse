@@ -4,7 +4,7 @@
 
 -- ============================================================
 -- 0. WALLET DIAMOND
--- Diamond top-up terpisah dari gems dan disimpan pada inventory.
+-- Semua Diamond disimpan pada satu saldo inventory.diamonds.
 -- Nilai hanya boleh diubah oleh fungsi server yang aman.
 -- ============================================================
 alter table public.inventory
