@@ -335,7 +335,7 @@
         // Persist the refreshed display locally without ever writing Diamonds
         // back to Supabase; the cloud save payload intentionally omits them.
         try {
-          const key = 'tamaverse_save';
+          const key = 'tamaverse_save_v1';
           const raw = localStorage.getItem(key);
           if (raw) {
             const saved = JSON.parse(raw);
