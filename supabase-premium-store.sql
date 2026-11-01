@@ -35,7 +35,7 @@ begin
   values (new.id, coalesce(nullif(new.raw_user_meta_data ->> 'display_name', ''), 'Penjelajah'))
   on conflict (id) do nothing;
 
-  insert into public.inventory (owner_id) values (new.id)
+  insert into public.inventory (owner_id, diamonds) values (new.id, 3)
   on conflict (owner_id) do nothing;
 
   insert into public.daily_rewards (owner_id) values (new.id)
