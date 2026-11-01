@@ -15,7 +15,7 @@ create or replace function public.guard_tamaverse_diamond_balance()
 returns trigger
 language plpgsql
 security invoker
-set search_path = public
+set search_path = ''
 as $
 begin
   if current_user not in ('postgres', 'service_role', 'supabase_admin') then
