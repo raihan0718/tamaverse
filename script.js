@@ -55,7 +55,7 @@ function ownsFrame(id){return id==='common'||(Array.isArray(premiumInventory().o
 
 const eggs = [
   {id:'basic',name:'Pixie Egg',image:'assets/eggs/pixie.webp',price:100,description:'Telur ajaib berisi pet Common hingga Legendary.'},
-  {id:'premium',name:'Astral Egg',image:'assets/eggs/astral.webp',price:5,description:'Telur astral eksklusif berisi pet Rare hingga Legendary.',currency:'gem'}
+  {id:'premium',name:'Astral Egg',image:'assets/eggs/astral.webp',price:5,description:'Telur astral eksklusif berisi pet Rare hingga Legendary.',currency:'diamond'}
 ];
 function eggImage(eggId){
   const egg=eggs.find(item=>item.id===eggId);
@@ -96,7 +96,7 @@ function save(){
   }
 }
 function freshState(name){
-  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,gems:3,diamonds:0,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,equippedFrame:'common',items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
+  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,diamonds:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,equippedFrame:'common',items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
 }
 function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function petById(id){return state?.pets.find(p=>p.uid===id)||null;}
@@ -130,7 +130,7 @@ function clearIntroSequence(){
 }
 function showModal(html){document.getElementById('modalCard').innerHTML=html;document.getElementById('modalBackdrop').classList.remove('hidden');}
 function closeModal(){clearIntroSequence();document.getElementById('modalBackdrop').classList.add('hidden');}
-function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('gemBalance').textContent=state?state.player.gems:0;}
+function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('diamondBalance').textContent=state?state.player.diamonds:0;}
 function applyTheme(){let dark=false;try{dark=localStorage.getItem('tamaverse_theme')==='dark';}catch(e){}document.body.dataset.theme=dark?'dark':'light';const button=document.querySelector('.theme-toggle');if(button){button.textContent=dark?'☀':'☾';button.setAttribute('aria-label',dark?'Gunakan tema terang':'Gunakan tema gelap');}}
 function render(){
   document.body.classList.toggle('battle-fullscreen', Boolean(page === 'battle' && onlineRoom && ['playing','finished'].includes(onlineRoom.status)));
@@ -142,7 +142,7 @@ function render(){
   root.innerHTML=(pages[page]||homePage)();
 }
 window.render = render;
-function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau gem, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 gem</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
+function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau diamond, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 diamond</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
 function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',bath:'Splash! 🫧',sleep:'Zzz... 🌙',train:'Go! 💪',greet:'Hello! ♥',idle:''})[action]||'';}
 function emptyPets(){return `<div class="card empty"><div style="font-size:42px">🥚</div><p>Belum ada pet. Tetaskan telur pertamamu untuk memulai!</p><button class="button" data-action="start">Tetaskan telur gratis</button></div>`;}
 function rarityRank(rarity){return ({Common:1,Rare:2,Epic:3,Legendary:4})[rarity]||0;}
@@ -158,7 +158,7 @@ function petsPage(){
   return '<section class="page collection-page"><div class="eyebrow">YOUR COLLECTION</div><h1 class="page-title">Collection</h1>'+tabs+(collectionTab==='accessories'?accessoryContent:petContent)+'</section>';
 }
 function petCard(p,owned){const s=speciesById(p.species);return `<button class="creature-card ${owned?'owned':''}" data-action="inspect" data-pet="${p.uid}"><div class="creature-thumb">${petImage(s.id, 'collection-pet-image')}</div><h3>${esc(p.name)} ${p.uid===state.activePet?'⭐':''}</h3><p>Lv.${p.level} · ${s.element}<br><span class="rarity rarity-${s.rarity}">${s.rarity}</span></p></button>`;}
-function gachaPage(){return `<section class="page"><div class="eyebrow">TEMUKAN TEMAN BARU</div><h1 class="page-title">Telur ajaib</h1><p class="subtle">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Premium: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p><div class="notice">🎁 Gratis 1 Basic Egg setiap hari. Semua hadiah menggunakan mata uang dalam game—tanpa pembayaran asli.</div><div class="collection-grid">${eggs.map(e=>`<article class="card egg-card"><span class="egg-icon">${eggImage(e.id)}</span><h3>${e.name}</h3><p class="subtle">${e.description}</p><p class="muted-label">${e.currency==='gem'?`💎 ${e.price} gem`:`🪙 ${e.price} koin`}</p><button class="button full" data-action="pull" data-egg="${e.id}">Buka 1 telur</button></article>`).join('')}</div><div class="card" style="margin-top:12px"><div class="section-heading" style="margin-top:0"><h2>Hadiah gratis harian</h2></div><button class="button secondary full" data-action="freeegg">${state.gacha.lastFree===new Date().toDateString()?'Sudah diklaim hari ini':'Klaim Basic Egg gratis'}</button><div class="section-heading"><h2>Progress pity</h2></div><p class="subtle">Rare+: ${state.gacha.pityRare}/10 · Epic+: ${state.gacha.pityEpic}/50</p><div class="section-heading"><h2>Riwayat tarikan</h2></div>${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>{const s=speciesById(h.species||species.find(x=>x.name===h.name)?.id);return `<p class="subtle gacha-history-row"><span class="gacha-history-icon">${petImage(s.id,'history-pet-image')}</span><b>${esc(h.name)}</b> · <span class="rarity rarity-${h.rarity}">${h.rarity}</span></p>`;}).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}</div></section>`;}
+function gachaPage(){return `<section class="page"><div class="eyebrow">TEMUKAN TEMAN BARU</div><h1 class="page-title">Telur ajaib</h1><p class="subtle">Basic: Common 60% · Rare 28% · Epic 8% · Legendary 4%. Premium: Rare 55% · Epic 27% · Legendary 18%. Pity Rare pada 10 pull, Epic pada 50 pull.</p><div class="notice">🎁 Gratis 1 Basic Egg setiap hari. Semua hadiah menggunakan mata uang dalam game—tanpa pembayaran asli.</div><div class="collection-grid">${eggs.map(e=>`<article class="card egg-card"><span class="egg-icon">${eggImage(e.id)}</span><h3>${e.name}</h3><p class="subtle">${e.description}</p><p class="muted-label">${e.currency==='diamond'?`💎 ${e.price} diamond`:`🪙 ${e.price} koin`}</p><button class="button full" data-action="pull" data-egg="${e.id}">Buka 1 telur</button></article>`).join('')}</div><div class="card" style="margin-top:12px"><div class="section-heading" style="margin-top:0"><h2>Hadiah gratis harian</h2></div><button class="button secondary full" data-action="freeegg">${state.gacha.lastFree===new Date().toDateString()?'Sudah diklaim hari ini':'Klaim Basic Egg gratis'}</button><div class="section-heading"><h2>Progress pity</h2></div><p class="subtle">Rare+: ${state.gacha.pityRare}/10 · Epic+: ${state.gacha.pityEpic}/50</p><div class="section-heading"><h2>Riwayat tarikan</h2></div>${state.gacha.history.length?state.gacha.history.slice(0,5).map(h=>{const s=speciesById(h.species||species.find(x=>x.name===h.name)?.id);return `<p class="subtle gacha-history-row"><span class="gacha-history-icon">${petImage(s.id,'history-pet-image')}</span><b>${esc(h.name)}</b> · <span class="rarity rarity-${h.rarity}">${h.rarity}</span></p>`;}).join(''):'<p class="subtle">Tarikanmu akan muncul di sini.</p>'}</div></section>`;}
 function battlePage(){if(battle)return battleView();return `<section class="page"><div class="eyebrow">ARENA TAMAVERSE</div><h1 class="page-title">Battle</h1><p class="subtle">Latih petmu dalam pertarungan turn-based melawan lawan simulasi.</p><div class="card"><div style="font-size:42px;text-align:center;margin:8px">⚔️</div><h2 style="text-align:center">Practice Battle</h2><p class="subtle" style="text-align:center">Lawan AI lokal · Hadiah: 35 koin + XP saat menang</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai latihan</button></div><div class="card" style="margin-top:12px"><h2>Simulated PvP</h2><p class="subtle">Mode demonstrasi melawan lawan sampel. Belum terhubung ke pemain sungguhan atau matchmaking online.</p><button class="button secondary full" data-action="battle-start" data-mode="simulated">Tantang lawan demo</button></div>${state.battleHistory.length?`<div class="section-heading"><h2>Battle terakhir</h2></div>${state.battleHistory.slice(0,4).map(b=>`<div class="card" style="margin:7px 0"><span>${b.result==='win'?'🏆':b.result==='draw'?'🤝':'💫'} ${b.result==='win'?'Menang':b.result==='draw'?'Seri':'Kalah'}</span><span style="float:right" class="muted-label">${new Date(b.date).toLocaleDateString('id-ID')}</span></div>`).join('')}`:''}<div class="notice">🛡️ Pertarungan dan rating tersimpan lokal. Hasil ini bukan ranking kompetitif online.</div></section>`;}
 
 
@@ -363,10 +363,10 @@ const dailyRewards=[
   {icon:'🪙',label:'50 koin',type:'coins',amount:50},
   {icon:'🍓',label:'2 camilan',type:'snack',amount:2},
   {icon:'🪙',label:'80 koin',type:'coins',amount:80},
-  {icon:'💎',label:'1 gem',type:'gems',amount:1},
+  {icon:'💎',label:'1 diamond',type:'diamonds',amount:1},
   {icon:'⚡',label:'2 ramuan',type:'energy',amount:2},
   {icon:'🪙',label:'150 koin',type:'coins',amount:150},
-  {icon:'🎁',label:'2 gem + 100 koin',type:'grand',amount:0}
+  {icon:'🎁',label:'2 diamond + 100 koin',type:'grand',amount:0}
 ];
 function dailyRewardDay(){
   const reward=state.dailyReward||{lastClaimDate:'',day:0};
@@ -388,8 +388,8 @@ function claimDailyReward(){
   const day=dailyRewardDay();
   const reward=dailyRewards[day-1];
   if(reward.type==='coins')state.player.coins+=reward.amount;
-  else if(reward.type==='gems')state.player.gems+=reward.amount;
-  else if(reward.type==='grand'){state.player.gems+=2;state.player.coins+=100;}
+  else if(reward.type==='diamonds')state.player.diamonds+=reward.amount;
+  else if(reward.type==='grand'){state.player.diamonds+=2;state.player.coins+=100;}
   else state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
   state.dailyReward={lastClaimDate:today,day};
   save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
@@ -427,13 +427,13 @@ function startIntro(){
     introSequenceTimers.push(setTimeout(beginVisibleHatch,1500));
   }else beginVisibleHatch();
 }
-function finishIntro(){const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';state=freshState('Penjelajah');const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();showToast('Selamat datang! 300 koin dan 3 gem sudah jadi milikmu.');}
+function finishIntro(){const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';state=freshState('Penjelajah');const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();showToast('Selamat datang! 300 koin dan 3 diamond sudah jadi milikmu.');}
 function createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:100,happiness:100,energy:80,cleanliness:100,evolution:0,fragments:0,sleeping:false,sleepStartedAt:0,careUpdatedAt:Date.now()};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;state.player.coins+=20;return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
 function grantPetXP(p,amount){p.xp+=amount;while(p.xp>=p.level*40){p.xp-=p.level*40;p.level++;p.stats.hp+=5;p.stats.atk+=1;p.stats.def+=1;showToast(`${p.name} naik ke Level ${p.level}!`);}}
 function playerXP(amount){state.player.xp+=amount;while(state.player.xp>=state.player.level*100){state.player.xp-=state.player.level*100;state.player.level++;state.player.coins+=50;showToast(`Level pemain naik! Hadiah +50 koin.`);}}
 function chooseRarity(){const r=Math.random()*100;return r<60?'Common':r<85?'Rare':r<97?'Epic':'Legendary';}
-function pullEgg(id,free){const e=eggs.find(x=>x.id===id);if(!e)return;if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}const currency=e.currency==='gem'?'gems':'coins';const cost=free?0:e.price;if(state.player[currency]<cost){showToast(`Koin/gem tidak cukup untuk ${e.name}.`);return;}if(!free)state.player[currency]-=cost;else state.gacha.lastFree=new Date().toDateString();
+function pullEgg(id,free){const e=eggs.find(x=>x.id===id);if(!e)return;if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}const currency=e.currency==='diamond'?'diamonds':'coins';const cost=free?0:e.price;if(state.player[currency]<cost){showToast(`Koin/diamond tidak cukup untuk ${e.name}.`);return;}if(!free)state.player[currency]-=cost;else state.gacha.lastFree=new Date().toDateString();
   const pool=species.filter(s=>s.pool.includes(id));let rarity=chooseRarity();if(state.gacha.pityRare>=9&&['Common'].includes(rarity))rarity='Rare';if(state.gacha.pityEpic>=49&&['Common','Rare'].includes(rarity))rarity='Epic';let candidates=pool.filter(s=>s.rarity===rarity);if(!candidates.length){const available=pool.filter(s=>s.rarity==='Common'||s.rarity==='Rare'||s.rarity==='Epic'||s.rarity==='Legendary');candidates=available;}const chosen=candidates[Math.floor(Math.random()*candidates.length)];state.gacha.pityRare=chosen.rarity==='Common'?state.gacha.pityRare+1:0;state.gacha.pityEpic=['Common','Rare'].includes(chosen.rarity)?state.gacha.pityEpic+1:0;state.quests.progress.egg++;const result=addPet(chosen.id);state.gacha.history.unshift({species:chosen.id,name:chosen.name,rarity:chosen.rarity,date:Date.now()});state.gacha.history=state.gacha.history.slice(0,20);save();render();showModal(`<div class="hatch-egg">${petImage(chosen.id, 'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${result.duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2><p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${result.duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p><div class="stats-row"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div></div><button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);}
 function buyItem(type,quantity=1){const shop={food:{name:'Apple',price:50},energy:{name:'Energy Potion',price:40},snack:{name:'Battle Snack',price:60},training:{name:'Training Manual',price:120}};const item=shop[type];if(!item)return;const qty=Math.floor(Number(quantity));if(!Number.isFinite(qty)||qty<1){showToast('Pilih jumlah pembelian minimal 1.');return;}const total=item.price*qty;if(state.player.coins<total){showToast(`Koin tidak cukup. Butuh ${total} Coins untuk ${qty} ${item.name}.`);return;}state.player.coins-=total;if(type==='food')state.items.food=(state.items.food||0)+qty;else state.items[type]=(state.items[type]||0)+qty;shopQuantities[type]=1;save();render();showToast(`${qty} ${item.name} berhasil dibeli!`);}
 const shopCatalog=[
@@ -507,7 +507,7 @@ function showInventoryItem(type){
 }
 function showShop(){showModal(`<div class="eyebrow">TAMAVERSE STORE</div><h2 id="modalTitle">Perlengkapan pet</h2><p class="store-caption">Pilih jumlah, lalu beli item yang dibutuhkan.</p><div class="store-list">${[['food','🍎','Apple','50'],['energy','⚡','Energy Potion','40'],['snack','🧃','Battle Snack','60'],['training','📘','Training Manual','120']].map(x=>`<div class="quest-row store-item"><div class="store-item-info"><span class="store-item-icon">${x[1]}</span><span class="store-item-name"><strong>${x[2]}</strong><small>🪙 ${x[3]} / item</small></span></div><div class="store-quantity"><button class="button secondary store-step" data-action="qty-minus" data-item="${x[0]}" aria-label="Kurangi jumlah">−</button><strong id="buyQty-${x[0]}">1</strong><button class="button secondary store-step" data-action="qty-plus" data-item="${x[0]}" aria-label="Tambah jumlah">+</button><button class="button secondary store-max" data-action="qty-max" data-item="${x[0]}">Max</button></div><button class="button store-buy" data-action="buy" data-item="${x[0]}">Beli</button></div>`).join('')}</div><button class="button secondary full store-close" data-action="close-modal">Tutup</button>`);}
 function doClaim(id){const q=questDefinitions().find(x=>x.id===id);if(!q||!state.quests.active.includes(id)||state.quests.claimed.includes(id)||(state.quests.progress[id]||0)<q.target)return;state.quests.claimed.push(id);state.player.coins+=q.reward;playerXP(q.xp);save();render();showDailyQuests();showToast(`Quest selesai! +${q.reward} koin +${q.xp} XP pemain.`);}
-function rebuyQuest(id){const q=questDefinitions().find(x=>x.id===id);if(!q||!state.quests.active.includes(id)||!state.quests.claimed.includes(id)||state.quests.rebought.includes(id))return;if(state.player.gems<1){showToast('Gem tidak cukup. Butuh 1 Gem untuk rebuy quest.');return;}state.player.gems--;state.quests.claimed=state.quests.claimed.filter(x=>x!==id);state.quests.rebought.push(id);state.quests.progress[id]=0;save();render();showDailyQuests();showToast(`Quest ${q.title} aktif kembali!`);}
+function rebuyQuest(id){const q=questDefinitions().find(x=>x.id===id);if(!q||!state.quests.active.includes(id)||!state.quests.claimed.includes(id)||state.quests.rebought.includes(id))return;if(state.player.diamonds<1){showToast('Diamond tidak cukup. Butuh 1 Diamond untuk rebuy quest.');return;}state.player.diamonds--;state.quests.claimed=state.quests.claimed.filter(x=>x!==id);state.quests.rebought.push(id);state.quests.progress[id]=0;save();render();showDailyQuests();showToast(`Quest ${q.title} aktif kembali!`);}
 function resetGame(){showModal(`<div class="eyebrow">KONFIRMASI</div><h2 id="modalTitle">Hapus semua progres?</h2><p>Data lokal, pet, dan koin akan dihapus dari perangkat ini. Tindakan ini tidak bisa dibatalkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button danger" data-action="confirm-reset">Hapus data</button></div>`);}
 
 // Keep daily actions rewarding without allowing unlimited local XP or currency farming.
@@ -754,7 +754,7 @@ function raritySummary(rates){
 }
 function formatEggCost(egg,count=1){
   const total=egg.price*count;
-  return `${egg.currency==='gem'?'💎 '+total+' gem':'🪙 '+total+' koin'}`;
+  return `${egg.currency==='diamond'?'💎 '+total+' diamond':'🪙 '+total+' koin'}`;
 }
 function gachaPage(){
   const owned=new Set(state.pets.map(p=>p.species));
@@ -828,12 +828,12 @@ function gachaPage(){
       <div class="diamond-history-empty"><span>🧾</span><b>Riwayat belum tersedia</b><p class="subtle">Riwayat pembelian akan ditampilkan di sini setelah fitur riwayat akun aktif. Untuk saat ini, simpan bukti transaksi secara pribadi.</p></div>
     </div>`;
   const inv=premiumInventory();
-  const premiumContent='<p class="subtle collection-description">Gunakan gem untuk membeli kartu rename dan frame permanen. Frame yang sudah dibeli tersimpan di Collection.</p><div class="notice">💎 Saldo gem: <b>'+Number(state.player.gems||0)+'</b></div><div class="accessory-grid store-item-grid">'+[
+  const premiumContent='<p class="subtle collection-description">Gunakan diamond untuk membeli kartu rename dan frame permanen. Frame yang sudah dibeli tersimpan di Collection.</p><div class="notice">💎 Saldo diamond: <b>'+Number(state.player.diamonds||0)+'</b></div><div class="accessory-grid store-item-grid">'+[
     {id:'rename_card',icon:'🪪',name:'Rename Card',desc:'Kartu untuk mengganti nama pemain.',price:50,count:Number(inv.rename_card_count||0),unit:'cards'},
     {id:'rename_pet_card',icon:'🐾',name:'Rename Pet Card',desc:'Kartu untuk mengganti nama companion.',price:50,count:Number(inv.rename_pet_card_count||0),unit:'cards'},
     {id:'frame_royal',icon:'👑',name:'Frame Royal',desc:'Royal Violet · Permanent collection frame.',price:200,owned:ownsFrame('legendary')},
     {id:'frame_celestial',icon:'✨',name:'Frame Celestial',desc:'Divine Princesses · Permanent collection frame.',price:300,owned:ownsFrame('celestial')}
-  ].map(item=>'<article class="accessory-card store-item-card"><div class="store-item-art">'+item.icon+'</div><div class="accessory-info"><h3>'+item.name+'</h3><p class="subtle">'+item.desc+'</p>'+(item.unit?'<b class="store-item-price">Owned: '+item.count+'</b>':'<b class="store-item-price">'+(item.owned?'✓ Owned':'Permanent unlock')+'</b>')+'<b class="store-item-price">💎 '+item.price+' gems</b><button class="button full" data-action="buy-premium" data-item="'+item.id+'" '+(item.owned?'disabled':'')+'>'+(item.owned?'Already owned':'Buy now')+'</button></div></article>').join('')+'</div>';
+  ].map(item=>'<article class="accessory-card store-item-card"><div class="store-item-art">'+item.icon+'</div><div class="accessory-info"><h3>'+item.name+'</h3><p class="subtle">'+item.desc+'</p>'+(item.unit?'<b class="store-item-price">Owned: '+item.count+'</b>':'<b class="store-item-price">'+(item.owned?'✓ Owned':'Permanent unlock')+'</b>')+'<b class="store-item-price">💎 '+item.price+' diamonds</b><button class="button full" data-action="buy-premium" data-item="'+item.id+'" '+(item.owned?'disabled':'')+'>'+(item.owned?'Already owned':'Buy now')+'</button></div></article>').join('')+'</div>';
   return '<section class="page collection-page store-page"><div class="eyebrow">WELCOME TO TAMAVERSE</div><h1 class="page-title">Store</h1><p class="subtle collection-description">Temukan teman baru dan perlengkapan untuk pet-mu.</p>'+tabs+(storeTab==='diamond'?diamondContent:storeTab==='premium'?premiumContent:gachaContent)+'</section>';
 }
 function battlePage(){
@@ -887,7 +887,7 @@ function profilePage(){
     return `<div class="fragment-row"><div class="fragment-pet-info"><span class="fragment-pet-icon">${petImage(s.id,'fragment-pet-image')}</span><b>${s.name}</b><span>${count} fragmen</span></div>
       <div class="fragment-actions">
         <button class="button secondary" data-action="exchange-fragment" data-species="${id}" data-reward="coins" ${count<3?'disabled':''}>3 → 30 koin</button>
-        <button class="button secondary" data-action="exchange-fragment" data-species="${id}" data-reward="gems" ${count<5?'disabled':''}>5 → 1 gem</button>
+        <button class="button secondary" data-action="exchange-fragment" data-species="${id}" data-reward="diamonds" ${count<5?'disabled':''}>5 → 1 diamond</button>
         <button class="button secondary" data-action="exchange-fragment" data-species="${id}" data-reward="training" ${count<4?'disabled':''}>4 → 1 buku</button>
       </div></div>`;
   }).join(''):'<p class="subtle">Fragmen dari pet duplikat akan muncul di sini.</p>';
@@ -1018,8 +1018,8 @@ function runEggPulls(id,count,free=false){
   const pool=species.filter(item=>item.pool.includes(id));
   if(Object.keys(egg.rates).some(tier=>!pool.some(item=>item.rarity===tier))){showToast('Pool telur belum lengkap; tidak ada biaya yang diambil.');return;}
   if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}
-  const currency=egg.currency==='gem'?'gems':'coins',cost=free?0:egg.price*count;
-  if(state.player[currency]<cost){showToast(`Tidak cukup ${currency==='gems'?'gem':'koin'} untuk tarikan ini.`);return;}
+  const currency=egg.currency==='diamond'?'diamonds':'coins',cost=free?0:egg.price*count;
+  if(state.player[currency]<cost){showToast(`Tidak cukup ${currency==='diamonds'?'diamond':'koin'} untuk tarikan ini.`);return;}
   pullInProgress=true;
   try{
     if(free)state.gacha.lastFree=new Date().toDateString();else state.player[currency]-=cost;
@@ -1046,12 +1046,12 @@ function runEggPulls(id,count,free=false){
   }finally{pullInProgress=false;}
 }
 function exchangeFragments(speciesId,reward){
-  const costs={coins:{fragments:3,amount:30},gems:{fragments:5,amount:1},training:{fragments:4,amount:1}};
+  const costs={coins:{fragments:3,amount:30},diamonds:{fragments:5,amount:1},training:{fragments:4,amount:1}};
   const option=costs[reward],available=state.items.fragments[speciesId]||0;
   if(!option||available<option.fragments){showToast('Fragmen spesies belum cukup.');return;}
   state.items.fragments[speciesId]-=option.fragments;
   if(reward==='coins')state.player.coins+=option.amount;
-  else if(reward==='gems')state.player.gems+=option.amount;
+  else if(reward==='diamonds')state.player.diamonds+=option.amount;
   else state.items.training+=option.amount;
   save();render();showToast('Fragmen berhasil ditukar.');
 }
@@ -1115,7 +1115,7 @@ function finishBattle(result){
   showModal(`<div class="hatch-egg">${result==='win'?'🏆':result==='draw'?'🤝':'💫'}</div><h2 id="modalTitle" style="text-align:center">${result==='win'?'Kemenangan!':result==='draw'?'Seri!':'Pertarungan selesai'}</h2><p style="text-align:center">${result==='win'?'Hebat! Petmu memperoleh hadiah battle.':result==='draw'?'Pertarungan berakhir imbang.':'Jangan menyerah, petmu tetap mendapat XP.'}</p><button class="button full" data-action="close-modal">Lanjut</button>`);
 }
 function batchPullConfirmation(egg){
-  const currency=egg.currency==='gem'?'gem':'koin',cost=egg.price*5;
+  const currency=egg.currency==='diamond'?'diamond':'koin',cost=egg.price*5;
   showModal(`<div class="hatch-egg">${eggImage(egg.id)}</div><div class="eyebrow">KONFIRMASI TARIKAN</div><h2 id="modalTitle">Spin 5 ${egg.name}?</h2><p>Biaya total: ${cost} ${currency}. Tarif per telur: ${raritySummary(egg.rates)}. Pity berlaku di setiap tarikan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-batch" data-egg="${egg.id}">Konfirmasi spin 5</button></div>`);
 }
 function avatarPicker(){
@@ -1128,13 +1128,13 @@ async function purchasePremiumItem(itemId){
   if(!db||!window.TAMAVERSE_USER_ID){showToast('Akun belum tersambung. Tunggu sinkronisasi lalu coba lagi.');return;}
   const costs={rename_card:50,rename_pet_card:50,frame_royal:200,frame_celestial:300};
   if(!Object.prototype.hasOwnProperty.call(costs,itemId))return;
-  if(Number(state.player.gems||0)<costs[itemId]){showToast('Gem kamu belum cukup.');return;}
+  if(Number(state.player.diamonds||0)<costs[itemId]){showToast('Diamond kamu belum cukup.');return;}
   try{
     const {data,error}=await db.rpc('purchase_tamaverse_premium_item',{p_item_id:itemId});
     if(error)throw error;
     const result=Array.isArray(data)?data[0]:data;
     if(!result||result.success!==true){showToast(result?.message||'Pembelian gagal.');return;}
-    state.player.gems=Number(result.gems??state.player.gems);
+    state.player.diamonds=Number(result.diamonds??state.player.diamonds);
     window.TAMAVERSE_PREMIUM_INVENTORY={rename_card_count:Number(result.rename_card_count||0),rename_pet_card_count:Number(result.rename_pet_card_count||0),owned_frames:Array.isArray(result.owned_frames)?result.owned_frames:['common']};
     save();render();showToast('Pembelian berhasil! Item masuk ke koleksi.');
   }catch(error){console.error('Premium purchase failed:',error);showToast(error?.message||'Pembelian gagal.');}
@@ -1207,7 +1207,7 @@ document.addEventListener('click',event=>{
   showToast('Pet aktif berhasil diganti.');
   return;
 }
-if(a==='nickname-pet'){const p=petById(selectedPetId);if(!p)return;showModal(`<div class="eyebrow">NAMA PET</div><h2 id="modalTitle">Ganti nama</h2><input class="text-input" id="newPetName" maxlength="18" value="${esc(p.name)}"><button class="button full" data-action="save-pet-name">Simpan nama</button>`);return;}if(a==='save-pet-name'){const p=petById(selectedPetId);const n=(document.getElementById('newPetName')?.value||'').trim().slice(0,18);if(p&&n){p.name=n;closeModal();save();render();showToast('Nama pet diperbarui.');}return;}if(a==='rename-player'){showModal(`<div class="eyebrow">PROFIL LOKAL</div><h2 id="modalTitle">Ubah nama pemain</h2><input class="text-input" id="playerNameInput" maxlength="18" value="${esc(state.player.name)}"><button class="button full" data-action="save-player-name">Simpan</button>`);return;}if(a==='save-player-name'){const n=(document.getElementById('playerNameInput')?.value||'').trim().slice(0,18);if(n){state.player.name=n;closeModal();save();render();showToast('Nama profil diperbarui.');}return;}if(a==='pull'){const e=eggs.find(x=>x.id===btn.dataset.egg);if(!e)return;const curr=e.currency==='gem'?'gem':'koin';showModal(`<div class="hatch-egg">${eggImage(e.id)}</div><h2 id="modalTitle">Buka ${e.name}?</h2><p>Biaya: ${e.price} ${curr}. Tarikan mengikuti tarif rarity yang ditampilkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-pull" data-egg="${e.id}">Buka telur</button></div>`);return;}if(a==='confirm-pull'){const id=btn.dataset.egg;closeModal();pullEgg(id,false);return;}if(a==='freeegg'){pullEgg('basic',true);return;}if(a==='battle-start'){startBattle(btn.dataset.mode);return;}if(a==='battle-action'){battleAction(btn.dataset.move);return;}if(a==='claim'){doClaim(btn.dataset.quest);return;}if(a==='rebuy-quest'){rebuyQuest(btn.dataset.quest);return;}if(a==='daily-quests'){showDailyQuests();return;}if(a==='inventory-item'){showInventoryItem(btn.dataset.item);return;}if(a==='inventory-use'){const kind=btn.dataset.care;closeModal();doCare(kind);return;}if(a==='daily-reward'){showModal(`<div class="eyebrow">TAMAVERSE · DAILY BONUS</div><h2 id="modalTitle">Daily Reward</h2><p class="subtle">Login setiap hari untuk mengumpulkan hadiah 7 hari.</p>${dailyRewardCard()}<button class="button secondary full" data-action="close-modal">Tutup</button>`);return;}if(a==='inventory'){showInventory();return;}if(a==='shop'){page='shop';render();return;}if(a==='shop-back'){page='home';render();return;}if(a==='qty-minus'||a==='qty-plus'||a==='qty-max'){const type=btn.dataset.item;const prices={food:50,energy:40,snack:60,training:120};const price=prices[type];if(!price)return;const current=Math.max(1,Math.floor(Number(shopQuantities[type])||1));const affordable=Math.floor(state.player.coins/price);const next=a==='qty-max'?Math.max(1,affordable):a==='qty-plus'?Math.min(Math.max(1,affordable),current+1):Math.max(1,current-1);shopQuantities[type]=next;render();return;}if(a==='buy'){const type=btn.dataset.item;buyItem(type,shopQuantities[type]||1);return;}if(a==='reset'){resetGame();return;}if(a==='confirm-reset'){localStorage.removeItem(SAVE_KEY);state=null;battle=null;page='home';closeModal();render();showToast('Save dihapus.');return;}
+if(a==='nickname-pet'){const p=petById(selectedPetId);if(!p)return;showModal(`<div class="eyebrow">NAMA PET</div><h2 id="modalTitle">Ganti nama</h2><input class="text-input" id="newPetName" maxlength="18" value="${esc(p.name)}"><button class="button full" data-action="save-pet-name">Simpan nama</button>`);return;}if(a==='save-pet-name'){const p=petById(selectedPetId);const n=(document.getElementById('newPetName')?.value||'').trim().slice(0,18);if(p&&n){p.name=n;closeModal();save();render();showToast('Nama pet diperbarui.');}return;}if(a==='rename-player'){showModal(`<div class="eyebrow">PROFIL LOKAL</div><h2 id="modalTitle">Ubah nama pemain</h2><input class="text-input" id="playerNameInput" maxlength="18" value="${esc(state.player.name)}"><button class="button full" data-action="save-player-name">Simpan</button>`);return;}if(a==='save-player-name'){const n=(document.getElementById('playerNameInput')?.value||'').trim().slice(0,18);if(n){state.player.name=n;closeModal();save();render();showToast('Nama profil diperbarui.');}return;}if(a==='pull'){const e=eggs.find(x=>x.id===btn.dataset.egg);if(!e)return;const curr=e.currency==='diamond'?'diamond':'koin';showModal(`<div class="hatch-egg">${eggImage(e.id)}</div><h2 id="modalTitle">Buka ${e.name}?</h2><p>Biaya: ${e.price} ${curr}. Tarikan mengikuti tarif rarity yang ditampilkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-pull" data-egg="${e.id}">Buka telur</button></div>`);return;}if(a==='confirm-pull'){const id=btn.dataset.egg;closeModal();pullEgg(id,false);return;}if(a==='freeegg'){pullEgg('basic',true);return;}if(a==='battle-start'){startBattle(btn.dataset.mode);return;}if(a==='battle-action'){battleAction(btn.dataset.move);return;}if(a==='claim'){doClaim(btn.dataset.quest);return;}if(a==='rebuy-quest'){rebuyQuest(btn.dataset.quest);return;}if(a==='daily-quests'){showDailyQuests();return;}if(a==='inventory-item'){showInventoryItem(btn.dataset.item);return;}if(a==='inventory-use'){const kind=btn.dataset.care;closeModal();doCare(kind);return;}if(a==='daily-reward'){showModal(`<div class="eyebrow">TAMAVERSE · DAILY BONUS</div><h2 id="modalTitle">Daily Reward</h2><p class="subtle">Login setiap hari untuk mengumpulkan hadiah 7 hari.</p>${dailyRewardCard()}<button class="button secondary full" data-action="close-modal">Tutup</button>`);return;}if(a==='inventory'){showInventory();return;}if(a==='shop'){page='shop';render();return;}if(a==='shop-back'){page='home';render();return;}if(a==='qty-minus'||a==='qty-plus'||a==='qty-max'){const type=btn.dataset.item;const prices={food:50,energy:40,snack:60,training:120};const price=prices[type];if(!price)return;const current=Math.max(1,Math.floor(Number(shopQuantities[type])||1));const affordable=Math.floor(state.player.coins/price);const next=a==='qty-max'?Math.max(1,affordable):a==='qty-plus'?Math.min(Math.max(1,affordable),current+1):Math.max(1,current-1);shopQuantities[type]=next;render();return;}if(a==='buy'){const type=btn.dataset.item;buyItem(type,shopQuantities[type]||1);return;}if(a==='reset'){resetGame();return;}if(a==='confirm-reset'){localStorage.removeItem(SAVE_KEY);state=null;battle=null;page='home';closeModal();render();showToast('Save dihapus.');return;}
 });
 document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal();});
 document.addEventListener('click',event=>{
@@ -1307,7 +1307,7 @@ if (action === 'online-join-submit') {
 
   if(action==='pull-ten'){
     const egg=eggs.find(item=>item.id===button.dataset.egg);if(!egg)return;
-    const currency=egg.currency==='gem'?'gems':'coins';
+    const currency=egg.currency==='diamond'?'diamonds':'coins';
     if(state.player[currency]<egg.price*5){showToast(`Perlu ${formatEggCost(egg,5)} untuk membuka 5 telur.`);return;}
     batchPullConfirmation(egg);
   }else if(action==='confirm-batch'){
