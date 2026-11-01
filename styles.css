@@ -3782,3 +3782,190 @@ body[data-theme="light"] .battle-hub .notice{
   color:#765f7d!important;
   box-shadow:0 5px 14px #9d789c12!important;
 }
+
+
+/* GLOBAL LIGHT THEME REFRESH — colorful soft pastel world.
+   Only applies to light mode; dark theme rules remain unchanged. */
+body[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f8edf8;
+  --panel:#f3e5f4;
+  --panel2:#f8e5ef;
+  --line:#b98dbb55;
+  --muted:#806d87;
+  --text:#44334e;
+  --pink:#d982ad;
+  --mint:#8e78b6;
+  --gold:#bd914b;
+  --purple:#9470c3;
+  --danger:#c96983;
+  background:
+    radial-gradient(ellipse at 8% 12%,#f2d8ed 0,transparent 34%),
+    radial-gradient(ellipse at 92% 28%,#e6dcf7 0,transparent 36%),
+    radial-gradient(ellipse at 45% 85%,#f8dfe9 0,transparent 38%),
+    linear-gradient(180deg,#f9eff8 0%,#f7edf6 48%,#f9eaf1 100%)!important;
+  color:var(--text);
+}
+body[data-theme="light"] .topbar{
+  background:#f9eff8eF!important;
+  border-bottom:1px solid #d9c2df!important;
+  box-shadow:0 4px 18px #8c6b9710;
+}
+body[data-theme="light"] .brand{color:#4c3855}
+body[data-theme="light"] .brand-light{color:#9874b5}
+body[data-theme="light"] .wallet,
+body[data-theme="light"] .theme-toggle{
+  background:linear-gradient(135deg,#f0e2f5,#f9e3ed)!important;
+  border:1px solid #ddc5e5!important;
+  color:#604b6d!important;
+  box-shadow:0 3px 0 #e6d4e9;
+}
+body[data-theme="light"] .page-title,
+body[data-theme="light"] .section-heading h2{color:#493650}
+body[data-theme="light"] .eyebrow{color:#9874a7}
+body[data-theme="light"] .subtle{color:#806f87}
+body[data-theme="light"] .card,
+body[data-theme="light"] .creature-card,
+body[data-theme="light"] .quest-row,
+body[data-theme="light"] .egg-card,
+body[data-theme="light"] .profile-card,
+body[data-theme="light"] .daily-reward-card{
+  background:linear-gradient(145deg,#f1e4f5 0%,#f7e4ef 58%,#efe6f8 100%)!important;
+  border:1px solid #ddc5e6!important;
+  color:#493750!important;
+  box-shadow:0 5px 0 #e5d2e9,0 10px 22px #9875a315!important;
+}
+body[data-theme="light"] .card h2,
+body[data-theme="light"] .card h3,
+body[data-theme="light"] .creature-card h3,
+body[data-theme="light"] .profile-card h2,
+body[data-theme="light"] .egg-card h3{color:#4b3854}
+body[data-theme="light"] .card p,
+body[data-theme="light"] .creature-card p,
+body[data-theme="light"] .profile-card p{color:#806d87}
+body[data-theme="light"] .stat-tile,
+body[data-theme="light"] .care-card,
+body[data-theme="light"] .profile-stat,
+body[data-theme="light"] .creature-thumb,
+body[data-theme="light"] .status-meter,
+body[data-theme="light"] .comparison-pet,
+body[data-theme="light"] .pool-pet,
+body[data-theme="light"] .batch-result{
+  background:linear-gradient(145deg,#eadcf3,#f4dfea)!important;
+  border:1px solid #ddc6e7!important;
+  color:#55415f!important;
+}
+body[data-theme="light"] .stat-tile span,
+body[data-theme="light"] .profile-stat span,
+body[data-theme="light"] .care-card small{color:#826f89}
+body[data-theme="light"] .button:not(.secondary):not(.soft):not(.danger){
+  background:linear-gradient(110deg,#d995bb 0%,#b28bd0 100%)!important;
+  color:#fff!important;
+  box-shadow:0 4px 0 #a87bb9,0 7px 14px #a87bb922!important;
+}
+body[data-theme="light"] .button.secondary{
+  background:linear-gradient(110deg,#eadcf2,#f4dfeb)!important;
+  border:1px solid #d9c1e4!important;
+  color:#684f78!important;
+  box-shadow:0 3px 0 #e1cfe8!important;
+}
+body[data-theme="light"] .button.soft{
+  background:linear-gradient(110deg,#f3dce9,#e8dcf5)!important;
+  border:1px solid #e2c7e4!important;
+  color:#795b83!important;
+}
+body[data-theme="light"] .button.danger{
+  background:linear-gradient(110deg,#f3dce4,#eed9e8)!important;
+  border:1px solid #e5c3d0!important;
+  color:#a34f69!important;
+}
+body[data-theme="light"] .pill{
+  background:linear-gradient(110deg,#e9d9f2,#f4dce9)!important;
+  color:#795c8a!important;
+  border:1px solid #dfc8e8;
+}
+body[data-theme="light"] .progress-track{background:#e5d9eb}
+body[data-theme="light"] .progress-fill{background:linear-gradient(90deg,#9b7bc9,#d98eb5)}
+body[data-theme="light"] .bottom-nav{
+  background:#f8edf8f2!important;
+  border-top:1px solid #ddc7e3!important;
+  box-shadow:0 -7px 24px #9875a31a!important;
+}
+body[data-theme="light"] .nav-item{color:#927f99}
+body[data-theme="light"] .nav-item.active{color:#9a70b5}
+body[data-theme="light"] .nav-item.active span{filter:drop-shadow(0 0 5px #c7a6df)}
+body[data-theme="light"] .notice{
+  background:linear-gradient(110deg,#eee2f5,#f7e2ed)!important;
+  border:1px solid #e0c9e8!important;
+  color:#786481!important;
+}
+body[data-theme="light"] .rank-me{
+  background:linear-gradient(110deg,#eadcf3,#f4dfea)!important;
+  border:1px solid #dec5e7;
+}
+body[data-theme="light"] .rank-row{border-bottom-color:#dfcce5}
+body[data-theme="light"] .text-button{color:#956eaf}
+body[data-theme="light"] .text-input,
+body[data-theme="light"] input,
+body[data-theme="light"] select,
+body[data-theme="light"] textarea{
+  background:#f5eaf5!important;
+  border:1px solid #ddc7e4!important;
+  color:#493750!important;
+}
+body[data-theme="light"] .modal-backdrop{background:#4b365577}
+body[data-theme="light"] .modal-card{
+  background:linear-gradient(145deg,#f1e3f5,#f8e3ed)!important;
+  border:1px solid #ddc4e5!important;
+  color:#493750!important;
+  box-shadow:0 20px 70px #60476a35!important;
+}
+body[data-theme="light"] .modal-card h2{color:#493750}
+body[data-theme="light"] .modal-card p{color:#806d87}
+body[data-theme="light"] .toast{
+  background:linear-gradient(110deg,#eadcf3,#f5dfea)!important;
+  color:#523d5c!important;
+  border:1px solid #ddc6e6;
+}
+body[data-theme="light"] .divider{background:#ddc9e4}
+body[data-theme="light"] .empty{color:#89768f}
+body[data-theme="light"] .care-action{
+  background:linear-gradient(145deg,#eee1f5,#f7e2ed)!important;
+  border:1px solid #ddc5e6!important;
+  color:#72577f!important;
+  box-shadow:0 4px 0 #e4d2e9!important;
+}
+body[data-theme="light"] .care-action:active{box-shadow:0 1px 0 #e4d2e9!important}
+body[data-theme="light"] .daily-reward-day{
+  background:linear-gradient(145deg,#f0e4f5,#f8e5ef)!important;
+  border-color:#dfc9e7!important;
+  color:#806d87!important;
+}
+body[data-theme="light"] .daily-reward-day.today{
+  background:linear-gradient(145deg,#e6d8f4,#f1d9ed)!important;
+  border-color:#c9a9df!important;
+  color:#76538d!important;
+}
+body[data-theme="light"] .daily-reward-day.claimed{
+  background:linear-gradient(145deg,#e1f0e8,#e8f2e8)!important;
+  border-color:#c5dfce!important;
+  color:#548063!important;
+}
+body[data-theme="light"] .pool-owned{
+  background:#e4f0e8!important;
+  color:#548063!important;
+}
+body[data-theme="light"] .avatar-option{
+  background:linear-gradient(145deg,#eee1f4,#f7e2ed)!important;
+  border-color:#dfc9e7!important;
+  color:#594363!important;
+}
+body[data-theme="light"] .avatar-option.selected{
+  background:linear-gradient(145deg,#e3d4f2,#f0d7e9)!important;
+  border-color:#c7a6dc!important;
+}
+body[data-theme="light"] .battle-log{
+  background:#eee3f2!important;
+  color:#594761!important;
+  border:1px solid #ddcbe5!important;
+}
