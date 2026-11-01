@@ -3705,3 +3705,80 @@ body[data-theme="light"] .battle-hub .notice{
   border-color:#ead9ed!important;
   color:#806e86!important;
 }
+
+
+/* PVE LIGHT MODE — saturated-but-soft lavender / rose cards.
+   Scope is deliberately limited to the Solo / Hunting branch. */
+body[data-theme="light"] .battle-hub .solo-banner{
+  background:
+    radial-gradient(ellipse at 92% 8%,#e6b9e8 0%,transparent 42%),
+    linear-gradient(118deg,#e8d4f2 0%,#f3d7e8 54%,#f8dce8 100%)!important;
+  border:1px solid #d9b9e5!important;
+  box-shadow:0 7px 0 #e5c8e7,0 12px 24px #9c70a51c!important;
+  color:#49334f!important;
+}
+body[data-theme="light"] .battle-hub .solo-banner .eyebrow{
+  color:#986c9e!important;
+}
+body[data-theme="light"] .battle-hub .solo-banner h2{
+  color:#49334f!important;
+}
+body[data-theme="light"] .battle-hub .solo-banner p{
+  color:#755d7b!important;
+}
+body[data-theme="light"] .battle-hub .solo-banner .battle-mode-icon{
+  background:linear-gradient(145deg,#d9c1ef,#efc6df)!important;
+  border:1px solid #d1b3df!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview{
+  background:linear-gradient(105deg,#e9dcf5 0%,#f5dce9 52%,#f1dff0 100%)!important;
+  border:1px solid #dfc7e9!important;
+  box-shadow:inset 0 1px 0 #fff8,0 5px 14px #9d7aa015!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview .turn-preview-icon{
+  background:linear-gradient(145deg,#d9c5ed,#edc9e2)!important;
+  border:1px solid #d7bde3!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview b{
+  color:#503b59!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview small{
+  color:#826b88!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview .turn-preview-arrow{
+  color:#a56fa7!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card{
+  background:
+    radial-gradient(ellipse at 100% 0%,#e7c4ec 0%,transparent 43%),
+    linear-gradient(135deg,#e9d8f4 0%,#f5d9e9 55%,#f1d9ee 100%)!important;
+  border:1px solid #d9bce5!important;
+  box-shadow:0 6px 0 #dfc5e6,0 12px 25px #9b719f20!important;
+  color:#4c3854!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card:before{
+  background:#d7b5e82b!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card h3{
+  color:#4b3654!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card p{
+  color:#765e7d!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card .pill{
+  background:#dfc8ed!important;
+  color:#78558a!important;
+  border:1px solid #d3b8e3!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card .button{
+  background:linear-gradient(105deg,#cf8fba 0%,#aa83cf 100%)!important;
+  color:#fff!important;
+  border:1px solid #c38cbd!important;
+  box-shadow:0 4px 0 #966eae!important;
+}
+body[data-theme="light"] .battle-hub .notice{
+  background:linear-gradient(110deg,#f0e2f5 0%,#f8e4ed 100%)!important;
+  border:1px solid #e4cfe9!important;
+  color:#765f7d!important;
+  box-shadow:0 5px 14px #9d789c12!important;
+}
