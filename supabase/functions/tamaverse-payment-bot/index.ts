@@ -304,8 +304,9 @@ Bot: ${(await telegram("getMe", {})).username}`);
     const command = parts[0];
     if (command === "/testtopic") {
       let stage = "getMe";
+      let me: any = null;
       try {
-        const me = await telegram("getMe", {});
+        me = await telegram("getMe", {});
         stage = "getChat";
         const group = await telegram("getChat", { chat_id: ticketGroupId });
         stage = "createForumTopic";
@@ -322,7 +323,8 @@ Bot: ${(await telegram("getMe", {})).username}`);
         await say(chatId, `TEST BERHASIL. Token aktif: @${me.username}; grup terbaca: ${group.title || group.id}; message_thread_id: ${topic.message_thread_id}`);
       } catch (error) {
         console.error("Topic diagnostic failed at " + stage + ":", error);
-        await say(chatId, `TEST TOPIC GAGAL pada tahap ${stage}. Token bot: periksa identitas bot lewat /testtopic. Detail: ${String(error)}`);
+        const identity = me ? `Token aktif: @${me.username} (ID: ${me.id}).\\n` : "Token aktif: tidak berhasil diverifikasi.\\n";
+        await say(chatId, `TEST TOPIC GAGAL pada tahap ${stage}.\\n${identity}Detail: ${String(error)}`);
       }
       return;
     }
