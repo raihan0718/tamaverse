@@ -550,7 +550,13 @@ function loadSave(){
     if(!raw)return null;
     const saved=JSON.parse(raw);
     if(!saved||!saved.player||!Array.isArray(saved.pets))return null;
-    return normalizeSavedState(saved);
+    const normalized=normalizeSavedState(saved);
+    // Persist the legacy-currency conversion immediately so a reload cannot
+    // merge the same old Gems balance into Diamonds a second time.
+    if(Object.prototype.hasOwnProperty.call(saved.player,'gems')){
+      localStorage.setItem(SAVE_KEY,JSON.stringify(normalized));
+    }
+    return normalized;
   }catch(error){console.warn('Save tidak dapat dibaca:',error);return null;}
 }
 function normalizeSavedState(saved){
