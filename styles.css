@@ -3221,3 +3221,30 @@ body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8e
  .solo-hunting-page .battle-arena-controls{left:8px!important;right:8px!important;padding:8px!important}
  .solo-hunting-page .battle-action-btn{min-height:44px!important;font-size:12px!important}
 }
+
+
+/* Pet-art replacements for Solo Hunting mode selection. */
+.solo-banner-pet .pet-image{width:48px;height:48px;object-fit:contain;image-rendering:auto}
+.battle-turn-preview .turn-preview-pet{overflow:hidden;padding:0;background:transparent}
+.battle-turn-preview .turn-preview-pet .pet-image{width:34px;height:34px;object-fit:contain;image-rendering:auto}
+.solo-option-art{display:flex;align-items:center;justify-content:center;gap:12px}
+.solo-option-art .solo-option-pet{width:76px;height:76px;object-fit:contain;image-rendering:auto}
+.solo-option-vs{font:900 12px 'Space Grotesk',sans-serif;letter-spacing:1px;color:#c4b4e7}
+.solo-hunting-page .battle-scene{height:min(690px,calc(100svh - 170px))!important;min-height:560px!important}
+.solo-hunting-page .battle-side{top:38px!important;height:calc(100% - 235px)!important;width:48%!important}
+.solo-hunting-page .battle-hp-card{position:absolute!important;top:0!important;bottom:auto!important;left:5%!important;right:5%!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;text-align:left!important}
+.solo-hunting-page .battle-hp-card .hp-value{font:700 10px 'Space Grotesk',sans-serif;margin-bottom:5px;text-align:left}
+.solo-hunting-page .battle-hp-card .progress-track{height:9px!important;border-radius:99px!important;overflow:hidden}
+.solo-hunting-page .battle-pet-caption{display:flex;align-items:center;gap:7px;margin-top:6px;font:700 12px 'Space Grotesk',sans-serif}
+.solo-hunting-page .battle-pet-caption span{font:600 10px 'Space Grotesk',sans-serif}
+.solo-hunting-page .battle-nameplate{display:none!important}
+.solo-hunting-page .battle-sprite{top:155px!important;left:50%!important}
+.solo-hunting-page .battle-sprite .pet-image{width:clamp(105px,29vw,170px)!important;height:clamp(105px,29vw,170px)!important;object-fit:contain!important;image-rendering:auto!important}
+.solo-hunting-page .battle-arena-controls{left:10px!important;right:10px!important;bottom:10px!important;padding:10px!important}
+.solo-hunting-page .battle-log-panel{max-height:90px!important}
+.solo-hunting-page .battle-action-btn span{display:none}
+.solo-hunting-page .battle-turn-overlay.wave-transition{background:linear-gradient(120deg,#5c3e91ed,#b15d9bed);box-shadow:0 0 45px #b78cff77;animation:huntingWavePulse .65s ease-in-out infinite alternate}
+body[data-theme="dark"] .solo-hunting-page .battle-pet-caption{color:#fff!important;text-shadow:0 1px 4px #211728!important}
+body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8ed!important}
+@media(max-height:740px){.solo-hunting-page .battle-scene{height:590px!important;min-height:590px!important}.solo-hunting-page .battle-side{height:355px!important}.solo-hunting-page .battle-sprite{top:135px!important}}
+@media(max-width:390px){.solo-hunting-page .battle-side{width:48%!important}.solo-hunting-page .battle-sprite .pet-image{width:clamp(100px,28vw,145px)!important;height:clamp(100px,28vw,145px)!important}.solo-hunting-page .battle-arena-controls{left:8px!important;right:8px!important;padding:8px!important}.solo-hunting-page .battle-action-btn{min-height:44px!important;font-size:12px!important}.solo-option-art .solo-option-pet{width:65px;height:65px}}
