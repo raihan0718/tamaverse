@@ -24,7 +24,7 @@
   async function uploadTamaverseAvatar(dataUrl) {
     const user = await ensureSupabaseUser();
     if (!user) throw new Error('Akun belum tersambung ke Supabase.');
-    if (typeof dataUrl !== 'string' || !/^data:image\\/jpeg;base64,/i.test(dataUrl)) {
+    if (typeof dataUrl !== 'string' || !/^data:image\/jpeg;base64,/i.test(dataUrl)) {
       throw new Error('Format foto hasil kompresi tidak valid.');
     }
     const blob = await (await fetch(dataUrl)).blob();
