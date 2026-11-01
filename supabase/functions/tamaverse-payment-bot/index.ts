@@ -35,7 +35,7 @@ async function createOrderTopic(orderId: string, label: string, diamonds: number
   await telegram("sendMessage", {
     chat_id: ticketGroupId,
     message_thread_id: threadId,
-    text: `TIKET DIAMOND BARU\\nOrder: ${orderId}\\nTelegram: ${telegramId}\\nPaket: ${label} — ${diamonds} Diamonds\\nStatus: Menunggu nominal dari admin.`,
+    text: `TIKET DIAMOND BARU\nOrder: ${orderId}\nTelegram: ${telegramId}\nPaket: ${label} — ${diamonds} Diamonds\nStatus: Menunggu nominal dari admin.`,
   });
   return threadId;
 }
@@ -142,7 +142,7 @@ async function handleCallback(q: any) {
     }
     const { error: priceError } = await db.rpc("set_tamaverse_diamond_order_payment", { p_order_id: data.id, p_amount_idr: pack.price, p_admin_note: null });
     if (priceError) { await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: "Gagal menetapkan harga: " + priceError.message }); return; }
-    await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: `TIKET BERHASIL DIBUAT\\nOrder: ${data.id}\\nPaket: ${pack.label}\\nDiamond: ${pack.diamonds}\\nTotal: Rp${money(pack.price)}\\n\\nPilih metode pembayaran:`, reply_markup: { inline_keyboard: [
+    await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: `TIKET BERHASIL DIBUAT\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\n\nPilih metode pembayaran:`, reply_markup: { inline_keyboard: [
       [{ text: "GoPay", callback_data: "method:gopay:" + data.id }],
       [{ text: "QRIS", callback_data: "method:qris:" + data.id }]
     ] } });
@@ -186,8 +186,8 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_m
     if (error) { await say(chatId, "Persetujuan gagal: " + error.message); return; }
 
     await say(data.telegram_user_id,
-      `🎉 PEMBELIAN BERHASIL!\\n\\n💎 ${data.diamonds} Diamond telah berhasil ditambahkan ke akun Tamaverse Anda.\\n🧾 ID Pesanan: ${orderId}\\n\\nTerima kasih telah melakukan pembelian. Selamat bermain!`);
-    await say(chatId, `✅ PESANAN DISETUJUI\\n+${data.diamonds} Diamond dikreditkan.\\nID: ${orderId}`);
+      `🎉 PEMBELIAN BERHASIL!\n\n💎 ${data.diamonds} Diamond telah berhasil ditambahkan ke akun Tamaverse Anda.\n🧾 ID Pesanan: ${orderId}\n\nTerima kasih telah melakukan pembelian. Selamat bermain!`);
+    await say(chatId, `✅ PESANAN DISETUJUI\n+${data.diamonds} Diamond dikreditkan.\nID: ${orderId}`);
 
     if (orderMeta?.telegram_topic_id) {
       try {
@@ -198,7 +198,7 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_m
         await say(chatId, `🗑️ Topic pesanan ${orderId.slice(0, 8).toUpperCase()} berhasil dihapus.`);
       } catch (deleteError) {
         console.error("Could not delete approved order topic:", deleteError);
-        await say(chatId, `⚠️ Pesanan berhasil disetujui, tetapi Topic gagal dihapus. Silakan hapus manual.\\nID: ${orderId}`);
+        await say(chatId, `⚠️ Pesanan berhasil disetujui, tetapi Topic gagal dihapus. Silakan hapus manual.\nID: ${orderId}`);
       }
     } else {
       await say(chatId, `⚠️ ID Topic tidak ditemukan untuk pesanan ${orderId}. Silakan periksa Topic secara manual.`);
@@ -214,7 +214,7 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_m
     if (error) { await say(chatId, "Gagal mengatur harga: " + error.message); return; }
     await say(data.telegram_user_id, `INSTRUKSI PEMBAYARAN TAMAVERSE\nOrder: ${data.id}\nDiamond: ${data.diamonds}\nTotal: Rp${money(data.amount_idr)}\n\nIkuti instruksi pembayaran dari admin. Setelah membayar, kirim foto bukti dengan caption /proof ${data.id}. Jangan kirim PIN atau OTP.`);
     try {
-      await sendOrderTopic(orderId, `Harga ditetapkan: Rp${money(amount)}\\nKirim instruksi QRIS/pembayaran secara manual kepada pemain.`);
+      await sendOrderTopic(orderId, `Harga ditetapkan: Rp${money(amount)}\nKirim instruksi QRIS/pembayaran secara manual kepada pemain.`);
     } catch (topicError) { console.error("Could not post price update to order topic:", topicError); }
     await say(chatId, `Harga tersimpan: Rp${money(amount)}\nOrder: ${orderId}\nKirim instruksi pembayaran secara manual.`);
     return;
@@ -434,8 +434,8 @@ Periksa transaksi lalu tekan Approve jika valid.`;
         await say(chatId, `TEST BERHASIL. Token aktif: @${me.username}; grup terbaca: ${group.title || group.id}; message_thread_id: ${topic.message_thread_id}`);
       } catch (error) {
         console.error("Topic diagnostic failed at " + stage + ":", error);
-        const identity = me ? `Token aktif: @${me.username} (ID: ${me.id}).\\n` : "Token aktif: tidak berhasil diverifikasi.\\n";
-        await say(chatId, `TEST TOPIC GAGAL pada tahap ${stage}.\\n${identity}Detail: ${String(error)}`);
+        const identity = me ? `Token aktif: @${me.username} (ID: ${me.id}).\n` : "Token aktif: tidak berhasil diverifikasi.\n";
+        await say(chatId, `TEST TOPIC GAGAL pada tahap ${stage}.\n${identity}Detail: ${String(error)}`);
       }
       return;
     }
