@@ -3577,3 +3577,131 @@ body:not([data-theme="dark"]) .battle-hub .notice{
   border-color:#e3d8eb;
   color:#6e6178;
 }
+
+
+/* LIGHT THEME ONLY — soft pastel lilac / pink Battle palette.
+   Explicit !important overrides older dark-card backgrounds above.
+   Dark theme selectors and appearance remain untouched. */
+body[data-theme="light"] .battle-hub .battle-hub-tabs{
+  background:linear-gradient(135deg,#f4eafa 0%,#f8e9f1 100%)!important;
+  border:1px solid #ead8ed!important;
+  box-shadow:0 8px 22px #a987a51c!important;
+}
+body[data-theme="light"] .battle-hub .battle-hub-tab{
+  color:#826d89!important;
+}
+body[data-theme="light"] .battle-hub .battle-hub-tab b{
+  color:#4b3a54!important;
+}
+body[data-theme="light"] .battle-hub .battle-hub-tab small{
+  color:#8e7c94!important;
+}
+body[data-theme="light"] .battle-hub .battle-hub-tab>span{
+  color:#8c6ca0!important;
+  background:#eadcf2!important;
+}
+body[data-theme="light"] .battle-hub .battle-hub-tab.active{
+  background:linear-gradient(135deg,#fff8fc 0%,#f2e4f7 100%)!important;
+  border-color:#d9bfe4!important;
+  box-shadow:0 3px 10px #a77eae20!important;
+}
+body[data-theme="light"] .battle-hub .battle-hub-tab.active>span{
+  background:#e8d6f1!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-hero{
+  background:linear-gradient(125deg,#f0e9fb 0%,#fceaf2 100%)!important;
+  border:1px solid #e5d4ed!important;
+  box-shadow:0 8px 20px #a78bab18!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-live{
+  color:#8a659c!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-hero h2{
+  color:#46364f!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-hero p{
+  color:#786b82!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-hero-icon{
+  background:#e8def7!important;
+  border-color:#d9c9ed!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-spark{
+  color:#b18bc2!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-match-card{
+  background:linear-gradient(145deg,#fff7fb 0%,#f4eafb 100%)!important;
+  border:1px solid #e8d4eb!important;
+  color:#493950!important;
+  box-shadow:0 4px 0 #ead9eb,0 10px 22px #9d789c18!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-match-card h2{
+  color:#493950!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-match-card p,
+body[data-theme="light"] .battle-hub .battle-online-match-card .subtle{
+  color:#88758d!important;
+}
+body[data-theme="light"] .battle-hub .battle-online-match-card .button{
+  background:linear-gradient(110deg,#d99abd 0%,#b58bd0 100%)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+  box-shadow:0 4px 0 #a879b8!important;
+}
+body[data-theme="light"] .battle-hub .battle-mode-banner{
+  background:linear-gradient(125deg,#f2eafa 0%,#fcecf3 100%)!important;
+  border-color:#e6d5eb!important;
+  color:#493950!important;
+}
+body[data-theme="light"] .battle-hub .battle-mode-banner h2{
+  color:#493950!important;
+}
+body[data-theme="light"] .battle-hub .battle-mode-banner p{
+  color:#88758d!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview{
+  background:linear-gradient(110deg,#f1e7f8 0%,#fbeaf2 100%)!important;
+  border-color:#e8d6ed!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview b{
+  color:#59445f!important;
+}
+body[data-theme="light"] .battle-hub .battle-turn-preview small{
+  color:#927f97!important;
+}
+body[data-theme="light"] .battle-hub .turn-preview-icon{
+  background:#e8d9f1!important;
+}
+body[data-theme="light"] .battle-hub .turn-preview-arrow{
+  color:#b17bb7!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card{
+  background:linear-gradient(145deg,#fff7fb 0%,#f2eafa 100%)!important;
+  border-color:#e6d5eb!important;
+  color:#493950!important;
+  box-shadow:0 7px 20px #9d789c16!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-art{
+  background:radial-gradient(circle,#e8d4f2 0%,transparent 65%),linear-gradient(135deg,#f6eafa,#fcecf3)!important;
+  border-color:#ead9ee!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card h3{
+  color:#493950!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card p{
+  color:#88758d!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card .pill{
+  background:#eadcf1!important;
+  color:#856393!important;
+}
+body[data-theme="light"] .battle-hub .battle-option-card .button{
+  background:linear-gradient(110deg,#d99abd 0%,#b58bd0 100%)!important;
+  color:#fff!important;
+  box-shadow:0 4px 0 #a879b8!important;
+}
+body[data-theme="light"] .battle-hub .notice{
+  background:#f8eef7!important;
+  border-color:#ead9ed!important;
+  color:#806e86!important;
+}
