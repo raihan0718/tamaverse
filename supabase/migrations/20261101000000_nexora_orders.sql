@@ -3,17 +3,33 @@
 -- Asumsi tabel lama: public.tamaverse_telegram_links(telegram_user_id, telegram_username, owner_id)
 
 -- ============================================================
--- 0. WALLET  ⚠️ CEK INI DULU
--- Saya tidak bisa melihat tabel saldo Diamond Tamaverse yang asli.
--- Blok ini membuat tabel wallet HANYA jika belum ada. Kalau saldo
--- Diamond lu disimpan di tabel lain, ganti tabel/kolom di fungsi
--- nexora_approve_order() (bagian "KREDIT SALDO") sebelum dipakai.
+-- 0. WALLET DIAMOND
+-- Diamond top-up terpisah dari gems dan disimpan pada inventory.
+-- Nilai hanya boleh diubah oleh fungsi server yang aman.
 -- ============================================================
-create table if not exists public.tamaverse_wallets (
-  owner_id   uuid primary key,
-  diamonds   bigint not null default 0 check (diamonds >= 0),
-  updated_at timestamptz not null default now()
-);
+alter table public.inventory
+  add column if not exists diamonds bigint not null default 0
+  check (diamonds >= 0);
+
+create or replace function public.guard_tamaverse_diamond_balance()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $
+begin
+  if new.diamonds is distinct from old.diamonds
+     and current_user not in ('postgres', 'service_role', 'supabase_admin') then
+    raise exception 'DIAMOND_BALANCE_SERVER_CONTROLLED';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists tamaverse_guard_diamond_balance on public.inventory;
+create trigger tamaverse_guard_diamond_balance
+before update of diamonds on public.inventory
+for each row execute function public.guard_tamaverse_diamond_balance();
 
 -- ============================================================
 -- 1. TABEL
@@ -197,14 +213,13 @@ begin
     return jsonb_build_object('ok', false, 'error', 'link_mismatch');
   end if;
 
-  -- ===== KREDIT SALDO (sesuaikan dengan tabel saldo asli bila berbeda) =====
-  insert into public.tamaverse_wallets as w (owner_id, diamonds)
+  -- ===== KREDIT DIAMOND TOP-UP KE INVENTORY TAMAVERSE =====
+  insert into public.inventory as i (owner_id, diamonds)
   values (o.owner_id, o.diamonds)
   on conflict (owner_id) do update
-    set diamonds   = w.diamonds + excluded.diamonds,
-        updated_at = now()
-  returning w.diamonds into bal;
-  -- =========================================================================
+    set diamonds = i.diamonds + excluded.diamonds
+  returning i.diamonds into bal;
+  -- =========================================================
 
   insert into public.nexora_diamond_ledger (owner_id, order_id, delta, balance_after)
   values (o.owner_id, o.id, o.diamonds, bal);
@@ -247,9 +262,7 @@ alter table public.nexora_orders            enable row level security;
 alter table public.nexora_order_events      enable row level security;
 alter table public.nexora_diamond_ledger    enable row level security;
 alter table public.nexora_processed_updates enable row level security;
--- tamaverse_wallets sengaja tidak disentuh (bisa sudah dipakai app game dengan policy sendiri).
--- Kalau tabel itu baru dibuat oleh migration ini, aktifkan RLS sendiri:
---   alter table public.tamaverse_wallets enable row level security;
+-- Saldo Diamond dilindungi trigger dan hanya dikredit oleh fungsi approval server.
 
 revoke all on public.nexora_orders, public.nexora_order_events,
               public.nexora_diamond_ledger, public.nexora_processed_updates
