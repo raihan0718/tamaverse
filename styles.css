@@ -3002,3 +3002,28 @@ body[data-theme="dark"] .shop-art-training{background:linear-gradient(145deg,#2c
 .topup-success-note{position:absolute;right:1px;bottom:-7px;font-size:9px;font-weight:600;letter-spacing:.15px;color:#bca8d9;opacity:.8}
 @keyframes topupGemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @media(max-width:360px){.topup-success-modal{min-height:305px}.topup-success-modal h2{font-size:20px!important}.topup-success-amount{font-size:30px}}
+
+
+/* Premium Shop frame cards use the same WebP artwork as Collection. */
+.store-frame-art{
+  min-height:124px;
+  display:grid;
+  place-items:center;
+  padding:8px;
+  border-radius:13px;
+  overflow:hidden;
+  background:linear-gradient(145deg,rgba(169,148,255,.13),rgba(255,142,175,.09));
+}
+.store-frame-art img{
+  display:block;
+  width:100%;
+  max-width:150px;
+  height:108px;
+  object-fit:contain;
+  filter:drop-shadow(0 5px 9px rgba(75,55,110,.12));
+}
+.store-frame-card .accessory-info{gap:6px}
+.store-frame-card .accessory-info h3{margin:0}
+.store-frame-tier{display:inline-flex;align-self:flex-start;margin:0;font-size:9px}
+.store-frame-card .accessory-info p{min-height:42px;line-height:1.45}
+body[data-theme="dark"] .store-frame-art{background:linear-gradient(145deg,#3a3048,#302a3a)}
