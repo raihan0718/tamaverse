@@ -809,8 +809,8 @@ function gachaPage(){
           <strong>${pack.amount.toLocaleString('id-ID')}</strong>
           <span class="diamond-package-label">Diamonds</span>
           <b class="diamond-package-name">${pack.label}</b>
-          <span class="diamond-package-price">Lanjutkan di Nexora</span>
-          <a class="button full" href="https://t.me/Nexorapaymbot" target="_blank" rel="noopener">Buka Nexora Bot</a>
+          <span class="diamond-package-price">Pilih paket untuk melanjutkan</span>
+          <button class="button full" data-action="diamond-purchase" data-amount="${pack.amount}" data-label="${pack.label}">Purchase</button>
         </article>`).join('')}
     </div>
     <div class="card diamond-history-card">
@@ -1138,6 +1138,33 @@ document.addEventListener('click',event=>{
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
+  if(a==='diamond-purchase'){
+    const amount=Number(btn.dataset.amount);
+    const label=String(btn.dataset.label||'Diamond Pack');
+    if(![50,120,300,700].includes(amount))return;
+    showModal(`<div class="eyebrow">TAMAVERSE · DIAMOND STORE</div>
+      <h2 id="modalTitle">Purchase ${amount} Diamonds</h2>
+      <p class="subtle">${esc(label)} · Pilih metode untuk melanjutkan ke Nexora Bot.</p>
+      <div class="card" style="margin:14px 0;text-align:center"><strong style="font-size:24px">💎 ${amount.toLocaleString('id-ID')}</strong><p class="muted-label">DIAMOND PACKAGE</p></div>
+      <div class="modal-actions" style="display:grid;grid-template-columns:1fr;gap:9px">
+        <button class="button full" data-action="diamond-payment" data-amount="${amount}" data-method="qris">QRIS</button>
+        <button class="button secondary full" data-action="diamond-payment" data-amount="${amount}" data-method="gopay">GoPay</button>
+        <button class="button secondary full" data-action="close-modal">Batal</button>
+      </div>`);
+    return;
+  }
+  if(a==='diamond-payment'){
+    const amount=Number(btn.dataset.amount);
+    const method=btn.dataset.method;
+    if(![50,120,300,700].includes(amount)||!['qris','gopay'].includes(method))return;
+    const payload=`tv_${amount}_${method}`;
+    const url=`https://t.me/Nexorapaymbot?start=${payload}`;
+    window.open(url,'_blank','noopener');
+    closeModal();
+    showToast('Nexora Bot dibuka. Lanjutkan di Telegram.');
+    return;
+  }
+
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
   if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
