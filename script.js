@@ -1080,15 +1080,17 @@ function playerAvatarMarkup(value,className='player-avatar-photo'){
 function profileAvatarMarkup(sizeClass='profile-avatar-image'){return playerAvatarMarkup(state.player.avatar,sizeClass);}
 function profilePage(){
   const p=state.player,wins=Number(p.wins||0),losses=Number(p.losses||0),draws=Number(p.draws||0);
+  const userId=String(window.TAMAVERSE_USER_ID||'');
+  const shortUserId=userId?(userId.length>16?userId.slice(0,8)+'…'+userId.slice(-4):userId):'Memuat ID...';
   return `<section class="page profile-page">
     <div class="profile-page-heading"><div><div class="eyebrow">TAMAVERSE ACCOUNT</div><h1 class="page-title">My Profile</h1><p class="subtle">Identitas dan perjalananmu di Tamaverse.</p></div><span class="profile-heading-spark">✦</span></div>
     <article class="profile-identity-card"><div class="profile-identity-orbit"></div><div class="profile-avatar-shell">${profileAvatarMarkup()}</div>
-      <div class="profile-identity-copy"><span class="profile-online-label"><i></i> PLAYER PROFILE</span><h2>${esc(p.name||'Player')}</h2><p>Level ${Number(p.level||1)} adventurer</p><div class="profile-identity-buttons"><button class="profile-rename-link" data-action="rename-player">✎ Rename Player</button><button class="profile-rename-link" data-action="pick-profile-photo">Change Photo</button></div></div>
-      <div class="profile-uuid-row"><span class="profile-uuid-icon">◈</span><strong>UUID</strong><button class="profile-copy-uuid" data-action="copy-user-id" aria-label="Salin UUID">⧉</button></div>
+      <div class="profile-identity-copy"><span class="profile-online-label"><i></i> PLAYER PROFILE</span><h2>${esc(p.name||'Player')}</h2><p>Level ${Number(p.level||1)} adventurer</p><div class="profile-identity-buttons"><button class="profile-action-button" data-action="rename-player"><span>✎</span> Rename</button><button class="profile-action-button profile-change-button" data-action="pick-profile-photo"><span>▧</span> Change Profile</button></div></div>
+      <div class="profile-uuid-row"><span class="profile-uuid-icon">◈</span><strong>UUID</strong><span class="profile-uuid-value">${esc(shortUserId)}</span><button class="profile-copy-uuid" data-action="copy-user-id" aria-label="Salin UUID">⧉</button></div>
     </article>
     <input id="profileAvatarFile" class="visually-hidden" type="file" accept="image/*">
-    <div class="profile-stats profile-battle-stats"><div class="profile-stat"><strong>${Number(p.rating||1000).toLocaleString('id-ID')}</strong><span>BATTLE RATING</span></div><div class="profile-stat"><strong>${wins}</strong><span>WINS</span></div><div class="profile-stat"><strong>${losses}</strong><span>LOSSES</span></div><div class="profile-stat"><strong>${draws}</strong><span>DRAWS</span></div></div>
-    <div class="profile-action-card"><div><span class="eyebrow">NEED A HAND?</span><h3>Butuh bantuan?</h3><p>Hubungi tim support kalau ada kendala saat bermain.</p></div><a class="button profile-help-button" href="https://t.me/TamaSupportBot" target="_blank" rel="noopener"><span>✉</span> Help Center</a></div>
+    <div class="profile-stats profile-battle-stats"><div class="profile-stat"><strong>${Number(p.rating||1000).toLocaleString('id-ID')}</strong><span>BATTLE RATING</span></div><div class="profile-stat"><strong>${wins}</strong><span>WINS</span></div><div class="profile-stat"><strong>${losses}</strong><span>LOSSES</span></div><div class="profile-stat"><strong>${draws}</strong><span>DRAWS</span></div><div class="profile-stat profile-collection-stat"><strong>${state.pets.length}</strong><span>PET COLLECTION</span></div></div>
+    <div class="profile-action-card"><div><span class="eyebrow">NEED A HAND?</span><h3>Butuh bantuan?</h3><p>Hubungi tim support kalau ada kendala saat bermain.</p></div><a class="button profile-help-button" href="https://t.me/TamaSupportBot" target="_blank" rel="noopener"><span>📩</span> Help Center</a></div>
     <button class="button danger full profile-reset-button" data-action="reset">Reset semua data</button>
   </section>`;
 }
