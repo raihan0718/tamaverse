@@ -5,6 +5,7 @@ const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN2")!;
 const adminId = Deno.env.get("TELEGRAM_ADMIN_ID")!;
 const webhookSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET")!;
+const ticketGroupId = "-1004322036078";
 const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 const api = (method: string) => `https://api.telegram.org/bot${botToken}/${method}`;
 
@@ -19,6 +20,39 @@ async function telegram(method: string, body: Record<string, unknown>) {
 }
 async function say(chatId: number | string, text: string, extra: Record<string, unknown> = {}) {
   return telegram("sendMessage", { chat_id: chatId, text, ...extra });
+}
+
+async function createOrderTopic(orderId: string, label: string, diamonds: number, telegramId: string) {
+  const topic = await telegram("createForumTopic", {
+    chat_id: ticketGroupId,
+    name: `ORDER ${orderId.slice(0, 8).toUpperCase()} • ${diamonds} 💎`,
+  });
+  const threadId = Number(topic.message_thread_id);
+  const { error } = await db.from("diamond_orders")
+    .update({ telegram_topic_id: threadId })
+    .eq("id", orderId);
+  if (error) throw new Error("Topic dibuat tetapi gagal menyimpan ID: " + error.message);
+  await telegram("sendMessage", {
+    chat_id: ticketGroupId,
+    message_thread_id: threadId,
+    text: `TIKET DIAMOND BARU\\nOrder: ${orderId}\\nTelegram: ${telegramId}\\nPaket: ${label} — ${diamonds} Diamonds\\nStatus: Menunggu nominal dari admin.`,
+  });
+  return threadId;
+}
+
+async function sendOrderTopic(orderId: string, text: string, extra: Record<string, unknown> = {}) {
+  const { data, error } = await db.from("diamond_orders")
+    .select("telegram_topic_id")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (error) throw new Error("Gagal mencari Topic order: " + error.message);
+  if (!data?.telegram_topic_id) throw new Error("TOPIC_NOT_FOUND");
+  return telegram("sendMessage", {
+    chat_id: ticketGroupId,
+    message_thread_id: data.telegram_topic_id,
+    text,
+    ...extra,
+  });
 }
 const money = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 const isAdmin = (id: number) => String(id) === adminId;
@@ -94,10 +128,17 @@ async function handleCallback(q: any) {
       return;
     }
     await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: `TIKET BERHASIL DIBUAT\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu instruksi pembayaran admin.\n\nAdmin akan mengirim nominal dan instruksi pembayaran. Jangan membayar sebelum menerima instruksi resmi.` });
-    await say(adminId, `TIKET DIAMOND BARU\nOrder: ${data.id}\nTelegram: ${id}\nPaket: ${pack.label} — ${pack.diamonds} Diamonds\n\nPilih nominal pembayaran:`, { reply_markup: { inline_keyboard: [
+    const priceButtons = { reply_markup: { inline_keyboard: [
       [5000,10000,15000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n })),
       [20000,25000,50000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n }))
-    ] } });
+    ] } };
+    try {
+      await createOrderTopic(data.id, pack.label, pack.diamonds, id);
+      await sendOrderTopic(data.id, "Pilih nominal pembayaran:", priceButtons);
+    } catch (topicError) {
+      console.error("Order topic creation failed:", topicError);
+      await say(adminId, `TOPIC GAGAL DIBUAT — ORDER ${data.id}\n${String(topicError)}\nSilakan tindak lanjuti manual.`, priceButtons);
+    }
     return;
   }
   if (payload.startsWith("price:")) {
@@ -108,6 +149,9 @@ async function handleCallback(q: any) {
     const { data, error } = await db.rpc("set_tamaverse_diamond_order_payment", { p_order_id: orderId, p_amount_idr: amount, p_admin_note: null });
     if (error) { await say(chatId, "Gagal mengatur harga: " + error.message); return; }
     await say(data.telegram_user_id, `INSTRUKSI PEMBAYARAN TAMAVERSE\nOrder: ${data.id}\nDiamond: ${data.diamonds}\nTotal: Rp${money(data.amount_idr)}\n\nIkuti instruksi pembayaran dari admin. Setelah membayar, kirim foto bukti dengan caption /proof ${data.id}. Jangan kirim PIN atau OTP.`);
+    try {
+      await sendOrderTopic(orderId, `Harga ditetapkan: Rp${money(amount)}\\nKirim instruksi QRIS/pembayaran secara manual kepada pemain.`);
+    } catch (topicError) { console.error("Could not post price update to order topic:", topicError); }
     await say(chatId, `Harga tersimpan: Rp${money(amount)}\nOrder: ${orderId}\nKirim instruksi pembayaran secara manual.`);
     return;
   }
@@ -204,10 +248,17 @@ async function handleMessage(m: any) {
     });
     if (error) { await say(chatId, error.message.includes("TELEGRAM_NOT_LINKED") ? "UUID belum terdeteksi. Masukkan UUID Tamaverse terlebih dahulu dengan format /uuid UUID_KAMU." : "Tiket gagal dibuat: " + error.message); return; }
     await say(chatId, `Tiket berhasil dibuat!\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu admin\n\nAdmin akan mengirim nominal dan instruksi pembayaran di chat ini. Jangan membayar sebelum menerima instruksi.`);
-    await say(adminId, `TIKET DIAMOND BARU\nOrder: ${data.id}\nTelegram: ${telegramId} (@${username || "-"})\nPaket: ${pack.label} — ${pack.diamonds} Diamonds\n\nPilih nominal pembayaran:`, { reply_markup: { inline_keyboard: [
+    const priceButtons = { reply_markup: { inline_keyboard: [
       [5000,10000,15000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n })),
       [20000,25000,50000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n }))
-    ] } });
+    ] } };
+    try {
+      await createOrderTopic(data.id, pack.label, pack.diamonds, telegramId);
+      await sendOrderTopic(data.id, "Pilih nominal pembayaran:", priceButtons);
+    } catch (topicError) {
+      console.error("Order topic creation failed:", topicError);
+      await say(adminId, `TOPIC GAGAL DIBUAT — ORDER ${data.id}\n${String(topicError)}\nSilakan tindak lanjuti manual.`, priceButtons);
+    }
     return;
   }
 
@@ -224,8 +275,16 @@ async function handleMessage(m: any) {
     });
     if (error) { await say(chatId, "Bukti belum bisa dikirim: " + error.message); return; }
     await say(chatId, "Bukti diterima. Admin akan memeriksa transaksi secara manual. Diamond belum ditambahkan.");
-    await say(adminId, `BUKTI PEMBAYARAN MASUK\nOrder: ${data.id}\nTelegram: ${telegramId}\nNominal: Rp${money(data.amount_idr)}\nDiamond: ${data.diamonds}\n\nPeriksa transaksi di dashboard pembayaran. Setelah benar, gunakan /paid ${data.id}`);
-    await telegram("sendPhoto", { chat_id: adminId, photo: fileId, caption: `Bukti order ${data.id} dari Telegram ${telegramId}` });
+    const proofCaption = `BUKTI PEMBAYARAN MASUK\\nOrder: ${data.id}\\nTelegram: ${telegramId}\\nNominal: Rp${money(data.amount_idr)}\\nDiamond: ${data.diamonds}\\n\\nVerifikasi pembayaran secara manual. Setelah benar, gunakan /paid ${data.id}.`;
+    try {
+      const { data: order } = await db.from("diamond_orders").select("telegram_topic_id").eq("id", data.id).maybeSingle();
+      if (order?.telegram_topic_id) {
+        await telegram("sendPhoto", { chat_id: ticketGroupId, message_thread_id: order.telegram_topic_id, photo: fileId, caption: proofCaption });
+      } else {
+        await say(adminId, proofCaption);
+        await telegram("sendPhoto", { chat_id: adminId, photo: fileId, caption: `Bukti order ${data.id} dari Telegram ${telegramId}` });
+      }
+    } catch (topicError) { console.error("Could not forward proof to order topic:", topicError); }
     return;
   }
 
