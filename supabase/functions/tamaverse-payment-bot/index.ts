@@ -743,8 +743,7 @@ async function handleCheckoutStart(message: Any, token: string) {
       `✅ Pesanan dibuat dari checkout game\n\n🧾 Order ID: ${o.order_code}\n💎 ${o.diamonds} Diamond\n💰 Rp${money(o.price)}\n💳 Metode: ${method}\n📌 ${STATUS_LABEL[o.status]}\n\n` +
         (method === "QRIS"
           ? "Admin sedang menyiapkan QRIS. Gambarnya akan dikirim ke chat ini."
-          : "Admin sedang menyiapkan informasi GoPay. Infonya akan dikirim ke chat ini.") +
-
+          : "Admin sedang menyiapkan informasi GoPay. Infonya akan dikirim ke chat ini."),
       { reply_markup: cancelMarkup(o.order_code) },
     );
   } catch (e) {
