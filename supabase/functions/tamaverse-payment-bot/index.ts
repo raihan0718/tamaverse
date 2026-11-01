@@ -30,7 +30,7 @@ const packages: Record<string, { label: string; diamonds: number }> = {
 };
 const help = `NEXORA • TAMAVERSE DIAMOND TOP-UP
 
-/link KODE — hubungkan akun game
+/uuid UUID — hubungkan akun Tamaverse
 /buy — buat tiket top-up
 /proof ORDER_ID — kirim bukti pembayaran dengan foto
 
@@ -39,6 +39,9 @@ Pilih paket:
 /buy 2 — 120 Diamonds
 /buy 3 — 300 Diamonds
 /buy 4 — 700 Diamonds
+
+Pertama kali, kirim UUID dari menu Profile Tamaverse dengan format:
+/uuid UUID_KAMU
 
 Pembayaran diproses manual oleh admin. Jangan kirim data rahasia atau PIN.`;
 
@@ -54,14 +57,63 @@ async function handleMessage(m: any) {
     return;
   }
 
+  if (text.startsWith("/uuid")) {
+    const uuid = text.split(/\s+/)[1]?.trim();
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuid || !uuidPattern.test(uuid)) {
+      await say(chatId, "UUID belum terdeteksi atau formatnya salah.\nBuka Tamaverse > Profile, salin TAMAVERSE USER ID, lalu kirim:\n/uuid UUID_KAMU");
+      return;
+    }
+
+    const { data: authData, error: authError } = await db.auth.admin.getUserById(uuid);
+    if (authError || !authData?.user) {
+      await say(chatId, "UUID Tamaverse tidak ditemukan. Periksa kembali UUID dari menu Profile lalu kirim /uuid UUID_KAMU.");
+      return;
+    }
+
+    const { data: existingByTelegram, error: lookupError } = await db
+      .from("tamaverse_telegram_links")
+      .select("owner_id")
+      .eq("telegram_user_id", telegramId)
+      .maybeSingle();
+    if (lookupError) {
+      await say(chatId, "Gagal memeriksa akun. Coba lagi beberapa saat.");
+      return;
+    }
+    if (existingByTelegram && existingByTelegram.owner_id !== uuid) {
+      await say(chatId, "Akun Telegram ini sudah terhubung ke UUID Tamaverse lain. Hubungi admin jika perlu menggantinya.");
+      return;
+    }
+
+    const { data: existingByGame, error: gameLookupError } = await db
+      .from("tamaverse_telegram_links")
+      .select("telegram_user_id")
+      .eq("owner_id", uuid)
+      .maybeSingle();
+    if (gameLookupError) {
+      await say(chatId, "Gagal memeriksa akun. Coba lagi beberapa saat.");
+      return;
+    }
+    if (existingByGame && existingByGame.telegram_user_id !== telegramId) {
+      await say(chatId, "UUID Tamaverse ini sudah terhubung ke akun Telegram lain. Hubungi admin jika itu akun milikmu.");
+      return;
+    }
+
+    const { error: linkError } = await db.from("tamaverse_telegram_links").upsert({
+      telegram_user_id: telegramId,
+      telegram_username: username || null,
+      owner_id: uuid,
+    }, { onConflict: "telegram_user_id" });
+    if (linkError) {
+      await say(chatId, "UUID belum berhasil disimpan. Coba lagi atau hubungi admin.");
+      return;
+    }
+    await say(chatId, "UUID Tamaverse berhasil disimpan! Sekarang kamu bisa gunakan /buy untuk memilih paket Diamond.");
+    return;
+  }
+
   if (text.startsWith("/link")) {
-    const code = text.split(/\s+/)[1];
-    if (!code) { await say(chatId, "Format: /link KODE\nBuat kode dari menu Profile Tamaverse. Kode berlaku 10 menit."); return; }
-    const { data, error } = await db.rpc("consume_tamaverse_telegram_link_code", {
-      p_code: code, p_telegram_user_id: telegramId, p_telegram_username: username,
-    });
-    if (error) { await say(chatId, "Gagal menghubungkan akun: " + error.message); return; }
-    await say(chatId, "Akun Tamaverse berhasil dihubungkan. Sekarang gunakan /buy untuk membuat tiket.");
+    await say(chatId, "Sekarang tidak perlu kode pairing. Kirim UUID Tamaverse dengan format:\n/uuid UUID_KAMU");
     return;
   }
 
@@ -77,7 +129,7 @@ async function handleMessage(m: any) {
     const { data, error } = await db.rpc("create_tamaverse_diamond_order", {
       p_telegram_user_id: telegramId, p_package_id: packageId,
     });
-    if (error) { await say(chatId, error.message.includes("TELEGRAM_NOT_LINKED") ? "Akun belum terhubung. Buat kode di Profile Tamaverse, lalu kirim /link KODE." : "Tiket gagal dibuat: " + error.message); return; }
+    if (error) { await say(chatId, error.message.includes("TELEGRAM_NOT_LINKED") ? "UUID belum terdeteksi. Masukkan UUID Tamaverse terlebih dahulu dengan format /uuid UUID_KAMU." : "Tiket gagal dibuat: " + error.message); return; }
     await say(chatId, `Tiket berhasil dibuat!\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu admin\n\nAdmin akan mengirim nominal dan instruksi pembayaran di chat ini. Jangan membayar sebelum menerima instruksi.`);
     await say(adminId, `TIKET DIAMOND BARU\nOrder: ${data.id}\nTelegram: ${telegramId} (@${username || "-"})\nPaket: ${pack.label} — ${pack.diamonds} Diamonds\n\nAtur harga: /price ${data.id} NOMINAL_RUPIAH`);
     return;
