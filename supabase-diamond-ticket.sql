@@ -232,18 +232,22 @@ returns trigger
 language plpgsql
 security invoker
 set search_path = ''
-as $$
+as $
 begin
-  if new.diamonds is distinct from old.diamonds
-     and current_user not in ('postgres', 'service_role', 'supabase_admin') then
-    raise exception 'DIAMOND_BALANCE_SERVER_CONTROLLED';
+  if current_user not in ('postgres', 'service_role', 'supabase_admin') then
+    if tg_op = 'INSERT' and coalesce(new.diamonds, 0) <> 0 then
+      raise exception 'DIAMOND_BALANCE_SERVER_CONTROLLED';
+    end if;
+    if tg_op = 'UPDATE' and new.diamonds is distinct from old.diamonds then
+      raise exception 'DIAMOND_BALANCE_SERVER_CONTROLLED';
+    end if;
   end if;
   return new;
 end;
-$$;
+$;
 drop trigger if exists tamaverse_guard_diamond_balance on public.inventory;
 create trigger tamaverse_guard_diamond_balance
-before update of diamonds on public.inventory
+before insert or update of diamonds on public.inventory
 for each row execute function public.guard_tamaverse_diamond_balance();
 
 
