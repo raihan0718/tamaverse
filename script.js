@@ -807,6 +807,7 @@ function gachaPage(){
         {amount:10,price:'Rp1.800',unit:'Rp180 / 💎'},
         {amount:25,price:'Rp3.500',unit:'Rp140 / 💎'},
         {amount:50,price:'Rp5.000',unit:'Rp100 / 💎'},
+        {amount:100,price:'Rp7.500',unit:'Rp75 / 💎'},
         {amount:120,price:'Rp10.800',unit:'Rp90 / 💎',featured:true},
         {amount:300,price:'Rp24.000',unit:'Rp80 / 💎'},
         {amount:700,price:'Rp49.000',unit:'Rp70 / 💎'}
@@ -1149,7 +1150,7 @@ document.addEventListener('click',event=>{
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
   if(a==='diamond-purchase'){
     const amount=Number(btn.dataset.amount);
-    const prices={5:'Rp1.000',10:'Rp1.800',25:'Rp3.500',50:'Rp5.000',100:'Rp20.000',120:'Rp10.800',300:'Rp24.000',700:'Rp49.000'};
+    const prices={5:'Rp1.000',10:'Rp1.800',25:'Rp3.500',50:'Rp5.000',100:'Rp7.500',120:'Rp10.800',300:'Rp24.000',700:'Rp49.000'};
     if(!Object.prototype.hasOwnProperty.call(prices,amount))return;
     showModal(`<div class="eyebrow">TAMAVERSE · DIAMOND STORE</div>
       <h2 id="modalTitle">Purchase ${amount} Diamonds</h2>
