@@ -157,9 +157,8 @@ async function handleCallback(q: any) {
     await answer("Metode dipilih");
     if (method === "gopay") await say(chatId, `PEMBAYARAN GOPAY\\nOrder: ${order.id}\\nDiamond: ${order.diamonds}\\nTotal: Rp${money(order.amount_idr)}\\nNomor GoPay: 087722960530\\n\\nKirim foto bukti dengan caption /proof ${order.id}`);
     else {
-      const { data: setting } = await db.from("tamaverse_payment_settings").select("value").eq("key", "qris_file_id").maybeSingle();
-      if (!setting?.value) { await say(chatId, "QRIS belum diunggah admin. Silakan pilih GoPay atau hubungi admin."); return; }
-      await telegram("sendPhoto", { chat_id: chatId, photo: setting.value, caption: `PEMBAYARAN QRIS\\nOrder: ${order.id}\\nDiamond: ${order.diamonds}\\nTotal: Rp${money(order.amount_idr)}\\n\\nKirim bukti dengan caption /proof ${order.id}.` });
+      await say(chatId, `Metode QRIS dipilih untuk order ${order.id}. Admin akan mengirim QRIS khusus transaksi ini ke chat pribadi lu setelah mengunggahnya di Topic tiket.`);
+      try { await sendOrderTopic(orderId, "Pemain memilih QRIS. Admin: kirim foto QRIS khusus order ini langsung ke Topic ini."); } catch (e) { console.error(e); }
     }
     return;
   }
@@ -204,6 +203,36 @@ ID: ${chatId}
 Nama: ${m.chat?.title || "-"}
 Tipe: ${m.chat?.type || "-"}
 Bot: ${(await telegram("getMe", {})).username}`);
+      return;
+    }
+    // Admin posts a per-order QRIS image directly inside that order's forum Topic.
+    if (isAdmin(Number(telegramId)) && m.message_thread_id && m.photo?.length) {
+      const { data: order, error } = await db.from("diamond_orders")
+        .select("id,telegram_user_id,diamonds,amount_idr,status,payment_method")
+        .eq("telegram_topic_id", m.message_thread_id)
+        .maybeSingle();
+      if (error || !order) {
+        await say(chatId, "QRIS tidak terkirim: tiket order tidak ditemukan untuk Topic ini.");
+        return;
+      }
+      if (order.status !== "waiting_payment" || order.payment_method !== "qris") {
+        await say(chatId, "QRIS tidak terkirim. Pastikan pemain sudah memilih metode QRIS dan order masih menunggu pembayaran.");
+        return;
+      }
+      const photo = m.photo[m.photo.length - 1].file_id;
+      await telegram("sendPhoto", {
+        chat_id: order.telegram_user_id,
+        photo,
+        caption: `QRIS PEMBAYARAN TAMAVERSE
+Order: ${order.id}
+Diamond: ${order.diamonds}
+Total: Rp${money(order.amount_idr)}
+
+Silakan scan QRIS khusus order ini. Setelah membayar, kirim foto bukti dengan caption:
+/proof ${order.id}`,
+      });
+      await say(chatId, `QRIS order ${order.id} berhasil diteruskan ke chat pribadi pemain.`);
+      return;
     }
     return;
   }
@@ -332,12 +361,6 @@ Bot: ${(await telegram("getMe", {})).username}`);
   }
 
   if (isAdmin(Number(telegramId))) {
-    if (m.photo?.length && text.startsWith("/setqris")) {
-      const fileId = m.photo[m.photo.length - 1].file_id;
-      const { error } = await db.from("tamaverse_payment_settings").upsert({ key: "qris_file_id", value: fileId, updated_at: new Date().toISOString() }, { onConflict: "key" });
-      await say(chatId, error ? "Gagal menyimpan QRIS: " + error.message : "QRIS berhasil disimpan.");
-      return;
-    }
     const parts = text.split(/\s+/);
     const command = parts[0];
     if (command === "/testtopic") {
@@ -366,7 +389,6 @@ Bot: ${(await telegram("getMe", {})).username}`);
       }
       return;
     }
-    if (command === "/setqris") { await say(chatId, "Kirim foto QRIS dengan caption /setqris untuk menyimpannya."); return; }
     if (command === "/price") {
       const orderId = parts[1]; const amount = Number(parts[2]);
       if (!orderId || !Number.isSafeInteger(amount) || amount < 1) { await say(chatId, "Format: /price ORDER_ID NOMINAL_RUPIAH"); return; }
