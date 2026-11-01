@@ -144,7 +144,7 @@ declare
   v_limit integer;
 begin
   if v_owner is null then raise exception 'AUTH_REQUIRED'; end if;
-  if p_reason not in ('astral_gacha', 'quest_rebuy') then
+  if p_reason is null or p_reason not in ('astral_gacha', 'quest_rebuy') then
     raise exception 'INVALID_DIAMOND_SPEND_REASON';
   end if;
   v_limit := case when p_reason = 'astral_gacha' then 100 else 1 end;
