@@ -291,6 +291,24 @@ async function handleMessage(m: any) {
   if (isAdmin(Number(telegramId))) {
     const parts = text.split(/\s+/);
     const command = parts[0];
+    if (command === "/testtopic") {
+      try {
+        const topic = await telegram("createForumTopic", {
+          chat_id: ticketGroupId,
+          name: "TEST BOT CONNECTION",
+        });
+        await telegram("sendMessage", {
+          chat_id: ticketGroupId,
+          message_thread_id: topic.message_thread_id,
+          text: "Koneksi Topic NexoraPay berhasil. Bot dapat membuat dan mengirim pesan ke Topic.",
+        });
+        await say(chatId, "TEST BERHASIL. Topic berhasil dibuat di grup. message_thread_id: " + topic.message_thread_id);
+      } catch (error) {
+        console.error("Topic diagnostic failed:", error);
+        await say(chatId, "TEST TOPIC GAGAL:\\n" + String(error));
+      }
+      return;
+    }
     if (command === "/price") {
       const orderId = parts[1]; const amount = Number(parts[2]);
       if (!orderId || !Number.isSafeInteger(amount) || amount < 1) { await say(chatId, "Format: /price ORDER_ID NOMINAL_RUPIAH"); return; }
