@@ -4,10 +4,10 @@ import { createClient } from "npm:@supabase/supabase-js@2";
  * NEXORA PAY • TAMAVERSE  (@Nexorapaymbot)
  * Single-file Telegram bot — manual payment with admin approval.
  *
- * Alur: katalog → konfirmasi → order + topik forum admin → pilih QRIS/GoPay →
- * admin mengirim instruksi pembayaran asli → user mengirim bukti →
- * admin memeriksa pembayaran secara manual lalu APPROVE/DECLINE →
- * Diamond dikredit atomik dan idempoten hanya setelah APPROVE.
+ * Alur: katalog → konfirmasi → order + topik forum admin → pilih QRIS/GoPay.
+ * GoPay: instruksi otomatis → user mengirim bukti.
+ * QRIS: admin mengirim QRIS → user mengirim bukti.
+ * Admin memeriksa pembayaran lalu APPROVE/DECLINE; Diamond hanya dikredit setelah APPROVE.
  */
 
 // ───────────────────────── CONFIG ─────────────────────────
@@ -113,9 +113,9 @@ const TEXT = {
   help: "📋 PANDUAN NEXORA\n\n" +
     "1️⃣ Hubungkan akun: kirim /uuid UUID_KAMU\n" +
     "2️⃣ Top Up Diamond: pilih paket → konfirmasi → pilih QRIS/GoPay\n" +
-    "3️⃣ Tunggu admin mengirim info pembayaran\n" +
+    "3️⃣ GoPay: instruksi langsung dikirim otomatis. QRIS: tunggu admin mengirim gambar QRIS\n" +
     "4️⃣ Kirim foto bukti ke chat ini\n" +
-    "5️⃣ Tunggu admin memeriksa\n\n" +
+    "5️⃣ Tunggu admin memeriksa pembayaran\n\n" +
     "🛡️ Jangan pernah membagikan password, PIN, atau kode OTP.", 
   uuidPrompt: "🔗 HUBUNGKAN AKUN TAMAVERSE\n\n" +
     "Buka aplikasi Tamaverse → Profile → salin UUID.\n" +
@@ -249,6 +249,36 @@ const proofMarkup = (code: string) => ({
   ]],
 });
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[ch] ?? ch);
+}
+
+async function sendGopayInstructions(o: Order): Promise<boolean> {
+  const number = Deno.env.get("GOPAY_NUMBER")?.trim();
+  const accountName = Deno.env.get("GOPAY_ACCOUNT_NAME")?.trim();
+  if (!number || !accountName) {
+    console.error("GoPay details missing: set GOPAY_NUMBER and GOPAY_ACCOUNT_NAME Supabase secrets.");
+    return false;
+  }
+  const message =
+    `🟩 <b>PEMBAYARAN GOPAY</b>\n\n` +
+    `<b>GoPay :</b> <code>${escapeHtml(number)}</code>\n` +
+    `<b>A/N     :</b> <b>${escapeHtml(accountName)}</b>\n\n` +
+    `<b>Nominal :</b> Rp${money(o.price)}\n` +
+    `<b>Order ID:</b> <code>${escapeHtml(o.order_code)}</code>\n\n` +
+    `Silakan selesaikan pembayaran sesuai nominal di atas, lalu langsung kirim foto bukti pembayaran ke chat ini.\n\n` +
+    `Admin akan memeriksa pembayaran sebelum Diamond ditambahkan.`;
+  const sent = await tgTry("sendMessage", {
+    chat_id: o.telegram_chat_id,
+    text: message,
+    parse_mode: "HTML",
+    reply_markup: cancelMarkup(o.order_code),
+  });
+  return Boolean(sent);
+}
+
 // ───────────────────────── TEXT BUILDERS ─────────────────────────
 function catalogueText() {
   return [
@@ -298,7 +328,9 @@ function activeOrderView(o: Order): { text: string; markup: Json } {
     return { text: head + "Pilih metode pembayaran:", markup: methodMarkup(o.order_code) };
   }
   if (o.status === "WAITING_ADMIN") {
-    return { text: head + `Metode ${o.payment_method}. Admin sedang menyiapkan info pembayaran.`, markup: cancelMarkup(o.order_code) };
+    return { text: head + (o.payment_method === "GOPAY"
+      ? "Instruksi GoPay sedang disiapkan admin. Jika belum terkirim, admin akan membantu."
+      : "Admin sedang menyiapkan QRIS."), markup: cancelMarkup(o.order_code) };
   }
   if (o.status === "WAITING_PAYMENT") {
     return { text: head + "Setelah membayar, kirim foto bukti pembayaran ke chat ini.", markup: cancelMarkup(o.order_code) };
@@ -593,9 +625,16 @@ async function createOrderWithTopic(
   }
 
   if (method && ready.status === "WAITING_ADMIN") {
+    if (method === "GOPAY" && await sendGopayInstructions(ready)) {
+      const paidWait = await transition(code, ["WAITING_ADMIN"], "WAITING_PAYMENT", telegramId, source);
+      if (paidWait) ready = paidWait;
+      await refreshTicket(ready);
+    }
     await sendTopic(
       ready,
-      `📲 Pesanan dari checkout game (Mini App). User sudah memilih ${method}.\n\n${adminHint(ready)}`,
+      method === "GOPAY" && ready.status === "WAITING_PAYMENT"
+        ? "📲 Instruksi GoPay otomatis sudah dikirim ke user. User dapat langsung mengirim bukti pembayaran."
+        : `📲 Pesanan dari checkout game (Mini App). User sudah memilih ${method}.\n\n${adminHint(ready)}`,
     );
   }
   return { kind: "created", order: ready };
@@ -743,7 +782,9 @@ async function handleCheckoutStart(message: Any, token: string) {
       `✅ Pesanan dibuat dari checkout game\n\n🧾 Order ID: ${o.order_code}\n💎 ${o.diamonds} Diamond\n💰 Rp${money(o.price)}\n💳 Metode: ${method}\n📌 ${STATUS_LABEL[o.status]}\n\n` +
         (method === "QRIS"
           ? "Admin sedang menyiapkan QRIS. Gambarnya akan dikirim ke chat ini."
-          : "Admin sedang menyiapkan informasi GoPay. Infonya akan dikirim ke chat ini."),
+          : o.status === "WAITING_PAYMENT"
+            ? "Instruksi GoPay sudah dikirim. Silakan bayar sesuai nominal lalu kirim foto bukti ke chat ini."
+            : "Instruksi GoPay otomatis belum terkirim. Admin akan membantu mengirimkan instruksi."),
       { reply_markup: cancelMarkup(o.order_code) },
     );
   } catch (e) {
@@ -763,17 +804,30 @@ async function chooseMethod(chatId: number, messageId: number, tgId: string, cod
   if (!upd) return ack("Tombol ini sudah tidak berlaku", true);
 
   await ack("Metode dipilih");
-  await refreshTicket(upd);
+  let ready = upd;
+  let gopaySent = false;
+  if (method === "GOPAY") {
+    gopaySent = await sendGopayInstructions(upd);
+    if (gopaySent) {
+      const moved = await transition(code, ["WAITING_ADMIN"], "WAITING_PAYMENT", tgId, null);
+      if (moved) ready = moved;
+    }
+  }
+  await refreshTicket(ready);
   await sendTopic(
-    upd,
-    `💳 User memilih ${method} untuk ${code}.\n\n${adminHint(upd)}`,
+    ready,
+    method === "GOPAY" && ready.status === "WAITING_PAYMENT"
+      ? `💳 User memilih GoPay untuk ${code}. Instruksi otomatis sudah dikirim; tunggu bukti pembayaran dari user.`
+      : `💳 User memilih ${method} untuk ${code}.\n\n${adminHint(ready)}`,
   );
   await show(
     chatId,
     messageId,
     method === "QRIS"
       ? `🟦 QRIS dipilih.\n\nAdmin sedang menyiapkan QRIS untuk pesanan ${code}. Kamu akan menerima gambarnya di chat ini.`
-      : `🟩 GoPay dipilih.\n\nAdmin sedang menyiapkan informasi GoPay untuk pesanan ${code}. Kamu akan menerimanya di chat ini.`,
+      : ready.status === "WAITING_PAYMENT"
+        ? `🟩 GoPay dipilih.\n\nInstruksi pembayaran sudah dikirim. Silakan bayar sesuai nominal lalu kirim foto bukti ke chat ini.`
+        : `🟩 GoPay dipilih.\n\nInstruksi GoPay belum bisa dikirim otomatis. Admin akan membantu mengirimkannya.`,
     cancelMarkup(code),
   );
 }
