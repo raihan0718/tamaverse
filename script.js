@@ -799,7 +799,7 @@ function gachaPage(){
       <div><span class="eyebrow">TAMAVERSE TOP UP</span><h2>Diamond Store</h2><p class="subtle">Isi saldo Diamond untuk membuka lebih banyak hal di Tamaverse.</p></div>
       <div class="diamond-wallet"><small>DIAMOND BALANCE</small><strong>💎 ${Number(state.player.diamonds||0).toLocaleString('id-ID')}</strong></div>
     </div>
-    <div class="notice">Daftar harga Store adalah harga terbaru yang direncanakan. Menu transaksi Nexora Bot masih memakai daftar paket lama, jadi jangan lanjutkan pembayaran sebelum nominal di bot cocok dengan harga di sini.</div>
+    <div class="notice">Pilih paket Diamond, lalu lanjutkan melalui Nexora Bot. Pastikan nominal pada tiket order sesuai dengan daftar harga resmi.</div>
     <div class="section-heading"><h2>Diamond Packages</h2><span class="muted-label">PRICE LIST · IDR</span></div>
     <div class="diamond-package-grid diamond-package-grid-all">
       ${[
@@ -821,7 +821,7 @@ function gachaPage(){
           <button class="button full" type="button" data-action="diamond-purchase" data-amount="${pack.amount}" data-label="${pack.price}">Purchase</button>
         </article>`).join('')}
     </div>
-    <div class="notice">⚠️ Harga Store dan menu transaksi bot belum sinkron. Tombol di bawah hanya membuka bot; jangan melakukan pembayaran jika nominal paket di bot berbeda.</div>
+    
     <div class="card diamond-history-card">
       <div class="section-heading"><h2>Riwayat Transaksi</h2><span class="muted-label">PAYMENT HISTORY</span></div>
       <div class="diamond-history-empty"><span>🧾</span><b>Riwayat belum tersedia</b><p class="subtle">Riwayat pembelian akan ditampilkan di sini setelah fitur riwayat akun aktif. Untuk saat ini, simpan bukti transaksi secara pribadi.</p></div>
