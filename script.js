@@ -17,26 +17,26 @@ const species = [
   {id:'wyrmling',name:'Dravaryn',emoji:'🐉',element:'Fire',rarity:'Legendary',stats:{hp:116,atk:24,def:16,spd:22},pool:['premium']}
  ];
 const petImages = {
-  fluffin: 'assets/pets/slime.webp',
-  embercub: 'assets/pets/ice-pup.webp',
-  bubblit: 'assets/pets/sprout-dino.webp',
-  mossling: 'assets/pets/glow-frog.webp',
-  voltkit: 'assets/pets/fire-cat.webp',
-  coralyn: 'assets/pets/axolotl.webp',
-  cinderowl: 'assets/pets/wizard.webp',
-  petalyn: 'assets/pets/golden-fox.webp',
-  lunabun: 'assets/pets/robo-bunny.webp',
-  glacipup: 'assets/pets/panda.webp',
-  starwhale: 'assets/pets/phoenix.webp',
-  wyrmling: 'assets/pets/dragon.webp'
+  fluffin: 'assets/pets/slime.png',
+  embercub: 'assets/pets/ice-pup.png',
+  bubblit: 'assets/pets/sprout-dino.png',
+  mossling: 'assets/pets/glow-frog.png',
+  voltkit: 'assets/pets/fire-cat.png',
+  coralyn: 'assets/pets/axolotl.png',
+  cinderowl: 'assets/pets/wizard.png',
+  petalyn: 'assets/pets/golden-fox.png',
+  lunabun: 'assets/pets/robo-bunny.png',
+  glacipup: 'assets/pets/panda.png',
+  starwhale: 'assets/pets/phoenix.png',
+  wyrmling: 'assets/pets/dragon.png'
 };
 function petImage(speciesId, className = '', eager = false) {
-  const pet = speciesById(speciesId);
-  const src = petImages[speciesId];
-  if (!src) return esc(pet.emoji);
+  const normalizedId = speciesId || 'fluffin';
+  const pet = speciesById(normalizedId);
+  const src = petImages[normalizedId] || petImages[pet.id] || petImages.fluffin;
   const loading = eager ? 'eager' : 'lazy';
   const priority = eager ? 'high' : 'low';
-  return `<img class="pet-image ${esc(className)}" src="${src}?v=pet-detail-20261031-4" alt="${esc(pet.name)}" loading="${loading}" decoding="async" fetchpriority="${priority}" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'pet-image-fallback',textContent:'${pet.emoji}'}))">`;
+  return `<img class="pet-image ${esc(className)}" src="${src}?v=pet-arena-assets-20261101-1" alt="${esc(pet.name)}" loading="${loading}" decoding="async" fetchpriority="${priority}" onerror="this.onerror=null;this.style.visibility='hidden'">`;
 }
 const accessoryFrames = [
   {id:'common',name:'Glossy Blue',rarity:'Common',src:'assets/ui/Common-GlassyBlue.webp'},
@@ -82,6 +82,7 @@ Object.defineProperty(window, 'state', {
 let page = 'home';
 let selectedPetId = null;
 let battle = null;
+let huntingSkillCooldownTimer = null;
 let battleSection = 'online';
 let toastTimer;
 let petAnimation = 'idle';
@@ -569,7 +570,7 @@ function advanceHuntingLevel(){
     battle.phase='player';battle.busy=false;battle.actionFx='idle';
     battle.log.push(`LEVEL ${battle.wave} · ${battle.opponent.name} memasuki arena!`);
     save();if(page==='battle')render();
-  },1350);
+  },1500);
 }
 function elementMultiplier(a,b){const strong={Fire:'Nature',Nature:'Water',Water:'Fire',Light:'Fire'};if(strong[a]===b)return 1.25;if(strong[b]===a)return .8;return 1;}
 function legacy_battleAction(move){
@@ -982,6 +983,10 @@ function battleView(){
   const hp=Math.max(0,battle.playerHP), ehp=Math.max(0,battle.enemyHP), max=Math.max(1,p.stats.hp), emax=Math.max(1,enemy.stats.hp);
   const log=Array.isArray(battle.log)?battle.log:[];
   const aiTurn=battle.phase==='ai', transition=battle.phase==='transition';
+  const actionCooldown=battle.phase==='cooldown';
+  const skillCooldown=Math.max(0,Math.ceil((Number(battle.skillReadyAt||0)-Date.now())/1000));
+  if(huntingSkillCooldownTimer)clearTimeout(huntingSkillCooldownTimer);
+  if(skillCooldown>0&&battle.phase==='player')huntingSkillCooldownTimer=setTimeout(()=>{if(battle&&page==='battle')render();},250);
   return `
     <section class="page online-battle-page battle-mode-screen solo-hunting-page">
       <div class="battle-mode-top">
@@ -991,7 +996,7 @@ function battleView(){
       </div>
       <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}" aria-label="Solo hunting arena">
         <div class="arena-sky"><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
-        <div class="battle-turn-overlay ${transition?'wave-transition':''}"><b>${aiTurn?'BOT TURN':transition?'LEVEL CLEAR!':'YOUR TURN'}</b><span>${aiTurn?'AI IS CHOOSING':transition?'NEXT OPPONENT ENTERING':'CHOOSE YOUR ACTION'}</span></div>
+        <div class="battle-turn-overlay ${transition?'wave-transition':''}"><b>${aiTurn?'BOT TURN':transition?'LEVEL CLEAR!':actionCooldown?'ACTION COMPLETE':'YOUR TURN'}</b><span>${aiTurn?'AI IS CHOOSING':transition?'NEXT OPPONENT ENTERING':actionCooldown?'PREPARING NEXT TURN':'CHOOSE YOUR ACTION'}</span></div>
         <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
         <div class="battle-side battle-player">
           <div class="battle-nameplate"><b>${esc(p.name)}</b><span>${esc(mySpecies.element)} · Lv.${p.level}</span></div>
@@ -1004,12 +1009,12 @@ function battleView(){
           <div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(enemy.name)}</b><span>LEVEL ${battle.wave}</span></div></div>
         </div>
         <div class="battle-arena-controls">
-          <div class="battle-action-status">${aiTurn?'AI TURN — PLEASE WAIT':transition?'LEVEL CLEAR — PREPARING NEXT OPPONENT':'YOUR TURN — CHOOSE ACTION'}</div>
+          <div class="battle-action-status">${aiTurn?'AI TURN — PLEASE WAIT':transition?'LEVEL CLEAR — PREPARING NEXT OPPONENT':actionCooldown?'ACTION COMPLETE — PLEASE WAIT':'YOUR TURN — CHOOSE ACTION'}</div>
           <div class="battle-action-grid">
-            <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}>Attack</button>
-            <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||battle.skillUsed?'disabled':''}>Skill</button>
-            <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}>Defend</button>
-            <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}>Item · ${state.items.snack}</button>
+            <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
+            <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||skillCooldown>0?'disabled':''}><span>✨</span>Skill${skillCooldown>0?` · ${skillCooldown}s`:''}</button>
+            <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>🛡️</span>Defend</button>
+            <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}><span>🍓</span>Item · ${state.items.snack}</button>
           </div>
         </div>
       </div>
@@ -1220,7 +1225,7 @@ async function exchangeFragments(speciesId,reward){
 function battleAction(move){
   if(!battle||battle.ended||battle.busy||battle.phase!=='player')return;
   if(!['attack','skill','defend','item'].includes(move))return;
-  if(move==='skill'&&battle.skillUsed){showToast('Skill sudah digunakan pada battle ini.');return;}
+  if(move==='skill'&&Number(battle.skillReadyAt||0)>Date.now()){showToast(`Skill cooldown: tunggu ${Math.ceil((battle.skillReadyAt-Date.now())/1000)} detik.`);return;}
   const p=petById(battle.petId);if(!p)return;
   if(move==='item'&&Number(state.items.snack||0)<1){showToast('Camilan habis.');return;}
   const activeBattle=battle,ps=speciesById(p.species),os=speciesById(activeBattle.opponent.species),log=activeBattle.log;
@@ -1235,7 +1240,8 @@ function battleAction(move){
       activeBattle.enemyHP=Math.max(0,activeBattle.enemyHP-damage);
       log.push(`${p.name} ${move==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage.`);
     }
-    activeBattle.enemyDefending=false;if(move==='skill')activeBattle.skillUsed=true;
+    activeBattle.enemyDefending=false;
+    if(move==='skill')activeBattle.skillReadyAt=Date.now()+5000;
   }else if(move==='defend'){activeBattle.defending=true;log.push(`${p.name} bersiap bertahan.`);}
   else{state.items.snack--;const healed=Math.min(25,p.stats.hp-activeBattle.playerHP);activeBattle.playerHP+=healed;log.push(`${p.name} memakai Battle Snack dan memulihkan ${healed} HP.`);}
   activeBattle.log=log.slice(-30);save();
@@ -1244,13 +1250,13 @@ function battleAction(move){
   activeBattle.aiTimer=setTimeout(()=>{
     if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='ai')return;
     const enemy=activeBattle.opponent,choices=['attack','attack','attack','defend'];
-    if(!activeBattle.enemySkillUsed)choices.push('skill');
+    if(Date.now()>=Number(activeBattle.enemySkillReadyAt||0))choices.push('skill');
     if(!activeBattle.enemyItemUsed&&activeBattle.enemyHP<=Math.ceil(enemy.stats.hp*.4))choices.push('item');
     const aiMove=choices[Math.floor(Math.random()*choices.length)];
     if(aiMove==='defend'){activeBattle.enemyDefending=true;log.push(`${enemy.name} memilih bertahan.`);activeBattle.actionFx='ai-defend';}
     else if(aiMove==='item'){activeBattle.enemyItemUsed=true;const healed=Math.min(Math.round(enemy.stats.hp*.16),enemy.stats.hp-activeBattle.enemyHP);activeBattle.enemyHP+=healed;log.push(`${enemy.name} memulihkan ${healed} HP.`);activeBattle.actionFx='ai-item';}
     else{
-      const skill=aiMove==='skill';if(skill)activeBattle.enemySkillUsed=true;
+      const skill=aiMove==='skill';if(skill)activeBattle.enemySkillReadyAt=Date.now()+5000;
       const dodge=clamp(.025+(p.stats.spd-enemy.stats.spd)*.003,.01,.12);
       if(Math.random()<dodge)log.push(`${p.name} menghindari serangan ${enemy.name}.`);
       else{
@@ -1264,8 +1270,13 @@ function battleAction(move){
     }
     activeBattle.defending=false;activeBattle.turn++;activeBattle.log=log.slice(-30);save();
     if(activeBattle.playerHP<=0){finishBattle('loss');return;}
-    activeBattle.phase='player';activeBattle.busy=false;activeBattle.actionFx='idle';render();
-  },850);
+    activeBattle.phase='cooldown';activeBattle.busy=true;activeBattle.log=log.slice(-30);save();render();
+    activeBattle.aiTimer=setTimeout(()=>{
+      if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='cooldown')return;
+      if(activeBattle.playerHP<=0){finishBattle('loss');return;}
+      activeBattle.phase='player';activeBattle.busy=false;activeBattle.actionFx='idle';render();
+    },1500);
+  },1500);
 }
 function finishBattle(result){
   if(!battle||battle.ended)return;
