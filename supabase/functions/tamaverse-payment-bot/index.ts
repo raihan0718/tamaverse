@@ -250,9 +250,10 @@ const proofMarkup = (code: string) => ({
 });
 
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (ch) => ({
+  const entities: Record<string, string> = {
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  })[ch] ?? ch);
+  };
+  return value.replace(/[&<>"']/g, (ch) => entities[ch]);
 }
 
 async function sendGopayInstructions(o: Order): Promise<boolean> {
@@ -530,7 +531,7 @@ type CreateResult =
 /**
  * Inti pembuatan pesanan + topik admin. Dipakai oleh alur manual (menu bot)
  * dan alur checkout dari Mini App. `method` terisi = metode sudah dipilih di Mini App,
- * jadi pesanan langsung masuk WAITING_ADMIN.
+ * lalu GoPay dikirim otomatis sedangkan QRIS menunggu admin.
  */
 async function createOrderWithTopic(
   chatId: number,
@@ -805,9 +806,8 @@ async function chooseMethod(chatId: number, messageId: number, tgId: string, cod
 
   await ack("Metode dipilih");
   let ready = upd;
-  let gopaySent = false;
   if (method === "GOPAY") {
-    gopaySent = await sendGopayInstructions(upd);
+    const gopaySent = await sendGopayInstructions(upd);
     if (gopaySent) {
       const moved = await transition(code, ["WAITING_ADMIN"], "WAITING_PAYMENT", tgId, null);
       if (moved) ready = moved;
