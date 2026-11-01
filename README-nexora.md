@@ -1,4 +1,4 @@
-# Nexora • Tamaverse bot (SANDBOX)
+# Nexora • Tamaverse bot (Manual Payment)
 
 ## File
 - `supabase/functions/tamaverse-payment-bot/index.ts` — seluruh bot (1 file)
@@ -13,7 +13,7 @@
 | `TELEGRAM_WEBHOOK_SECRET` | ya | harus sama dengan `secret_token` di setWebhook |
 | `ADMIN_FORUM_CHAT_ID` | tidak | default `-1004322036078` |
 | `ADMIN_TELEGRAM_ID` | tidak | default `8906658395` |
-| `SANDBOX_MODE` | tidak | default aktif; `false` untuk menghilangkan label sandbox |
+
 | `ORDER_TTL_MINUTES` | tidak | default `120` |
 
 ## Setup
@@ -42,18 +42,18 @@
 - Fungsi `nexora_transition` (compare-and-swap), `nexora_approve_order` (atomik), `nexora_expire_stale`. Semua hanya bisa dipanggil `service_role`.
 
 ## Alur
-`PENDING` → (user pilih metode) `WAITING_ADMIN` → (admin kirim QRIS foto / info GoPay teks di topik) `WAITING_PAYMENT` → (user kirim foto) `PROOF_SUBMITTED` → APPROVE `APPROVED` / DECLINE `DECLINED`.
+`PENDING` → (user pilih metode) `WAITING_ADMIN` → (admin kirim instruksi pembayaran asli di topik) `WAITING_PAYMENT` → (user kirim bukti) `PROOF_SUBMITTED` → admin memeriksa pembayaran → APPROVE `APPROVED` / DECLINE `DECLINED`.
 User bisa `CANCELLED` sebelum bukti dikirim. `EXPIRED` otomatis setelah TTL (dicek saat ada interaksi; PROOF_SUBMITTED tidak expire).
 
 Keputusan desain yang perlu lu tahu:
 - Satu pesanan aktif per user. Tap ganda tidak membuat order kedua.
 - Tombol APPROVE/DECLINE ada di pesan bukti (bukan di header tiket), karena baru relevan setelah bukti masuk. Alternatif: `/tolak alasan` di topik untuk decline dengan alasan.
 - Topik ditutup otomatis saat pesanan selesai/batal/expired.
-- Foto bukti yang sama dipakai di order lain tidak diblokir (supaya dummy bisa dipakai ulang saat tes), tapi admin diberi peringatan.
+- Foto bukti yang sama pada order berbeda diberi peringatan agar admin melakukan pemeriksaan ekstra. Bukti foto bukan verifikasi pembayaran; admin wajib memastikan dana benar-benar diterima melalui kanal pembayaran yang digunakan.
 
 ## Status pengujian (jujur)
-Sudah: type-check TypeScript mode `--strict` dengan shim tipe Deno/Supabase (lolos tanpa error).
-**Belum dijalankan:** migration di Postgres, webhook ke Telegram, pembuatan topik, dan seluruh alur end-to-end. Gua nggak punya akses ke Supabase/Telegram lu dari sini.
+Mode pembayaran manual: admin mengirim instruksi pembayaran asli, user mengirim bukti, lalu admin memeriksa penerimaan dana dan melakukan APPROVE/DECLINE. Approval mengkredit Diamond secara atomik dan satu order hanya dapat dikredit sekali.
+**Belum diverifikasi di percakapan ini:** deployment Edge Function, webhook Telegram, pengiriman instruksi pembayaran aktual, serta pengujian end-to-end. Jangan anggap bot sudah live hanya karena source sudah diperbarui.
 
 Checklist uji manual (urut):
 1. `/start`, semua tombol menu, tap tombol berulang tidak mengirim pesan dobel
