@@ -13,7 +13,6 @@
 | `TELEGRAM_WEBHOOK_SECRET` | ya | harus sama dengan `secret_token` di setWebhook |
 | `ADMIN_FORUM_CHAT_ID` | tidak | default `-1004322036078` |
 | `ADMIN_TELEGRAM_ID` | tidak | default `8906658395` |
-
 | `ORDER_TTL_MINUTES` | tidak | default `120` |
 
 ## Setup
