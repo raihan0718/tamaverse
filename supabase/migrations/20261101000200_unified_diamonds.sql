@@ -6,6 +6,7 @@ alter table public.inventory
 
 -- Remove the old Gems guard before migrating legacy balances.
 drop trigger if exists tamaverse_guard_gem_balance on public.inventory;
+drop function if exists public.guard_tamaverse_gem_balance();
 
 update public.inventory
 set diamonds = coalesce(diamonds, 0) + coalesce(gems, 0),
