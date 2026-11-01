@@ -299,7 +299,7 @@ function rankingPage() {
   const currentIndex = rows.findIndex(r => r.me);
   const current = currentIndex >= 0 ? rows[currentIndex] : null;
   const podium = rows.slice(0,3);
-  const rest = rows.slice(3,10);
+  const rest = rows.slice(3);
   const medal = ['🥇','🥈','🥉'];
   const metric = r => Number(r[category] || 0).toLocaleString('id-ID');
 
@@ -364,7 +364,7 @@ function rankingPage() {
     ` : ''}
 
     ${rest.length ? `
-      <div class="ranking-section-title ranking-list-title"><div><small>KEEP CLIMBING</small><h2>Leaderboard</h2></div><span>RANK 04–10</span></div>
+      <div class="ranking-section-title ranking-list-title"><div><small>KEEP CLIMBING</small><h2>Leaderboard</h2></div><span>RANK 04–${rows.length.toLocaleString('id-ID')}</span></div>
       <div class="ranking-list-card">
         ${rest.map((r,i)=>`
           <div class="ranking-list-row ${r.me?'is-you':''}">
