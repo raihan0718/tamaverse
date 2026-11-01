@@ -2987,3 +2987,18 @@ body[data-theme="dark"] .shop-art-training{background:linear-gradient(145deg,#2c
   .diamond-package-grid-all .diamond-unit-price{font-size:.56rem;}
   .diamond-package-grid-all .button{font-size:.61rem;}
 }
+
+
+/* Nexora top-up success modal */
+.topup-success-modal{position:relative;text-align:center;padding:10px 2px 4px;min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.topup-success-icon{width:76px;height:76px;border-radius:24px;display:grid;place-items:center;font-size:42px;margin:0 auto 15px;background:radial-gradient(circle at 35% 25%,#ffffff35,#a98bff24 62%,#7c5cff12);border:1px solid #d8c6ff45;box-shadow:0 8px 34px #a98bff24;animation:topupGemFloat 2.4s ease-in-out infinite}
+.topup-success-eyebrow{font-size:9px;letter-spacing:3px;font-weight:800;color:#c6b1ff;margin-bottom:7px}
+.topup-success-modal h2{font-size:23px!important;letter-spacing:.2px;color:#fff;margin:0 0 9px!important}
+.topup-success-copy{max-width:270px;margin:0 auto 17px!important;color:#d3cadd!important}
+.topup-success-amount{font:800 34px 'Space Grotesk',sans-serif;color:#e7d9ff;line-height:1.1;margin:2px 0 10px;text-shadow:0 0 22px #b18aff55}
+.topup-success-amount span{display:block;font:800 9px 'Space Grotesk',sans-serif;letter-spacing:3px;color:#bda9df;margin-top:7px}
+.topup-success-thanks{font-size:11px!important;margin:5px 0 18px!important;color:#bfb1d1!important}
+.topup-success-close{width:100%;max-width:230px;min-height:43px;font-weight:800}
+.topup-success-note{position:absolute;right:1px;bottom:-7px;font-size:9px;font-weight:600;letter-spacing:.15px;color:#bca8d9;opacity:.8}
+@keyframes topupGemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@media(max-width:360px){.topup-success-modal{min-height:305px}.topup-success-modal h2{font-size:20px!important}.topup-success-amount{font-size:30px}}
