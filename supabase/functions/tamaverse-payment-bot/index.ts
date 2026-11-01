@@ -205,6 +205,42 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_m
     }
     return;
   }
+  if (payload.startsWith("decline:")) {
+    if (!isAdmin(Number(id))) { await answer("Khusus admin"); return; }
+    const orderId = payload.slice("decline:".length).trim();
+    if (!orderId) { await answer("ID order tidak valid"); return; }
+
+    const { data: order, error } = await db.from("diamond_orders")
+      .select("id,telegram_user_id")
+      .eq("id", orderId)
+      .maybeSingle();
+    if (error || !order?.telegram_user_id) {
+      await answer("Data order tidak ditemukan");
+      await say(chatId, "Notifikasi penolakan gagal dikirim karena data order tidak ditemukan.");
+      return;
+    }
+
+    await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Notifikasi penolakan dikirim." });
+    await say(order.telegram_user_id,
+      `⚠️ PEMBAYARAN TIDAK DAPAT DIPROSES
+
+Mohon maaf, bukti pembayaran untuk pesanan ini belum dapat diproses.
+Silakan hubungi @ipnmesum untuk bantuan lebih lanjut.
+
+— Nexora Team`);
+    await say(chatId, `📨 NOTIFIKASI PENOLAKAN TERKIRIM
+Order: ${orderId}
+
+Pesan sudah dikirim ke customer. Status order dan saldo diamond tidak diubah.`);
+    if (chatId && q.message?.message_id) {
+      try {
+        await telegram("deleteMessage", { chat_id: chatId, message_id: q.message.message_id });
+      } catch (error) {
+        console.error("Could not delete declined proof message:", error);
+      }
+    }
+    return;
+  }
   if (payload.startsWith("price:")) {
     if (id !== adminId) { await answer("Khusus admin"); return; }
     const [, orderId, raw] = payload.split(":"); const amount = Number(raw);
@@ -397,10 +433,10 @@ Periksa transaksi lalu tekan Approve jika valid.`;
     try {
       const { data: order } = await db.from("diamond_orders").select("telegram_topic_id").eq("id", data.id).maybeSingle();
       if (order?.telegram_topic_id) {
-        await telegram("sendPhoto", { chat_id: ticketGroupId, message_thread_id: order.telegram_topic_id, photo: fileId, caption: proofCaption, reply_markup: { inline_keyboard: [[{ text: "✅ APPROVE PAYMENT", callback_data: "approve:" + data.id }]] } });
+        await telegram("sendPhoto", { chat_id: ticketGroupId, message_thread_id: order.telegram_topic_id, photo: fileId, caption: proofCaption, reply_markup: { inline_keyboard: [[{ text: "✅ APPROVE PAYMENT", callback_data: "approve:" + data.id }, { text: "❌ DECLINE", callback_data: "decline:" + data.id }]] } });
       } else {
         await say(adminId, proofCaption);
-        await telegram("sendPhoto", { chat_id: adminId, photo: fileId, caption: `Bukti order ${data.id} dari Telegram ${telegramId}` });
+        await telegram("sendPhoto", { chat_id: adminId, photo: fileId, caption: `Bukti order ${data.id} dari Telegram ${telegramId}`, reply_markup: { inline_keyboard: [[{ text: "✅ APPROVE PAYMENT", callback_data: "approve:" + data.id }, { text: "❌ DECLINE", callback_data: "decline:" + data.id }]] } });
       }
     } catch (topicError) { console.error("Could not forward proof to order topic:", topicError); }
     return;
