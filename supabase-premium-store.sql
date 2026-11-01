@@ -59,7 +59,7 @@ declare
   v_owner uuid := auth.uid();
   v_cost integer;
   v_item_type text;
-  v_gems integer;
+  v_diamonds integer;
   v_premium public.premium_inventory%rowtype;
 begin
   if v_owner is null then
@@ -79,7 +79,7 @@ begin
   insert into public.premium_inventory(owner_id) values (v_owner)
   on conflict (owner_id) do nothing;
 
-  select diamonds into v_gems
+  select diamonds into v_diamonds
   from public.inventory
   where owner_id = v_owner
   for update;
@@ -89,7 +89,7 @@ begin
   where owner_id = v_owner
   for update;
 
-  if v_gems < v_cost then
+  if v_diamonds < v_cost then
     raise exception 'NOT_ENOUGH_DIAMONDS';
   end if;
 
@@ -103,7 +103,7 @@ begin
   update public.inventory
   set diamonds = diamonds - v_cost, updated_at = now()
   where owner_id = v_owner
-  returning diamonds into v_gems;
+  returning diamonds into v_diamonds;
 
   if v_item_type = 'rename' then
     update public.premium_inventory
@@ -125,7 +125,7 @@ begin
 
   return jsonb_build_object(
     'success', true,
-    'diamonds', v_gems,
+    'diamonds', v_diamonds,
     'rename_card_count', v_premium.rename_card_count,
     'rename_pet_card_count', v_premium.rename_pet_card_count,
     'owned_frames', to_jsonb(v_premium.owned_frames)
