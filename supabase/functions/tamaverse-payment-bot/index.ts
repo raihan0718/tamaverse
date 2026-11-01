@@ -895,7 +895,7 @@ async function approveOrder(o: Order, adminId: string): Promise<ActionResult> {
     );
     await notifyUser(
       fresh,
-      `🎉 Pesanan ${fresh.order_code} disetujui!\n💎 ${data.diamonds} Diamond ditambahkan ke akun Tamaverse.\nSaldo sekarang: ${data.balance_after} 💎`,
+      `🎉 TOP UP BERHASIL!\n\n💎 ${data.diamonds} Diamond telah ditambahkan ke akun Tamaverse kamu.\nSaldo sekarang: ${data.balance_after} 💎\n\nTerima kasih sudah melakukan top up! ✨`,
       homeMarkup(),
     );
   }
