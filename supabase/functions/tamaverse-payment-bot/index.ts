@@ -94,6 +94,19 @@ async function handleCallback(q: any) {
       }
     }
   };
+  if (payload.startsWith("proofready:")) {
+    const orderId = payload.slice("proofready:".length);
+    const { data: order, error } = await db.from("diamond_orders")
+      .select("id,telegram_user_id,status,payment_method")
+      .eq("id", orderId).eq("telegram_user_id", id).maybeSingle();
+    if (error || !order || order.status !== "waiting_payment" || !["gopay", "qris"].includes(order.payment_method)) {
+      await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Order tidak aktif atau tidak ditemukan." });
+      return;
+    }
+    await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Silakan kirim foto bukti di chat ini." });
+    await say(chatId, "Silakan kirim foto bukti pembayaran untuk order " + order.id + ". Tidak perlu mengetik perintah atau Order ID.");
+    return;
+  }
   if (payload === "menu:home") {
     await answer("Menu utama");
     await say(chatId, "NEXORA PAY • TAMAVERSE", { reply_markup: { inline_keyboard: [
@@ -145,7 +158,14 @@ async function handleCallback(q: any) {
     const { error } = await db.from("diamond_orders").update({ payment_method: method, updated_at: new Date().toISOString() }).eq("id", orderId);
     if (error) { await answer("Gagal menyimpan metode"); return; }
     await answer("Metode dipilih");
-    if (method === "gopay") await say(chatId, `PEMBAYARAN GOPAY\\nOrder: ${order.id}\\nDiamond: ${order.diamonds}\\nTotal: Rp${money(order.amount_idr)}\\nNomor GoPay: 087722960530\\n\\nKirim foto bukti dengan caption /proof ${order.id}`);
+    if (method === "gopay") await say(chatId, `PEMBAYARAN GOPAY
+Order: ${order.id}
+Diamond: ${order.diamonds}
+Total: Rp${money(order.amount_idr)}
+Nomor GoPay: 087722860530
+A/N: Raihan Rizki Milano
+
+Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_markup: { inline_keyboard: [[{ text: "📤 KIRIM BUKTI PEMBAYARAN", callback_data: "proofready:" + order.id }]] } });
     else {
       await say(chatId, `Metode QRIS dipilih untuk order ${order.id}. Admin akan mengirim QRIS khusus transaksi ini ke chat pribadi lu setelah mengunggahnya di Topic tiket.`);
       try { await sendOrderTopic(orderId, "Pemain memilih QRIS. Admin: kirim foto QRIS khusus order ini langsung ke Topic ini."); } catch (e) { console.error(e); }
@@ -218,8 +238,8 @@ Order: ${order.id}
 Diamond: ${order.diamonds}
 Total: Rp${money(order.amount_idr)}
 
-Silakan scan QRIS khusus order ini. Setelah membayar, kirim foto bukti dengan caption:
-/proof ${order.id}`,
+Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
+        reply_markup: { inline_keyboard: [[{ text: "📤 KIRIM BUKTI PEMBAYARAN", callback_data: "proofready:" + order.id }]] },
       });
       await say(chatId, `QRIS order ${order.id} berhasil diteruskan ke chat pribadi pemain.`);
       return;
@@ -324,20 +344,33 @@ Silakan scan QRIS khusus order ini. Setelah membayar, kirim foto bukti dengan ca
     return;
   }
 
-  if (text.startsWith("/proof")) {
-    const orderId = text.split(/\s+/)[1];
-    const photos = m.photo;
-    if (!orderId || !photos?.length) {
-      await say(chatId, "Kirim foto bukti dengan caption:\n/proof ORDER_ID\nPastikan order sudah menerima instruksi pembayaran.");
-      return;
+  if (m.photo?.length) {
+    const fileId = m.photo[m.photo.length - 1].file_id;
+    let orderId = text.startsWith("/proof") ? text.split(/\\s+/)[1] : null;
+    if (!orderId) {
+      const { data: activeOrders, error: orderLookupError } = await db.from("diamond_orders")
+        .select("id")
+        .eq("telegram_user_id", telegramId)
+        .eq("status", "waiting_payment")
+        .in("payment_method", ["gopay", "qris"])
+        .limit(2);
+      if (orderLookupError) { await say(chatId, "Order aktif gagal diperiksa. Coba lagi."); return; }
+      if (!activeOrders?.length) { await say(chatId, "Belum ada pesanan aktif yang menunggu bukti pembayaran."); return; }
+      if (activeOrders.length > 1) { await say(chatId, "Ada lebih dari satu pesanan aktif. Hubungi admin agar bukti masuk ke tiket yang tepat."); return; }
+      orderId = activeOrders[0].id;
     }
-    const fileId = photos[photos.length - 1].file_id;
     const { data, error } = await db.rpc("submit_tamaverse_diamond_proof", {
       p_order_id: orderId, p_telegram_user_id: telegramId, p_file_id: fileId,
     });
     if (error) { await say(chatId, "Bukti belum bisa dikirim: " + error.message); return; }
     await say(chatId, "Bukti diterima. Admin akan memeriksa transaksi secara manual. Diamond belum ditambahkan.");
-    const proofCaption = `BUKTI PEMBAYARAN MASUK\\nOrder: ${data.id}\\nTelegram: ${telegramId}\\nNominal: Rp${money(data.amount_idr)}\\nDiamond: ${data.diamonds}\\n\\nPeriksa transaksi lalu tekan Approve jika valid.`;
+    const proofCaption = `BUKTI PEMBAYARAN MASUK
+Order: ${data.id}
+Telegram: ${telegramId}
+Nominal: Rp${money(data.amount_idr)}
+Diamond: ${data.diamonds}
+
+Periksa transaksi lalu tekan Approve jika valid.`;
     try {
       const { data: order } = await db.from("diamond_orders").select("telegram_topic_id").eq("id", data.id).maybeSingle();
       if (order?.telegram_topic_id) {
@@ -347,6 +380,10 @@ Silakan scan QRIS khusus order ini. Setelah membayar, kirim foto bukti dengan ca
         await telegram("sendPhoto", { chat_id: adminId, photo: fileId, caption: `Bukti order ${data.id} dari Telegram ${telegramId}` });
       }
     } catch (topicError) { console.error("Could not forward proof to order topic:", topicError); }
+    return;
+  }
+  if (text.startsWith("/proof")) {
+    await say(chatId, "Sekarang cukup tekan tombol KIRIM BUKTI PEMBAYARAN lalu kirim fotonya tanpa caption.");
     return;
   }
 
