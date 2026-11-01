@@ -2,13 +2,12 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 /**
  * NEXORA PAY • TAMAVERSE  (@Nexorapaymbot)
- * Single-file Telegram bot — SANDBOX.
+ * Single-file Telegram bot — manual payment with admin approval.
  *
  * Alur: katalog → konfirmasi → order + topik forum admin → pilih QRIS/GoPay →
- * admin kirim info pembayaran DUMMY di topik → user kirim bukti simulasi →
- * admin APPROVE/DECLINE → Diamond dikredit atomik (idempoten).
- *
- * Tidak ada transaksi uang sungguhan. QRIS/GoPay/bukti = materi dummy.
+ * admin mengirim instruksi pembayaran asli → user mengirim bukti →
+ * admin memeriksa pembayaran secara manual lalu APPROVE/DECLINE →
+ * Diamond dikredit atomik dan idempoten hanya setelah APPROVE.
  */
 
 // ───────────────────────── CONFIG ─────────────────────────
@@ -24,7 +23,6 @@ const TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN2");
 const TELEGRAM_WEBHOOK_SECRET = env("TELEGRAM_WEBHOOK_SECRET");
 const ADMIN_FORUM_CHAT_ID = Number(env("ADMIN_FORUM_CHAT_ID", "-1004322036078"));
 const ADMIN_TELEGRAM_ID = String(env("ADMIN_TELEGRAM_ID", "8906658395"));
-const SANDBOX = Deno.env.get("SANDBOX_MODE") !== "false";
 const ORDER_TTL_MINUTES = Number(Deno.env.get("ORDER_TTL_MINUTES") ?? "120");
 
 const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -109,22 +107,16 @@ const fmtDate = (iso: string) =>
     minute: "2-digit",
   }) + " WIB";
 
-const SANDBOX_NOTE = SANDBOX
-  ? "🧪 MODE SANDBOX: ini simulasi, bukan transaksi uang sungguhan."
-  : "";
-
 // ───────────────────────── TEKS ─────────────────────────
 const TEXT = {
-  welcome: "💎 NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:" +
-    (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+  welcome: "💎 NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", 
   help: "📋 PANDUAN NEXORA\n\n" +
     "1️⃣ Hubungkan akun: kirim /uuid UUID_KAMU\n" +
     "2️⃣ Top Up Diamond: pilih paket → konfirmasi → pilih QRIS/GoPay\n" +
     "3️⃣ Tunggu admin mengirim info pembayaran\n" +
     "4️⃣ Kirim foto bukti ke chat ini\n" +
     "5️⃣ Tunggu admin memeriksa\n\n" +
-    "🛡️ Jangan pernah membagikan password, PIN, atau kode OTP." +
-    (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+    "🛡️ Jangan pernah membagikan password, PIN, atau kode OTP.", 
   uuidPrompt: "🔗 HUBUNGKAN AKUN TAMAVERSE\n\n" +
     "Buka aplikasi Tamaverse → Profile → salin UUID.\n" +
     "Kirim ke chat ini dengan format:\n/uuid UUID_KAMU\n\n" +
@@ -265,15 +257,15 @@ function catalogueText() {
     ...PACKAGES.map((p) => `${p.diamonds} 💎 — Rp${money(p.price)} (Rp${money(p.unit)}/Diamond)`),
     "",
     "Pilih paket untuk melanjutkan.",
-    ...(SANDBOX ? ["", SANDBOX_NOTE] : []),
+
   ].join("\n");
 }
 
 function adminHint(o: Order): string {
   if (o.status === "WAITING_ADMIN") {
     return o.payment_method === "QRIS"
-      ? "➡️ Kirim GAMBAR QRIS dummy (foto) di topik ini."
-      : "➡️ Kirim INFO GoPay dummy (teks) di topik ini.";
+      ? "➡️ Kirim gambar QRIS asli yang akan dipakai untuk pembayaran."
+      : "➡️ Kirim instruksi pembayaran GoPay yang benar dan masih berlaku.";
   }
   if (o.status === "PENDING") return "User belum memilih metode.";
   if (o.status === "WAITING_PAYMENT") return "Info pembayaran sudah dikirim ke user.";
@@ -284,7 +276,7 @@ function adminHint(o: Order): string {
 function ticketText(o: Order): string {
   return [
     "🎫 TIKET PESANAN",
-    ...(SANDBOX ? [SANDBOX_NOTE] : []),
+
     "",
     `🧾 Order ID: ${o.order_code}`,
     `👤 Telegram ID: ${o.telegram_user_id}`,
@@ -309,7 +301,7 @@ function activeOrderView(o: Order): { text: string; markup: Json } {
     return { text: head + `Metode ${o.payment_method}. Admin sedang menyiapkan info pembayaran.`, markup: cancelMarkup(o.order_code) };
   }
   if (o.status === "WAITING_PAYMENT") {
-    return { text: head + "Kirim foto bukti pembayaran simulasi ke chat ini.", markup: cancelMarkup(o.order_code) };
+    return { text: head + "Setelah membayar, kirim foto bukti pembayaran ke chat ini.", markup: cancelMarkup(o.order_code) };
   }
   return { text: head + "Bukti sudah diterima. Menunggu pemeriksaan admin.", markup: backMarkup() };
 }
@@ -642,7 +634,7 @@ async function startOrder(chatId: number, messageId: number, from: Any, amount: 
     chatId,
     messageId,
     `✅ Pesanan dibuat\n\n🧾 Order ID: ${res.order.order_code}\n💎 ${pack.diamonds} Diamond\n💰 Rp${money(pack.price)}\n\nPilih metode pembayaran:` +
-      (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+
     methodMarkup(res.order.order_code),
   );
   return true;
@@ -831,7 +823,7 @@ async function handleProof(message: Any) {
     message_thread_id: o.topic_thread_id,
     photo: photo.file_id,
     caption: [
-      `🧾 BUKTI PEMBAYARAN${SANDBOX ? " (SIMULASI)" : ""}`,
+      `🧾 BUKTI PEMBAYARAN`,
       `Order: ${o.order_code}`,
       `User: ${o.telegram_username ? "@" + o.telegram_username : tgId} (${tgId})`,
       `Paket: ${o.diamonds} Diamond`,
@@ -865,7 +857,7 @@ async function handleProof(message: Any) {
   await refreshTicket(upd);
   await sendMessage(
     chatId,
-    `✅ Bukti${SANDBOX ? " simulasi" : ""} untuk ${o.order_code} sudah diterima.\nMenunggu pemeriksaan admin.`,
+    `✅ Bukti pembayaran untuk ${o.order_code} sudah diterima.\nAdmin akan memeriksa pembayaran sebelum menyetujui pesanan.`,
     { reply_markup: backMarkup() },
   );
 }
@@ -904,8 +896,7 @@ async function approveOrder(o: Order, adminId: string): Promise<ActionResult> {
     );
     await notifyUser(
       fresh,
-      `🎉 Pesanan ${fresh.order_code} disetujui!\n💎 ${data.diamonds} Diamond ditambahkan ke akun Tamaverse.\nSaldo sekarang: ${data.balance_after} 💎` +
-        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+      `🎉 Pesanan ${fresh.order_code} disetujui!\n💎 ${data.diamonds} Diamond ditambahkan ke akun Tamaverse.\nSaldo sekarang: ${data.balance_after} 💎`,
       homeMarkup(),
     );
   }
@@ -993,7 +984,7 @@ async function handleGroupMessage(message: Any) {
 
   if (o.payment_method === "QRIS") {
     if (!isPhoto) {
-      await reply("Order ini QRIS. Kirim gambar QRIS dummy sebagai foto.");
+      await reply("Order ini QRIS. Kirim gambar QRIS asli yang akan dipakai user untuk membayar.");
       return;
     }
     const photo = message.photo[message.photo.length - 1];
@@ -1006,7 +997,7 @@ async function handleGroupMessage(message: Any) {
     });
   } else if (o.payment_method === "GOPAY") {
     if (!text) {
-      await reply("Order ini GoPay. Kirim informasi GoPay dummy sebagai teks.");
+      await reply("Order ini GoPay. Kirim instruksi pembayaran GoPay yang benar dan masih berlaku.");
       return;
     }
     delivered = await tgTry("sendMessage", {
