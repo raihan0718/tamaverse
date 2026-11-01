@@ -1168,12 +1168,26 @@ document.addEventListener('click',event=>{
   if(a==='diamond-payment'){
     const amount=Number(btn.dataset.amount);
     const method=btn.dataset.method;
-    const packageIds={5:'mini_5',10:'basic_10',25:'plus_25',50:'pro_50',100:'max_100',120:'popular_120',300:'value_300',700:'mega_700'};
-    if(!packageIds[amount]||!['qris','gopay'].includes(method))return;
-    const payload='tv_'+amount+'_'+method;
+    if(![5,10,25,50,100,120,300,700].includes(amount)||!['qris','gopay'].includes(method))return;
     closeModal();
-    window.open('https://t.me/Nexorapaymbot?start='+encodeURIComponent(payload),'_blank','noopener');
-    showToast('Bot dibuka dengan detail paket '+amount+' Diamonds dan metode '+method.toUpperCase()+'.');
+    showToast('Menyiapkan checkout...');
+    (async()=>{
+      try{
+        const db=window.TAMAVERSE_SUPABASE_CLIENT;
+        if(!db?.functions?.invoke)throw new Error('Koneksi akun belum siap. Muat ulang Tamaverse lalu coba lagi.');
+        const {data,error}=await db.functions.invoke('create-checkout',{
+          body:{diamonds:amount,method:method.toUpperCase()}
+        });
+        if(error)throw error;
+        if(!data?.url)throw new Error(data?.error||'Link checkout gagal dibuat.');
+        const tg=window.Telegram?.WebApp;
+        if(tg?.openTelegramLink)tg.openTelegramLink(data.url);
+        else window.location.href=data.url;
+      }catch(error){
+        console.error('Diamond checkout failed:',error);
+        showToast(error?.message||'Checkout gagal dibuat. Coba lagi.');
+      }
+    })();
     return;
   }
 
