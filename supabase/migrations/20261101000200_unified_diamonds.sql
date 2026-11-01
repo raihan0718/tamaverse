@@ -22,6 +22,28 @@ for each row execute function public.guard_tamaverse_diamond_balance();
 -- The old Gems column is intentionally retained temporarily for compatibility
 -- with older installed SQL functions. The game no longer reads or writes it.
 
+-- Ensure premium inventory exists before defining purchase RPCs and signup hooks.
+create table if not exists public.premium_inventory (
+  owner_id uuid primary key references auth.users(id) on delete cascade,
+  rename_card_count integer not null default 0 check (rename_card_count >= 0),
+  rename_pet_card_count integer not null default 0 check (rename_pet_card_count >= 0),
+  owned_frames text[] not null default array['common']::text[],
+  updated_at timestamptz not null default now(),
+  constraint premium_frames_valid check (
+    owned_frames <@ array['common','uncommon','rare','legendary','celestial']::text[]
+  )
+);
+alter table public.premium_inventory enable row level security;
+drop policy if exists "Players can read own premium inventory" on public.premium_inventory;
+create policy "Players can read own premium inventory"
+  on public.premium_inventory for select to authenticated
+  using ((select auth.uid()) = owner_id);
+grant select on public.premium_inventory to authenticated;
+revoke insert, update, delete on public.premium_inventory from anon, authenticated;
+insert into public.premium_inventory(owner_id)
+select id from auth.users
+on conflict (owner_id) do nothing;
+
 create or replace function public.purchase_tamaverse_premium_item(p_item_id text)
 returns jsonb
 language plpgsql
