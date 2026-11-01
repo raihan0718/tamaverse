@@ -3473,3 +3473,107 @@ body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8e
     height:42px!important;
   }
 }
+
+
+/* Battle hub — unified light palette (keep dark arena colors out of light mode). */
+body:not([data-theme="dark"]) .battle-hub{
+  color:#342b43;
+}
+body:not([data-theme="dark"]) .battle-hub .eyebrow{
+  color:#8b659f;
+}
+body:not([data-theme="dark"]) .battle-hub .page-title,
+body:not([data-theme="dark"]) .battle-hub h2,
+body:not([data-theme="dark"]) .battle-hub h3{
+  color:#342b43;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-hub-tabs{
+  background:#f0e9f7;
+  border-color:#e3d7ee;
+  box-shadow:0 7px 18px #715b8420;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-hub-tab{
+  color:#756681;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-hub-tab b{
+  color:#40334e;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-hub-tab small{
+  color:#81748b;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-hub-tab>span{
+  background:#e4d9f0;
+  color:#765b91;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-hub-tab.active{
+  background:linear-gradient(135deg,#fff 0%,#f3eafa 100%);
+  border-color:#c7addd;
+  box-shadow:0 3px 10px #72558b18;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-hub-tab.active>span{
+  background:#e7d9f4;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-hero{
+  background:linear-gradient(135deg,#edf5ff 0%,#f0eafa 100%);
+  border-color:#d7d9f0;
+  box-shadow:0 7px 18px #6376a018;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-live{
+  color:#477c91;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-hero h2{
+  color:#342b43;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-hero p{
+  color:#6e667b;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-hero-icon{
+  background:#e0e8fb;
+  border-color:#cbd8f1;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-spark{
+  color:#9279b6;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-match-card{
+  background:linear-gradient(145deg,#fff 0%,#f7f1fb 100%)!important;
+  border:1px solid #e4d8ed!important;
+  color:#342b43;
+  box-shadow:0 5px 0 #eee5f2,0 10px 22px #6a527b12;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-match-card h2{
+  color:#40334e;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-match-card p,
+body:not([data-theme="dark"]) .battle-hub .battle-online-match-card .subtle{
+  color:#766b80;
+}
+body:not([data-theme="dark"]) .battle-hub .battle-online-match-card .button{
+  background:linear-gradient(110deg,#bd83bd,#987bd0);
+  color:#fff;
+  box-shadow:0 4px 0 #8066ae;
+}
+body:not([data-theme="dark"]) .battle-hub .card:not(.battle-online-match-card){
+  color:#40334e;
+}
+body:not([data-theme="dark"]) .battle-hub .card:not(.battle-online-match-card) h2,
+body:not([data-theme="dark"]) .battle-hub .card:not(.battle-online-match-card) h3{
+  color:#40334e;
+}
+body:not([data-theme="dark"]) .battle-hub .card[style*="rgba(140,120,255"]{
+  background:linear-gradient(145deg,#f8f3fc,#eee9f8)!important;
+  border-color:#ded1eb!important;
+  box-shadow:0 5px 0 #e8deef,0 10px 22px #6a527b10;
+}
+body:not([data-theme="dark"]) .battle-hub .card .subtle{
+  color:#766b80;
+}
+body:not([data-theme="dark"]) .battle-hub .button.secondary{
+  background:#eee7f4;
+  border-color:#ded1e8;
+  color:#5d4a70;
+}
+body:not([data-theme="dark"]) .battle-hub .notice{
+  background:#f2edf7;
+  border-color:#e3d8eb;
+  color:#6e6178;
+}
