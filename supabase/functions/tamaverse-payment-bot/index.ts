@@ -113,7 +113,7 @@ async function handleCallback(q: any) {
     await say(chatId, "PILIH PAKET DIAMOND\\n\\nPilih paket untuk membuat tiket pesanan. Pastikan akun Tamaverse sudah terhubung.", { reply_markup: { inline_keyboard: [
       [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
       [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
-      [{ text: "100 💎 — Rp20.000", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
+      [{ text: "100 💎 — Rp7.500", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
       [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
       [{ text: "⬅️ Kembali", callback_data: "menu:home" }]
     ] } }); return;
@@ -500,7 +500,7 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
     await say(chatId, "PILIH PAKET DIAMOND\\n\\nHarga paket resmi Tamaverse:", { reply_markup: { inline_keyboard: [
       [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
       [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
-      [{ text: "100 💎 — Rp20.000", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
+      [{ text: "100 💎 — Rp7.500", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
       [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
       [{ text: "⬅️ Menu utama", callback_data: "menu:home" }]
     ] } });
