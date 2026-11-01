@@ -82,6 +82,7 @@ Object.defineProperty(window, 'state', {
 let page = 'home';
 let selectedPetId = null;
 let battle = null;
+let battleSection = 'online';
 let toastTimer;
 let petAnimation = 'idle';
 let petAnimationTimer;
@@ -895,47 +896,47 @@ function gachaPage(){
   ].map(item=>'<article class="accessory-card store-item-card '+(item.src?'store-frame-card':'')+'"><div class="'+(item.src?'store-frame-art':'store-item-art')+'">'+(item.src?'<img src="'+item.src+'" alt="'+item.name+' frame" loading="lazy" decoding="async">':item.icon)+'</div><div class="accessory-info"><h3>'+item.name+'</h3>'+(item.tier?'<span class="rarity rarity-'+item.tier+' store-frame-tier">'+item.tier+'</span>':'')+'<p class="subtle">'+item.desc+'</p>'+(item.unit?'<b class="store-item-price">Owned: '+item.count+'</b>':'<b class="store-item-price">'+(item.owned?'✓ Owned':'Permanent unlock')+'</b>')+'<b class="store-item-price">💎 '+item.price+' diamonds</b><button class="button full" data-action="buy-premium" data-item="'+item.id+'" '+(item.owned?'disabled':'')+'>'+(item.owned?'Already owned':'Buy now')+'</button></div></article>').join('')+'</div>';
   return '<section class="page collection-page store-page"><div class="eyebrow">WELCOME TO TAMAVERSE</div><h1 class="page-title">Shop</h1><p class="subtle collection-description">Temukan teman baru dan perlengkapan untuk pet-mu.</p>'+tabs+(storeTab==='diamond'?diamondContent:storeTab==='premium'?premiumContent:gachaContent)+'</section>';
 }
-function battlePage(){
-  if (onlineRoom && ['playing', 'finished'].includes(onlineRoom.status)) {
-    return onlineBattleView();
-  }
-  if(battle) return battleView();
-
-
+function battleView(){
+  const p=petById(battle.petId);if(!p){battle=null;return battlePage();}
+  const enemy=battle.opponent, mySpecies=speciesById(p.species), enemySpecies=speciesById(enemy.species);
+  const hp=Math.max(0,battle.playerHP), ehp=Math.max(0,battle.enemyHP), max=Math.max(1,p.stats.hp), emax=Math.max(1,enemy.stats.hp);
   return `
-    ${onlineBattlePage()}
-
-    <div class="page">
-      <div class="card">
-        <h2 style="text-align:center">Practice Battle</h2>
-        <p class="subtle" style="text-align:center">
-         Berburu Hadiah menang: 35 koin + XP
-        </p>
-        <button class="button full" data-action="battle-start" data-mode="practice">
-          Mulai latihan
-        </button>
+    <section class="page battle-live-page">
+      <div class="battle-live-top"><button class="battle-exit" data-action="battle-cancel">←</button><div><div class="eyebrow">SOLO HUNTING</div><h1>Wild Encounter</h1></div><span class="battle-turn-chip">TURN ${battle.turn}</span></div>
+      <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}">
+        <div class="arena-sky"><span class="arena-moon">✦</span><span class="arena-cloud cloud-one">☁</span><span class="arena-cloud cloud-two">☁</span><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
+        <div class="battle-turn-overlay"><b>${battle.phase==='ai'?'AI TURN':'YOUR TURN'}</b><span>${battle.phase==='ai'?'Opponent is choosing an action':'Choose your move'}</span></div>
+        <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
+        <div class="battle-side battle-player"><div class="battle-nameplate"><b>${esc(p.name)}</b><span>${mySpecies.element} · Lv.${p.level}</span></div><div class="battle-sprite">${petImage(p.species,'battle-pet-image')}</div><div class="battle-hp-card"><div class="hp-value">${hp} / ${max} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,hp/max*100)}%"></div></div></div></div>
+        <div class="battle-side battle-enemy"><div class="battle-nameplate"><b>${esc(enemy.name)}</b><span>${enemySpecies.element} · Lv.${enemy.level}</span></div><div class="battle-sprite">${petImage(enemy.species,'battle-pet-image')}</div><div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div></div></div>
+        <div class="battle-arena-controls"><div class="battle-action-status">${battle.phase==='ai'?'🤖 AI sedang menentukan aksi...':'✨ GILIRAN KAMU — PILIH AKSI'}</div><div class="battle-action-grid">
+          <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy?'disabled':''}><span>⚔️</span>Attack</button>
+          <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.skillUsed?'disabled':''}><span>✨</span>Skill</button>
+          <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy?'disabled':''}><span>🛡️</span>Defend</button>
+          <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||!state.items.snack?'disabled':''}><span>🍓</span>Item · ${state.items.snack}</button>
+        </div></div>
       </div>
-      <div class="card" style="margin-top:12px">
-        <h2>Simulated PvP</h2>
-        <p class="subtle">Training Damage dengan monster.</p>
-        <button class="button secondary full" data-action="battle-start" data-mode="simulated">
-          Training
-        </button>
+      <div class="battle-log-panel"><div class="battle-log-heading">BATTLE LOG <span>TURN ${battle.turn}</span></div><div class="battle-log">${battle.log.slice(-5).map(line=>`<div>• ${esc(line)}</div>`).join('')}</div></div>
+    </section>`;
+}
+function battlePage(){
+  if (onlineRoom && ['playing','finished'].includes(onlineRoom.status)) return onlineBattleView();
+  if (battle) return battleView();
+  return `
+    <section class="page battle-hub">
+      <div class="eyebrow">TAMAVERSE ARENA</div><h1 class="page-title">Battle</h1>
+      <p class="subtle">Pilih arena dan bawa companion-mu bertarung.</p>
+      <div class="battle-hub-tabs" role="tablist" aria-label="Battle modes">
+        <button class="battle-hub-tab ${battleSection==='online'?'active':''}" data-action="battle-section" data-section="online" role="tab" aria-selected="${battleSection==='online'}"><span>🌐</span><b>Online</b><small>Player vs Player</small></button>
+        <button class="battle-hub-tab ${battleSection==='solo'?'active':''}" data-action="battle-section" data-section="solo" role="tab" aria-selected="${battleSection==='solo'}"><span>🌿</span><b>Solo / Hunting</b><small>Player vs AI</small></button>
       </div>
-      <div class="notice">
-        Setiap battle memberikan XP dan hadiah sesuai hasil pertarungan.
-      </div>
-      ${state.battleHistory.length ? `
-        <div class="section-heading"><h2>Battle terakhir</h2></div>
-        ${state.battleHistory.slice(0,5).map(item=>`
-          <div class="card battle-history-row">
-            <span>${item.result==='win'?'🏆':item.result==='draw'?'🤝':'💫'} ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span>
-            <span class="muted-label">${new Date(item.date).toLocaleDateString('id-ID')}</span>
-          </div>
-        `).join('')}
-      ` : ''}
-    </div>
-  `;
+      ${battleSection==='online' ? onlineBattlePage() : `
+        <div class="battle-mode-banner solo-banner"><span class="battle-mode-icon">🌿</span><div><div class="eyebrow">WILDERNESS MODE</div><h2>Solo Hunting</h2><p>Temui monster liar dan bertarung bergiliran melawan AI.</p></div></div>
+        <div class="battle-option-card"><div class="battle-option-art">⚔️</div><span class="pill">TURN-BASED · AI</span><h3>Hunt in the Wild</h3><p>Serang, gunakan skill, bertahan, atau pulihkan HP. AI memilih aksi secara acak pada gilirannya.</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai Hunting</button></div>
+        <div class="notice">Giliran berjalan bergantian: Player → AI → Player. AI tidak menyerang bersamaan dengan aksimu.</div>
+      `}
+      ${state.battleHistory.length ? `<div class="section-heading"><h2>Battle terakhir</h2></div>${state.battleHistory.slice(0,5).map(item=>`<div class="card battle-history-row"><span>${item.result==='win'?'🏆':item.result==='draw'?'🤝':'💫'} ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span><span class="muted-label">${new Date(item.date).toLocaleDateString('id-ID')}</span></div>`).join('')}` : ''}
+    </section>`;
 }
 
 function profilePage(){
@@ -1115,42 +1116,51 @@ async function exchangeFragments(speciesId,reward){
   save();render();showToast('Fragmen berhasil ditukar.');
 }
 function battleAction(move){
-  if(!battle||battle.ended)return;
+  if(!battle||battle.ended||battle.busy)return;
   if(move==='skill'&&battle.skillUsed){showToast('Skill sudah digunakan pada battle ini.');return;}
   const p=petById(battle.petId);if(!p)return;
-  const ps=speciesById(p.species),os=speciesById(battle.opponent.species),log=battle.log;
-  battle.actionFx=move;
+  if(move==='item'&&state.items.snack<1){showToast('Camilan habis.');return;}
+  const activeBattle=battle, ps=speciesById(p.species), os=speciesById(activeBattle.opponent.species), log=activeBattle.log;
+  activeBattle.busy=true;activeBattle.actionFx=move;
   if(move==='attack'||move==='skill'){
-    const enemyDodge=clamp(.04+(battle.opponent.stats.spd-p.stats.spd)*.005,.02,.18);
-    if(Math.random()<enemyDodge){
-      log.push(`${battle.opponent.name} menghindari serangan ${p.name}.`);
-    }else{
-      const skillBonus=move==='skill'?5:0;
-      let damage=Math.max(4,Math.round((4+p.stats.atk*.5+skillBonus-battle.opponent.stats.def*.2)*(0.85+Math.random()*.3)*elementMultiplier(ps.element,os.element)));
-      const critChance=clamp(.07+(p.stats.spd-battle.opponent.stats.spd)*.006,.03,.2);
-      if(Math.random()<critChance){damage=Math.round(damage*1.5);log.push('Serangan kritis!');}
-      battle.enemyHP-=damage;
+    const dodge=clamp(.04+(activeBattle.opponent.stats.spd-p.stats.spd)*.005,.02,.18);
+    if(Math.random()<dodge)log.push(`${activeBattle.opponent.name} menghindari serangan ${p.name}.`);
+    else{
+      const bonus=move==='skill'?5:0;
+      let damage=Math.max(4,Math.round((4+p.stats.atk*.5+bonus-activeBattle.opponent.stats.def*.2)*(0.85+Math.random()*.3)*elementMultiplier(ps.element,os.element)*(activeBattle.opponentDefending?.45:1)));
+      activeBattle.opponentDefending=false;
+      if(Math.random()<clamp(.07+(p.stats.spd-activeBattle.opponent.stats.spd)*.006,.03,.2)){damage=Math.round(damage*1.5);log.push('Serangan kritis!');}
+      activeBattle.enemyHP=Math.max(0,activeBattle.enemyHP-damage);
       log.push(`${p.name} ${move==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage!`);
     }
-    if(move==='skill')battle.skillUsed=true;
-  }else if(move==='defend'){
-    battle.defending=true;log.push(`${p.name} bersiap bertahan.`);
-  }else if(move==='item'){
-    if(state.items.snack<1){showToast('Camilan habis.');return;}
-    state.items.snack--;battle.playerHP=Math.min(p.stats.hp,battle.playerHP+25);log.push(`${p.name} memakai camilan dan memulihkan HP!`);
-  }else return;
-  if(battle.enemyHP<=0){finishBattle('win');return;}
-  const playerDodge=clamp(.04+(p.stats.spd-os.stats.spd)*.005,.02,.18);
-  if(Math.random()<playerDodge){
-    log.push(`${p.name} menghindari serangan ${battle.opponent.name}.`);
-  }else{
-    const incoming=Math.max(3,Math.round((4+battle.opponent.stats.atk*.5-p.stats.def*.2)*(0.85+Math.random()*.3)*elementMultiplier(os.element,ps.element)*(battle.defending?.45:1)));
-    battle.playerHP-=incoming;log.push(`${battle.opponent.name} menyerang, ${incoming} damage.`);
-  }
-  battle.defending=false;battle.turn++;
-  if(battle.playerHP<=0){finishBattle('loss');return;}
-  if(battle.turn>30){finishBattle('draw');return;}
-  battle.log=log.slice(-30);render();
+    if(move==='skill')activeBattle.skillUsed=true;
+  }else if(move==='defend'){activeBattle.defending=true;log.push(`${p.name} bersiap bertahan.`);}
+  else if(move==='item'){state.items.snack--;const healed=Math.min(25,p.stats.hp-activeBattle.playerHP);activeBattle.playerHP+=healed;log.push(`${p.name} memakai camilan dan memulihkan ${healed} HP!`);}
+  else{activeBattle.busy=false;return;}
+  activeBattle.log=log.slice(-30);
+  if(activeBattle.enemyHP<=0){activeBattle.busy=false;finishBattle('win');return;}
+  activeBattle.phase='ai';render();
+  activeBattle.aiTimer=setTimeout(()=>{
+    if(battle!==activeBattle||activeBattle.ended)return;
+    const enemy=activeBattle.opponent, choices=['attack','attack','skill','defend'];
+    if(activeBattle.enemyHP<=Math.ceil(enemy.stats.hp*.35))choices.push('item');
+    let aiMove=choices[Math.floor(Math.random()*choices.length)];
+    if(aiMove==='skill'&&activeBattle.aiSkillUsed)aiMove='attack';
+    if(aiMove==='item'&&activeBattle.aiItemUsed)aiMove='attack';
+    if(aiMove==='defend'){activeBattle.opponentDefending=true;log.push(`${enemy.name} memilih bertahan.`);activeBattle.actionFx='ai-defend';}
+    else if(aiMove==='item'){activeBattle.aiItemUsed=true;const healed=Math.min(20,enemy.stats.hp-activeBattle.enemyHP);activeBattle.enemyHP+=healed;log.push(`${enemy.name} memulihkan ${healed} HP.`);activeBattle.actionFx='ai-item';}
+    else{
+      if(aiMove==='skill')activeBattle.aiSkillUsed=true;
+      const dodge=clamp(.04+(p.stats.spd-enemy.stats.spd)*.005,.02,.18);
+      if(Math.random()<dodge)log.push(`${p.name} menghindari serangan ${enemy.name}.`);
+      else{const bonus=aiMove==='skill'?5:0;let damage=Math.max(3,Math.round((4+enemy.stats.atk*.5+bonus-p.stats.def*.2)*(0.85+Math.random()*.3)*elementMultiplier(os.element,ps.element)*(activeBattle.defending?.45:1)));if(Math.random()<.08)damage=Math.round(damage*1.5);activeBattle.playerHP=Math.max(0,activeBattle.playerHP-damage);log.push(`${enemy.name} ${aiMove==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage.`);}
+      activeBattle.actionFx=aiMove;
+    }
+    activeBattle.defending=false;activeBattle.turn++;activeBattle.phase='player';activeBattle.busy=false;activeBattle.log=log.slice(-30);
+    if(activeBattle.playerHP<=0){finishBattle('loss');return;}
+    if(activeBattle.turn>30){finishBattle('draw');return;}
+    render();
+  },700);
 }
 function finishBattle(result){
   if(!battle||battle.ended)return;
@@ -1203,7 +1213,7 @@ window.purchasePremiumItem=purchasePremiumItem;
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
