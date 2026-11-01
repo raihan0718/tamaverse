@@ -292,20 +292,26 @@ async function handleMessage(m: any) {
     const parts = text.split(/\s+/);
     const command = parts[0];
     if (command === "/testtopic") {
+      let stage = "getMe";
       try {
+        const me = await telegram("getMe", {});
+        stage = "getChat";
+        const group = await telegram("getChat", { chat_id: ticketGroupId });
+        stage = "createForumTopic";
         const topic = await telegram("createForumTopic", {
           chat_id: ticketGroupId,
           name: "TEST BOT CONNECTION",
         });
+        stage = "sendMessage";
         await telegram("sendMessage", {
           chat_id: ticketGroupId,
           message_thread_id: topic.message_thread_id,
           text: "Koneksi Topic NexoraPay berhasil. Bot dapat membuat dan mengirim pesan ke Topic.",
         });
-        await say(chatId, "TEST BERHASIL. Topic berhasil dibuat di grup. message_thread_id: " + topic.message_thread_id);
+        await say(chatId, `TEST BERHASIL. Token aktif: @${me.username}; grup terbaca: ${group.title || group.id}; message_thread_id: ${topic.message_thread_id}`);
       } catch (error) {
-        console.error("Topic diagnostic failed:", error);
-        await say(chatId, "TEST TOPIC GAGAL:\\n" + String(error));
+        console.error("Topic diagnostic failed at " + stage + ":", error);
+        await say(chatId, `TEST TOPIC GAGAL pada tahap ${stage}. Token bot: periksa identitas bot lewat /testtopic. Detail: ${String(error)}`);
       }
       return;
     }
