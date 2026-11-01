@@ -381,7 +381,52 @@ function dailyRewardCard(){
   const day=dailyRewardDay();
   return `<div class="card daily-reward-card"><div class="daily-reward-days">${dailyRewards.map((item,index)=>`<div class="daily-reward-day ${index+1===day?'today':''} ${claimed&&index+1===day?'claimed':''}"><span>${claimed&&index+1===day?'✓':item.icon}</span><small>Hari ${index+1}</small></div>`).join('')}</div><div class="daily-reward-footer"><div><b>${claimed?'Hadiah hari ini sudah diklaim':`Hadiah hari ${day}: ${dailyRewards[day-1].label}`}</b><p>${claimed?'Kembali besok untuk hadiah berikutnya.':'Klaim hadiah login hari ini!'}</p></div><button class="button" data-action="claim-daily" ${claimed?'disabled':''}>${claimed?'Diklaim':'Klaim'}</button></div></div>`;
 }
-function claimDailyReward(){
+async function spendDiamonds(amount,reason){
+  const cost=Math.floor(Number(amount));
+  if(!Number.isFinite(cost)||cost<1||state.player.diamonds<cost){showToast('Diamond tidak cukup.');return false;}
+  const db=window.TAMAVERSE_SUPABASE_CLIENT;
+  if(db?.rpc&&window.TAMAVERSE_USER_ID){
+    try{
+      const {data,error}=await db.rpc('tamaverse_spend_diamonds',{p_amount:cost,p_reason:reason});
+      if(error)throw error;
+      const result=Array.isArray(data)?data[0]:data;
+      state.player.diamonds=Number(result?.diamonds??state.player.diamonds-cost);
+    }catch(error){console.error('Diamond spend failed:',error);showToast(error?.message||'Pengeluaran Diamond gagal.');return false;}
+  }else{
+    state.player.diamonds-=cost;
+  }
+  return true;
+}
+async function claimDailyReward(){
+  const db=window.TAMAVERSE_SUPABASE_CLIENT;
+  if(db?.rpc&&window.TAMAVERSE_USER_ID){
+    try{
+      const {data,error}=await db.rpc('tamaverse_claim_daily_reward');
+      if(error)throw error;
+      const result=Array.isArray(data)?data[0]:data;
+      const day=Number(result?.day||0);
+      const reward=dailyRewards[day-1];
+      if(!reward)throw new Error('Hadiah harian tidak valid.');
+      state.dailyReward={lastClaimDate:new Date().toDateString(),day};
+      state.player.diamonds=Number(result.diamonds??state.player.diamonds);
+      if(reward.type==='coins')state.player.coins+=reward.amount;
+      else if(reward.type==='grand')state.player.coins+=100;
+      else if(reward.type!=='diamonds')state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
+      save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
+    }catch(error){console.error('Daily reward claim failed:',error);showToast(error?.message||'Hadiah harian gagal diklaim.');}
+    return;
+  }
+  const today=new Date().toDateString();
+  if(!state.dailyReward)state.dailyReward={lastClaimDate:'',day:0};
+  if(state.dailyReward.lastClaimDate===today){showToast('Hadiah hari ini sudah diklaim.');return;}
+  const day=dailyRewardDay(),reward=dailyRewards[day-1];
+  if(reward.type==='coins')state.player.coins+=reward.amount;
+  else if(reward.type==='diamonds')state.player.diamonds+=reward.amount;
+  else if(reward.type==='grand'){state.player.diamonds+=2;state.player.coins+=100;}
+  else state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
+  state.dailyReward={lastClaimDate:today,day};
+  save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
+}
   const today=new Date().toDateString();
   if(!state.dailyReward)state.dailyReward={lastClaimDate:'',day:0};
   if(state.dailyReward.lastClaimDate===today){showToast('Hadiah hari ini sudah diklaim.');return;}
@@ -507,7 +552,7 @@ function showInventoryItem(type){
 }
 function showShop(){showModal(`<div class="eyebrow">TAMAVERSE STORE</div><h2 id="modalTitle">Perlengkapan pet</h2><p class="store-caption">Pilih jumlah, lalu beli item yang dibutuhkan.</p><div class="store-list">${[['food','🍎','Apple','50'],['energy','⚡','Energy Potion','40'],['snack','🧃','Battle Snack','60'],['training','📘','Training Manual','120']].map(x=>`<div class="quest-row store-item"><div class="store-item-info"><span class="store-item-icon">${x[1]}</span><span class="store-item-name"><strong>${x[2]}</strong><small>🪙 ${x[3]} / item</small></span></div><div class="store-quantity"><button class="button secondary store-step" data-action="qty-minus" data-item="${x[0]}" aria-label="Kurangi jumlah">−</button><strong id="buyQty-${x[0]}">1</strong><button class="button secondary store-step" data-action="qty-plus" data-item="${x[0]}" aria-label="Tambah jumlah">+</button><button class="button secondary store-max" data-action="qty-max" data-item="${x[0]}">Max</button></div><button class="button store-buy" data-action="buy" data-item="${x[0]}">Beli</button></div>`).join('')}</div><button class="button secondary full store-close" data-action="close-modal">Tutup</button>`);}
 function doClaim(id){const q=questDefinitions().find(x=>x.id===id);if(!q||!state.quests.active.includes(id)||state.quests.claimed.includes(id)||(state.quests.progress[id]||0)<q.target)return;state.quests.claimed.push(id);state.player.coins+=q.reward;playerXP(q.xp);save();render();showDailyQuests();showToast(`Quest selesai! +${q.reward} koin +${q.xp} XP pemain.`);}
-function rebuyQuest(id){const q=questDefinitions().find(x=>x.id===id);if(!q||!state.quests.active.includes(id)||!state.quests.claimed.includes(id)||state.quests.rebought.includes(id))return;if(state.player.diamonds<1){showToast('Diamond tidak cukup. Butuh 1 Diamond untuk rebuy quest.');return;}state.player.diamonds--;state.quests.claimed=state.quests.claimed.filter(x=>x!==id);state.quests.rebought.push(id);state.quests.progress[id]=0;save();render();showDailyQuests();showToast(`Quest ${q.title} aktif kembali!`);}
+async function rebuyQuest(id){const q=questDefinitions().find(x=>x.id===id);if(!q||!state.quests.active.includes(id)||!state.quests.claimed.includes(id)||state.quests.rebought.includes(id))return;if(!(await spendDiamonds(1,'quest_rebuy')))return;state.quests.claimed=state.quests.claimed.filter(x=>x!==id);state.quests.rebought.push(id);state.quests.progress[id]=0;save();render();showDailyQuests();showToast(`Quest ${q.title} aktif kembali!`);}
 function resetGame(){showModal(`<div class="eyebrow">KONFIRMASI</div><h2 id="modalTitle">Hapus semua progres?</h2><p>Data lokal, pet, dan koin akan dihapus dari perangkat ini. Tindakan ini tidak bisa dibatalkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button danger" data-action="confirm-reset">Hapus data</button></div>`);}
 
 // Keep daily actions rewarding without allowing unlimited local XP or currency farming.
@@ -1015,7 +1060,7 @@ function showGachaResult(chosen,duplicate){
     <div class="stats-row stats-four"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div><div class="stat-tile"><strong>${chosen.stats.spd}</strong><span>SPD</span></div></div>
     <button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);
 }
-function runEggPulls(id,count,free=false){
+async function runEggPulls(id,count,free=false){
   if(pullInProgress){showToast('Tarikan sedang diproses.');return;}
   const egg=eggs.find(item=>item.id===id);if(!egg)return;
   const pool=species.filter(item=>item.pool.includes(id));
@@ -1025,7 +1070,8 @@ function runEggPulls(id,count,free=false){
   if(state.player[currency]<cost){showToast(`Tidak cukup ${currency==='diamonds'?'diamond':'koin'} untuk tarikan ini.`);return;}
   pullInProgress=true;
   try{
-    if(free)state.gacha.lastFree=new Date().toDateString();else state.player[currency]-=cost;
+    if(currency==='diamonds'&&!free){if(!(await spendDiamonds(cost,'astral_gacha')))return;}
+    if(free)state.gacha.lastFree=new Date().toDateString();else if(currency!=='diamonds')state.player[currency]-=cost;
     const results=[];
     for(let index=0;index<count;index++){
       const rarity=chooseRarityForEgg(egg);
@@ -1048,14 +1094,24 @@ function runEggPulls(id,count,free=false){
     }
   }finally{pullInProgress=false;}
 }
-function exchangeFragments(speciesId,reward){
+async function exchangeFragments(speciesId,reward){
   const costs={coins:{fragments:3,amount:30},diamonds:{fragments:5,amount:1},training:{fragments:4,amount:1}};
   const option=costs[reward],available=state.items.fragments[speciesId]||0;
   if(!option||available<option.fragments){showToast('Fragmen spesies belum cukup.');return;}
-  state.items.fragments[speciesId]-=option.fragments;
-  if(reward==='coins')state.player.coins+=option.amount;
-  else if(reward==='diamonds')state.player.diamonds+=option.amount;
-  else state.items.training+=option.amount;
+  if(reward==='diamonds'&&window.TAMAVERSE_SUPABASE_CLIENT?.rpc&&window.TAMAVERSE_USER_ID){
+    try{
+      const {data,error}=await window.TAMAVERSE_SUPABASE_CLIENT.rpc('tamaverse_exchange_fragments_for_diamond',{p_species_id:speciesId});
+      if(error)throw error;
+      const result=Array.isArray(data)?data[0]:data;
+      state.items.fragments={...(result.fragments||state.items.fragments)};
+      state.player.diamonds=Number(result.diamonds??state.player.diamonds);
+    }catch(error){console.error('Fragment exchange failed:',error);showToast(error?.message||'Penukaran fragment gagal.');return;}
+  }else{
+    state.items.fragments[speciesId]-=option.fragments;
+    if(reward==='coins')state.player.coins+=option.amount;
+    else if(reward==='diamonds')state.player.diamonds+=option.amount;
+    else state.items.training+=option.amount;
+  }
   save();render();showToast('Fragmen berhasil ditukar.');
 }
 function battleAction(move){
