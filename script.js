@@ -1009,6 +1009,11 @@ function battlePage(){
       </div>
       ${battleSection==='online' ? onlineBattlePage() : `
         <div class="battle-mode-banner solo-banner"><span class="battle-mode-icon">🌿</span><div><div class="eyebrow">WILDERNESS MODE</div><h2>Solo Hunting</h2><p>Temui monster liar dan bertarung bergiliran melawan AI.</p></div></div>
+        <div class="battle-turn-preview">
+          <div><span class="turn-preview-icon">🧑‍🚀</span><b>PLAYER</b><small>Your action</small></div>
+          <span class="turn-preview-arrow">↔</span>
+          <div><span class="turn-preview-icon">🤖</span><b>AI BOT</b><small>Random action</small></div>
+        </div>
         <div class="battle-option-card"><div class="battle-option-art">⚔️</div><span class="pill">TURN-BASED · AI</span><h3>Hunt in the Wild</h3><p>Serang, gunakan skill, bertahan, atau pulihkan HP. AI memilih aksi secara acak pada gilirannya.</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai Hunting</button></div>
         <div class="notice">Giliran berjalan bergantian: Player → AI → Player. AI tidak menyerang bersamaan dengan aksimu.</div>
       `}
@@ -2125,8 +2130,17 @@ function onlineBattlePage() {
     <section class="page">
       <div class="eyebrow">TAMAVERSE ONLINE ARENA</div>
       <h1 class="page-title">Online Match</h1>
+      <div class="battle-online-hero">
+        <div class="battle-online-hero-icon">🌐</div>
+        <div class="battle-online-hero-copy">
+          <span class="battle-online-live"><i></i> ONLINE ARENA</span>
+          <h2>Find your rival</h2>
+          <p>Hadapi pemain lain secara real-time. Buat room pribadi atau cari lawan secara acak.</p>
+        </div>
+        <div class="battle-online-spark">✦</div>
+      </div>
 
-      <div class="card">
+      <div class="card battle-online-match-card">
         <h2>⚔️ Random Match</h2>
         <p class="subtle">Cari pemain lain secara acak.</p>
         <button class="button full" data-action="online-random">
