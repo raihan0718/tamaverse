@@ -3050,14 +3050,14 @@ body[data-theme="dark"] .store-frame-art{background:linear-gradient(145deg,#3a30
 .battle-live-top h1{margin:0;font:700 20px 'Space Grotesk',sans-serif}
 .battle-live-top .eyebrow{font-size:9px}
 .battle-live-top .battle-turn-chip{margin-left:auto}
-.battle-live-page .battle-scene{height:440px}
+
 .battle-turn-overlay{position:absolute;z-index:6;top:12px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;min-width:125px;padding:8px 13px;border:1px solid #ffffff9c;border-radius:13px;background:#fff9ffdc;color:#74517c;box-shadow:0 4px 15px #49304a20}
 .battle-turn-overlay b{font:900 10px 'Space Grotesk',sans-serif;letter-spacing:1px}
 .battle-turn-overlay span{font-size:9px}
 body[data-theme="dark"] .battle-hub-tabs{background:#100d1c}
 body[data-theme="dark"] .battle-mode-banner,body[data-theme="dark"] .battle-option-card{background-color:#211a37}
 body[data-theme="dark"] .battle-turn-overlay{background:#251d30eF;border-color:#ffffff2b;color:#f4e9ff}
-@media(max-width:380px){.battle-hub-tab{padding:9px 7px;grid-template-columns:31px 1fr;gap:2px 6px}.battle-hub-tab>span{width:31px;height:31px;font-size:17px}.battle-hub-tab b{font-size:11px}.battle-live-page .battle-scene{height:410px}}
+@media(max-width:380px){.battle-hub-tab{padding:9px 7px;grid-template-columns:31px 1fr;gap:2px 6px}.battle-hub-tab>span{width:31px;height:31px;font-size:17px}.battle-hub-tab b{font-size:11px}}
 
 
 /* Battle hub polish: clear mode hierarchy and richer cards */
