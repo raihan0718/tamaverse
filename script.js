@@ -983,7 +983,7 @@ function battleView(){
   const enemy=battle.opponent, mySpecies=speciesById(p.species);
   const hp=Math.max(0,battle.playerHP), ehp=Math.max(0,battle.enemyHP), max=Math.max(1,p.stats.hp), emax=Math.max(1,enemy.stats.hp);
   const log=Array.isArray(battle.log)?battle.log:[];
-  const aiTurn=battle.phase==='ai', transition=battle.phase==='transition';
+  const aiTurn=battle.phase==='ai', playerAction=battle.phase==='player-action', aiAction=battle.phase==='ai-action', transition=battle.phase==='transition';
   const actionCooldown=battle.phase==='cooldown';
   const skillCooldown=Math.max(0,Math.ceil((Number(battle.skillReadyAt||0)-Date.now())/1000));
   if(huntingSkillCooldownTimer)clearTimeout(huntingSkillCooldownTimer);
@@ -997,7 +997,7 @@ function battleView(){
       </div>
       <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}" aria-label="Solo hunting arena">
         <div class="arena-sky"><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
-        <div class="battle-turn-overlay ${transition?'wave-transition':''}"><b>${aiTurn?'BOT TURN':transition?'LEVEL CLEAR!':actionCooldown?'ACTION COMPLETE':'YOUR TURN'}</b><span>${aiTurn?'AI IS CHOOSING':transition?'NEXT OPPONENT ENTERING':actionCooldown?'PREPARING NEXT TURN':'CHOOSE YOUR ACTION'}</span></div>
+        <div class="battle-turn-overlay ${transition?'wave-transition':''}"><b>${aiTurn?'BOT TURN':playerAction?'PLAYER ACTION':aiAction?'BOT ACTION':transition?'LEVEL CLEAR!':actionCooldown?'ACTION COMPLETE':'YOUR TURN'}</b><span>${aiTurn?'AI IS CHOOSING':playerAction?'PLAYER MOVE IN PROGRESS':aiAction?'AI MOVE IN PROGRESS':transition?'NEXT OPPONENT ENTERING':actionCooldown?'PREPARING NEXT TURN':'CHOOSE YOUR ACTION'}</span></div>
         <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
         <div class="battle-side battle-player">
           <div class="battle-nameplate"><b>${esc(p.name)}</b><span>${esc(mySpecies.element)} · Lv.${p.level}</span></div>
@@ -1010,7 +1010,7 @@ function battleView(){
           <div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(enemy.name)}</b><span>LEVEL ${battle.wave}</span></div></div>
         </div>
         <div class="battle-arena-controls">
-          <div class="battle-action-status">${aiTurn?'AI TURN — PLEASE WAIT':transition?'LEVEL CLEAR — PREPARING NEXT OPPONENT':actionCooldown?'ACTION COMPLETE — PLEASE WAIT':'YOUR TURN — CHOOSE ACTION'}</div>
+          <div class="battle-action-status">${aiTurn||aiAction?'AI TURN — PLEASE WAIT':playerAction?'PLAYER ACTION — PLEASE WAIT':transition?'LEVEL CLEAR — PREPARING NEXT OPPONENT':actionCooldown?'ACTION COMPLETE — PLEASE WAIT':'YOUR TURN — CHOOSE ACTION'}</div>
           <div class="battle-action-grid">
             <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
             <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||skillCooldown>0?'disabled':''}><span>✨</span>Skill${skillCooldown>0?` · ${skillCooldown}s`:''}</button>
