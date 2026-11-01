@@ -1,640 +1,1185 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN2")!;
-const adminId = Deno.env.get("TELEGRAM_ADMIN_ID")!;
-const webhookSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET")!;
-const ticketGroupId = "-1004322036078";
-const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
-const api = (method: string) => `https://api.telegram.org/bot${botToken}/${method}`;
+/**
+ * NEXORA PAY • TAMAVERSE  (@Nexorapaymbot)
+ * Single-file Telegram bot — SANDBOX.
+ *
+ * Alur: katalog → konfirmasi → order + topik forum admin → pilih QRIS/GoPay →
+ * admin kirim info pembayaran DUMMY di topik → user kirim bukti simulasi →
+ * admin APPROVE/DECLINE → Diamond dikredit atomik (idempoten).
+ *
+ * Tidak ada transaksi uang sungguhan. QRIS/GoPay/bukti = materi dummy.
+ */
 
-async function telegram(method: string, body: Record<string, unknown>) {
-  const res = await fetch(api(method), {
-    method: "POST", headers: { "content-type": "application/json" },
+// ───────────────────────── CONFIG ─────────────────────────
+function env(name: string, fallback?: string): string {
+  const v = Deno.env.get(name) ?? fallback;
+  if (v === undefined || v === "") throw new Error(`Missing env: ${name}`);
+  return v;
+}
+
+const SUPABASE_URL = env("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = env("SUPABASE_SERVICE_ROLE_KEY");
+const TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN2");
+const TELEGRAM_WEBHOOK_SECRET = env("TELEGRAM_WEBHOOK_SECRET");
+const ADMIN_FORUM_CHAT_ID = Number(env("ADMIN_FORUM_CHAT_ID", "-1004322036078"));
+const ADMIN_TELEGRAM_ID = String(env("ADMIN_TELEGRAM_ID", "8906658395"));
+const SANDBOX = Deno.env.get("SANDBOX_MODE") !== "false";
+const ORDER_TTL_MINUTES = Number(Deno.env.get("ORDER_TTL_MINUTES") ?? "120");
+
+const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: { persistSession: false },
+});
+const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+
+// ───────────────────────── TYPES ─────────────────────────
+// deno-lint-ignore no-explicit-any
+type Any = any;
+type Json = Record<string, unknown>;
+type Status =
+  | "PENDING"
+  | "WAITING_ADMIN"
+  | "WAITING_PAYMENT"
+  | "PROOF_SUBMITTED"
+  | "APPROVED"
+  | "DECLINED"
+  | "CANCELLED"
+  | "EXPIRED";
+
+interface Order {
+  id: string;
+  order_code: string;
+  telegram_user_id: string;
+  telegram_chat_id: number;
+  telegram_username: string | null;
+  owner_id: string;
+  diamonds: number;
+  price: number;
+  payment_method: "QRIS" | "GOPAY" | null;
+  status: Status;
+  forum_chat_id: number | null;
+  topic_thread_id: number | null;
+  admin_message_id: number | null;
+  proof_file_id: string | null;
+  proof_file_unique_id: string | null;
+  decline_reason: string | null;
+  created_at: string;
+  expires_at: string;
+}
+
+interface ActionResult {
+  ok: boolean;
+  text: string;
+  stale?: boolean;
+}
+
+// ───────────────────────── DATA ─────────────────────────
+const PACKAGES = [
+  { diamonds: 5, price: 1_000, unit: 200 },
+  { diamonds: 10, price: 1_800, unit: 180 },
+  { diamonds: 25, price: 3_500, unit: 140 },
+  { diamonds: 50, price: 5_000, unit: 100 },
+  { diamonds: 100, price: 7_500, unit: 75 },
+  { diamonds: 120, price: 10_800, unit: 90 },
+  { diamonds: 300, price: 24_000, unit: 80 },
+  { diamonds: 700, price: 49_000, unit: 70 },
+] as const;
+
+const ACTIVE: Status[] = ["PENDING", "WAITING_ADMIN", "WAITING_PAYMENT", "PROOF_SUBMITTED"];
+
+const STATUS_LABEL: Record<Status, string> = {
+  PENDING: "🕓 Pesanan dibuat",
+  WAITING_ADMIN: "⏳ Menunggu info pembayaran",
+  WAITING_PAYMENT: "💳 Menunggu bukti pembayaran",
+  PROOF_SUBMITTED: "🧾 Bukti diterima, menunggu admin",
+  APPROVED: "✅ Disetujui",
+  DECLINED: "❌ Ditolak",
+  CANCELLED: "🚫 Dibatalkan",
+  EXPIRED: "⌛ Kedaluwarsa",
+};
+
+const money = (v: number) => new Intl.NumberFormat("id-ID").format(v);
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }) + " WIB";
+
+const SANDBOX_NOTE = SANDBOX
+  ? "🧪 MODE SANDBOX: ini simulasi, bukan transaksi uang sungguhan."
+  : "";
+
+// ───────────────────────── TEKS ─────────────────────────
+const TEXT = {
+  welcome: "💎 NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:" +
+    (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+  help: "📋 PANDUAN NEXORA\n\n" +
+    "1️⃣ Hubungkan akun: kirim /uuid UUID_KAMU\n" +
+    "2️⃣ Top Up Diamond: pilih paket → konfirmasi → pilih QRIS/GoPay\n" +
+    "3️⃣ Tunggu admin mengirim info pembayaran\n" +
+    "4️⃣ Kirim foto bukti ke chat ini\n" +
+    "5️⃣ Tunggu admin memeriksa\n\n" +
+    "🛡️ Jangan pernah membagikan password, PIN, atau kode OTP." +
+    (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+  uuidPrompt: "🔗 HUBUNGKAN AKUN TAMAVERSE\n\n" +
+    "Buka aplikasi Tamaverse → Profile → salin UUID.\n" +
+    "Kirim ke chat ini dengan format:\n/uuid UUID_KAMU\n\n" +
+    "Jangan bagikan password atau kode rahasia.",
+  uuidInvalid: "⚠️ Format UUID belum sesuai.\nSalin UUID dari Tamaverse → Profile, lalu kirim:\n/uuid UUID_KAMU",
+  uuidNotFound: "⚠️ UUID Tamaverse tidak ditemukan. Periksa kembali UUID dari menu Profile.",
+  uuidAlreadyLinked: "⚠️ Akun Telegram ini sudah terhubung ke UUID Tamaverse lain. Hubungi admin jika perlu bantuan.",
+  uuidGameLinked: "⚠️ UUID Tamaverse ini sudah terhubung ke akun Telegram lain.",
+  uuidSaved: "✅ UUID Tamaverse berhasil terhubung!",
+  needLink: "🔗 Hubungkan UUID Tamaverse dulu sebelum top up.\n\nKirim: /uuid UUID_KAMU",
+  ticketFailed: "⚠️ Tiket pesanan gagal dibuat. Pesanan tidak tersimpan, silakan coba lagi sebentar lagi.",
+  genericError: "⚠️ Terjadi kendala. Coba lagi beberapa saat.",
+  unknown: "Perintah belum dikenali. Ketik /help untuk panduan.",
+  noOrderForProof: "Belum ada pesanan yang menunggu bukti. Mulai dari menu Top Up Diamond.",
+  notPrivate: "Gunakan bot ini lewat chat pribadi.",
+};
+
+// ───────────────────────── TELEGRAM HELPERS ─────────────────────────
+async function tg<T = Any>(method: string, body: Json): Promise<T> {
+  const res = await fetch(`${TELEGRAM_API}/${method}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
-  if (!res.ok || !data.ok) throw new Error(data.description || "Telegram API error");
-  return data.result;
-}
-async function say(chatId: number | string, text: string, extra: Record<string, unknown> = {}) {
-  return telegram("sendMessage", { chat_id: chatId, text, ...extra });
-}
-
-async function createOrderTopic(orderId: string, label: string, diamonds: number, telegramId: string) {
-  const topic = await telegram("createForumTopic", {
-    chat_id: ticketGroupId,
-    name: `🟡 ORDER ${orderId.slice(0, 8).toUpperCase()} • ${diamonds} 💎`,
-  });
-  const threadId = Number(topic.message_thread_id);
-  const { error } = await db.from("diamond_orders")
-    .update({ telegram_topic_id: threadId })
-    .eq("id", orderId);
-  if (error) throw new Error("Topic dibuat tetapi gagal menyimpan ID: " + error.message);
-  await telegram("sendMessage", {
-    chat_id: ticketGroupId,
-    message_thread_id: threadId,
-    text: `TIKET DIAMOND BARU\nOrder: ${orderId}\nTelegram: ${telegramId}\nPaket: ${label} — ${diamonds} Diamonds\nStatus: Menunggu nominal dari admin.`,
-  });
-  return threadId;
+  const result = await res.json();
+  if (!res.ok || !result.ok) {
+    throw new Error(result.description || `Telegram ${method} failed`);
+  }
+  return result.result as T;
 }
 
-async function sendOrderTopic(orderId: string, text: string, extra: Record<string, unknown> = {}) {
-  const { data, error } = await db.from("diamond_orders")
-    .select("telegram_topic_id")
-    .eq("id", orderId)
-    .maybeSingle();
-  if (error) throw new Error("Gagal mencari Topic order: " + error.message);
-  if (!data?.telegram_topic_id) throw new Error("TOPIC_NOT_FOUND");
-  return telegram("sendMessage", {
-    chat_id: ticketGroupId,
-    message_thread_id: data.telegram_topic_id,
+async function tgTry<T = Any>(method: string, body: Json): Promise<T | null> {
+  try {
+    return await tg<T>(method, body);
+  } catch (e) {
+    console.error(`tg ${method} failed:`, (e as Error).message);
+    return null;
+  }
+}
+
+const sendMessage = (chatId: number | string, text: string, extra: Json = {}) =>
+  tg("sendMessage", { chat_id: chatId, text, ...extra });
+
+const CLEAR_KB = { inline_keyboard: [] as unknown[] };
+
+/** Edit pesan di tempat (hindari pesan duplikat); fallback kirim baru. */
+async function show(chatId: number | string, messageId: number | undefined, text: string, markup?: Json) {
+  if (messageId) {
+    try {
+      await tg("editMessageText", {
+        chat_id: chatId,
+        message_id: messageId,
+        text,
+        reply_markup: markup ?? CLEAR_KB,
+      });
+      return;
+    } catch (e) {
+      if (String((e as Error).message).includes("message is not modified")) return;
+      await tgTry("editMessageReplyMarkup", {
+        chat_id: chatId,
+        message_id: messageId,
+        reply_markup: CLEAR_KB,
+      });
+    }
+  }
+  await sendMessage(chatId, text, markup ? { reply_markup: markup } : {});
+}
+
+const sendTopic = (o: Order, text: string, extra: Json = {}) =>
+  tgTry("sendMessage", {
+    chat_id: o.forum_chat_id,
+    message_thread_id: o.topic_thread_id,
     text,
     ...extra,
   });
-}
-const money = (n: number) => new Intl.NumberFormat("id-ID").format(n);
-const isAdmin = (id: number) => String(id) === adminId;
-const packages: Record<string, { label: string; diamonds: number; price: number; packageId: string }> = {
-  "1": { label: "Mini", diamonds: 5, price: 1000, packageId: "mini_5" },
-  "2": { label: "Basic", diamonds: 10, price: 1800, packageId: "basic_10" },
-  "3": { label: "Plus", diamonds: 25, price: 3500, packageId: "plus_25" },
-  "4": { label: "Pro", diamonds: 50, price: 5000, packageId: "pro_50" },
-  "5": { label: "Max", diamonds: 100, price: 7500, packageId: "max_100" },
-  "6": { label: "Popular", diamonds: 120, price: 10800, packageId: "popular_120" },
-  "7": { label: "Value", diamonds: 300, price: 24000, packageId: "value_300" },
-  "8": { label: "Mega", diamonds: 700, price: 49000, packageId: "mega_700" },
-};
-const help = `NEXORA • TAMAVERSE DIAMOND TOP-UP
 
-Gunakan tombol menu untuk memilih paket Diamond dan mengikuti instruksi pembayaran.
+const notifyUser = (o: Order, text: string, markup?: Json) =>
+  tgTry("sendMessage", {
+    chat_id: o.telegram_chat_id,
+    text,
+    ...(markup ? { reply_markup: markup } : {}),
+  });
 
-Jika ingin membuka menu utama, kirim /start.
-Pembayaran diproses manual oleh admin. Jangan kirim data rahasia, PIN, atau OTP.`;
+// ───────────────────────── KEYBOARDS ─────────────────────────
+const homeMarkup = () => ({
+  inline_keyboard: [
+    [{ text: "💎 Top Up Diamond", callback_data: "m:topup" }],
+    [{ text: "🔗 Hubungkan UUID", callback_data: "m:uuid" }],
+    [{ text: "📜 Riwayat Pesanan", callback_data: "m:hist" }],
+    [{ text: "📋 Bantuan", callback_data: "m:help" }],
+  ],
+});
 
-async function handleCallback(q: any) {
-  const id = String(q.from?.id ?? "");
-  const chatId = q.message?.chat?.id;
-  const payload = String(q.data ?? "");
-  const answer = async (text: string) => {
-    await telegram("answerCallbackQuery", { callback_query_id: q.id, text });
-    if (chatId && q.message?.message_id) {
-      try {
-        await telegram("deleteMessage", { chat_id: chatId, message_id: q.message.message_id });
-      } catch (error) {
-        console.error("Could not delete previous button message:", error);
-      }
-    }
-  };
-  if (payload.startsWith("proofready:")) {
-    const orderId = payload.slice("proofready:".length);
-    const { data: order, error } = await db.from("diamond_orders")
-      .select("id,telegram_user_id,status,payment_method")
-      .eq("id", orderId).eq("telegram_user_id", id).maybeSingle();
-    if (error || !order || order.status !== "waiting_payment" || !["gopay", "qris"].includes(order.payment_method)) {
-      await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Order tidak aktif atau tidak ditemukan." });
-      return;
-    }
-    await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Silakan kirim foto bukti di chat ini." });
-    await say(chatId, "Silakan kirim foto bukti pembayaran untuk order " + order.id + ". Tidak perlu mengetik perintah atau Order ID.");
-    return;
-  }
-  if (payload === "menu:home") {
-    await answer("Menu utama");
-    await say(chatId, "NEXORA PAY • TAMAVERSE", { reply_markup: { inline_keyboard: [
-      [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
-      [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
-      [{ text: "📋 Panduan", callback_data: "menu:help" }]
-    ] } }); return;
-  }
-  if (payload === "menu:topup") {
-    await answer("Pilih paket");
-    await say(chatId, "PILIH PAKET DIAMOND\\n\\nPilih paket untuk membuat tiket pesanan. Pastikan akun Tamaverse sudah terhubung.", { reply_markup: { inline_keyboard: [
-      [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
-      [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
-      [{ text: "100 💎 — Rp7.500", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
-      [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
-      [{ text: "⬅️ Kembali", callback_data: "menu:home" }]
-    ] } }); return;
-  }
-  if (payload === "menu:uuid") {
-    await answer("Silakan kirim UUID");
-    await say(chatId, "🔗 HUBUNGKAN AKUN TAMAVERSE\n\nKirim UUID akun kamu langsung ke chat ini, tanpa /uuid.\n\nCara melihat UUID:\n1. Buka aplikasi Tamaverse.\n2. Masuk ke menu Profile.\n3. Cari bagian UUID.\n4. Salin ID tersebut, lalu kirim ke chat ini.\n\nPastikan UUID yang dikirim benar dan jangan bagikan password atau kode rahasia.");
-    return;
-  }
-  if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
-  if (payload.startsWith("packageinfo:")) {
-    const amount = Number(payload.split(":")[1]);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 7500, 120: 10800, 300: 24000, 700: 49000 };
-    const price = prices[amount];
-    if (!price) { await answer("Paket tidak valid"); return; }
-    await answer("Detail paket");
-    await say(chatId, `DETAIL PAKET TAMAVERSE\n\n💎 ${amount} Diamonds\nHarga katalog: Rp${money(price)}\n\nPilih metode untuk melihat ringkasan pilihan. Pratinjau ini tidak membuat pesanan atau instruksi pembayaran.`, { reply_markup: { inline_keyboard: [
-      [{ text: "🟦 QRIS", callback_data: `methodpreview:${amount}:qris` }, { text: "🟩 GoPay", callback_data: `methodpreview:${amount}:gopay` }],
-      [{ text: "⬅️ Kembali ke Paket", callback_data: "menu:topup" }]
-    ] } });
-    return;
-  }
-  if (payload.startsWith("methodpreview:")) {
-    const [, rawAmount, method] = payload.split(":");
-    const amount = Number(rawAmount);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 7500, 120: 10800, 300: 24000, 700: 49000 };
-    const price = prices[amount];
-    if (!price || !["qris", "gopay"].includes(method)) { await answer("Pilihan tidak valid"); return; }
-    await answer("Metode dipilih");
-    await say(chatId, `RINGKASAN PILIHAN · PRATINJAU\n\n💎 Paket: ${amount} Diamonds\n💰 Harga katalog: Rp${money(price)}\n💳 Metode: ${method.toUpperCase()}\n\nIni hanya pratinjau tampilan. Belum ada order, tiket admin, QRIS, atau instruksi GoPay yang dibuat. Jangan melakukan pembayaran berdasarkan pesan ini.`, { reply_markup: { inline_keyboard: [
-      [{ text: "⬅️ Ganti metode", callback_data: `packageinfo:${amount}` }],
-      [{ text: "📦 Ganti paket", callback_data: "menu:topup" }]
-    ] } });
-    return;
-  }
-  if (payload.startsWith("pack:")) {
-    const choice = payload.split(":")[1], pack = packages[choice];
-    if (!pack) { await answer("Paket tidak valid"); return; }
-    const { data: link, error: linkError } = await db.from("tamaverse_telegram_links").select("owner_id").eq("telegram_user_id", id).maybeSingle();
-    if (linkError) { await answer("Gagal memeriksa akun"); await say(chatId, "Akun belum bisa diperiksa. Coba lagi beberapa saat."); return; }
-    if (!link) { await answer("UUID belum terhubung"); await say(chatId, "UUID belum terdeteksi. Hubungkan akun dulu.", { reply_markup: { inline_keyboard: [[{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }], [{ text: "⬅️ Menu utama", callback_data: "menu:home" }]] } }); return; }
+const backMarkup = () => ({
+  inline_keyboard: [[{ text: "⬅️ Menu utama", callback_data: "m:home" }]],
+});
 
-    await answer("Memproses pesanan...");
-    const progress = await say(chatId, "⏳ Sedang membuat tiket Diamond kamu...");
-    const { data, error } = await db.rpc("create_tamaverse_diamond_order", { p_telegram_user_id: id, p_package_id: pack.packageId });
-    if (error) {
-      await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: "Tiket gagal dibuat.\n" + error.message });
-      return;
-    }
-    const { error: priceError } = await db.rpc("set_tamaverse_diamond_order_payment", { p_order_id: data.id, p_amount_idr: pack.price, p_admin_note: null });
-    if (priceError) { await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: "Gagal menetapkan harga: " + priceError.message }); return; }
-    await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: `TIKET BERHASIL DIBUAT\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\n\nPilih metode pembayaran:`, reply_markup: { inline_keyboard: [
-      [{ text: "GoPay", callback_data: "method:gopay:" + data.id }],
-      [{ text: "QRIS", callback_data: "method:qris:" + data.id }]
-    ] } });
-    try { await createOrderTopic(data.id, pack.label, pack.diamonds, id); }
-    catch (e) { console.error("Order topic creation failed:", e); await say(ticketGroupId, `Order ${data.id}: gagal membuat Topic — ${String(e)}`); }
-    return;
-  }
-  if (payload.startsWith("method:")) {
-    const [, method, orderId] = payload.split(":");
-    if (method !== "gopay" && method !== "qris") { await answer("Metode tidak valid"); return; }
-    const { data: order } = await db.from("diamond_orders").select("id,telegram_user_id,diamonds,amount_idr,status").eq("id", orderId).eq("telegram_user_id", id).maybeSingle();
-    if (!order || order.status !== "waiting_payment") { await answer("Order tidak valid"); return; }
-    const { error } = await db.from("diamond_orders").update({ payment_method: method, updated_at: new Date().toISOString() }).eq("id", orderId);
-    if (error) { await answer("Gagal menyimpan metode"); return; }
-    await answer("Metode dipilih");
-    if (method === "gopay") await say(chatId, `PEMBAYARAN GOPAY
-Order: ${order.id}
-Diamond: ${order.diamonds}
-Total: Rp${money(order.amount_idr)}
-Nomor GoPay: 087722860530
-A/N: Raihan Rizki Milano
-
-Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_markup: { inline_keyboard: [[{ text: "📤 KIRIM BUKTI PEMBAYARAN", callback_data: "proofready:" + order.id }]] } });
-    else {
-      await say(chatId, `Metode QRIS dipilih untuk order ${order.id}. Admin akan mengirim QRIS khusus transaksi ini ke chat pribadi lu setelah mengunggahnya di Topic tiket.`);
-      try { await sendOrderTopic(orderId, "Pemain memilih QRIS. Admin: kirim foto QRIS khusus order ini langsung ke Topic ini."); } catch (e) { console.error(e); }
-    }
-    return;
-  }
-  if (payload.startsWith("approve:")) {
-    if (!isAdmin(Number(id))) { await answer("Khusus admin"); return; }
-    const orderId = payload.split(":")[1];
-    await answer("Memproses persetujuan...");
-    const { data: orderMeta, error: metaError } = await db.from("diamond_orders")
-      .select("telegram_topic_id")
-      .eq("id", orderId)
-      .maybeSingle();
-    if (metaError) { await say(chatId, "Data pesanan gagal diperiksa: " + metaError.message); return; }
-
-    const { data, error } = await db.rpc("approve_tamaverse_diamond_order", { p_order_id: orderId });
-    if (error) { await say(chatId, "Persetujuan gagal: " + error.message); return; }
-
-    await say(data.telegram_user_id,
-      `🎉 PEMBELIAN BERHASIL!\n\n💎 ${data.diamonds} Diamond telah berhasil ditambahkan ke akun Tamaverse Anda.\n🧾 ID Pesanan: ${orderId}\n\nTerima kasih telah melakukan pembelian. Selamat bermain!`);
-    await say(chatId, `✅ PESANAN DISETUJUI\n+${data.diamonds} Diamond dikreditkan.\nID: ${orderId}`);
-
-    if (orderMeta?.telegram_topic_id) {
-      try {
-        await telegram("deleteForumTopic", {
-          chat_id: ticketGroupId,
-          message_thread_id: orderMeta.telegram_topic_id,
-        });
-        await say(chatId, `🗑️ Topic pesanan ${orderId.slice(0, 8).toUpperCase()} berhasil dihapus.`);
-      } catch (deleteError) {
-        console.error("Could not delete approved order topic:", deleteError);
-        await say(chatId, `⚠️ Pesanan berhasil disetujui, tetapi Topic gagal dihapus. Silakan hapus manual.\nID: ${orderId}`);
-      }
-    } else {
-      await say(chatId, `⚠️ ID Topic tidak ditemukan untuk pesanan ${orderId}. Silakan periksa Topic secara manual.`);
-    }
-    return;
-  }
-  if (payload.startsWith("decline:")) {
-    if (!isAdmin(Number(id))) { await answer("Khusus admin"); return; }
-    const orderId = payload.slice("decline:".length).trim();
-    if (!orderId) { await answer("ID order tidak valid"); return; }
-
-    const { data: order, error: lookupError } = await db.from("diamond_orders")
-      .select("id,telegram_user_id,telegram_topic_id")
-      .eq("id", orderId)
-      .maybeSingle();
-    if (lookupError || !order?.telegram_user_id) {
-      await answer("Data order tidak ditemukan");
-      await say(chatId, "Order tidak ditemukan. Tidak ada perubahan yang dilakukan.");
-      return;
-    }
-
-    await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Memproses penolakan..." });
-
-    const { data: cancelled, error: cancelError } = await db.rpc(
-      "set_tamaverse_diamond_order_status",
-      { p_order_id: orderId, p_status: "cancelled" }
+function packageMarkup() {
+  const rows: Json[][] = [];
+  for (let i = 0; i < PACKAGES.length; i += 2) {
+    rows.push(
+      PACKAGES.slice(i, i + 2).map((p) => ({
+        text: `${p.diamonds} 💎 — Rp${money(p.price)}`,
+        callback_data: `p:${p.diamonds}`,
+      })),
     );
-    if (cancelError || !cancelled) {
-      await say(chatId, "Order gagal dibatalkan. Topic tidak dihapus. Detail: " + (cancelError?.message || "Order tidak ditemukan."));
-      return;
-    }
-
-    await say(order.telegram_user_id,
-      `⚠️ PEMBAYARAN TIDAK DAPAT DIPROSES
-
-Mohon maaf, bukti pembayaran untuk pesanan ini belum dapat diproses.
-Order lama telah dibatalkan. Untuk melakukan top-up kembali, tekan tombol di bawah atau kirim /start untuk membuka menu utama.
-Jika membutuhkan bantuan, hubungi @ipnmesum.
-
-— Nexora Team`,
-      { reply_markup: { inline_keyboard: [
-        [{ text: "💎 Kembali ke Menu Top Up", callback_data: "menu:topup" }],
-        [{ text: "🏠 Menu Utama", callback_data: "menu:home" }]
-      ] } });
-
-    let topicDeleted = false;
-    if (order.telegram_topic_id) {
-      try {
-        await telegram("deleteForumTopic", {
-          chat_id: ticketGroupId,
-          message_thread_id: order.telegram_topic_id,
-        });
-        topicDeleted = true;
-      } catch (deleteError) {
-        console.error("Could not delete declined order topic:", deleteError);
-      }
-    }
-
-    await say(chatId,
-      `❌ ORDER DITOLAK & DIBATALKAN
-Order: ${orderId}
-Customer sudah diberi tahu dan bisa top-up ulang dengan /buy.
-Topic: ${topicDeleted ? "berhasil dihapus" : "tidak ditemukan atau gagal dihapus"}.`);
-
-    if (chatId && q.message?.message_id) {
-      try {
-        await telegram("deleteMessage", { chat_id: chatId, message_id: q.message.message_id });
-      } catch (error) {
-        console.error("Could not delete declined proof message:", error);
-      }
-    }
-    return;
   }
-  if (payload.startsWith("price:")) {
-    if (id !== adminId) { await answer("Khusus admin"); return; }
-    const [, orderId, raw] = payload.split(":"); const amount = Number(raw);
-    if (![5000,10000,15000,20000,25000,50000].includes(amount)) { await answer("Nominal tidak valid"); return; }
-    await answer("Menyimpan harga...");
-    const { data, error } = await db.rpc("set_tamaverse_diamond_order_payment", { p_order_id: orderId, p_amount_idr: amount, p_admin_note: null });
-    if (error) { await say(chatId, "Gagal mengatur harga: " + error.message); return; }
-    await say(data.telegram_user_id, `INSTRUKSI PEMBAYARAN TAMAVERSE\nOrder: ${data.id}\nDiamond: ${data.diamonds}\nTotal: Rp${money(data.amount_idr)}\n\nIkuti instruksi pembayaran dari admin. Setelah membayar, kirim foto bukti dengan caption /proof ${data.id}. Jangan kirim PIN atau OTP.`);
-    try {
-      await sendOrderTopic(orderId, `Harga ditetapkan: Rp${money(amount)}\nKirim instruksi QRIS/pembayaran secara manual kepada pemain.`);
-    } catch (topicError) { console.error("Could not post price update to order topic:", topicError); }
-    await say(chatId, `Harga tersimpan: Rp${money(amount)}\nOrder: ${orderId}\nKirim instruksi pembayaran secara manual.`);
-    return;
-  }
-  await answer("Tombol tidak dikenali");
+  rows.push([{ text: "⬅️ Menu utama", callback_data: "m:home" }]);
+  return { inline_keyboard: rows };
 }
 
-async function handleMessage(m: any) {
-  const chatId = m.chat?.id;
-  const telegramId = String(m.from?.id ?? "");
-  const username = m.from?.username ?? "";
-  const text = String(m.text ?? m.caption ?? "").trim();
-  if (!chatId || !telegramId) return;
+const methodMarkup = (code: string) => ({
+  inline_keyboard: [
+    [
+      { text: "🟦 QRIS", callback_data: `pm:${code}:q` },
+      { text: "🟩 GoPay", callback_data: `pm:${code}:g` },
+    ],
+    [{ text: "❌ Batalkan pesanan", callback_data: `x:${code}` }],
+  ],
+});
 
-  if (m.chat?.type !== "private") {
-    if (text === "/chatid" || text.startsWith("/chatid@")) {
-      await say(chatId, `INFO GRUP
-ID: ${chatId}
-Nama: ${m.chat?.title || "-"}
-Tipe: ${m.chat?.type || "-"}
-Bot: ${(await telegram("getMe", {})).username}`);
-      return;
-    }
-    // Admin posts a per-order QRIS image directly inside that order's forum Topic.
-    if (isAdmin(Number(telegramId)) && m.message_thread_id && m.photo?.length) {
-      const { data: order, error } = await db.from("diamond_orders")
-        .select("id,telegram_user_id,diamonds,amount_idr,status,payment_method")
-        .eq("telegram_topic_id", m.message_thread_id)
-        .maybeSingle();
-      if (error || !order) {
-        await say(chatId, "QRIS tidak terkirim: tiket order tidak ditemukan untuk Topic ini.");
-        return;
-      }
-      if (order.status !== "waiting_payment" || order.payment_method !== "qris") {
-        await say(chatId, "QRIS tidak terkirim. Pastikan pemain sudah memilih metode QRIS dan order masih menunggu pembayaran.");
-        return;
-      }
-      const photo = m.photo[m.photo.length - 1].file_id;
-      await telegram("sendPhoto", {
-        chat_id: order.telegram_user_id,
-        photo,
-        caption: `QRIS PEMBAYARAN TAMAVERSE
-Order: ${order.id}
-Diamond: ${order.diamonds}
-Total: Rp${money(order.amount_idr)}
+const cancelMarkup = (code: string) => ({
+  inline_keyboard: [[{ text: "❌ Batalkan pesanan", callback_data: `x:${code}` }]],
+});
 
-Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
-        reply_markup: { inline_keyboard: [[{ text: "📤 KIRIM BUKTI PEMBAYARAN", callback_data: "proofready:" + order.id }]] },
-      });
-      await say(chatId, `QRIS order ${order.id} berhasil diteruskan ke chat pribadi pemain.`);
-      return;
-    }
+const proofMarkup = (code: string) => ({
+  inline_keyboard: [[
+    { text: "✅ APPROVE", callback_data: `a:${code}` },
+    { text: "❌ DECLINE", callback_data: `d:${code}` },
+  ]],
+});
+
+// ───────────────────────── TEXT BUILDERS ─────────────────────────
+function catalogueText() {
+  return [
+    "💎 DAFTAR HARGA DIAMOND",
+    "",
+    ...PACKAGES.map((p) => `${p.diamonds} 💎 — Rp${money(p.price)} (Rp${money(p.unit)}/Diamond)`),
+    "",
+    "Pilih paket untuk melanjutkan.",
+    ...(SANDBOX ? ["", SANDBOX_NOTE] : []),
+  ].join("\n");
+}
+
+function adminHint(o: Order): string {
+  if (o.status === "WAITING_ADMIN") {
+    return o.payment_method === "QRIS"
+      ? "➡️ Kirim GAMBAR QRIS dummy (foto) di topik ini."
+      : "➡️ Kirim INFO GoPay dummy (teks) di topik ini.";
+  }
+  if (o.status === "PENDING") return "User belum memilih metode.";
+  if (o.status === "WAITING_PAYMENT") return "Info pembayaran sudah dikirim ke user.";
+  if (o.status === "PROOF_SUBMITTED") return "Bukti sudah masuk. Gunakan APPROVE/DECLINE pada pesan bukti.";
+  return "Pesanan selesai.";
+}
+
+function ticketText(o: Order): string {
+  return [
+    "🎫 TIKET PESANAN",
+    ...(SANDBOX ? [SANDBOX_NOTE] : []),
+    "",
+    `🧾 Order ID: ${o.order_code}`,
+    `👤 Telegram ID: ${o.telegram_user_id}`,
+    `🔖 Username: ${o.telegram_username ? "@" + o.telegram_username : "-"}`,
+    `🔗 UUID: ${o.owner_id}`,
+    `💎 Paket: ${o.diamonds} Diamond`,
+    `💰 Nominal: Rp${money(o.price)}`,
+    `💳 Metode: ${o.payment_method ?? "belum dipilih"}`,
+    `📌 Status: ${STATUS_LABEL[o.status]}`,
+    `🕒 Dibuat: ${fmtDate(o.created_at)}`,
+    "",
+    adminHint(o),
+  ].join("\n");
+}
+
+function activeOrderView(o: Order): { text: string; markup: Json } {
+  const head = `🧾 Pesanan aktif: ${o.order_code}\n💎 ${o.diamonds} Diamond · Rp${money(o.price)}\n📌 ${STATUS_LABEL[o.status]}\n\n`;
+  if (o.status === "PENDING") {
+    return { text: head + "Pilih metode pembayaran:", markup: methodMarkup(o.order_code) };
+  }
+  if (o.status === "WAITING_ADMIN") {
+    return { text: head + `Metode ${o.payment_method}. Admin sedang menyiapkan info pembayaran.`, markup: cancelMarkup(o.order_code) };
+  }
+  if (o.status === "WAITING_PAYMENT") {
+    return { text: head + "Kirim foto bukti pembayaran simulasi ke chat ini.", markup: cancelMarkup(o.order_code) };
+  }
+  return { text: head + "Bukti sudah diterima. Menunggu pemeriksaan admin.", markup: backMarkup() };
+}
+
+// ───────────────────────── DB HELPERS ─────────────────────────
+async function getOrder(code: string): Promise<Order | null> {
+  const { data, error } = await db.from("nexora_orders").select("*").eq("order_code", code).maybeSingle();
+  if (error) throw error;
+  return (data as Order | null) ?? null;
+}
+
+async function getActiveOrder(telegramId: string): Promise<Order | null> {
+  const { data, error } = await db
+    .from("nexora_orders")
+    .select("*")
+    .eq("telegram_user_id", telegramId)
+    .in("status", ACTIVE)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Order | null) ?? null;
+}
+
+/** Compare-and-swap status. null = status sudah bukan salah satu dari `from`. */
+async function transition(
+  code: string,
+  from: Status[],
+  to: Status,
+  actor: string,
+  note: string | null = null,
+  extra: Json = {},
+): Promise<Order | null> {
+  const { data, error } = await db.rpc("nexora_transition", {
+    p_code: code,
+    p_from: from,
+    p_to: to,
+    p_actor: actor,
+    p_note: note,
+    p_extra: extra,
+  });
+  if (error) throw error;
+  return (data as Order | null) ?? null;
+}
+
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function genCode(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  return "NXR-" + Array.from(bytes, (b) => ALPHABET[b % 32]).join("");
+}
+
+async function refreshTicket(o: Order) {
+  if (!o.forum_chat_id || !o.admin_message_id) return;
+  await tgTry("editMessageText", {
+    chat_id: o.forum_chat_id,
+    message_id: o.admin_message_id,
+    text: ticketText(o),
+  });
+}
+
+async function closeTopic(o: Order) {
+  if (!o.forum_chat_id || !o.topic_thread_id) return;
+  await tgTry("closeForumTopic", {
+    chat_id: o.forum_chat_id,
+    message_thread_id: o.topic_thread_id,
+  });
+}
+
+/** Dipanggil setelah order masuk status akhir. */
+async function afterTerminal(o: Order, topicNote: string) {
+  await refreshTicket(o);
+  await sendTopic(o, topicNote);
+  await closeTopic(o);
+}
+
+async function expireStale() {
+  const { data, error } = await db.rpc("nexora_expire_stale");
+  if (error) {
+    console.error("expire_stale failed:", error);
     return;
   }
+  for (const o of (data ?? []) as Order[]) {
+    await notifyUser(
+      o,
+      `⌛ Pesanan ${o.order_code} kedaluwarsa karena tidak diselesaikan tepat waktu.\nSilakan buat pesanan baru.`,
+      homeMarkup(),
+    );
+    await afterTerminal(o, "⌛ Pesanan kedaluwarsa (otomatis).");
+  }
+}
 
-  if (text.startsWith("/start") || text === "/help") {
-    const startPayload = text.startsWith("/start") ? (text.split(/\s+/)[1] || "") : "";
-    const handoff = /^tv_(5|10|25|50|100|120|300|700)_(qris|gopay)$/i.exec(startPayload);
-    if (handoff) {
-      const amount = Number(handoff[1]);
-      const method = handoff[2].toLowerCase();
-      const pack = Object.values(packages).find((item) => item.diamonds === amount);
-      if (!pack) { await say(chatId, "Paket tidak tersedia. Silakan kembali ke Tamaverse."); return; }
+// ───────────────────────── UUID LINKING ─────────────────────────
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-      const { data: linkedAccount, error: linkError } = await db.from("tamaverse_telegram_links")
-        .select("owner_id").eq("telegram_user_id", telegramId).maybeSingle();
-      if (linkError) { await say(chatId, "Akun belum bisa diperiksa. Coba lagi beberapa saat."); return; }
-      if (!linkedAccount) {
-        await say(chatId, "Akun Telegram belum terhubung ke Tamaverse.\n\nBuka Tamaverse > Profile > Hubungkan Telegram Bot, lalu kirim UUID akun dengan format:\n/uuid UUID_KAMU\n\nSetelah berhasil, tekan kembali tombol beli di Tamaverse.");
-        return;
-      }
+type LinkResult = "ok" | "not_found" | "telegram_other" | "uuid_other" | "error";
 
-      const { data: order, error: orderError } = await db.rpc("create_tamaverse_diamond_order", {
-        p_telegram_user_id: telegramId,
-        p_package_id: pack.packageId,
-      });
-      if (orderError || !order?.id) {
-        await say(chatId, "Order gagal dibuat: " + (orderError?.message || "Respons database tidak valid.") + "\nSilakan coba lagi atau hubungi admin.");
-        return;
-      }
+/** Hubungkan Telegram ↔ UUID. Satu UUID hanya boleh ke satu Telegram, dan sebaliknya. */
+async function ensureLink(telegramId: string, username: string, uuid: string): Promise<LinkResult> {
+  const { data: authData, error: authError } = await db.auth.admin.getUserById(uuid);
+  if (authError || !authData?.user) return "not_found";
 
-      const { error: priceError } = await db.rpc("set_tamaverse_diamond_order_payment", {
-        p_order_id: order.id,
-        p_amount_idr: pack.price,
-        p_admin_note: null,
-      });
-      if (priceError) {
-        await say(chatId, "Order tercatat, tetapi harga belum berhasil ditetapkan. Jangan membuat pembayaran. Hubungi admin dengan Order ID:\n" + order.id);
-        return;
-      }
+  const { data: byTelegram, error: e1 } = await db
+    .from("tamaverse_telegram_links")
+    .select("owner_id")
+    .eq("telegram_user_id", telegramId)
+    .maybeSingle();
+  if (e1) return "error";
+  if (byTelegram && String(byTelegram.owner_id) !== uuid) return "telegram_other";
 
-      const { error: methodError } = await db.from("diamond_orders")
-        .update({ payment_method: method, updated_at: new Date().toISOString() })
-        .eq("id", order.id).eq("telegram_user_id", telegramId);
-      if (methodError) {
-        await say(chatId, "Order tercatat, tetapi metode pembayaran belum tersimpan. Jangan membayar dulu. Hubungi admin dengan Order ID:\n" + order.id);
-        return;
-      }
+  const { data: byGame, error: e2 } = await db
+    .from("tamaverse_telegram_links")
+    .select("telegram_user_id")
+    .eq("owner_id", uuid)
+    .maybeSingle();
+  if (e2) return "error";
+  if (byGame && String(byGame.telegram_user_id) !== telegramId) return "uuid_other";
 
-      try {
-        await createOrderTopic(order.id, pack.label, pack.diamonds, telegramId);
-        await sendOrderTopic(order.id,
-          `ORDER DIAMOND BARU\nOrder: ${order.id}\nTelegram: ${telegramId}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\nMetode: ${method.toUpperCase()}\nStatus: waiting_payment`);
-      } catch (topicError) {
-        console.error("Order topic creation failed:", topicError);
-        await say(adminId, `TOPIC GAGAL DIBUAT — ORDER ${order.id}\n${String(topicError)}\nSilakan tindak lanjuti manual.`);
-      }
+  const { error: saveError } = await db.from("tamaverse_telegram_links").upsert(
+    { telegram_user_id: telegramId, telegram_username: username || null, owner_id: uuid },
+    { onConflict: "telegram_user_id" },
+  );
+  if (saveError) {
+    console.error("UUID link save failed:", saveError);
+    return "error";
+  }
+  return "ok";
+}
 
-      if (method === "gopay") {
-        await say(chatId, `✅ ORDER TAMAVERSE BERHASIL DIBUAT\n\nOrder: ${order.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\nMetode: GoPay\n\nNomor GoPay: 087722860530\nA/N: Raihan Rizki Milano\n\nSetelah membayar, tekan tombol di bawah untuk mengirim foto bukti. Jangan kirim PIN atau OTP.`,
-          { reply_markup: { inline_keyboard: [[{ text: "📤 KIRIM BUKTI PEMBAYARAN", callback_data: "proofready:" + order.id }]] } });
-      } else {
-        await say(chatId, `✅ ORDER TAMAVERSE BERHASIL DIBUAT\n\nOrder: ${order.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\nMetode: QRIS\nStatus: Menunggu admin mengirim QRIS khusus transaksi ini.\n\nJangan melakukan pembayaran sebelum QRIS dari bot diterima.`);
-        try { await sendOrderTopic(order.id, "Pemain memilih QRIS. Admin: kirim foto QRIS khusus order ini langsung ke Topic."); }
-        catch (topicError) { console.error("Could not notify QRIS Topic:", topicError); }
-      }
-      return;
-    }
+const LINK_MSG: Record<Exclude<LinkResult, "ok">, string> = {
+  not_found: TEXT.uuidNotFound,
+  telegram_other: TEXT.uuidAlreadyLinked,
+  uuid_other: TEXT.uuidGameLinked,
+  error: TEXT.genericError,
+};
 
-    await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
-      [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
-      [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
-      [{ text: "📋 Panduan", callback_data: "menu:help" }]
-    ] } });
+async function linkUuid(chatId: number | string, telegramId: string, username: string, supplied: string) {
+  const uuid = supplied.trim().toLowerCase();
+  if (!UUID_PATTERN.test(uuid)) {
+    await sendMessage(chatId, TEXT.uuidInvalid);
     return;
   }
+  const result = await ensureLink(telegramId, username, uuid);
+  if (result !== "ok") {
+    await sendMessage(chatId, LINK_MSG[result]);
+    return;
+  }
+  await sendMessage(chatId, `${TEXT.uuidSaved}\n\nPilih menu berikut:`, { reply_markup: homeMarkup() });
+}
 
-  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  if (text.startsWith("/uuid") || uuidPattern.test(text.trim())) {
-    const uuid = text.startsWith("/uuid") ? text.split(/\s+/)[1]?.trim() : text.trim();
-    if (!uuid || !uuidPattern.test(uuid)) {
-      await say(chatId, "UUID belum terdeteksi atau formatnya salah.\nBuka Tamaverse > Profile, salin UUID, lalu kirim:\n/uuid UUID_KAMU");
-      return;
-    }
+// ───────────────────────── ORDER FLOW (USER) ─────────────────────────
+async function showHistory(chatId: number, messageId: number | undefined, telegramId: string) {
+  await expireStale();
+  const { data, error } = await db
+    .from("nexora_orders")
+    .select("*")
+    .eq("telegram_user_id", telegramId)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (error) throw error;
+  const rows = (data ?? []) as Order[];
+  const text = rows.length === 0
+    ? "📜 RIWAYAT PESANAN\n\nBelum ada pesanan."
+    : "📜 RIWAYAT PESANAN (10 terakhir)\n\n" +
+      rows.map((o) =>
+        `🧾 ${o.order_code}\n💎 ${o.diamonds} · Rp${money(o.price)} · ${o.payment_method ?? "-"}\n${STATUS_LABEL[o.status]}\n🕒 ${fmtDate(o.created_at)}`
+      ).join("\n\n");
+  await show(chatId, messageId, text, backMarkup());
+}
 
-    const { data: authData, error: authError } = await db.auth.admin.getUserById(uuid);
-    if (authError || !authData?.user) {
-      await say(chatId, "UUID Tamaverse tidak ditemukan. Periksa kembali UUID dari menu Profile lalu kirim /uuid UUID_KAMU.");
-      return;
-    }
+async function showPackageDetail(chatId: number, messageId: number, amount: number) {
+  const pack = PACKAGES.find((p) => p.diamonds === amount);
+  if (!pack) return false;
+  await show(
+    chatId,
+    messageId,
+    `DETAIL PAKET\n\n💎 ${pack.diamonds} Diamond\n💰 Rp${money(pack.price)}\n📌 Rp${money(pack.unit)}/Diamond\n\nLanjutkan pesanan ini?`,
+    {
+      inline_keyboard: [
+        [{ text: "✅ Konfirmasi pesanan", callback_data: `c:${pack.diamonds}` }],
+        [{ text: "⬅️ Pilih paket lain", callback_data: "m:topup" }],
+      ],
+    },
+  );
+  return true;
+}
 
-    const { data: existingByTelegram, error: lookupError } = await db
-      .from("tamaverse_telegram_links")
-      .select("owner_id")
-      .eq("telegram_user_id", telegramId)
-      .maybeSingle();
-    if (lookupError) {
-      await say(chatId, "Gagal memeriksa akun. Coba lagi beberapa saat.");
-      return;
-    }
-    if (existingByTelegram && existingByTelegram.owner_id !== uuid) {
-      await say(chatId, "Akun Telegram ini sudah terhubung ke UUID Tamaverse lain. Hubungi admin jika perlu menggantinya.");
-      return;
-    }
+type Pack = (typeof PACKAGES)[number];
+type PayMethod = "QRIS" | "GOPAY";
+type CreateResult =
+  | { kind: "created"; order: Order }
+  | { kind: "existing"; order: Order }
+  | { kind: "failed" };
 
-    const { data: existingByGame, error: gameLookupError } = await db
-      .from("tamaverse_telegram_links")
-      .select("telegram_user_id")
-      .eq("owner_id", uuid)
-      .maybeSingle();
-    if (gameLookupError) {
-      await say(chatId, "Gagal memeriksa akun. Coba lagi beberapa saat.");
-      return;
-    }
-    if (existingByGame && existingByGame.telegram_user_id !== telegramId) {
-      await say(chatId, "UUID Tamaverse ini sudah terhubung ke akun Telegram lain. Hubungi admin jika itu akun milikmu.");
-      return;
-    }
+/**
+ * Inti pembuatan pesanan + topik admin. Dipakai oleh alur manual (menu bot)
+ * dan alur checkout dari Mini App. `method` terisi = metode sudah dipilih di Mini App,
+ * jadi pesanan langsung masuk WAITING_ADMIN.
+ */
+async function createOrderWithTopic(
+  chatId: number,
+  from: Any,
+  ownerId: string,
+  pack: Pack,
+  method: PayMethod | null,
+  source: "bot" | "miniapp",
+): Promise<CreateResult> {
+  const telegramId = String(from.id);
 
-    const { error: linkError } = await db.from("tamaverse_telegram_links").upsert({
+  const existing = await getActiveOrder(telegramId);
+  if (existing) return { kind: "existing", order: existing };
+
+  const code = genCode();
+  const { data: ins, error: insErr } = await db
+    .from("nexora_orders")
+    .insert({
+      order_code: code,
       telegram_user_id: telegramId,
-      telegram_username: username || null,
-      owner_id: uuid,
-    }, { onConflict: "telegram_user_id" });
-    if (linkError) {
-      await say(chatId, "UUID belum berhasil disimpan. Coba lagi atau hubungi admin.");
-      return;
+      telegram_chat_id: chatId,
+      telegram_username: from.username ?? null,
+      owner_id: ownerId,
+      diamonds: pack.diamonds,
+      price: pack.price,
+      status: "PENDING",
+      source,
+      expires_at: new Date(Date.now() + ORDER_TTL_MINUTES * 60_000).toISOString(),
+    })
+    .select("*")
+    .single();
+
+  if (insErr) {
+    if (insErr.code === "23505") {
+      // tap ganda / pesanan aktif sudah ada
+      const again = await getActiveOrder(telegramId);
+      if (again) return { kind: "existing", order: again };
     }
-    await say(chatId, "✅ UUID Tamaverse berhasil terhubung!\n\nSekarang pilih menu berikut:", { reply_markup: { inline_keyboard: [
-      [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
-      [{ text: "📋 Panduan", callback_data: "menu:help" }]
-    ] } });
-    return;
+    throw insErr;
   }
+  const order = ins as Order;
 
-  if (text.startsWith("/link")) {
-    await say(chatId, "Sekarang tidak perlu kode pairing. Kirim UUID Tamaverse dengan format:\n/uuid UUID_KAMU");
-    return;
-  }
-
-  if (text.startsWith("/buy")) {
-    await say(chatId, "Menu /buy versi lama sudah dinonaktifkan agar tidak membuat order dengan nominal dummy. Gunakan tombol Top Up Diamond untuk memilih paket dengan harga resmi.");
-    await say(chatId, "PILIH PAKET DIAMOND\\n\\nHarga paket resmi Tamaverse:", { reply_markup: { inline_keyboard: [
-      [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
-      [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
-      [{ text: "100 💎 — Rp7.500", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
-      [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
-      [{ text: "⬅️ Menu utama", callback_data: "menu:home" }]
-    ] } });
-    return;
-  }
-
-  if (m.photo?.length) {
-    const fileId = m.photo[m.photo.length - 1].file_id;
-    let orderId = text.startsWith("/proof") ? text.split(/\\s+/)[1] : null;
-    if (!orderId) {
-      const { data: activeOrders, error: orderLookupError } = await db.from("diamond_orders")
-        .select("id")
-        .eq("telegram_user_id", telegramId)
-        .eq("status", "waiting_payment")
-        .in("payment_method", ["gopay", "qris"])
-        .limit(2);
-      if (orderLookupError) { await say(chatId, "Order aktif gagal diperiksa. Coba lagi."); return; }
-      if (!activeOrders?.length) { await say(chatId, "Belum ada pesanan aktif yang menunggu bukti pembayaran."); return; }
-      if (activeOrders.length > 1) { await say(chatId, "Ada lebih dari satu pesanan aktif. Hubungi admin agar bukti masuk ke tiket yang tepat."); return; }
-      orderId = activeOrders[0].id;
-    }
-    const { data, error } = await db.rpc("submit_tamaverse_diamond_proof", {
-      p_order_id: orderId, p_telegram_user_id: telegramId, p_file_id: fileId,
+  // Buat topik forum. Gagal = pesanan dibatalkan, user diberi tahu jujur.
+  const who = from.username ? `@${from.username}` : `id${telegramId}`;
+  let threadId: number;
+  try {
+    const topic = await tg<{ message_thread_id: number }>("createForumTopic", {
+      chat_id: ADMIN_FORUM_CHAT_ID,
+      name: `${code} | ${who} | ${pack.diamonds}💎`.slice(0, 128),
     });
-    if (error) { await say(chatId, "Bukti belum bisa dikirim: " + error.message); return; }
-    await say(chatId, "Bukti diterima. Admin akan memeriksa transaksi secara manual. Diamond belum ditambahkan.");
-    const proofCaption = `BUKTI PEMBAYARAN MASUK
-Order: ${data.id}
-Telegram: ${telegramId}
-Nominal: Rp${money(data.amount_idr)}
-Diamond: ${data.diamonds}
-
-Periksa transaksi lalu tekan Approve jika valid.`;
-    try {
-      const { data: order } = await db.from("diamond_orders").select("telegram_topic_id").eq("id", data.id).maybeSingle();
-      if (order?.telegram_topic_id) {
-        await telegram("sendPhoto", { chat_id: ticketGroupId, message_thread_id: order.telegram_topic_id, photo: fileId, caption: proofCaption, reply_markup: { inline_keyboard: [[{ text: "✅ APPROVE PAYMENT", callback_data: "approve:" + data.id }, { text: "❌ DECLINE", callback_data: "decline:" + data.id }]] } });
-      } else {
-        await say(adminId, proofCaption);
-        await telegram("sendPhoto", { chat_id: adminId, photo: fileId, caption: `Bukti order ${data.id} dari Telegram ${telegramId}`, reply_markup: { inline_keyboard: [[{ text: "✅ APPROVE PAYMENT", callback_data: "approve:" + data.id }, { text: "❌ DECLINE", callback_data: "decline:" + data.id }]] } });
-      }
-    } catch (topicError) { console.error("Could not forward proof to order topic:", topicError); }
-    return;
-  }
-  if (text.startsWith("/proof")) {
-    await say(chatId, "Sekarang cukup tekan tombol KIRIM BUKTI PEMBAYARAN lalu kirim fotonya tanpa caption.");
-    return;
+    threadId = topic.message_thread_id;
+  } catch (e) {
+    console.error("createForumTopic failed:", (e as Error).message);
+    await transition(code, ["PENDING"], "CANCELLED", "system", "topic_create_failed").catch(() => null);
+    await tgTry("sendMessage", {
+      chat_id: ADMIN_TELEGRAM_ID,
+      text: `⚠️ Gagal membuat topik untuk ${code}: ${(e as Error).message}\nCek: grup Forum aktif, bot admin + izin Manage Topics.`,
+    });
+    return { kind: "failed" };
   }
 
-  if (isAdmin(Number(telegramId))) {
-    const parts = text.split(/\s+/);
-    const command = parts[0];
-    if (command === "/testtopic") {
-      let stage = "getMe";
-      let me: any = null;
-      try {
-        me = await telegram("getMe", {});
-        stage = "getChat";
-        const group = await telegram("getChat", { chat_id: ticketGroupId });
-        stage = "createForumTopic";
-        const topic = await telegram("createForumTopic", {
-          chat_id: ticketGroupId,
-          name: "TEST BOT CONNECTION",
-        });
-        stage = "sendMessage";
-        await telegram("sendMessage", {
-          chat_id: ticketGroupId,
-          message_thread_id: topic.message_thread_id,
-          text: "Koneksi Topic NexoraPay berhasil. Bot dapat membuat dan mengirim pesan ke Topic.",
-        });
-        await say(chatId, `TEST BERHASIL. Token aktif: @${me.username}; grup terbaca: ${group.title || group.id}; message_thread_id: ${topic.message_thread_id}`);
-      } catch (error) {
-        console.error("Topic diagnostic failed at " + stage + ":", error);
-        const identity = me ? `Token aktif: @${me.username} (ID: ${me.id}).\n` : "Token aktif: tidak berhasil diverifikasi.\n";
-        await say(chatId, `TEST TOPIC GAGAL pada tahap ${stage}.\n${identity}Detail: ${String(error)}`);
-      }
-      return;
-    }
-    if (command === "/price") {
-      const orderId = parts[1]; const amount = Number(parts[2]);
-      if (!orderId || !Number.isSafeInteger(amount) || amount < 1) { await say(chatId, "Format: /price ORDER_ID NOMINAL_RUPIAH"); return; }
-      const { data, error } = await db.rpc("set_tamaverse_diamond_order_payment", {
-        p_order_id: orderId, p_amount_idr: amount, p_admin_note: null,
-      });
-      if (error) { await say(chatId, "Gagal mengatur harga: " + error.message); return; }
-      await say(data.telegram_user_id, `Instruksi pembayaran Tamaverse\nOrder: ${data.id}\nDiamond: ${data.diamonds}\nTotal: Rp${money(data.amount_idr)}\n\nSilakan hubungi admin untuk QRIS/instruksi pembayaran. Setelah membayar, kirim foto dengan caption /proof ${data.id}. Jangan kirim PIN atau OTP.`);
-      await say(chatId, "Nominal tersimpan. Silakan kirim instruksi QRIS secara manual ke pemain.");
-      return;
-    }
-    if (command === "/paid") {
-      const orderId = parts[1];
-      if (!orderId) { await say(chatId, "Format: /paid ORDER_ID"); return; }
-      const { data, error } = await db.rpc("approve_tamaverse_diamond_order", { p_order_id: orderId });
-      if (error) { await say(chatId, "Kredit gagal: " + error.message); return; }
-      await say(data.telegram_user_id, `Pembayaran terverifikasi. ${data.diamonds} Diamonds telah ditambahkan ke akun Tamaverse kamu.\nOrder: ${orderId}`);
-      await say(chatId, `Order ${orderId} selesai. ${data.diamonds} Diamonds dikreditkan.`);
-      return;
-    }
-    if (command === "/check") {
-      const orderId = parts[1];
-      if (!orderId) { await say(chatId, "Format: /check ORDER_ID"); return; }
-      const { data, error } = await db.from("diamond_orders").select("*").eq("id", orderId).maybeSingle();
-      if (error || !data) { await say(chatId, "Order tidak ditemukan."); return; }
-      await say(chatId, `Order: ${data.id}\nPlayer UUID: ${data.owner_id}\nTelegram: ${data.telegram_user_id}\nDiamond: ${data.diamonds}\nNominal: ${data.amount_idr ? "Rp" + money(data.amount_idr) : "belum diatur"}\nStatus: ${data.status}`);
-      if (data.proof_file_id) await telegram("sendPhoto", { chat_id: chatId, photo: data.proof_file_id, caption: `Bukti order ${data.id}` });
-      return;
-    }
-    if (command === "/cancel") {
-      const orderId = parts[1];
-      if (!orderId) { await say(chatId, "Format: /cancel ORDER_ID"); return; }
-      const { data, error } = await db.rpc("set_tamaverse_diamond_order_status", { p_order_id: orderId, p_status: "cancelled" });
-      if (error) { await say(chatId, "Gagal membatalkan: " + error.message); return; }
-      await say(data.telegram_user_id, `Order ${orderId} dibatalkan oleh admin.`);
-      await say(chatId, "Order dibatalkan.");
-      return;
-    }
+  // Satu pesanan = satu topik (hanya set bila belum ada topik)
+  const { data: bound, error: bindErr } = await db
+    .from("nexora_orders")
+    .update({ forum_chat_id: ADMIN_FORUM_CHAT_ID, topic_thread_id: threadId })
+    .eq("id", order.id)
+    .is("topic_thread_id", null)
+    .select("*")
+    .maybeSingle();
+  if (bindErr || !bound) {
+    console.error("bind topic failed:", bindErr);
+    await tgTry("deleteForumTopic", { chat_id: ADMIN_FORUM_CHAT_ID, message_thread_id: threadId });
+    await transition(code, ["PENDING"], "CANCELLED", "system", "topic_bind_failed").catch(() => null);
+    return { kind: "failed" };
+  }
+  let ready = bound as Order;
+
+  // Metode sudah dipilih di Mini App → langsung WAITING_ADMIN
+  if (method) {
+    const upd = await transition(code, ["PENDING"], "WAITING_ADMIN", telegramId, source, { payment_method: method });
+    if (upd) ready = upd;
   }
 
-  if (m.photo?.length && text.startsWith("/proof")) return;
-  await say(chatId, "Perintah tidak dikenali. Ketik /help untuk panduan.");
+  const head = await tgTry<{ message_id: number }>("sendMessage", {
+    chat_id: ADMIN_FORUM_CHAT_ID,
+    message_thread_id: threadId,
+    text: ticketText(ready),
+  });
+  if (head) {
+    await db.from("nexora_orders").update({ admin_message_id: head.message_id }).eq("id", order.id);
+    ready = { ...ready, admin_message_id: head.message_id };
+  }
+
+  if (method && ready.status === "WAITING_ADMIN") {
+    await sendTopic(
+      ready,
+      `📲 Pesanan dari checkout game (Mini App). User sudah memilih ${method}.\n\n${adminHint(ready)}`,
+    );
+  }
+  return { kind: "created", order: ready };
 }
 
-Deno.serve(async (req) => {
-  if (req.method !== "POST") return new Response("Tamaverse bot webhook ready", { status: 200 });
-  if (req.headers.get("x-telegram-bot-api-secret-token") !== webhookSecret) {
+async function startOrder(chatId: number, messageId: number, from: Any, amount: number) {
+  const pack = PACKAGES.find((p) => p.diamonds === amount);
+  if (!pack) return false;
+  const telegramId = String(from.id);
+
+  await expireStale();
+
+  const { data: link, error: linkErr } = await db
+    .from("tamaverse_telegram_links")
+    .select("owner_id")
+    .eq("telegram_user_id", telegramId)
+    .maybeSingle();
+  if (linkErr) throw linkErr;
+  if (!link) {
+    await show(chatId, messageId, TEXT.needLink, backMarkup());
+    return true;
+  }
+
+  const res = await createOrderWithTopic(chatId, from, String(link.owner_id), pack, null, "bot");
+  if (res.kind === "existing") {
+    const v = activeOrderView(res.order);
+    await show(chatId, messageId, "ℹ️ Kamu masih punya pesanan aktif.\n\n" + v.text, v.markup);
+    return true;
+  }
+  if (res.kind === "failed") {
+    await show(chatId, messageId, TEXT.ticketFailed, backMarkup());
+    return true;
+  }
+
+  await show(
+    chatId,
+    messageId,
+    `✅ Pesanan dibuat\n\n🧾 Order ID: ${res.order.order_code}\n💎 ${pack.diamonds} Diamond\n💰 Rp${money(pack.price)}\n\nPilih metode pembayaran:` +
+      (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+    methodMarkup(res.order.order_code),
+  );
+  return true;
+}
+
+const CHECKOUT_TOKEN = /^[A-Za-z0-9_-]{16,64}$/;
+
+/** /start <token> dari Mini App: buat tiket langsung dengan data dari checkout intent. */
+async function handleCheckoutStart(message: Any, token: string) {
+  const chatId = message.chat.id;
+  const from = message.from;
+  const telegramId = String(from.id);
+
+  await expireStale();
+
+  const { data: intent, error } = await db
+    .from("nexora_checkout_intents")
+    .select("*")
+    .eq("token", token)
+    .maybeSingle();
+  if (error) throw error;
+  if (!intent) {
+    await sendMessage(chatId, "⚠️ Link checkout tidak valid. Silakan pilih paket lagi dari game.");
+    return;
+  }
+
+  // Idempoten: token yang sudah jadi pesanan hanya menampilkan pesanan itu ke pemiliknya.
+  if (intent.order_id) {
+    if (intent.claimed_by !== telegramId) {
+      await sendMessage(chatId, "⚠️ Link checkout ini sudah dipakai.");
+      return;
+    }
+    const { data: o } = await db.from("nexora_orders").select("*").eq("id", intent.order_id).maybeSingle();
+    if (o && ACTIVE.includes((o as Order).status)) {
+      const v = activeOrderView(o as Order);
+      await sendMessage(chatId, "ℹ️ Pesanan dari checkout ini sudah dibuat.\n\n" + v.text, { reply_markup: v.markup });
+    } else {
+      await sendMessage(chatId, "ℹ️ Pesanan dari checkout ini sudah selesai.", { reply_markup: homeMarkup() });
+    }
+    return;
+  }
+
+  if (new Date(intent.expires_at).getTime() < Date.now()) {
+    await sendMessage(chatId, "⌛ Link checkout sudah kedaluwarsa. Silakan pilih paket lagi dari game.");
+    return;
+  }
+
+  // Harga selalu dari katalog server, bukan dari data klien.
+  const pack = PACKAGES.find((p) => p.diamonds === intent.diamonds);
+  const method: PayMethod | null = intent.method === "QRIS" ? "QRIS" : intent.method === "GOPAY" ? "GOPAY" : null;
+  if (!pack || !method) {
+    await sendMessage(chatId, "⚠️ Data checkout tidak valid. Silakan pilih paket lagi dari game.");
+    return;
+  }
+
+  // Klaim atomik: hanya satu /start yang boleh memproses token ini.
+  const { data: claimed, error: claimErr } = await db
+    .from("nexora_checkout_intents")
+    .update({ claimed_by: telegramId, claimed_at: new Date().toISOString() })
+    .eq("token", token)
+    .is("claimed_at", null)
+    .is("order_id", null)
+    .select("token")
+    .maybeSingle();
+  if (claimErr) throw claimErr;
+  if (!claimed) {
+    await sendMessage(chatId, "⏳ Checkout ini sedang diproses atau sudah dipakai.");
+    return;
+  }
+
+  const release = () =>
+    db.from("nexora_checkout_intents")
+      .update({ claimed_by: null, claimed_at: null })
+      .eq("token", token)
+      .is("order_id", null);
+
+  try {
+    const linked = await ensureLink(telegramId, String(from.username ?? ""), String(intent.owner_id));
+    if (linked !== "ok") {
+      await release();
+      await sendMessage(chatId, LINK_MSG[linked]);
+      return;
+    }
+
+    const res = await createOrderWithTopic(chatId, from, String(intent.owner_id), pack, method, "miniapp");
+    if (res.kind === "existing") {
+      await release();
+      const v = activeOrderView(res.order);
+      await sendMessage(
+        chatId,
+        "ℹ️ Kamu masih punya pesanan aktif. Selesaikan atau batalkan dulu, lalu ulangi checkout dari game.\n\n" + v.text,
+        { reply_markup: v.markup },
+      );
+      return;
+    }
+    if (res.kind === "failed") {
+      await release();
+      await sendMessage(chatId, TEXT.ticketFailed);
+      return;
+    }
+
+    await db.from("nexora_checkout_intents").update({ order_id: res.order.id }).eq("token", token);
+    const o = res.order;
+    await sendMessage(
+      chatId,
+      `✅ Pesanan dibuat dari checkout game\n\n🧾 Order ID: ${o.order_code}\n💎 ${o.diamonds} Diamond\n💰 Rp${money(o.price)}\n💳 Metode: ${method}\n📌 ${STATUS_LABEL[o.status]}\n\n` +
+        (method === "QRIS"
+          ? "Admin sedang menyiapkan QRIS. Gambarnya akan dikirim ke chat ini."
+          : "Admin sedang menyiapkan informasi GoPay. Infonya akan dikirim ke chat ini.") +
+        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+      { reply_markup: cancelMarkup(o.order_code) },
+    );
+  } catch (e) {
+    await release();
+    throw e;
+  }
+}
+
+async function chooseMethod(chatId: number, messageId: number, tgId: string, code: string, m: string, ack: Ack) {
+  const o = await getOrder(code);
+  if (!o || o.telegram_user_id !== tgId) return ack("Pesanan tidak ditemukan", true);
+  if (o.status !== "PENDING") return ack("Tombol ini sudah tidak berlaku", true);
+  const method = m === "q" ? "QRIS" : m === "g" ? "GOPAY" : null;
+  if (!method) return ack("Metode tidak valid", true);
+
+  const upd = await transition(code, ["PENDING"], "WAITING_ADMIN", tgId, null, { payment_method: method });
+  if (!upd) return ack("Tombol ini sudah tidak berlaku", true);
+
+  await ack("Metode dipilih");
+  await refreshTicket(upd);
+  await sendTopic(
+    upd,
+    `💳 User memilih ${method} untuk ${code}.\n\n${adminHint(upd)}`,
+  );
+  await show(
+    chatId,
+    messageId,
+    method === "QRIS"
+      ? `🟦 QRIS dipilih.\n\nAdmin sedang menyiapkan QRIS untuk pesanan ${code}. Kamu akan menerima gambarnya di chat ini.`
+      : `🟩 GoPay dipilih.\n\nAdmin sedang menyiapkan informasi GoPay untuk pesanan ${code}. Kamu akan menerimanya di chat ini.`,
+    cancelMarkup(code),
+  );
+}
+
+async function cancelOrder(chatId: number, messageId: number, tgId: string, code: string, ack: Ack) {
+  const o = await getOrder(code);
+  if (!o || o.telegram_user_id !== tgId) return ack("Pesanan tidak ditemukan", true);
+  const upd = await transition(code, ["PENDING", "WAITING_ADMIN", "WAITING_PAYMENT"], "CANCELLED", tgId, "cancelled_by_user");
+  if (!upd) return ack(`Tidak bisa dibatalkan (${STATUS_LABEL[o.status]})`, true);
+  await ack("Pesanan dibatalkan");
+  await show(chatId, messageId, `🚫 Pesanan ${code} dibatalkan.`, homeMarkup());
+  await afterTerminal(upd, "🚫 Pesanan dibatalkan oleh user.");
+}
+
+async function handleProof(message: Any) {
+  const chatId = message.chat.id;
+  const tgId = String(message.from.id);
+  await expireStale();
+
+  const o = await getActiveOrder(tgId);
+  if (!o) {
+    await sendMessage(chatId, TEXT.noOrderForProof, { reply_markup: homeMarkup() });
+    return;
+  }
+  if (o.status === "PROOF_SUBMITTED") {
+    await sendMessage(chatId, `🧾 Bukti untuk ${o.order_code} sudah diterima dan sedang diperiksa admin.`);
+    return;
+  }
+  if (o.status !== "WAITING_PAYMENT") {
+    await sendMessage(chatId, `Pesanan ${o.order_code} belum siap menerima bukti.\nStatus: ${STATUS_LABEL[o.status]}`);
+    return;
+  }
+
+  const photo = message.photo[message.photo.length - 1];
+  const { data: dup } = await db
+    .from("nexora_orders")
+    .select("order_code")
+    .eq("proof_file_unique_id", photo.file_unique_id)
+    .neq("id", o.id)
+    .limit(1);
+  const dupWarn = dup && dup.length > 0 ? `\n⚠️ Foto yang sama pernah dipakai di ${dup[0].order_code}.` : "";
+
+  // Teruskan ke admin dulu; kalau gagal, status tidak berubah.
+  const sent = await tgTry("sendPhoto", {
+    chat_id: o.forum_chat_id,
+    message_thread_id: o.topic_thread_id,
+    photo: photo.file_id,
+    caption: [
+      `🧾 BUKTI PEMBAYARAN${SANDBOX ? " (SIMULASI)" : ""}`,
+      `Order: ${o.order_code}`,
+      `User: ${o.telegram_username ? "@" + o.telegram_username : tgId} (${tgId})`,
+      `Paket: ${o.diamonds} Diamond`,
+      `Nominal: Rp${money(o.price)}`,
+      `Metode: ${o.payment_method}`,
+    ].join("\n") + dupWarn,
+    reply_markup: proofMarkup(o.order_code),
+  });
+  if (!sent) {
+    await sendMessage(chatId, "⚠️ Bukti belum bisa diteruskan ke admin. Coba kirim ulang sebentar lagi.");
+    return;
+  }
+
+  const upd = await transition(o.order_code, ["WAITING_PAYMENT"], "PROOF_SUBMITTED", tgId, null, {
+    proof_file_id: photo.file_id,
+    proof_file_unique_id: photo.file_unique_id,
+    proof_meta: {
+      width: photo.width,
+      height: photo.height,
+      file_size: photo.file_size ?? null,
+      message_id: message.message_id,
+      received_at: new Date().toISOString(),
+    },
+  });
+  if (!upd) {
+    await tgTry("deleteMessage", { chat_id: o.forum_chat_id, message_id: sent.message_id });
+    await sendMessage(chatId, "⚠️ Pesanan sudah tidak menunggu bukti.");
+    return;
+  }
+
+  await refreshTicket(upd);
+  await sendMessage(
+    chatId,
+    `✅ Bukti${SANDBOX ? " simulasi" : ""} untuk ${o.order_code} sudah diterima.\nMenunggu pemeriksaan admin.`,
+    { reply_markup: backMarkup() },
+  );
+}
+
+// ───────────────────────── ADMIN ACTIONS ─────────────────────────
+async function approveOrder(o: Order, adminId: string): Promise<ActionResult> {
+  if (o.status !== "PROOF_SUBMITTED") {
+    return { ok: false, stale: true, text: `Sudah diproses: ${STATUS_LABEL[o.status]}` };
+  }
+
+  const { data: au, error: ae } = await db.auth.admin.getUserById(o.owner_id);
+  if (ae || !au?.user) {
+    return { ok: false, text: "Akun Tamaverse tidak ditemukan. Status tidak diubah." };
+  }
+
+  const { data, error } = await db.rpc("nexora_approve_order", { p_code: o.order_code, p_actor: adminId });
+  if (error) {
+    console.error("approve rpc failed:", error);
+    return { ok: false, text: "Gagal menambah Diamond. Status tidak diubah." };
+  }
+  if (!data?.ok) {
+    const map: Record<string, ActionResult> = {
+      invalid_status: { ok: false, stale: true, text: `Sudah diproses (${data?.status})` },
+      already_credited: { ok: false, stale: true, text: "Diamond order ini sudah pernah dikredit." },
+      link_mismatch: { ok: false, text: "UUID tidak lagi terhubung ke Telegram user ini." },
+      not_found: { ok: false, text: "Pesanan tidak ditemukan." },
+    };
+    return map[data?.error as string] ?? { ok: false, text: "Gagal memproses." };
+  }
+
+  const fresh = await getOrder(o.order_code);
+  if (fresh) {
+    await afterTerminal(
+      fresh,
+      `✅ APPROVED oleh admin.\n💎 ${data.diamonds} Diamond ditambahkan. Saldo akun: ${data.balance_after}.`,
+    );
+    await notifyUser(
+      fresh,
+      `🎉 Pesanan ${fresh.order_code} disetujui!\n💎 ${data.diamonds} Diamond ditambahkan ke akun Tamaverse.\nSaldo sekarang: ${data.balance_after} 💎` +
+        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+      homeMarkup(),
+    );
+  }
+  return { ok: true, text: "Disetujui ✅" };
+}
+
+async function declineOrder(o: Order, adminId: string, reason: string | null): Promise<ActionResult> {
+  if (o.status !== "PROOF_SUBMITTED") {
+    return { ok: false, stale: true, text: `Sudah diproses: ${STATUS_LABEL[o.status]}` };
+  }
+  const upd = await transition(o.order_code, ["PROOF_SUBMITTED"], "DECLINED", adminId, reason);
+  if (!upd) return { ok: false, stale: true, text: "Sudah diproses." };
+
+  await afterTerminal(upd, `❌ DECLINED oleh admin.${reason ? `\nAlasan: ${reason}` : ""}`);
+  await notifyUser(
+    upd,
+    `❌ Pesanan ${upd.order_code} ditolak.${reason ? `\nAlasan: ${reason}` : ""}\n\nJika merasa ada kesalahan, hubungi admin.`,
+    homeMarkup(),
+  );
+  return { ok: true, text: "Ditolak ❌" };
+}
+
+type Ack = (text?: string, alert?: boolean) => Promise<void>;
+
+async function adminDecision(q: Any, kind: string, code: string, ack: Ack) {
+  if (String(q.from.id) !== ADMIN_TELEGRAM_ID) return ack("Hanya admin yang boleh memakai tombol ini.", true);
+  if (q.message?.chat?.id !== ADMIN_FORUM_CHAT_ID) return ack("Tombol ini hanya berlaku di grup admin.", true);
+
+  const o = await getOrder(code);
+  if (!o) return ack("Pesanan tidak ditemukan", true);
+  const msgThread = q.message?.message_thread_id;
+  if (msgThread !== undefined && o.topic_thread_id !== msgThread) {
+    return ack("Tombol ini bukan milik topik ini.", true);
+  }
+
+  const adminId = String(q.from.id);
+  const res = kind === "a" ? await approveOrder(o, adminId) : await declineOrder(o, adminId, null);
+  await ack(res.text, !res.ok);
+  if (res.ok || res.stale) {
+    await tgTry("editMessageReplyMarkup", {
+      chat_id: q.message.chat.id,
+      message_id: q.message.message_id,
+      reply_markup: CLEAR_KB,
+    });
+  }
+}
+
+/** Pesan di grup admin: info pembayaran dari admin, atau /tolak <alasan>. */
+async function handleGroupMessage(message: Any) {
+  if (message.chat?.id !== ADMIN_FORUM_CHAT_ID) return;
+  const threadId = message.message_thread_id;
+  if (!threadId) return;
+  if (message.from?.is_bot || String(message.from?.id ?? "") !== ADMIN_TELEGRAM_ID) return;
+
+  const { data, error } = await db
+    .from("nexora_orders")
+    .select("*")
+    .eq("forum_chat_id", ADMIN_FORUM_CHAT_ID)
+    .eq("topic_thread_id", threadId)
+    .maybeSingle();
+  if (error) throw error;
+  const o = data as Order | null;
+  if (!o) return;
+
+  const reply = (text: string) => sendTopic(o, text, { reply_to_message_id: message.message_id });
+  const text = String(message.text ?? message.caption ?? "").trim();
+  const isPhoto = Array.isArray(message.photo) && message.photo.length > 0;
+
+  if (/^\/tolak(@\w+)?(\s|$)/i.test(text)) {
+    const reason = text.replace(/^\/tolak(@\w+)?\s*/i, "").trim() || null;
+    const res = await declineOrder(o, ADMIN_TELEGRAM_ID, reason);
+    if (!res.ok) await reply(res.text);
+    return;
+  }
+  if (text.startsWith("/")) return;
+  if (!isPhoto && !text) return;
+
+  if (o.status !== "WAITING_ADMIN") {
+    await reply(`Order ${o.order_code}: ${STATUS_LABEL[o.status]}. Tidak sedang menunggu info pembayaran.`);
+    return;
+  }
+
+  const nominal = `💰 Nominal: Rp${money(o.price)}\n🧾 Order ID: ${o.order_code}`;
+  let delivered: unknown = null;
+
+  if (o.payment_method === "QRIS") {
+    if (!isPhoto) {
+      await reply("Order ini QRIS. Kirim gambar QRIS dummy sebagai foto.");
+      return;
+    }
+    const photo = message.photo[message.photo.length - 1];
+    delivered = await tgTry("sendPhoto", {
+      chat_id: o.telegram_chat_id,
+      photo: photo.file_id,
+      caption: `🟦 QRIS${SANDBOX ? " (SIMULASI)" : ""}\n\n${nominal}\n\nSetelah "membayar", kirim foto bukti ke chat ini.` +
+        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+      reply_markup: cancelMarkup(o.order_code),
+    });
+  } else if (o.payment_method === "GOPAY") {
+    if (!text) {
+      await reply("Order ini GoPay. Kirim informasi GoPay dummy sebagai teks.");
+      return;
+    }
+    delivered = await tgTry("sendMessage", {
+      chat_id: o.telegram_chat_id,
+      text: `🟩 INFO GOPAY${SANDBOX ? " (SIMULASI)" : ""}\n\n${text.slice(0, 2500)}\n\n${nominal}\n\nSetelah "membayar", kirim foto bukti ke chat ini.` +
+        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+      reply_markup: cancelMarkup(o.order_code),
+    });
+  } else {
+    await reply("User belum memilih metode pembayaran.");
+    return;
+  }
+
+  if (!delivered) {
+    await reply("⚠️ Gagal mengirim ke user (mungkin bot diblokir). Status tidak diubah.");
+    return;
+  }
+
+  const upd = await transition(o.order_code, ["WAITING_ADMIN"], "WAITING_PAYMENT", ADMIN_TELEGRAM_ID);
+  if (!upd) {
+    await reply("⚠️ Status pesanan sudah berubah; info sudah terkirim ke user tetapi status tidak diperbarui.");
+    return;
+  }
+  await refreshTicket(upd);
+  await reply(`✅ Info ${o.payment_method} diteruskan ke user. Status: ${STATUS_LABEL.WAITING_PAYMENT}.`);
+}
+
+// ───────────────────────── ROUTERS ─────────────────────────
+async function handleCallback(q: Any) {
+  let answered = false;
+  const ack: Ack = async (text, alert = false) => {
+    if (answered) return;
+    answered = true;
+    await tgTry("answerCallbackQuery", {
+      callback_query_id: q.id,
+      ...(text ? { text, show_alert: alert } : {}),
+    });
+  };
+
+  try {
+    const chat = q.message?.chat;
+    const mid = q.message?.message_id;
+    if (!chat || !mid) return await ack("Pesan tidak ditemukan", true);
+
+    const [kind, a, b] = String(q.data ?? "").split(":");
+
+    if (kind === "a" || kind === "d") return await adminDecision(q, kind, a, ack);
+    if (chat.type !== "private") return await ack(TEXT.notPrivate, true);
+
+    const tgId = String(q.from.id);
+
+    switch (kind) {
+      case "m": {
+        await ack();
+        if (a === "home") return await show(chat.id, mid, TEXT.welcome, homeMarkup());
+        if (a === "topup") return await show(chat.id, mid, catalogueText(), packageMarkup());
+        if (a === "uuid") return await show(chat.id, mid, TEXT.uuidPrompt, backMarkup());
+        if (a === "help") return await show(chat.id, mid, TEXT.help, backMarkup());
+        if (a === "hist") return await showHistory(chat.id, mid, tgId);
+        return;
+      }
+      case "p": {
+        const okPack = await showPackageDetail(chat.id, mid, Number(a));
+        await ack(okPack ? undefined : "Paket tidak valid", !okPack);
+        return;
+      }
+      case "c": {
+        await ack("Memproses…");
+        if (!(await startOrder(chat.id, mid, q.from, Number(a)))) await show(chat.id, mid, "Paket tidak valid.", backMarkup());
+        return;
+      }
+      case "pm":
+        return await chooseMethod(chat.id, mid, tgId, a, b, ack);
+      case "x":
+        return await cancelOrder(chat.id, mid, tgId, a, ack);
+      default:
+        return await ack("Tombol tidak dikenali", true);
+    }
+  } finally {
+    await ack();
+  }
+}
+
+async function handleMessage(message: Any) {
+  const chat = message.chat;
+  if (!chat) return;
+
+  if (chat.type !== "private") {
+    await handleGroupMessage(message);
+    return;
+  }
+
+  const chatId = chat.id;
+  const telegramId = String(message.from?.id ?? "");
+  const username = String(message.from?.username ?? "");
+  const text = String(message.text ?? "").trim();
+  if (!telegramId) return;
+
+  if (Array.isArray(message.photo) && message.photo.length > 0) {
+    await handleProof(message);
+    return;
+  }
+
+  const startPayload = text.match(/^\/start(?:@\w+)?\s+(\S+)$/i);
+  if (startPayload && CHECKOUT_TOKEN.test(startPayload[1])) {
+    await handleCheckoutStart(message, startPayload[1]);
+    return;
+  }
+
+  if (/^\/(start|menu|help)(@\w+)?(\s|$)/i.test(text)) {
+    await sendMessage(chatId, TEXT.welcome, { reply_markup: homeMarkup() });
+    return;
+  }
+  if (/^\/(buy|topup)(@\w+)?(\s|$)/i.test(text)) {
+    await sendMessage(chatId, catalogueText(), { reply_markup: packageMarkup() });
+    return;
+  }
+  if (/^\/(riwayat|history)(@\w+)?(\s|$)/i.test(text)) {
+    await showHistory(chatId, undefined, telegramId);
+    return;
+  }
+  if (/^\/uuid(@\w+)?(\s|$)/i.test(text)) {
+    const uuid = text.split(/\s+/)[1] ?? "";
+    if (!uuid) {
+      await sendMessage(chatId, TEXT.uuidPrompt);
+      return;
+    }
+    await linkUuid(chatId, telegramId, username, uuid);
+    return;
+  }
+  if (UUID_PATTERN.test(text)) {
+    await linkUuid(chatId, telegramId, username, text);
+    return;
+  }
+  await sendMessage(chatId, TEXT.unknown, { reply_markup: homeMarkup() });
+}
+
+// ───────────────────────── WEBHOOK ─────────────────────────
+Deno.serve(async (request) => {
+  if (request.method !== "POST") {
+    return new Response("Nexora Tamaverse bot webhook ready", { status: 200 });
+  }
+  if (request.headers.get("x-telegram-bot-api-secret-token") !== TELEGRAM_WEBHOOK_SECRET) {
     return new Response("Unauthorized", { status: 401 });
   }
+
+  let update: Any;
   try {
-    const update = await req.json();
+    update = await request.json();
+  } catch {
+    return new Response("Bad request", { status: 400 });
+  }
+
+  try {
+    // Update duplikat (retry Telegram) dibuang lewat PK update_id
+    if (typeof update.update_id === "number") {
+      const { error } = await db.from("nexora_processed_updates").insert({ update_id: update.update_id });
+      if (error?.code === "23505") return new Response("duplicate", { status: 200 });
+      if (error) console.error("processed_updates insert failed:", error);
+    }
+
     if (update.message) await handleMessage(update.message);
     if (update.callback_query) await handleCallback(update.callback_query);
-    return new Response("ok", { status: 200 });
   } catch (error) {
-    console.error("Telegram webhook error:", error);
-    return new Response("Webhook error", { status: 200 });
+    console.error("Nexora webhook error:", error);
+    const chatId = update?.message?.chat?.type === "private"
+      ? update.message.chat.id
+      : update?.callback_query?.message?.chat?.type === "private"
+      ? update.callback_query.message.chat.id
+      : null;
+    if (chatId) await tgTry("sendMessage", { chat_id: chatId, text: TEXT.genericError });
   }
+
+  // Selalu 200 agar Telegram tidak retry tanpa henti
+  return new Response("ok", { status: 200 });
 });
