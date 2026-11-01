@@ -14,6 +14,8 @@
 | `ADMIN_FORUM_CHAT_ID` | tidak | default `-1004322036078` |
 | `ADMIN_TELEGRAM_ID` | tidak | default `8906658395` |
 | `ORDER_TTL_MINUTES` | tidak | default `120` |
+| `GOPAY_NUMBER` | untuk GoPay | Nomor tujuan GoPay; simpan sebagai Supabase Secret, jangan commit ke GitHub |
+| `GOPAY_ACCOUNT_NAME` | untuk GoPay | Nama penerima; simpan sebagai Supabase Secret, jangan commit ke GitHub |
 
 ## Setup
 1. Pastikan schema dasar Tamaverse sudah diterapkan (termasuk tabel `auth.users`, `public.inventory`, dan `public.profiles`).
@@ -41,7 +43,7 @@
 - Fungsi `nexora_transition` (compare-and-swap), `nexora_approve_order` (atomik), `nexora_expire_stale`. Semua hanya bisa dipanggil `service_role`.
 
 ## Alur
-`PENDING` → (user pilih metode) `WAITING_ADMIN` → (admin kirim instruksi pembayaran asli di topik) `WAITING_PAYMENT` → (user kirim bukti) `PROOF_SUBMITTED` → admin memeriksa pembayaran → APPROVE `APPROVED` / DECLINE `DECLINED`.
+`PENDING` → (user pilih metode) `WAITING_ADMIN` → GoPay: bot langsung mengirim detail pembayaran dan masuk `WAITING_PAYMENT`; QRIS: admin mengirim gambar QRIS lalu masuk `WAITING_PAYMENT` → (user kirim bukti) `PROOF_SUBMITTED` → admin memeriksa pembayaran → APPROVE `APPROVED` / DECLINE `DECLINED`.
 User bisa `CANCELLED` sebelum bukti dikirim. `EXPIRED` otomatis setelah TTL (dicek saat ada interaksi; PROOF_SUBMITTED tidak expire).
 
 Keputusan desain yang perlu lu tahu:
@@ -51,7 +53,7 @@ Keputusan desain yang perlu lu tahu:
 - Foto bukti yang sama pada order berbeda diberi peringatan agar admin melakukan pemeriksaan ekstra. Bukti foto bukan verifikasi pembayaran; admin wajib memastikan dana benar-benar diterima melalui kanal pembayaran yang digunakan.
 
 ## Status pengujian (jujur)
-Mode pembayaran manual: admin mengirim instruksi pembayaran asli, user mengirim bukti, lalu admin memeriksa penerimaan dana dan melakukan APPROVE/DECLINE. Approval mengkredit Diamond secara atomik dan satu order hanya dapat dikredit sekali.
+Mode pembayaran manual: instruksi GoPay dikirim otomatis dari Supabase Secrets setelah metode dipilih; QRIS tetap dikirim admin. User mengirim bukti, lalu admin memeriksa penerimaan dana dan melakukan APPROVE/DECLINE. Approval mengkredit Diamond secara atomik dan satu order hanya dapat dikredit sekali.
 **Belum diverifikasi di percakapan ini:** deployment Edge Function, webhook Telegram, pengiriman instruksi pembayaran aktual, serta pengujian end-to-end. Jangan anggap bot sudah live hanya karena source sudah diperbarui.
 
 Checklist uji manual (urut):
@@ -60,7 +62,7 @@ Checklist uji manual (urut):
 3. Pilih paket → konfirmasi → topik muncul dengan nama `NXR-… | @user | N💎`; tap Konfirmasi 2x cepat = 1 order, 1 topik
 4. Matikan izin Manage Topics → user dapat pesan gagal, order jadi CANCELLED
 5. QRIS: admin kirim foto di topik → user menerima foto + nominal + Order ID
-6. GoPay: admin kirim teks → diteruskan ke user
+6. GoPay: bot langsung mengirim nomor, A/N, nominal, dan Order ID dalam format tebal; user kirim bukti tanpa menunggu admin
 7. Admin kirim foto ke order GoPay / teks ke order QRIS → ditolak dengan petunjuk
 8. User kirim foto saat tidak ada order / status salah → pesan penolakan
 9. Kirim bukti → muncul di topik yang benar dengan tombol
