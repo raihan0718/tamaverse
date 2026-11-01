@@ -84,7 +84,7 @@
       const inventoryPayload = {
         owner_id: user.id,
         coins: Number(player.coins || 0),
-        // Gems are authoritative in Supabase and are changed only by secure RPCs.
+        // Diamonds are authoritative in Supabase and are changed only by secure RPCs.
         snack: Number(items.snack || 0),
         energy: Number(items.energy || 0),
         training: Number(items.training || 0),
@@ -192,10 +192,7 @@
         player.coins = Number(
           inventoryData.coins ?? player.coins ?? 0
         );
-        player.gems = Number(
-          inventoryData.gems ?? player.gems ?? 0
-        );
-        // Purchased Diamonds are server-credited and never included in client save payloads.
+                // Purchased Diamonds are server-credited and never included in client save payloads.
         player.diamonds = Number(
           inventoryData.diamonds ?? player.diamonds ?? 0
         );
