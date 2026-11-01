@@ -1269,7 +1269,6 @@ function battleAction(move){
       activeBattle.actionFx=aiMove;
     }
     activeBattle.defending=false;activeBattle.turn++;activeBattle.log=log.slice(-30);save();
-    if(activeBattle.playerHP<=0){finishBattle('loss');return;}
     activeBattle.phase='cooldown';activeBattle.busy=true;activeBattle.log=log.slice(-30);save();render();
     activeBattle.aiTimer=setTimeout(()=>{
       if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='cooldown')return;
