@@ -336,7 +336,7 @@ function rankingPage() {
 
     ${current ? `
       <div class="ranking-you-card">
-        <div class="ranking-you-avatar">${esc(String(current.avatar))}</div>
+        <div class="ranking-you-avatar">${playerAvatarMarkup(current.avatar,'ranking-avatar-photo')}</div>
         <div class="ranking-you-copy"><small>YOUR POSITION</small><b>${esc(current.name)}</b><span>${esc(labels[category])}</span></div>
         <div class="ranking-you-place"><small>RANK</small><strong>#${currentIndex+1}</strong></div>
       </div>
