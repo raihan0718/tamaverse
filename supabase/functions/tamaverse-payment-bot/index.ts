@@ -128,8 +128,22 @@ async function handleCallback(q: any) {
     const price = prices[amount];
     if (!price) { await answer("Paket tidak valid"); return; }
     await answer("Detail paket");
-    await say(chatId, `DETAIL PAKET TAMAVERSE\n\n💎 ${amount} Diamonds\nHarga target: Rp${money(price)}\n\nIni masih tampilan pratinjau. Belum membuat order dan jangan melakukan pembayaran dari informasi ini.`, { reply_markup: { inline_keyboard: [
+    await say(chatId, `DETAIL PAKET TAMAVERSE\n\n💎 ${amount} Diamonds\nHarga katalog: Rp${money(price)}\n\nPilih metode untuk melihat ringkasan pilihan. Pratinjau ini tidak membuat pesanan atau instruksi pembayaran.`, { reply_markup: { inline_keyboard: [
+      [{ text: "🟦 QRIS", callback_data: `methodpreview:${amount}:qris` }, { text: "🟩 GoPay", callback_data: `methodpreview:${amount}:gopay` }],
       [{ text: "⬅️ Kembali ke Paket", callback_data: "menu:topup" }]
+    ] } });
+    return;
+  }
+  if (payload.startsWith("methodpreview:")) {
+    const [, rawAmount, method] = payload.split(":");
+    const amount = Number(rawAmount);
+    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 120: 10800, 300: 24000, 700: 49000 };
+    const price = prices[amount];
+    if (!price || !["qris", "gopay"].includes(method)) { await answer("Pilihan tidak valid"); return; }
+    await answer("Metode dipilih");
+    await say(chatId, `RINGKASAN PILIHAN · PRATINJAU\n\n💎 Paket: ${amount} Diamonds\n💰 Harga katalog: Rp${money(price)}\n💳 Metode: ${method.toUpperCase()}\n\nIni hanya pratinjau tampilan. Belum ada order, tiket admin, QRIS, atau instruksi GoPay yang dibuat. Jangan melakukan pembayaran berdasarkan pesan ini.`, { reply_markup: { inline_keyboard: [
+      [{ text: "⬅️ Ganti metode", callback_data: `packageinfo:${amount}` }],
+      [{ text: "📦 Ganti paket", callback_data: "menu:topup" }]
     ] } });
     return;
   }
