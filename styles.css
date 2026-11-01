@@ -3407,3 +3407,11 @@ body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8e
  .solo-hunting-page .battle-player .battle-sprite{left:54%!important}
  .solo-hunting-page .battle-enemy .battle-sprite{left:46%!important}
 }
+
+
+/* Solo / AI lobby preview: apply inward-facing sprite flips outside the arena too. */
+.battle-hub .battle-turn-preview .battle-face-flip,
+.battle-hub .solo-option-art .battle-face-flip{
+  transform:scaleX(-1)!important;
+  transform-origin:center center!important;
+}
