@@ -3259,3 +3259,46 @@ body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8e
 .battle-log-heading span{display:inline-block}
 .solo-hunting-page .battle-action-btn span{display:inline-flex!important;align-items:center;justify-content:center;font-size:18px!important}
 .battle-sprite .pet-image{display:block}
+
+
+/* Solo Hunting: bring both fighters closer and tighten the player-vs-AI preview. */
+.solo-hunting-page .battle-turn-preview{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:12px!important;
+  width:min(100%,520px)!important;
+  margin:8px auto 10px!important;
+  padding:10px 12px!important;
+  box-sizing:border-box!important;
+}
+.solo-hunting-page .battle-turn-preview>div{
+  min-width:0!important;
+  width:100%!important;
+}
+.solo-hunting-page .battle-turn-preview>div:first-child{justify-self:end!important}
+.solo-hunting-page .battle-turn-preview>div:last-child{justify-self:start!important}
+.solo-hunting-page .turn-preview-arrow{font-size:17px!important;line-height:1!important}
+.solo-hunting-page .battle-side{
+  width:50%!important;
+}
+.solo-hunting-page .battle-player{left:0!important;right:auto!important}
+.solo-hunting-page .battle-enemy{right:0!important;left:auto!important}
+.solo-hunting-page .battle-player .battle-sprite{left:64%!important}
+.solo-hunting-page .battle-enemy .battle-sprite{left:36%!important}
+.solo-hunting-page .battle-sprite .pet-image{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  object-fit:contain!important;
+}
+@media(max-width:390px){
+  .solo-hunting-page .battle-turn-preview{gap:7px!important;padding:9px 8px!important}
+  .solo-hunting-page .battle-turn-preview>div{grid-template-columns:26px minmax(0,1fr)!important;column-gap:5px!important}
+  .solo-hunting-page .turn-preview-icon{width:26px!important;height:26px!important}
+  .solo-hunting-page .battle-turn-preview b{font-size:8px!important}
+  .solo-hunting-page .battle-turn-preview small{font-size:7px!important}
+  .solo-hunting-page .battle-player .battle-sprite{left:65%!important}
+  .solo-hunting-page .battle-enemy .battle-sprite{left:35%!important}
+}
