@@ -114,7 +114,11 @@ async function handleCallback(q: any) {
       [{ text: "⬅️ Kembali", callback_data: "menu:home" }]
     ] } }); return;
   }
-  if (payload === "menu:uuid") { await answer("Hubungkan akun"); await say(chatId, "Kirim UUID Tamaverse dengan format:\n/uuid UUID_KAMU"); return; }
+  if (payload === "menu:uuid") {
+    await answer("Silakan kirim UUID");
+    await say(chatId, "🔗 HUBUNGKAN AKUN TAMAVERSE\n\nKirim UUID akun kamu langsung ke chat ini, tanpa /uuid.\n\nCara melihat UUID:\n1. Buka aplikasi Tamaverse.\n2. Masuk ke menu Profile.\n3. Cari bagian TAMAVERSE USER ID.\n4. Salin ID tersebut, lalu kirim ke chat ini.\n\nPastikan UUID yang dikirim benar dan jangan bagikan password atau kode rahasia.");
+    return;
+  }
   if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
   if (payload.startsWith("pack:")) {
     const choice = payload.split(":")[1], pack = packages[choice];
@@ -330,14 +334,15 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
   if (text.startsWith("/start") || text === "/help") {
     await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
       [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
+      [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
       [{ text: "📋 Panduan", callback_data: "menu:help" }]
     ] } });
     return;
   }
 
-  if (text.startsWith("/uuid")) {
-    const uuid = text.split(/\s+/)[1]?.trim();
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (text.startsWith("/uuid") || uuidPattern.test(text.trim())) {
+    const uuid = text.startsWith("/uuid") ? text.split(/\s+/)[1]?.trim() : text.trim();
     if (!uuid || !uuidPattern.test(uuid)) {
       await say(chatId, "UUID belum terdeteksi atau formatnya salah.\nBuka Tamaverse > Profile, salin TAMAVERSE USER ID, lalu kirim:\n/uuid UUID_KAMU");
       return;
