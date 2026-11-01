@@ -2015,17 +2015,18 @@ async function subscribeOnlineRoom(roomId) {
       }
     });
 
-  // Realtime is the fast path; polling keeps lobby cards in sync if a device
-  // misses a Realtime event or the table publication is delayed.
+  // Realtime is the fast path. Keep polling during active matches too:
+  // it is the fallback when pvp_rooms is not enabled in the Realtime publication
+  // or a client misses an event while the app is backgrounded.
   onlineRoomPoller = setInterval(async () => {
     if (!onlineRoom || onlineRoom.id !== roomId ||
-        ['playing', 'finished', 'closed'].includes(onlineRoom.status)) {
+        ['finished', 'closed'].includes(onlineRoom.status)) {
       clearInterval(onlineRoomPoller);
       onlineRoomPoller = null;
       return;
     }
     await refreshOnlineRoom(roomId, true);
-  }, 2500);
+  }, onlineRoom?.status === 'playing' ? 1500 : 2500);
 
   await refreshOnlineRoom(roomId, true);
 }
