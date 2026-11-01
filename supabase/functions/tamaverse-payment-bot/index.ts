@@ -126,7 +126,7 @@ async function handleCallback(q: any) {
   if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
   if (payload.startsWith("packageinfo:")) {
     const amount = Number(payload.split(":")[1]);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 120: 10800, 300: 24000, 700: 49000 };
+    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 20000, 120: 10800, 300: 24000, 700: 49000 };
     const price = prices[amount];
     if (!price) { await answer("Paket tidak valid"); return; }
     await answer("Detail paket");
@@ -139,7 +139,7 @@ async function handleCallback(q: any) {
   if (payload.startsWith("methodpreview:")) {
     const [, rawAmount, method] = payload.split(":");
     const amount = Number(rawAmount);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 120: 10800, 300: 24000, 700: 49000 };
+    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 100: 20000, 120: 10800, 300: 24000, 700: 49000 };
     const price = prices[amount];
     if (!price || !["qris", "gopay"].includes(method)) { await answer("Pilihan tidak valid"); return; }
     await answer("Metode dipilih");
@@ -496,36 +496,14 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
   }
 
   if (text.startsWith("/buy")) {
-    const choice = text.split(/\s+/)[1];
-    if (!choice) {
-      await say(chatId, "PILIH PAKET DIAMOND\\n\\nPilih tombol untuk membuat tiket pesanan. Pastikan akun Tamaverse sudah terhubung.", { reply_markup: { inline_keyboard: [
-        [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
-        [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
-        [{ text: "100 💎 — Rp20.000", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
-        [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
-        [{ text: "⬅️ Menu utama", callback_data: "menu:home" }]
-      ] } });
-      return;
-    }
-    const pack = packages[choice];
-    if (!pack) { await say(chatId, "Paket tidak valid. Gunakan /buy untuk melihat pilihan."); return; }
-    const packageId = pack.packageId;
-    const { data, error } = await db.rpc("create_tamaverse_diamond_order", {
-      p_telegram_user_id: telegramId, p_package_id: packageId,
-    });
-    if (error) { await say(chatId, error.message.includes("TELEGRAM_NOT_LINKED") ? "UUID belum terdeteksi. Masukkan UUID Tamaverse terlebih dahulu dengan format /uuid UUID_KAMU." : "Tiket gagal dibuat: " + error.message); return; }
-    await say(chatId, `Tiket berhasil dibuat!\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu admin\n\nAdmin akan mengirim nominal dan instruksi pembayaran di chat ini. Jangan membayar sebelum menerima instruksi.`);
-    const priceButtons = { reply_markup: { inline_keyboard: [
-      [5000,10000,15000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n })),
-      [20000,25000,50000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n }))
-    ] } };
-    try {
-      await createOrderTopic(data.id, pack.label, pack.diamonds, telegramId);
-      await sendOrderTopic(data.id, "Pilih nominal pembayaran:", priceButtons);
-    } catch (topicError) {
-      console.error("Order topic creation failed:", topicError);
-      await say(adminId, `TOPIC GAGAL DIBUAT — ORDER ${data.id}\n${String(topicError)}\nSilakan tindak lanjuti manual.`, priceButtons);
-    }
+    await say(chatId, "Menu /buy versi lama sudah dinonaktifkan agar tidak membuat order dengan nominal dummy. Gunakan tombol Top Up Diamond untuk memilih paket dengan harga resmi.");
+    await say(chatId, "PILIH PAKET DIAMOND\\n\\nHarga paket resmi Tamaverse:", { reply_markup: { inline_keyboard: [
+      [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
+      [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
+      [{ text: "100 💎 — Rp20.000", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
+      [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
+      [{ text: "⬅️ Menu utama", callback_data: "menu:home" }]
+    ] } });
     return;
   }
 
