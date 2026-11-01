@@ -989,7 +989,7 @@ function battleView(){
         <div class="battle-arena-controls"><div class="battle-action-status">${battle.phase==='ai'?'🤖 BOT SEDANG MEMILIH AKSI...':'✨ GILIRAN KAMU — PILIH AKSI'}</div><div class="battle-action-grid">
           <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
           <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||battle.skillUsed?'disabled':''}><span>✨</span>Skill</button>
-          <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy?'disabled':''}><span>🛡️</span>Defend</button>
+          <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>🛡️</span>Defend</button>
           <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}><span>🍓</span>Item · ${state.items.snack}</button>
         </div></div>
       </div>
@@ -1881,9 +1881,11 @@ async function onlineStartMatch() {
     });
 
     if (error) throw error;
+    const startedRoom = Array.isArray(data) ? data[0] : data;
+    if (!startedRoom || typeof startedRoom !== 'object') throw new Error('Server tidak mengembalikan status match yang valid.');
 
     const active=activePet();if(active){active.energy=clamp(active.energy-25,0,100);active.careUpdatedAt=Date.now();save();}
-    onlineRoom = { ...onlineRoom, ...data, id: data.room_id || roomId };
+    onlineRoom = { ...onlineRoom, ...startedRoom, id: startedRoom.room_id || startedRoom.id || roomId };
     render();
     showToast('Match dimulai!');
     subscribeOnlineRoom(onlineRoom.id);
