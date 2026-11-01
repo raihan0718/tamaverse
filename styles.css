@@ -4215,3 +4215,22 @@ body[data-theme="light"] .profile-rename-link{color:#fff}
 .visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.intro-avatar-picker{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0;padding:11px;border-radius:14px;background:var(--card-bg);border:1px solid var(--border-color)}.intro-avatar-picker>span{font-size:10px;font-weight:900;letter-spacing:1px}.intro-avatar-picker small{width:100%;font-size:10px;color:var(--muted)}.profile-identity-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px}.profile-rename-link{border:0;background:transparent;color:#e4c9ff;font-size:10px;font-weight:800;padding:3px 0;cursor:pointer}.profile-battle-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.profile-battle-stats .profile-stat{min-width:0}.profile-battle-stats .profile-stat strong{font-size:18px}@media(max-width:360px){.profile-battle-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}body[data-theme="light"] .profile-rename-link{color:#fff}
 .player-avatar-photo{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}.profile-avatar-image{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .intro-avatar-picker{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0;padding:11px;border-radius:14px;background:var(--card-bg);border:1px solid var(--border-color)}.intro-avatar-picker>span{font-size:10px;font-weight:900;letter-spacing:1px}.intro-avatar-picker small{width:100%;font-size:10px;color:var(--muted)}.profile-identity-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px}.profile-rename-link{border:0;background:transparent;color:#e4c9ff;font-size:10px;font-weight:800;padding:3px 0;cursor:pointer}.profile-uuid-row strong{font-size:10px;letter-spacing:1.2px;color:inherit}.profile-battle-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.profile-battle-stats .profile-stat{min-width:0}.profile-battle-stats .profile-stat strong{font-size:18px}@media(max-width:360px){.profile-battle-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}body[data-theme="light"] .profile-rename-link{color:#fff}
+/* Profile card refinement */
+.profile-identity-card{gap:14px;padding:19px}
+.profile-identity-buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.profile-action-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:7px 10px;border:1px solid #ffffff30;border-radius:10px;background:#ffffff14;color:#fff;font:700 10px 'DM Sans',sans-serif;cursor:pointer;transition:transform .18s,background .18s,border-color .18s}
+.profile-action-button:active{transform:scale(.96)}
+.profile-action-button span{font-size:13px;line-height:1}
+.profile-change-button{background:linear-gradient(120deg,#b99be9,#e6a8cb);border-color:#ffffff55;color:#30213f}
+.profile-uuid-row{gap:9px;padding:9px 11px}
+.profile-uuid-value{min-width:0;flex:1;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 10px 'DM Sans',sans-serif;letter-spacing:.35px;color:#f1e8f7}
+.profile-copy-uuid{flex:0 0 auto;width:31px;height:30px;display:grid;place-items:center;cursor:pointer}
+.profile-battle-stats{grid-template-columns:repeat(5,minmax(0,1fr))}
+.profile-battle-stats .profile-stat{padding:11px 5px;min-width:0}
+.profile-battle-stats .profile-stat strong{font-size:17px}
+.profile-battle-stats .profile-stat span{font-size:8px;letter-spacing:.45px}
+.profile-collection-stat{background:linear-gradient(145deg,#a994ff20,#ff9fbd18)!important;border-color:#b99be955!important}
+body[data-theme="light"] .profile-action-button{background:#ffffff35;border-color:#ffffff70;color:#fff}
+body[data-theme="light"] .profile-change-button{background:linear-gradient(120deg,#f5e7ff,#ffe5f0);color:#654b78}
+body[data-theme="light"] .profile-uuid-value{color:#fff}
+@media(max-width:390px){.profile-identity-buttons{gap:6px}.profile-action-button{font-size:9px;padding:7px 8px}.profile-battle-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-battle-stats .profile-stat:last-child{grid-column:1/-1}}
