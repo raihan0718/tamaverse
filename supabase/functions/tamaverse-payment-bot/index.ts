@@ -60,11 +60,13 @@ async function sendOrderTopic(orderId: string, text: string, extra: Record<strin
 const money = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 const isAdmin = (id: number) => String(id) === adminId;
 const packages: Record<string, { label: string; diamonds: number; price: number; packageId: string }> = {
-  "1": { label: "Mini", diamonds: 5, price: 2000, packageId: "mini_5" },
-  "2": { label: "Basic", diamonds: 10, price: 4000, packageId: "basic_10" },
-  "3": { label: "Plus", diamonds: 25, price: 8000, packageId: "plus_25" },
-  "4": { label: "Pro", diamonds: 50, price: 12000, packageId: "pro_50" },
-  "5": { label: "Max", diamonds: 100, price: 20000, packageId: "max_100" },
+  "1": { label: "Mini", diamonds: 5, price: 1000, packageId: "mini_5" },
+  "2": { label: "Basic", diamonds: 10, price: 1800, packageId: "basic_10" },
+  "3": { label: "Plus", diamonds: 25, price: 3500, packageId: "plus_25" },
+  "4": { label: "Pro", diamonds: 50, price: 5000, packageId: "pro_50" },
+  "5": { label: "Starter", diamonds: 120, price: 10800, packageId: "starter_120" },
+  "6": { label: "Value", diamonds: 300, price: 24000, packageId: "value_300" },
+  "7": { label: "Mega", diamonds: 700, price: 49000, packageId: "mega_700" },
 };
 const help = `NEXORA • TAMAVERSE DIAMOND TOP-UP
 
@@ -111,9 +113,11 @@ async function handleCallback(q: any) {
   if (payload === "menu:topup") {
     await answer("Pilih paket");
     await say(chatId, "PILIH NOMINAL DIAMOND\n\nDaftar harga paket Tamaverse (mode pratinjau):\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
-      [{ text: "5 💎 — Rp2.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp4.000", callback_data: "packageinfo:10" }],
-      [{ text: "25 💎 — Rp8.000", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp12.000", callback_data: "packageinfo:50" }],
-      [{ text: "100 💎 — Rp20.000", callback_data: "packageinfo:100" }],
+      [{ text: "5 💎 — Rp1.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp1.800", callback_data: "packageinfo:10" }],
+      [{ text: "25 💎 — Rp3.500", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp5.000", callback_data: "packageinfo:50" }],
+      [{ text: "120 💎 — Rp10.800", callback_data: "packageinfo:120" }],
+      [{ text: "300 💎 — Rp24.000", callback_data: "packageinfo:300" }],
+      [{ text: "700 💎 — Rp49.000", callback_data: "packageinfo:700" }],
       [{ text: "⬅️ Kembali", callback_data: "menu:home" }]
     ] } }); return;
   }
@@ -125,7 +129,7 @@ async function handleCallback(q: any) {
   if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
   if (payload.startsWith("packageinfo:")) {
     const amount = Number(payload.split(":")[1]);
-    const prices: Record<number, number> = { 5: 2000, 10: 4000, 25: 8000, 50: 12000, 100: 20000 };
+    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 120: 10800, 300: 24000, 700: 49000 };
     const price = prices[amount];
     if (!price) { await answer("Paket tidak valid"); return; }
     await answer("Detail paket");
@@ -138,7 +142,7 @@ async function handleCallback(q: any) {
   if (payload.startsWith("methodpreview:")) {
     const [, rawAmount, method] = payload.split(":");
     const amount = Number(rawAmount);
-    const prices: Record<number, number> = { 5: 2000, 10: 4000, 25: 8000, 50: 12000, 100: 20000 };
+    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 120: 10800, 300: 24000, 700: 49000 };
     const price = prices[amount];
     if (!price || !["qris", "gopay"].includes(method)) { await answer("Pilihan tidak valid"); return; }
     await answer("Metode dipilih");
