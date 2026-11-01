@@ -1,4 +1,4 @@
--- NEXORA • TAMAVERSE — order, tiket, ledger Diamond (SANDBOX)
+-- NEXORA • TAMAVERSE — order, tiket, ledger Diamond (manual payment + admin approval)
 -- Additive only: tidak menghapus / mengubah tabel lama.
 -- Asumsi tabel lama: public.tamaverse_telegram_links(telegram_user_id, telegram_username, owner_id)
 
