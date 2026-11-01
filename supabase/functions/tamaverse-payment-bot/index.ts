@@ -111,11 +111,9 @@ async function handleCallback(q: any) {
   if (payload === "menu:topup") {
     await answer("Pilih paket");
     await say(chatId, "PILIH NOMINAL DIAMOND\n\nDaftar harga paket Tamaverse (mode pratinjau):\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
-      [{ text: "5 💎 — Rp1.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp1.800", callback_data: "packageinfo:10" }],
-      [{ text: "25 💎 — Rp3.500", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp5.000", callback_data: "packageinfo:50" }],
-      [{ text: "120 💎 — Rp10.800", callback_data: "packageinfo:120" }],
-      [{ text: "300 💎 — Rp24.000", callback_data: "packageinfo:300" }],
-      [{ text: "700 💎 — Rp49.000", callback_data: "packageinfo:700" }],
+      [{ text: "5 💎 — Rp2.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp4.000", callback_data: "packageinfo:10" }],
+      [{ text: "25 💎 — Rp8.000", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp12.000", callback_data: "packageinfo:50" }],
+      [{ text: "100 💎 — Rp20.000", callback_data: "packageinfo:100" }],
       [{ text: "⬅️ Kembali", callback_data: "menu:home" }]
     ] } }); return;
   }
@@ -127,7 +125,7 @@ async function handleCallback(q: any) {
   if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
   if (payload.startsWith("packageinfo:")) {
     const amount = Number(payload.split(":")[1]);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 120: 10800, 300: 24000, 700: 49000 };
+    const prices: Record<number, number> = { 5: 2000, 10: 4000, 25: 8000, 50: 12000, 100: 20000 };
     const price = prices[amount];
     if (!price) { await answer("Paket tidak valid"); return; }
     await answer("Detail paket");
@@ -140,7 +138,7 @@ async function handleCallback(q: any) {
   if (payload.startsWith("methodpreview:")) {
     const [, rawAmount, method] = payload.split(":");
     const amount = Number(rawAmount);
-    const prices: Record<number, number> = { 5: 1000, 10: 1800, 25: 3500, 50: 5000, 120: 10800, 300: 24000, 700: 49000 };
+    const prices: Record<number, number> = { 5: 2000, 10: 4000, 25: 8000, 50: 12000, 100: 20000 };
     const price = prices[amount];
     if (!price || !["qris", "gopay"].includes(method)) { await answer("Pilihan tidak valid"); return; }
     await answer("Metode dipilih");
@@ -469,7 +467,7 @@ Ini hanya konfirmasi pilihan dari aplikasi. Untuk informasi dan bantuan, gunakan
     }
     const pack = packages[choice];
     if (!pack) { await say(chatId, "Paket tidak valid. Gunakan /buy untuk melihat pilihan."); return; }
-    const packageId = ({ "1": "starter_50", "2": "popular_120", "3": "value_300", "4": "mega_700" } as Record<string,string>)[choice];
+    const packageId = pack.packageId;
     const { data, error } = await db.rpc("create_tamaverse_diamond_order", {
       p_telegram_user_id: telegramId, p_package_id: packageId,
     });
