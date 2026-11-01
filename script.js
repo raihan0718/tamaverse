@@ -1636,7 +1636,9 @@ async function onlineBattleAction(move) {
     const db = window.TAMAVERSE_SUPABASE_CLIENT;
     const { data, error } = await db.rpc('pvp_battle_action', { p_room_id: onlineRoom.id, p_action: move });
     if (error) throw error;
-    onlineRoom = { ...onlineRoom, ...data };
+    const actionResult = Array.isArray(data) ? data[0] : data;
+    if (!actionResult || typeof actionResult !== 'object') throw new Error('Server tidak mengembalikan status battle yang valid.');
+    onlineRoom = { ...onlineRoom, ...actionResult };
     window.onlineBattleFx = move;
     if (onlineBattleFxTimer) clearTimeout(onlineBattleFxTimer);
     onlineBattleFxTimer = setTimeout(() => { window.onlineBattleFx = 'idle'; if (onlineRoom?.id) render(); }, 1100);
@@ -1644,15 +1646,15 @@ async function onlineBattleAction(move) {
     const { data: inventory, error: inventoryError } = await db.from('inventory').select('snack').eq('owner_id', window.TAMAVERSE_USER_ID).maybeSingle();
     if (!inventoryError && inventory) state.items.snack = Number(inventory.snack || 0);
 
-    if (data.status === 'finished' && typeof window.loadPlayerFromSupabase === 'function') {
+    if (actionResult.status === 'finished' && typeof window.loadPlayerFromSupabase === 'function') {
       await window.loadPlayerFromSupabase();
     } else {
       render();
     }
 
-    if (data.status === 'finished') {
-      const result = data.battle_state?.result;
-      const winner = data.battle_state?.winner_id;
+    if (actionResult.status === 'finished') {
+      const result = actionResult.battle_state?.result;
+      const winner = actionResult.battle_state?.winner_id;
       const outcome = result === 'draw' ? 'Seri!' : winner === window.TAMAVERSE_USER_ID ? 'Kemenangan!' : 'Pertandingan selesai';
       showModal(`<div class="hatch-egg">${result === 'draw' ? '🤝' : winner === window.TAMAVERSE_USER_ID ? '🏆' : '💫'}</div>
         <h2 id="modalTitle" style="text-align:center">${outcome}</h2>
@@ -1899,25 +1901,27 @@ async function onlineRandomMatch() {
     });
 
     if (error) throw error;
+    const matchResult = Array.isArray(data) ? data[0] : data;
+    const roomId = matchResult?.room_id || matchResult?.id || matchResult?.room?.id;
+    if (!roomId) throw new Error('Matchmaking tidak mengembalikan Room ID. Periksa RPC find_random_match.');
 
     const { data: roomRow, error: roomLoadError } = await db
       .from('pvp_rooms')
       .select('*')
-      .eq('id', data.room_id || data.id)
+      .eq('id', roomId)
       .single();
     if (roomLoadError) throw roomLoadError;
 
-    onlineRoom = { ...roomRow, id: roomRow.id, matched: data.matched };
+    onlineRoom = { ...roomRow, id: roomRow.id, matched: !!matchResult.matched };
     page = 'battle';
     render();
 
-    if (data.matched) {
+    if (matchResult.matched) {
       showToast('Lawan ditemukan! Room siap.');
-      subscribeOnlineRoom(data.room_id);
     } else {
       showToast('Mencari lawan... tunggu pemain lain.');
-      subscribeOnlineRoom(data.room_id);
     }
+    await subscribeOnlineRoom(roomId);
   } catch (error) {
     console.error(error);
     showToast(error.message || 'Gagal mencari lawan.');
@@ -1936,11 +1940,14 @@ async function onlineCreateRoom() {
     });
 
     if (error) throw error;
+    const createResult = Array.isArray(data) ? data[0] : data;
+    const roomId = createResult?.room_id || createResult?.id || createResult?.room?.id;
+    if (!roomId) throw new Error('Create room tidak mengembalikan Room ID. Periksa RPC create_pvp_room.');
 
     const { data: roomRow, error: roomLoadError } = await db
       .from('pvp_rooms')
       .select('*')
-      .eq('id', data.room_id || data.id)
+      .eq('id', roomId)
       .single();
     if (roomLoadError) throw roomLoadError;
 
@@ -1950,7 +1957,7 @@ async function onlineCreateRoom() {
 
     showToast('Private room berhasil dibuat. Bagikan kode room ke temanmu.');
 
-    subscribeOnlineRoom(data.room_id);
+    await subscribeOnlineRoom(roomId);
   } catch (error) {
     console.error(error);
     showToast(error.message || 'Gagal membuat room.');
@@ -1969,11 +1976,14 @@ async function onlineJoinRoom(code) {
     });
 
     if (error) throw error;
+    const joinResult = Array.isArray(data) ? data[0] : data;
+    const roomId = joinResult?.room_id || joinResult?.id || joinResult?.room?.id;
+    if (!roomId) throw new Error('Join room tidak mengembalikan Room ID. Periksa RPC join_pvp_room.');
 
     const { data: roomData, error: roomError } = await db
       .from('pvp_rooms')
       .select('*')
-      .eq('id', data.room_id)
+      .eq('id', roomId)
       .single();
 
 console.log('ROOM DATA:', roomData);
@@ -1985,7 +1995,7 @@ console.log('ROOM ERROR:', roomError);
     page = 'battle';
     render();
     showToast('Berhasil masuk room!');
-    subscribeOnlineRoom(data.room_id);
+    await subscribeOnlineRoom(roomId);
   } catch (error) {
     console.error(error);
     showToast(error.message || 'Gagal masuk room.');
