@@ -3058,3 +3058,40 @@ body[data-theme="dark"] .battle-hub-tabs{background:#100d1c}
 body[data-theme="dark"] .battle-mode-banner,body[data-theme="dark"] .battle-option-card{background-color:#211a37}
 body[data-theme="dark"] .battle-turn-overlay{background:#251d30eF;border-color:#ffffff2b;color:#f4e9ff}
 @media(max-width:380px){.battle-hub-tab{padding:9px 7px;grid-template-columns:31px 1fr;gap:2px 6px}.battle-hub-tab>span{width:31px;height:31px;font-size:17px}.battle-hub-tab b{font-size:11px}.battle-live-page .battle-scene{height:410px}}
+
+
+/* Battle hub polish: clear mode hierarchy and richer cards */
+.battle-hub{padding-bottom:24px}
+.battle-hub>.page-title{margin-bottom:6px}
+.battle-hub-tabs{box-shadow:0 10px 28px #0002}
+.battle-hub-tab{transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.battle-hub-tab:active{transform:scale(.985)}
+.battle-online-hero{position:relative;display:flex;align-items:center;gap:13px;overflow:hidden;margin:8px 0 13px;padding:17px;border:1px solid #6f9dff42;border-radius:20px;background:radial-gradient(circle at 90% 15%,#65c9ff35,transparent 38%),linear-gradient(135deg,#182c50,#242044 75%);box-shadow:0 12px 26px #10152b25}
+.battle-online-hero:after{content:"";position:absolute;width:135px;height:135px;right:-56px;bottom:-83px;border:1px solid #9ac9ff40;border-radius:50%;box-shadow:0 0 0 15px #9ac9ff0a,0 0 0 31px #9ac9ff08}
+.battle-online-hero-icon{display:grid;place-items:center;flex:none;width:52px;height:52px;border:1px solid #a6d7ff40;border-radius:17px;background:linear-gradient(145deg,#75cfff2b,#a994ff2b);font-size:27px}
+.battle-online-hero-copy{min-width:0;position:relative;z-index:1}
+.battle-online-live{display:flex;align-items:center;gap:6px;color:#9fe3ff;font:900 8px 'Space Grotesk',sans-serif;letter-spacing:1.7px}
+.battle-online-live i{width:7px;height:7px;border-radius:50%;background:#5de2a0;box-shadow:0 0 0 4px #5de2a01c,0 0 12px #5de2a0;animation:battleOnlinePulse 1.7s infinite}
+.battle-online-hero h2{margin:5px 0 3px;color:#fff;font:800 19px 'Space Grotesk',sans-serif}
+.battle-online-hero p{margin:0;color:#c5c8df;font-size:10px;line-height:1.5;max-width:245px}
+.battle-online-spark{position:absolute;right:20px;top:18px;color:#c6b8ff;font-size:22px;opacity:.8}
+.battle-online-match-card{position:relative;overflow:hidden;border:1px solid #8b78d344!important;background:linear-gradient(145deg,#2c2443,#1b172c)!important;box-shadow:0 10px 26px #09071335}
+.battle-online-match-card h2{font:800 17px 'Space Grotesk',sans-serif}
+.battle-online-match-card .button{box-shadow:0 5px 0 #6b5595}
+.battle-turn-preview{display:flex;align-items:center;justify-content:space-around;gap:10px;margin:12px 0;padding:12px 10px;border:1px solid #a994ff35;border-radius:17px;background:linear-gradient(110deg,#a994ff12,#65c9ff0d,#ff9acb12)}
+.battle-turn-preview>div{display:grid;grid-template-columns:30px auto;grid-template-rows:auto auto;align-items:center;gap:1px 7px;min-width:0}
+.turn-preview-icon{grid-row:1/3;display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#a994ff20;font-size:17px}
+.battle-turn-preview b{font:900 9px 'Space Grotesk',sans-serif;letter-spacing:1px;color:var(--text)}
+.battle-turn-preview small{font-size:8px;color:var(--muted)}
+.turn-preview-arrow{font-size:20px;color:#a994ff}
+.battle-option-card{position:relative;overflow:hidden;border-color:#a994ff48}
+.battle-option-card:before{content:"";position:absolute;width:170px;height:170px;right:-80px;top:-90px;border-radius:50%;background:#a994ff13;pointer-events:none}
+.battle-option-art{position:relative;border:1px solid #ffffff12}
+.battle-option-card .button{box-shadow:0 5px 0 #755b9c}
+.battle-live-page .battle-action-btn:not(:disabled){transition:transform .15s ease,filter .15s ease}
+.battle-live-page .battle-action-btn:not(:disabled):active{transform:translateY(2px) scale(.985);filter:brightness(.97)}
+.battle-live-page .battle-action-btn:disabled{cursor:not-allowed;opacity:.35}
+.battle-live-page .battle-log-panel{box-shadow:0 7px 20px #26133112}
+@keyframes battleOnlinePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.82)}}
+body[data-theme="dark"] .battle-turn-preview{background:linear-gradient(110deg,#a994ff12,#65c9ff08,#ff9acb0a)}
+@media(max-width:380px){.battle-online-hero{padding:14px;gap:10px}.battle-online-hero-icon{width:44px;height:44px;font-size:23px}.battle-online-hero h2{font-size:17px}.battle-turn-preview{padding:10px 7px}.battle-turn-preview>div{grid-template-columns:26px auto;gap:1px 5px}.turn-preview-icon{width:26px;height:26px}}
