@@ -633,7 +633,7 @@ function normalizeSavedState(saved){
   const today=new Date().toDateString();
   base.equippedFrame=accessoryFrames.some(frame=>frame.id===saved.equippedFrame)?saved.equippedFrame:'common';
   base.lastCareUpdate=Number(saved.lastCareUpdate)||Date.now();
-  base.dailyReward=saved.dailyReward?{...saved.dailyReward,lastClaimDate:(()=>{const value=saved.dailyReward.lastClaimDate;if(!value)return '';if(/^\\d{4}-\\d{2}-\\d{2}$/.test(value))return value;const d=new Date(value);return Number.isNaN(d.getTime())?'':[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');})()}:{lastClaimDate:'',day:0};
+  base.dailyReward=saved.dailyReward?{...saved.dailyReward,lastClaimDate:(()=>{const value=saved.dailyReward.lastClaimDate;if(!value)return '';if(/^\d{4}-\d{2}-\d{2}$/.test(value))return value;const d=new Date(value);return Number.isNaN(d.getTime())?'':[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');})()}:{lastClaimDate:'',day:0};
   base.battleHistory=Array.isArray(saved.battleHistory)?saved.battleHistory:[];
   return base;
 }
