@@ -799,8 +799,8 @@ function gachaPage(){
       <div><span class="eyebrow">TAMAVERSE TOP UP</span><h2>Diamond Store</h2><p class="subtle">Isi saldo Diamond untuk membuka lebih banyak hal di Tamaverse.</p></div>
       <div class="diamond-wallet"><small>DIAMOND BALANCE</small><strong>💎 ${Number(state.player.diamonds||0).toLocaleString('id-ID')}</strong></div>
     </div>
-    <div class="notice">Pembayaran asli sedang dipersiapkan. Paket belum bisa dibeli sampai sistem pembayaran resmi aktif.</div>
-    <div class="section-heading"><h2>Pilih Paket Diamond</h2><span class="muted-label">COMING SOON</span></div>
+    <div class="notice">Pilih paket di sini, lalu lanjutkan pembelian melalui Nexora Bot. UUID akun game tidak perlu dikirim lewat chat publik.</div>
+    <div class="section-heading"><h2>Pilih Paket Diamond</h2><span class="muted-label">NEXORA BOT</span></div>
     <div class="diamond-package-grid">
       ${[{amount:50,label:'Starter'},{amount:120,label:'Popular'},{amount:300,label:'Value Pack'},{amount:700,label:'Mega Pack'}].map((pack,index)=>`
         <article class="diamond-package-card ${index===1?'featured':''}">
@@ -809,8 +809,8 @@ function gachaPage(){
           <strong>${pack.amount.toLocaleString('id-ID')}</strong>
           <span class="diamond-package-label">Diamonds</span>
           <b class="diamond-package-name">${pack.label}</b>
-          <span class="diamond-package-price">Harga segera hadir</span>
-          <button class="button full" disabled>Segera hadir</button>
+          <span class="diamond-package-price">Lanjutkan di Nexora</span>
+          <a class="button full" href="https://t.me/Nexorapaymbot" target="_blank" rel="noopener">Buka Nexora Bot</a>
         </article>`).join('')}
     </div>
     <div class="card diamond-history-card">
