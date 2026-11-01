@@ -250,8 +250,8 @@ for each row execute function public.guard_tamaverse_gem_balance();
 -- Fixed-price package migration
 alter table public.diamond_orders drop constraint if exists diamond_orders_package_id_check;
 alter table public.diamond_orders drop constraint if exists diamond_orders_diamonds_check;
-alter table public.diamond_orders add constraint diamond_orders_package_id_check check (package_id in ('mini_5','basic_10','plus_25','pro_50','max_100'));
-alter table public.diamond_orders add constraint diamond_orders_diamonds_check check (diamonds in (5,10,25,50,100));
+alter table public.diamond_orders add constraint diamond_orders_package_id_check check (package_id in ('starter_50','popular_120','value_300','mega_700','mini_5','basic_10','plus_25','pro_50','max_100'));
+alter table public.diamond_orders add constraint diamond_orders_diamonds_check check (diamonds in (5,10,25,50,100,120,300,700));
 alter table public.diamond_orders add column if not exists payment_method text check (payment_method is null or payment_method in ('gopay','qris'));
 create table if not exists public.tamaverse_payment_settings (key text primary key,value text not null,updated_at timestamptz not null default now());
 alter table public.tamaverse_payment_settings enable row level security;
