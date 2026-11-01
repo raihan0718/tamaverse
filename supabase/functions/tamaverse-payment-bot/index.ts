@@ -45,6 +45,60 @@ Pertama kali, kirim UUID dari menu Profile Tamaverse dengan format:
 
 Pembayaran diproses manual oleh admin. Jangan kirim data rahasia atau PIN.`;
 
+async function handleCallback(q: any) {
+  const id = String(q.from?.id ?? "");
+  const chatId = q.message?.chat?.id;
+  const payload = String(q.data ?? "");
+  const answer = (text: string) => telegram("answerCallbackQuery", { callback_query_id: q.id, text });
+  if (payload === "menu:home") {
+    await answer("Menu utama");
+    await say(chatId, "NEXORA PAY • TAMAVERSE", { reply_markup: { inline_keyboard: [
+      [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
+      [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
+      [{ text: "📋 Panduan", callback_data: "menu:help" }]
+    ] } }); return;
+  }
+  if (payload === "menu:topup") {
+    await answer("Pilih paket");
+    await say(chatId, "PILIH NOMINAL DIAMOND", { reply_markup: { inline_keyboard: [
+      [{ text: "50 Diamonds", callback_data: "pack:1" }, { text: "120 Diamonds", callback_data: "pack:2" }],
+      [{ text: "300 Diamonds", callback_data: "pack:3" }, { text: "700 Diamonds", callback_data: "pack:4" }],
+      [{ text: "⬅️ Kembali", callback_data: "menu:home" }]
+    ] } }); return;
+  }
+  if (payload === "menu:uuid") { await answer("Hubungkan akun"); await say(chatId, "Kirim UUID Tamaverse dengan format:\n/uuid UUID_KAMU"); return; }
+  if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
+  if (payload.startsWith("pack:")) {
+    const choice = payload.split(":")[1], pack = packages[choice];
+    if (!pack) { await answer("Paket tidak valid"); return; }
+    if (id === adminId) { await answer("Admin tidak dapat membuat order pemain"); return; }
+    const { data: link } = await db.from("tamaverse_telegram_links").select("owner_id").eq("telegram_user_id", id).maybeSingle();
+    if (!link) { await answer("UUID belum terhubung"); await say(chatId, "UUID belum terdeteksi. Hubungkan akun dulu.", { reply_markup: { inline_keyboard: [[{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }]] } }); return; }
+    await answer("Membuat tiket...");
+    const packageId = ({ "1": "starter_50", "2": "popular_120", "3": "value_300", "4": "mega_700" } as Record<string,string>)[choice];
+    const { data, error } = await db.rpc("create_tamaverse_diamond_order", { p_telegram_user_id: id, p_package_id: packageId });
+    if (error) { await say(chatId, "Tiket gagal dibuat: " + error.message); return; }
+    await say(chatId, `TIKET BERHASIL DIBUAT\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu instruksi pembayaran admin.\n\nJangan membayar sebelum menerima instruksi resmi.`);
+    await say(adminId, `TIKET DIAMOND BARU\nOrder: ${data.id}\nTelegram: ${id}\nPaket: ${pack.label} — ${pack.diamonds} Diamonds\n\nPilih nominal pembayaran:`, { reply_markup: { inline_keyboard: [
+      [5000,10000,15000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n })),
+      [20000,25000,50000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n }))
+    ] } }); return;
+  }
+  if (payload.startsWith("price:")) {
+    if (id !== adminId) { await answer("Khusus admin"); return; }
+    const [, orderId, raw] = payload.split(":"); const amount = Number(raw);
+    if (![5000,10000,15000,20000,25000,50000].includes(amount)) { await answer("Nominal tidak valid"); return; }
+    await answer("Menyimpan harga...");
+    const { data, error } = await db.rpc("set_tamaverse_diamond_order_payment", { p_order_id: orderId, p_amount_idr: amount, p_admin_note: null });
+    if (error) { await say(chatId, "Gagal mengatur harga: " + error.message); return; }
+    await say(data.telegram_user_id, `INSTRUKSI PEMBAYARAN TAMAVERSE\nOrder: ${data.id}\nDiamond: ${data.diamonds}\nTotal: Rp${money(data.amount_idr)}\n\nIkuti instruksi pembayaran dari admin. Setelah membayar, kirim foto bukti dengan caption /proof ${data.id}. Jangan kirim PIN atau OTP.`);
+    await say(chatId, `Harga tersimpan: Rp${money(amount)}\nOrder: ${orderId}\nKirim instruksi pembayaran secara manual.`);
+    if (q.message?.message_id) await telegram("editMessageReplyMarkup", { chat_id: chatId, message_id: q.message.message_id, reply_markup: { inline_keyboard: [] } });
+    return;
+  }
+  await answer("Tombol tidak dikenali");
+}
+
 async function handleMessage(m: any) {
   const chatId = m.chat?.id;
   const telegramId = String(m.from?.id ?? "");
@@ -53,7 +107,11 @@ async function handleMessage(m: any) {
   if (!chatId || !telegramId || m.chat?.type !== "private") return;
 
   if (text.startsWith("/start") || text === "/help") {
-    await say(chatId, help);
+    await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
+      [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
+      [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
+      [{ text: "📋 Panduan", callback_data: "menu:help" }]
+    ] } });
     return;
   }
 
@@ -131,7 +189,10 @@ async function handleMessage(m: any) {
     });
     if (error) { await say(chatId, error.message.includes("TELEGRAM_NOT_LINKED") ? "UUID belum terdeteksi. Masukkan UUID Tamaverse terlebih dahulu dengan format /uuid UUID_KAMU." : "Tiket gagal dibuat: " + error.message); return; }
     await say(chatId, `Tiket berhasil dibuat!\nOrder: ${data.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nStatus: Menunggu admin\n\nAdmin akan mengirim nominal dan instruksi pembayaran di chat ini. Jangan membayar sebelum menerima instruksi.`);
-    await say(adminId, `TIKET DIAMOND BARU\nOrder: ${data.id}\nTelegram: ${telegramId} (@${username || "-"})\nPaket: ${pack.label} — ${pack.diamonds} Diamonds\n\nAtur harga: /price ${data.id} NOMINAL_RUPIAH`);
+    await say(adminId, `TIKET DIAMOND BARU\nOrder: ${data.id}\nTelegram: ${telegramId} (@${username || "-"})\nPaket: ${pack.label} — ${pack.diamonds} Diamonds\n\nPilih nominal pembayaran:`, { reply_markup: { inline_keyboard: [
+      [5000,10000,15000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n })),
+      [20000,25000,50000].map(n => ({ text: "Rp" + money(n), callback_data: "price:" + data.id + ":" + n }))
+    ] } });
     return;
   }
 
@@ -208,6 +269,7 @@ Deno.serve(async (req) => {
   try {
     const update = await req.json();
     if (update.message) await handleMessage(update.message);
+    if (update.callback_query) await handleCallback(update.callback_query);
     return new Response("ok", { status: 200 });
   } catch (error) {
     console.error("Telegram webhook error:", error);
