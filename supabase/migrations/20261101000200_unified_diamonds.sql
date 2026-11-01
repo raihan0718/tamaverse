@@ -207,7 +207,10 @@ declare
   v_last date;
   v_day smallint;
   v_today date := (now() at time zone 'utc')::date;
-  v_diamonds bigint;
+  v_coins integer := 0;
+  v_diamonds bigint := 0;
+  v_snack integer := 0;
+  v_energy integer := 0;
 begin
   if v_owner is null then raise exception 'AUTH_REQUIRED'; end if;
 
@@ -232,19 +235,41 @@ begin
   insert into public.inventory(owner_id) values (v_owner)
   on conflict (owner_id) do nothing;
 
-  if v_day = 4 then
-    update public.inventory set diamonds = diamonds + 1, updated_at = now()
-    where owner_id = v_owner returning diamonds into v_diamonds;
-  elsif v_day = 7 then
-    update public.inventory set diamonds = diamonds + 2, updated_at = now()
-    where owner_id = v_owner returning diamonds into v_diamonds;
-  else
-    select diamonds into v_diamonds from public.inventory where owner_id = v_owner;
-  end if;
+  -- Grant the complete daily reward in this transaction. The client never
+  -- mints Coins, Diamonds, or inventory items after the claim succeeds.
+  v_coins := case v_day
+    when 1 then 50
+    when 3 then 80
+    when 6 then 150
+    when 7 then 100
+    else 0
+  end;
+  v_diamonds := case v_day
+    when 4 then 1
+    when 7 then 2
+    else 0
+  end;
+  v_snack := case when v_day = 2 then 2 else 0 end;
+  v_energy := case when v_day = 5 then 2 else 0 end;
+
+  update public.inventory
+  set coins = coins + v_coins,
+      diamonds = diamonds + v_diamonds,
+      snack = snack + v_snack,
+      energy = energy + v_energy,
+      updated_at = now()
+  where owner_id = v_owner
+  returning coins, diamonds, snack, energy
+  into v_coins, v_diamonds, v_snack, v_energy;
 
   return jsonb_build_object(
-    'success', true, 'day', v_day, 'diamonds', v_diamonds,
-    'last_claim_date', v_today, 'diamond_reward', case when v_day = 4 then 1 when v_day = 7 then 2 else 0 end
+    'success', true,
+    'day', v_day,
+    'coins', v_coins,
+    'diamonds', v_diamonds,
+    'snack', v_snack,
+    'energy', v_energy,
+    'last_claim_date', v_today
   );
 end;
 $$;
