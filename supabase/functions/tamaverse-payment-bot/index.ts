@@ -49,7 +49,16 @@ async function handleCallback(q: any) {
   const id = String(q.from?.id ?? "");
   const chatId = q.message?.chat?.id;
   const payload = String(q.data ?? "");
-  const answer = (text: string) => telegram("answerCallbackQuery", { callback_query_id: q.id, text });
+  const answer = async (text: string) => {
+    await telegram("answerCallbackQuery", { callback_query_id: q.id, text });
+    if (chatId && q.message?.message_id) {
+      try {
+        await telegram("deleteMessage", { chat_id: chatId, message_id: q.message.message_id });
+      } catch (error) {
+        console.error("Could not delete previous button message:", error);
+      }
+    }
+  };
   if (payload === "menu:home") {
     await answer("Menu utama");
     await say(chatId, "NEXORA PAY • TAMAVERSE", { reply_markup: { inline_keyboard: [
@@ -93,7 +102,6 @@ async function handleCallback(q: any) {
     if (error) { await say(chatId, "Gagal mengatur harga: " + error.message); return; }
     await say(data.telegram_user_id, `INSTRUKSI PEMBAYARAN TAMAVERSE\nOrder: ${data.id}\nDiamond: ${data.diamonds}\nTotal: Rp${money(data.amount_idr)}\n\nIkuti instruksi pembayaran dari admin. Setelah membayar, kirim foto bukti dengan caption /proof ${data.id}. Jangan kirim PIN atau OTP.`);
     await say(chatId, `Harga tersimpan: Rp${money(amount)}\nOrder: ${orderId}\nKirim instruksi pembayaran secara manual.`);
-    if (q.message?.message_id) await telegram("editMessageReplyMarkup", { chat_id: chatId, message_id: q.message.message_id, reply_markup: { inline_keyboard: [] } });
     return;
   }
   await answer("Tombol tidak dikenali");
