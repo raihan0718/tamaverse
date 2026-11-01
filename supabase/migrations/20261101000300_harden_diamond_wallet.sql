@@ -33,8 +33,7 @@ grant select on public.daily_rewards to authenticated;
 
 -- Fragment counts are currently saved by the client and are not trusted enough
 -- to mint premium currency. Disable the old exchange RPC even if it was deployed.
-revoke all on function public.tamaverse_exchange_fragments_for_diamond(text)
-  from public, anon, authenticated;
+drop function if exists public.tamaverse_exchange_fragments_for_diamond(text);
 
 -- Revoke any accidental broad execution grants; keep only intended authenticated RPCs.
 revoke all on function public.tamaverse_spend_diamonds(integer, text)
