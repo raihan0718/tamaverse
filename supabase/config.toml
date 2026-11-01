@@ -1,0 +1,4 @@
+project_id = "tamaverse"
+
+[functions.tamaverse-payment-bot]
+verify_jwt = false
