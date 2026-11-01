@@ -211,7 +211,7 @@ begin
   if v_order.status not in ('proof_submitted','checking_payment') then
     raise exception 'ORDER_NOT_VERIFIED_OR_INVALID_STATUS';
   end if;
-  update public.inventory set gems = gems + v_order.diamonds, updated_at = now()
+  update public.inventory set diamonds = diamonds + v_order.diamonds, updated_at = now()
     where owner_id = v_order.owner_id;
   if not found then raise exception 'PLAYER_INVENTORY_NOT_FOUND'; end if;
   update public.diamond_orders set status = 'completed', completed_at = now(), updated_at = now()
@@ -226,7 +226,7 @@ grant execute on function public.approve_tamaverse_diamond_order(uuid) to servic
 
 -- Protect purchased Diamonds from direct client-side inventory updates.
 -- SECURITY DEFINER game RPCs (owned by postgres) and service_role backend
--- operations can still change gems; authenticated table updates cannot.
+-- operations can still change diamonds; authenticated table updates cannot.
 create or replace function public.guard_tamaverse_gem_balance()
 returns trigger
 language plpgsql
@@ -234,7 +234,7 @@ security invoker
 set search_path = ''
 as $$
 begin
-  if new.gems is distinct from old.gems
+  if new.diamonds is distinct from old.diamonds
      and current_user not in ('postgres', 'service_role', 'supabase_admin') then
     raise exception 'GEM_BALANCE_SERVER_CONTROLLED';
   end if;
@@ -243,7 +243,7 @@ end;
 $$;
 drop trigger if exists tamaverse_guard_gem_balance on public.inventory;
 create trigger tamaverse_guard_gem_balance
-before update of gems on public.inventory
+before update of diamonds on public.inventory
 for each row execute function public.guard_tamaverse_gem_balance();
 
 
