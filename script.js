@@ -383,49 +383,51 @@ function dailyRewardCard(){
 }
 async function spendDiamonds(amount,reason){
   const cost=Math.floor(Number(amount));
-  if(!Number.isFinite(cost)||cost<1||state.player.diamonds<cost){showToast('Diamond tidak cukup.');return false;}
+  if(!Number.isFinite(cost)||cost<1){showToast('Jumlah Diamond tidak valid.');return false;}
   const db=window.TAMAVERSE_SUPABASE_CLIENT;
-  if(db?.rpc&&window.TAMAVERSE_USER_ID){
-    try{
-      const {data,error}=await db.rpc('tamaverse_spend_diamonds',{p_amount:cost,p_reason:reason});
-      if(error)throw error;
-      const result=Array.isArray(data)?data[0]:data;
-      state.player.diamonds=Number(result?.diamonds??state.player.diamonds-cost);
-    }catch(error){console.error('Diamond spend failed:',error);showToast(error?.message||'Pengeluaran Diamond gagal.');return false;}
-  }else{
-    state.player.diamonds-=cost;
+  if(!db?.rpc||!window.TAMAVERSE_USER_ID){
+    showToast('Akun belum tersambung. Diamond hanya bisa digunakan saat online.');
+    return false;
   }
-  return true;
+  try{
+    // The database is authoritative; do not reject from a potentially stale local balance.
+    const {data,error}=await db.rpc('tamaverse_spend_diamonds',{p_amount:cost,p_reason:reason});
+    if(error)throw error;
+    const result=Array.isArray(data)?data[0]:data;
+    if(!result||result.success!==true)throw new Error('Pengeluaran Diamond gagal.');
+    state.player.diamonds=Number(result.diamonds??state.player.diamonds);
+    return true;
+  }catch(error){
+    console.error('Diamond spend failed:',error);
+    const message=String(error?.message||'');
+    showToast(message.includes('NOT_ENOUGH_DIAMONDS')?'Diamond tidak cukup.':message||'Pengeluaran Diamond gagal.');
+    return false;
+  }
 }
 async function claimDailyReward(){
   const db=window.TAMAVERSE_SUPABASE_CLIENT;
-  if(db?.rpc&&window.TAMAVERSE_USER_ID){
-    try{
-      const {data,error}=await db.rpc('tamaverse_claim_daily_reward');
-      if(error)throw error;
-      const result=Array.isArray(data)?data[0]:data;
-      const day=Number(result?.day||0);
-      const reward=dailyRewards[day-1];
-      if(!reward)throw new Error('Hadiah harian tidak valid.');
-      state.dailyReward={lastClaimDate:new Date().toISOString().slice(0,10),day};
-      state.player.diamonds=Number(result.diamonds??state.player.diamonds);
-      if(reward.type==='coins')state.player.coins+=reward.amount;
-      else if(reward.type==='grand')state.player.coins+=100;
-      else if(reward.type!=='diamonds')state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
-      save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
-    }catch(error){console.error('Daily reward claim failed:',error);showToast(error?.message||'Hadiah harian gagal diklaim.');}
+  if(!db?.rpc||!window.TAMAVERSE_USER_ID){
+    showToast('Akun belum tersambung. Hadiah harian perlu diklaim saat online.');
     return;
   }
-  const today=new Date().toISOString().slice(0,10);
-  if(!state.dailyReward)state.dailyReward={lastClaimDate:'',day:0};
-  if(state.dailyReward.lastClaimDate===today){showToast('Hadiah hari ini sudah diklaim.');return;}
-  const day=dailyRewardDay(),reward=dailyRewards[day-1];
-  if(reward.type==='coins')state.player.coins+=reward.amount;
-  else if(reward.type==='diamonds')state.player.diamonds+=reward.amount;
-  else if(reward.type==='grand'){state.player.diamonds+=2;state.player.coins+=100;}
-  else state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
-  state.dailyReward={lastClaimDate:today,day};
-  save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
+  try{
+    const {data,error}=await db.rpc('tamaverse_claim_daily_reward');
+    if(error)throw error;
+    const result=Array.isArray(data)?data[0]:data;
+    const day=Number(result?.day||0);
+    const reward=dailyRewards[day-1];
+    if(result?.success!==true||!reward)throw new Error('Hadiah harian tidak valid.');
+    state.dailyReward={lastClaimDate:new Date().toISOString().slice(0,10),day};
+    state.player.diamonds=Number(result.diamonds??state.player.diamonds);
+    if(reward.type==='coins')state.player.coins+=reward.amount;
+    else if(reward.type==='grand')state.player.coins+=100;
+    else if(reward.type!=='diamonds')state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
+    save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
+  }catch(error){
+    console.error('Daily reward claim failed:',error);
+    const message=String(error?.message||'');
+    showToast(message.includes('DAILY_REWARD_ALREADY_CLAIMED')?'Hadiah hari ini sudah diklaim.':message||'Hadiah harian gagal diklaim.');
+  }
 }
 function questPreview(){return questDefinitions().filter(q=>state.quests.active.includes(q.id)).slice(0,2).map(questRow).join('');}
 function questDefinitions(){return [{id:'feed',title:'Beri makan pet',target:2,icon:'🍓',reward:35,xp:15,difficulty:'Mudah'},{id:'play',title:'Bermain bersama',target:2,icon:'💖',reward:35,xp:15,difficulty:'Mudah'},{id:'egg',title:'Buka telur',target:1,icon:'🥚',reward:40,xp:25,difficulty:'Normal'},{id:'battle',title:'Selesaikan battle 5x',target:5,icon:'⚔️',reward:50,xp:30,difficulty:'Sulit'},{id:'win',title:'Menangkan battle',target:1,icon:'🏆',reward:60,xp:40,difficulty:'Tantangan'}];}
@@ -1170,7 +1172,7 @@ async function purchasePremiumItem(itemId){
   if(!db||!window.TAMAVERSE_USER_ID){showToast('Akun belum tersambung. Tunggu sinkronisasi lalu coba lagi.');return;}
   const costs={rename_card:50,rename_pet_card:50,frame_royal:200,frame_celestial:300};
   if(!Object.prototype.hasOwnProperty.call(costs,itemId))return;
-  if(Number(state.player.diamonds||0)<costs[itemId]){showToast('Diamond kamu belum cukup.');return;}
+  // Let the server validate the current wallet balance; the local value may be stale.
   try{
     const {data,error}=await db.rpc('purchase_tamaverse_premium_item',{p_item_id:itemId});
     if(error)throw error;
