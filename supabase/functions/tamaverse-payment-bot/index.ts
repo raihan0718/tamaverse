@@ -3,9 +3,9 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN2")!;
-const adminId = Deno.env.get("TELEGRAM_ADMIN_ID")!;
-const webhookSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET")!;
-const ticketGroupId = "-1004322036078";
+const adminId = Deno.env.get("TELEGRAM_ADMIN_ID") ?? Deno.env.get("ADMIN_TELEGRAM_ID") ?? "";
+const webhookSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET") ?? "";
+const ticketGroupId = Deno.env.get("ADMIN_FORUM_CHAT_ID") ?? "-1004322036078";
 const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 const api = (method: string) => `https://api.telegram.org/bot${botToken}/${method}`;
 
@@ -14,8 +14,11 @@ async function telegram(method: string, body: Record<string, unknown>) {
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
-  if (!res.ok || !data.ok) throw new Error(data.description || "Telegram API error");
+  const raw = await res.text();
+  let data: any;
+  try { data = raw ? JSON.parse(raw) : null; }
+  catch { throw new Error(`Telegram API returned invalid JSON (HTTP ${res.status})`); }
+  if (!res.ok || !data?.ok) throw new Error(data?.description || `Telegram API error (HTTP ${res.status})`);
   return data.result;
 }
 async function say(chatId: number | string, text: string, extra: Record<string, unknown> = {}) {
@@ -57,11 +60,13 @@ async function sendOrderTopic(orderId: string, text: string, extra: Record<strin
 const money = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 const isAdmin = (id: number) => String(id) === adminId;
 const packages: Record<string, { label: string; diamonds: number; price: number; packageId: string }> = {
-  "1": { label: "Mini", diamonds: 5, price: 2000, packageId: "mini_5" },
-  "2": { label: "Basic", diamonds: 10, price: 4000, packageId: "basic_10" },
-  "3": { label: "Plus", diamonds: 25, price: 8000, packageId: "plus_25" },
-  "4": { label: "Pro", diamonds: 50, price: 12000, packageId: "pro_50" },
-  "5": { label: "Max", diamonds: 100, price: 20000, packageId: "max_100" },
+  "1": { label: "Mini", diamonds: 5, price: 1000, packageId: "mini_5" },
+  "2": { label: "Basic", diamonds: 10, price: 1800, packageId: "basic_10" },
+  "3": { label: "Plus", diamonds: 25, price: 3500, packageId: "plus_25" },
+  "4": { label: "Pro", diamonds: 50, price: 5000, packageId: "pro_50" },
+  "5": { label: "Starter", diamonds: 120, price: 10800, packageId: "starter_120" },
+  "6": { label: "Value", diamonds: 300, price: 24000, packageId: "value_300" },
+  "7": { label: "Mega", diamonds: 700, price: 49000, packageId: "mega_700" },
 };
 const help = `NEXORA • TAMAVERSE DIAMOND TOP-UP
 
@@ -466,7 +471,7 @@ Ini hanya konfirmasi pilihan dari aplikasi. Untuk informasi dan bantuan, gunakan
     }
     const pack = packages[choice];
     if (!pack) { await say(chatId, "Paket tidak valid. Gunakan /buy untuk melihat pilihan."); return; }
-    const packageId = ({ "1": "starter_50", "2": "popular_120", "3": "value_300", "4": "mega_700" } as Record<string,string>)[choice];
+    const packageId = pack.packageId;
     const { data, error } = await db.rpc("create_tamaverse_diamond_order", {
       p_telegram_user_id: telegramId, p_package_id: packageId,
     });
