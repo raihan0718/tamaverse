@@ -195,6 +195,10 @@
         player.gems = Number(
           inventoryData.gems ?? player.gems ?? 0
         );
+        // Purchased Diamonds are server-credited and never included in client save payloads.
+        player.diamonds = Number(
+          inventoryData.diamonds ?? player.diamonds ?? 0
+        );
 
         window.state.items.snack = Number(
           inventoryData.snack ?? window.state.items.snack ?? 0
