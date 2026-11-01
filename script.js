@@ -1013,7 +1013,7 @@ function battleView(){
         </div>
         <div class="battle-side battle-enemy">
           <div class="battle-nameplate"><b>${esc(enemy.name)}</b><span>AI TIER · ${esc(enemy.rarity)}</span></div>
-          <div class="battle-sprite" data-species="${esc(enemy.species)}">${battlePetImage(enemy.species,'enemy','battle-pet-image')}</div>
+          <div class="battle-sprite" data-species="${esc(enemy.id)}">${battlePetImage(enemy.id,'enemy','battle-pet-image')}</div>
           <div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(enemy.name)}</b><span>LEVEL ${battle.wave}</span></div></div>
         </div>
         <div class="battle-arena-controls">
