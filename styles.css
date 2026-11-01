@@ -4174,3 +4174,38 @@ body[data-theme="light"] .ranking-state{background:linear-gradient(145deg,#e5d7f
  .ranking-podium-card.rank-place-3{min-height:150px}
  .ranking-podium-base{width:calc(100% + 6px);margin-left:-3px;margin-right:-3px}
 }
+
+/* Profile refresh */
+.profile-page-heading{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.profile-heading-spark{width:42px;height:42px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,#a994ff,#ff9fbd);color:#30213f;font-size:21px;box-shadow:0 8px 20px #a994ff30}
+.profile-identity-card{position:relative;overflow:hidden;display:grid;grid-template-columns:76px minmax(0,1fr);gap:13px;align-items:center;padding:18px;border:1px solid #ffffff20;border-radius:23px;background:radial-gradient(circle at 100% 0,#bd9ce94a,transparent 42%),linear-gradient(140deg,#34264d,#211a36 72%);box-shadow:0 12px 28px #130c221c;color:#fff}
+.profile-identity-orbit{position:absolute;width:180px;height:180px;border:1px solid #ffffff12;border-radius:50%;right:-70px;top:-105px;box-shadow:0 0 0 18px #ffffff08,0 0 0 38px #ffffff05;pointer-events:none}
+.profile-avatar-shell{width:76px;height:76px;display:grid;place-items:center;border-radius:25px;background:linear-gradient(145deg,#c8adf4,#f2a9c6);border:2px solid #ffffffa0;box-shadow:0 8px 20px #120a2345;font-size:36px;overflow:hidden;z-index:1}
+.profile-avatar-image{width:100%;height:100%;object-fit:cover}
+.profile-identity-copy{min-width:0;z-index:1}
+.profile-online-label{display:flex;align-items:center;gap:6px;font-size:8px;letter-spacing:1.3px;font-weight:900;color:#d5c7f5}
+.profile-online-label i{width:6px;height:6px;border-radius:50%;background:#80e4bd;box-shadow:0 0 8px #80e4bd}
+.profile-identity-copy h2{font:700 21px 'Space Grotesk',sans-serif;margin:5px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-identity-copy p{margin:0;color:#c8bdd8;font-size:11px}
+.profile-rename-link{border:0;background:none;color:#f2c9e3;font-size:10px;font-weight:800;padding:6px 0 0;cursor:pointer}
+.profile-uuid-row{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:10px 11px;border-radius:13px;background:#ffffff10;border:1px solid #ffffff12;min-width:0;z-index:1}
+.profile-uuid-icon{color:#d4b8ff;font-size:15px}
+.profile-uuid-row>span:nth-child(2){font-size:10px;font-weight:900;letter-spacing:1px;color:#d8cbe8}
+.profile-uuid-row strong{font:600 9px 'DM Sans',sans-serif;color:#e6dced;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right}
+.profile-copy-uuid{border:0;border-radius:8px;background:#ffffff16;color:#fff;padding:6px 8px;font-size:15px}
+.profile-stats{margin:13px 0;gap:8px}
+.profile-page .profile-stat{border:1px solid #ffffff10;box-shadow:0 4px 12px #100a1a12}
+.profile-action-card{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding:16px;border:1px solid #ffffff18;border-radius:19px;background:linear-gradient(135deg,#302542,#251d39)}
+.profile-action-card h3{margin:5px 0;font:700 16px 'Space Grotesk',sans-serif;color:#fff}
+.profile-action-card p{margin:0;color:#c5b9d3;font-size:10px;line-height:1.5;max-width:185px}
+.profile-help-button{display:inline-flex;align-items:center;gap:7px;text-decoration:none;white-space:nowrap}
+.profile-reset-button{margin-top:14px}
+body[data-theme="light"] .profile-identity-card{background:radial-gradient(circle at 100% 0,#f8d6e8 0,transparent 42%),linear-gradient(140deg,#9d7cba,#c18ebd 65%,#d99ab8);border-color:#dfc2e5;box-shadow:0 8px 0 #e3d0e8,0 14px 25px #98739f22}
+body[data-theme="light"] .profile-identity-copy h2{color:#fff}
+body[data-theme="light"] .profile-uuid-row{background:#ffffff30;border-color:#ffffff40}
+body[data-theme="light"] .profile-uuid-row strong,body[data-theme="light"] .profile-uuid-row>span:nth-child(2){color:#fff}
+body[data-theme="light"] .profile-action-card{background:linear-gradient(135deg,#eadcf3,#f2dce9);border-color:#ddc5e6;box-shadow:0 6px 0 #e2cfe9}
+body[data-theme="light"] .profile-action-card h3{color:#594365}
+body[data-theme="light"] .profile-action-card p{color:#866f8e}
+body[data-theme="light"] .profile-rename-link{color:#fff}
+@media(max-width:390px){.profile-identity-card{padding:14px;grid-template-columns:64px minmax(0,1fr);gap:10px}.profile-avatar-shell{width:64px;height:64px;border-radius:21px}.profile-identity-copy h2{font-size:18px}.profile-action-card{align-items:flex-start;flex-direction:column}.profile-help-button{width:100%;justify-content:center}}
