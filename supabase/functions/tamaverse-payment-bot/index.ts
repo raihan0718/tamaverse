@@ -210,28 +210,55 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_m
     const orderId = payload.slice("decline:".length).trim();
     if (!orderId) { await answer("ID order tidak valid"); return; }
 
-    const { data: order, error } = await db.from("diamond_orders")
-      .select("id,telegram_user_id")
+    const { data: order, error: lookupError } = await db.from("diamond_orders")
+      .select("id,telegram_user_id,telegram_topic_id")
       .eq("id", orderId)
       .maybeSingle();
-    if (error || !order?.telegram_user_id) {
+    if (lookupError || !order?.telegram_user_id) {
       await answer("Data order tidak ditemukan");
-      await say(chatId, "Notifikasi penolakan gagal dikirim karena data order tidak ditemukan.");
+      await say(chatId, "Order tidak ditemukan. Tidak ada perubahan yang dilakukan.");
       return;
     }
 
-    await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Notifikasi penolakan dikirim." });
+    await telegram("answerCallbackQuery", { callback_query_id: q.id, text: "Memproses penolakan..." });
+
+    const { data: cancelled, error: cancelError } = await db.rpc(
+      "set_tamaverse_diamond_order_status",
+      { p_order_id: orderId, p_status: "cancelled" }
+    );
+    if (cancelError || !cancelled) {
+      await say(chatId, "Order gagal dibatalkan. Topic tidak dihapus. Detail: " + (cancelError?.message || "Order tidak ditemukan."));
+      return;
+    }
+
     await say(order.telegram_user_id,
       `⚠️ PEMBAYARAN TIDAK DAPAT DIPROSES
 
 Mohon maaf, bukti pembayaran untuk pesanan ini belum dapat diproses.
-Silakan hubungi @ipnmesum untuk bantuan lebih lanjut.
+Order lama telah dibatalkan. Kamu bisa membuat pesanan top-up baru melalui /buy.
+Jika membutuhkan bantuan, hubungi @ipnmesum.
 
 — Nexora Team`);
-    await say(chatId, `📨 NOTIFIKASI PENOLAKAN TERKIRIM
-Order: ${orderId}
 
-Pesan sudah dikirim ke customer. Status order dan saldo diamond tidak diubah.`);
+    let topicDeleted = false;
+    if (order.telegram_topic_id) {
+      try {
+        await telegram("deleteForumTopic", {
+          chat_id: ticketGroupId,
+          message_thread_id: order.telegram_topic_id,
+        });
+        topicDeleted = true;
+      } catch (deleteError) {
+        console.error("Could not delete declined order topic:", deleteError);
+      }
+    }
+
+    await say(chatId,
+      `❌ ORDER DITOLAK & DIBATALKAN
+Order: ${orderId}
+Customer sudah diberi tahu dan bisa top-up ulang dengan /buy.
+Topic: ${topicDeleted ? "berhasil dihapus" : "tidak ditemukan atau gagal dihapus"}.`);
+
     if (chatId && q.message?.message_id) {
       try {
         await telegram("deleteMessage", { chat_id: chatId, message_id: q.message.message_id });
