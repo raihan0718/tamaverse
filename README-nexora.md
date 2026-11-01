@@ -1,63 +1,26 @@
-# Nexora • Tamaverse bot (SANDBOX)
+# Nexora • Tamaverse bot — audit notes
 
-## File
-- `supabase/functions/tamaverse-payment-bot/index.ts` — seluruh bot (1 file)
-- `supabase/migrations/20261101000000_nexora_orders.sql` — schema baru (additive)
+## Current source of truth
+- Bot source: `supabase/functions/tamaverse-payment-bot/index.ts`
+- SQL file currently in repository root: `20261101000000_nexora_orders.sql`
 
-## Environment variables
-| Nama | Wajib | Keterangan |
-|---|---|---|
-| `SUPABASE_URL` | ya | otomatis di Edge Functions |
-| `SUPABASE_SERVICE_ROLE_KEY` | ya | otomatis di Edge Functions |
-| `TELEGRAM_BOT_TOKEN2` | ya | token bot (nama sama dengan versi lama) |
-| `TELEGRAM_WEBHOOK_SECRET` | ya | harus sama dengan `secret_token` di setWebhook |
-| `ADMIN_FORUM_CHAT_ID` | tidak | default `-1004322036078` |
-| `ADMIN_TELEGRAM_ID` | tidak | default `8906658395` |
-| `SANDBOX_MODE` | tidak | default aktif; `false` untuk menghilangkan label sandbox |
-| `ORDER_TTL_MINUTES` | tidak | default `120` |
+**Important:** the current bot source still uses the legacy `diamond_orders` table and legacy RPCs (for example, `create_tamaverse_diamond_order` and `approve_tamaverse_diamond_order`). The SQL file defines a separate `nexora_orders` schema and different RPCs. They are **not interchangeable**.
 
-## Setup
-1. Jalankan migration. **Baca blok "WALLET" paling atas dulu**: tabel saldo Diamond asli tidak terlihat oleh saya, jadi migration membuat `tamaverse_wallets` bila belum ada. Kalau saldo lu ada di tabel lain, ubah blok "KREDIT SALDO" di `nexora_approve_order()`.
-2. Deploy function: `supabase functions deploy tamaverse-payment-bot --no-verify-jwt`
-3. Set webhook (wajib `allowed_updates` dan `secret_token`):
-   `https://api.telegram.org/bot<TOKEN>/setWebhook?url=<FUNCTION_URL>&secret_token=<SECRET>&allowed_updates=["message","callback_query"]`
-4. Grup admin: Supergroup + Topics aktif, bot jadi admin dengan izin **Manage Topics**.
-   Bot hanya menerima semua pesan grup bila ia admin.
+Do not apply the Nexora SQL migration or deploy the bot as a matched pair until a reviewed migration/adapter is prepared and tested against the actual production wallet schema. This README does not authorize changing payment methods, prices, proof handling, approvals, or Diamond credit.
 
-## Struktur database
-- `nexora_orders`: pesanan + status + id topik + referensi bukti. Unique index: satu pesanan aktif per user, satu topik per pesanan.
-- `nexora_order_events`: riwayat status, diisi trigger otomatis.
-- `nexora_diamond_ledger`: `order_id` UNIQUE, jadi satu order hanya bisa kredit sekali.
-- `nexora_processed_updates`: dedup `update_id` Telegram.
-- Trigger `nexora_guard_status` menolak perpindahan status di luar alur.
-- Fungsi `nexora_transition` (compare-and-swap), `nexora_approve_order` (atomik), `nexora_expire_stale`. Semua hanya bisa dipanggil `service_role`.
+## Environment variables currently read by the bot
+| Name | Required | Purpose |
+|---|---:|---|
+| `SUPABASE_URL` | yes | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | Supabase service-role key; keep secret |
+| `TELEGRAM_BOT_TOKEN2` | yes | Telegram bot token; keep secret |
+| `TELEGRAM_ADMIN_ID` | yes | Telegram numeric admin ID |
+| `TELEGRAM_WEBHOOK_SECRET` | yes | Must match Telegram webhook `secret_token` |
 
-## Alur
-`PENDING` → (user pilih metode) `WAITING_ADMIN` → (admin kirim QRIS foto / info GoPay teks di topik) `WAITING_PAYMENT` → (user kirim foto) `PROOF_SUBMITTED` → APPROVE `APPROVED` / DECLINE `DECLINED`.
-User bisa `CANCELLED` sebelum bukti dikirim. `EXPIRED` otomatis setelah TTL (dicek saat ada interaksi; PROOF_SUBMITTED tidak expire).
+The current source hardcodes the admin forum chat ID as `-1004322036078`. The names `ADMIN_TELEGRAM_ID`, `ADMIN_FORUM_CHAT_ID`, `SANDBOX_MODE`, and `ORDER_TTL_MINUTES` documented in an earlier draft are not read by this source.
 
-Keputusan desain yang perlu lu tahu:
-- Satu pesanan aktif per user. Tap ganda tidak membuat order kedua.
-- Tombol APPROVE/DECLINE ada di pesan bukti (bukan di header tiket), karena baru relevan setelah bukti masuk. Alternatif: `/tolak alasan` di topik untuk decline dengan alasan.
-- Topik ditutup otomatis saat pesanan selesai/batal/expired.
-- Foto bukti yang sama dipakai di order lain tidak diblokir (supaya dummy bisa dipakai ulang saat tes), tapi admin diberi peringatan.
+## Existing behavior and scope
+The current bot contains account linking, menus, Telegram forum topics, order creation, QRIS/GoPay instructions, proof submission, admin approval/decline, and Diamond credit. Those order/payment operations are deliberately not modified by this non-payment cleanup.
 
-## Status pengujian (jujur)
-Sudah: type-check TypeScript mode `--strict` dengan shim tipe Deno/Supabase (lolos tanpa error).
-**Belum dijalankan:** migration di Postgres, webhook ke Telegram, pembuatan topik, dan seluruh alur end-to-end. Gua nggak punya akses ke Supabase/Telegram lu dari sini.
-
-Checklist uji manual (urut):
-1. `/start`, semua tombol menu, tap tombol berulang tidak mengirim pesan dobel
-2. `/uuid` valid, invalid, UUID sudah dipakai Telegram lain
-3. Pilih paket → konfirmasi → topik muncul dengan nama `NXR-… | @user | N💎`; tap Konfirmasi 2x cepat = 1 order, 1 topik
-4. Matikan izin Manage Topics → user dapat pesan gagal, order jadi CANCELLED
-5. QRIS: admin kirim foto di topik → user menerima foto + nominal + Order ID
-6. GoPay: admin kirim teks → diteruskan ke user
-7. Admin kirim foto ke order GoPay / teks ke order QRIS → ditolak dengan petunjuk
-8. User kirim foto saat tidak ada order / status salah → pesan penolakan
-9. Kirim bukti → muncul di topik yang benar dengan tombol
-10. Non-admin tekan APPROVE → ditolak
-11. APPROVE → saldo bertambah, ledger terisi, tekan lagi → "sudah diproses"
-12. DECLINE dan `/tolak alasan` → status DECLINED, user diberi tahu
-13. Kirim ulang update yang sama (replay) → diabaikan
-14. Ubah `expires_at` ke masa lalu → status EXPIRED
+## Deployment status
+No deployment or live Telegram/Supabase test is performed by this repository edit. Before deploying, verify the database schema and RPCs used by the bot match the target Supabase project. Never put service-role keys or bot tokens in source control.
