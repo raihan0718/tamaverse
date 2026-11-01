@@ -3250,3 +3250,12 @@ body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8e
 @media(max-width:390px){.solo-hunting-page .battle-side{width:48%!important}.solo-hunting-page .battle-sprite .pet-image{width:clamp(100px,28vw,145px)!important;height:clamp(100px,28vw,145px)!important}.solo-hunting-page .battle-arena-controls{left:8px!important;right:8px!important;padding:8px!important}.solo-hunting-page .battle-action-btn{min-height:44px!important;font-size:12px!important}.solo-option-art .solo-option-pet{width:65px;height:65px}}
 
 .battle-hub-tab>.battle-tab-code{font:900 9px 'Space Grotesk',sans-serif;letter-spacing:.7px;color:#c8b8f1}
+
+
+/* Battle polish: centered turn labels, visible action icons, and no emoji pet fallback. */
+.battle-mode-top{position:relative}
+.battle-mode-top .battle-turn-chip{position:absolute;left:50%;right:auto;top:50%;transform:translate(-50%,-50%);margin:0;white-space:nowrap;z-index:3}
+.battle-log-heading{justify-content:center;gap:10px;text-align:center}
+.battle-log-heading span{display:inline-block}
+.solo-hunting-page .battle-action-btn span{display:inline-flex!important;align-items:center;justify-content:center;font-size:18px!important}
+.battle-sprite .pet-image{display:block}
