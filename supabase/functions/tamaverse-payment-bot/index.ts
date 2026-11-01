@@ -57,11 +57,14 @@ async function sendOrderTopic(orderId: string, text: string, extra: Record<strin
 const money = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 const isAdmin = (id: number) => String(id) === adminId;
 const packages: Record<string, { label: string; diamonds: number; price: number; packageId: string }> = {
-  "1": { label: "Mini", diamonds: 5, price: 2000, packageId: "mini_5" },
-  "2": { label: "Basic", diamonds: 10, price: 4000, packageId: "basic_10" },
-  "3": { label: "Plus", diamonds: 25, price: 8000, packageId: "plus_25" },
-  "4": { label: "Pro", diamonds: 50, price: 12000, packageId: "pro_50" },
+  "1": { label: "Mini", diamonds: 5, price: 1000, packageId: "mini_5" },
+  "2": { label: "Basic", diamonds: 10, price: 1800, packageId: "basic_10" },
+  "3": { label: "Plus", diamonds: 25, price: 3500, packageId: "plus_25" },
+  "4": { label: "Pro", diamonds: 50, price: 5000, packageId: "pro_50" },
   "5": { label: "Max", diamonds: 100, price: 20000, packageId: "max_100" },
+  "6": { label: "Popular", diamonds: 120, price: 10800, packageId: "popular_120" },
+  "7": { label: "Value", diamonds: 300, price: 24000, packageId: "value_300" },
+  "8": { label: "Mega", diamonds: 700, price: 49000, packageId: "mega_700" },
 };
 const help = `NEXORA • TAMAVERSE DIAMOND TOP-UP
 
@@ -360,27 +363,69 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
 
   if (text.startsWith("/start") || text === "/help") {
     const startPayload = text.startsWith("/start") ? (text.split(/\\s+/)[1] || "") : "";
-    const handoff = /^tv_(50|120|300|700)_(qris|gopay)$/i.exec(startPayload);
+    const handoff = /^tv_(5|10|25|50|100|120|300|700)_(qris|gopay)$/i.exec(startPayload);
     if (handoff) {
-      const [, rawAmount, rawMethod] = handoff;
-      const amount = Number(rawAmount);
-      const method = rawMethod.toLowerCase() === "qris" ? "QRIS" : "GoPay";
-      await say(chatId,
-        `NEXORA PAY • TAMAVERSE
+      const amount = Number(handoff[1]);
+      const method = handoff[2].toLowerCase();
+      const pack = Object.values(packages).find((item) => item.diamonds === amount);
+      if (!pack) { await say(chatId, "Paket tidak tersedia. Silakan kembali ke Tamaverse."); return; }
 
-Pilihan dari Tamaverse berhasil diterima.
+      const { data: linkedAccount, error: linkError } = await db.from("tamaverse_telegram_links")
+        .select("owner_id").eq("telegram_user_id", telegramId).maybeSingle();
+      if (linkError) { await say(chatId, "Akun belum bisa diperiksa. Coba lagi beberapa saat."); return; }
+      if (!linkedAccount) {
+        await say(chatId, "Akun Telegram belum terhubung ke Tamaverse.\n\nBuka Tamaverse > Profile > Hubungkan Telegram Bot, lalu kirim UUID akun dengan format:\n/uuid UUID_KAMU\n\nSetelah berhasil, tekan kembali tombol beli di Tamaverse.");
+        return;
+      }
 
-Paket: ${amount} Diamonds
-Metode pilihan: ${method}
+      const { data: order, error: orderError } = await db.rpc("create_tamaverse_diamond_order", {
+        p_telegram_user_id: telegramId,
+        p_package_id: pack.packageId,
+      });
+      if (orderError || !order?.id) {
+        await say(chatId, "Order gagal dibuat: " + (orderError?.message || "Respons database tidak valid.") + "\nSilakan coba lagi atau hubungi admin.");
+        return;
+      }
 
-Ini hanya konfirmasi pilihan dari aplikasi. Untuk informasi dan bantuan, gunakan menu di bawah.`,
-        { reply_markup: { inline_keyboard: [
-          [{ text: "📋 Panduan", callback_data: "menu:help" }],
-          [{ text: "🏠 Menu Utama", callback_data: "menu:home" }]
-        ] } });
+      const { error: priceError } = await db.rpc("set_tamaverse_diamond_order_payment", {
+        p_order_id: order.id,
+        p_amount_idr: pack.price,
+        p_admin_note: null,
+      });
+      if (priceError) {
+        await say(chatId, "Order tercatat, tetapi harga belum berhasil ditetapkan. Jangan membuat pembayaran. Hubungi admin dengan Order ID:\n" + order.id);
+        return;
+      }
+
+      const { error: methodError } = await db.from("diamond_orders")
+        .update({ payment_method: method, updated_at: new Date().toISOString() })
+        .eq("id", order.id).eq("telegram_user_id", telegramId);
+      if (methodError) {
+        await say(chatId, "Order tercatat, tetapi metode pembayaran belum tersimpan. Jangan membayar dulu. Hubungi admin dengan Order ID:\n" + order.id);
+        return;
+      }
+
+      try {
+        await createOrderTopic(order.id, pack.label, pack.diamonds, telegramId);
+        await sendOrderTopic(order.id,
+          `ORDER DIAMOND BARU\nOrder: ${order.id}\nTelegram: ${telegramId}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\nMetode: ${method.toUpperCase()}\nStatus: waiting_payment`);
+      } catch (topicError) {
+        console.error("Order topic creation failed:", topicError);
+        await say(adminId, `TOPIC GAGAL DIBUAT — ORDER ${order.id}\n${String(topicError)}\nSilakan tindak lanjuti manual.`);
+      }
+
+      if (method === "gopay") {
+        await say(chatId, `✅ ORDER TAMAVERSE BERHASIL DIBUAT\n\nOrder: ${order.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\nMetode: GoPay\n\nNomor GoPay: 087722860530\nA/N: Raihan Rizki Milano\n\nSetelah membayar, tekan tombol di bawah untuk mengirim foto bukti. Jangan kirim PIN atau OTP.`,
+          { reply_markup: { inline_keyboard: [[{ text: "📤 KIRIM BUKTI PEMBAYARAN", callback_data: "proofready:" + order.id }]] } });
+      } else {
+        await say(chatId, `✅ ORDER TAMAVERSE BERHASIL DIBUAT\n\nOrder: ${order.id}\nPaket: ${pack.label}\nDiamond: ${pack.diamonds}\nTotal: Rp${money(pack.price)}\nMetode: QRIS\nStatus: Menunggu admin mengirim QRIS khusus transaksi ini.\n\nJangan melakukan pembayaran sebelum QRIS dari bot diterima.`);
+        try { await sendOrderTopic(order.id, "Pemain memilih QRIS. Admin: kirim foto QRIS khusus order ini langsung ke Topic."); }
+        catch (topicError) { console.error("Could not notify QRIS Topic:", topicError); }
+      }
       return;
     }
-    await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
+
+    await say(chatId, "NEXORA PAY • TAMAVERSE\\n\\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
       [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
       [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
       [{ text: "📋 Panduan", callback_data: "menu:help" }]
@@ -466,7 +511,7 @@ Ini hanya konfirmasi pilihan dari aplikasi. Untuk informasi dan bantuan, gunakan
     }
     const pack = packages[choice];
     if (!pack) { await say(chatId, "Paket tidak valid. Gunakan /buy untuk melihat pilihan."); return; }
-    const packageId = ({ "1": "starter_50", "2": "popular_120", "3": "value_300", "4": "mega_700" } as Record<string,string>)[choice];
+    const packageId = pack.packageId;
     const { data, error } = await db.rpc("create_tamaverse_diamond_order", {
       p_telegram_user_id: telegramId, p_package_id: packageId,
     });
