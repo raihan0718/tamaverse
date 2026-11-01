@@ -744,7 +744,7 @@ async function handleCheckoutStart(message: Any, token: string) {
         (method === "QRIS"
           ? "Admin sedang menyiapkan QRIS. Gambarnya akan dikirim ke chat ini."
           : "Admin sedang menyiapkan informasi GoPay. Infonya akan dikirim ke chat ini.") +
-        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+
       { reply_markup: cancelMarkup(o.order_code) },
     );
   } catch (e) {
@@ -991,8 +991,7 @@ async function handleGroupMessage(message: Any) {
     delivered = await tgTry("sendPhoto", {
       chat_id: o.telegram_chat_id,
       photo: photo.file_id,
-      caption: `🟦 QRIS${SANDBOX ? " (SIMULASI)" : ""}\n\n${nominal}\n\nSetelah "membayar", kirim foto bukti ke chat ini.` +
-        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+      caption: `🟦 INSTRUKSI PEMBAYARAN QRIS\n\n${nominal}\n\nSelesaikan pembayaran sesuai instruksi admin, lalu kirim foto bukti pembayaran ke chat ini.`,
       reply_markup: cancelMarkup(o.order_code),
     });
   } else if (o.payment_method === "GOPAY") {
@@ -1002,8 +1001,7 @@ async function handleGroupMessage(message: Any) {
     }
     delivered = await tgTry("sendMessage", {
       chat_id: o.telegram_chat_id,
-      text: `🟩 INFO GOPAY${SANDBOX ? " (SIMULASI)" : ""}\n\n${text.slice(0, 2500)}\n\n${nominal}\n\nSetelah "membayar", kirim foto bukti ke chat ini.` +
-        (SANDBOX ? `\n\n${SANDBOX_NOTE}` : ""),
+      text: `🟩 INSTRUKSI PEMBAYARAN GOPAY\n\n${text.slice(0, 2500)}\n\n${nominal}\n\nSelesaikan pembayaran sesuai instruksi admin, lalu kirim foto bukti pembayaran ke chat ini.`,
       reply_markup: cancelMarkup(o.order_code),
     });
   } else {
