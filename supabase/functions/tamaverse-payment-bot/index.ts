@@ -116,7 +116,7 @@ async function handleCallback(q: any) {
   }
   if (payload === "menu:uuid") {
     await answer("Silakan kirim UUID");
-    await say(chatId, "🔗 HUBUNGKAN AKUN TAMAVERSE\n\nKirim UUID akun kamu langsung ke chat ini, tanpa /uuid.\n\nCara melihat UUID:\n1. Buka aplikasi Tamaverse.\n2. Masuk ke menu Profile.\n3. Cari bagian TAMAVERSE USER ID.\n4. Salin ID tersebut, lalu kirim ke chat ini.\n\nPastikan UUID yang dikirim benar dan jangan bagikan password atau kode rahasia.");
+    await say(chatId, "🔗 HUBUNGKAN AKUN TAMAVERSE\n\nKirim UUID akun kamu langsung ke chat ini, tanpa /uuid.\n\nCara melihat UUID:\n1. Buka aplikasi Tamaverse.\n2. Masuk ke menu Profile.\n3. Cari bagian UUID.\n4. Salin ID tersebut, lalu kirim ke chat ini.\n\nPastikan UUID yang dikirim benar dan jangan bagikan password atau kode rahasia.");
     return;
   }
   if (payload === "menu:help") { await answer("Panduan"); await say(chatId, help, { reply_markup: { inline_keyboard: [[{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }]] } }); return; }
@@ -344,7 +344,7 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
   if (text.startsWith("/uuid") || uuidPattern.test(text.trim())) {
     const uuid = text.startsWith("/uuid") ? text.split(/\s+/)[1]?.trim() : text.trim();
     if (!uuid || !uuidPattern.test(uuid)) {
-      await say(chatId, "UUID belum terdeteksi atau formatnya salah.\nBuka Tamaverse > Profile, salin TAMAVERSE USER ID, lalu kirim:\n/uuid UUID_KAMU");
+      await say(chatId, "UUID belum terdeteksi atau formatnya salah.\nBuka Tamaverse > Profile, salin UUID, lalu kirim:\n/uuid UUID_KAMU");
       return;
     }
 
