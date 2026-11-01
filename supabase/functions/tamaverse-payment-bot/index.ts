@@ -163,7 +163,18 @@ async function handleMessage(m: any) {
   const telegramId = String(m.from?.id ?? "");
   const username = m.from?.username ?? "";
   const text = String(m.text ?? m.caption ?? "").trim();
-  if (!chatId || !telegramId || m.chat?.type !== "private") return;
+  if (!chatId || !telegramId) return;
+
+  if (m.chat?.type !== "private") {
+    if (text === "/chatid" || text.startsWith("/chatid@")) {
+      await say(chatId, `INFO GRUP
+ID: ${chatId}
+Nama: ${m.chat?.title || "-"}
+Tipe: ${m.chat?.type || "-"}
+Bot: ${(await telegram("getMe", {})).username}`);
+    }
+    return;
+  }
 
   if (text.startsWith("/start") || text === "/help") {
     await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
