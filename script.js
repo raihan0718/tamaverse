@@ -30,6 +30,12 @@ const petImages = {
   starwhale: 'assets/pets/phoenix.webp',
   wyrmling: 'assets/pets/dragon.webp'
 };
+const leftFacingPetIds = new Set(['petalyn','lunabun','wyrmling','starwhale']);
+function petFacesLeft(speciesId){return leftFacingPetIds.has(speciesId);}
+function battlePetImage(speciesId,side,className=''){
+  const flip=side==='player'?petFacesLeft(speciesId):!petFacesLeft(speciesId);
+  return petImage(speciesId,className+(flip?' battle-face-flip':''));
+}
 function petImage(speciesId, className = '', eager = false) {
   const normalizedId = speciesId || 'fluffin';
   const pet = speciesById(normalizedId);
@@ -568,9 +574,10 @@ function advanceHuntingLevel(){
     battle.opponent=soloEnemyForWave(nextIndex);
     battle.enemyHP=battle.opponent.stats.hp;
     battle.enemySkillUsed=false;battle.enemyItemUsed=false;battle.enemyDefending=false;
-    battle.phase='player';battle.busy=false;battle.actionFx='idle';
+    battle.phase='entering';battle.busy=true;battle.actionFx='level-enter';
     battle.log.push(`LEVEL ${battle.wave} · ${battle.opponent.name} memasuki arena!`);
     save();if(page==='battle')render();
+    battle.aiTimer=setTimeout(()=>{if(!battle||battle.ended||battle.phase!=='entering')return;battle.phase='player';battle.busy=false;battle.actionFx='idle';save();if(page==='battle')render();},2100);
   },1500);
 }
 function elementMultiplier(a,b){const strong={Fire:'Nature',Nature:'Water',Water:'Fire',Light:'Fire'};if(strong[a]===b)return 1.25;if(strong[b]===a)return .8;return 1;}
@@ -983,7 +990,7 @@ function battleView(){
   const enemy=battle.opponent, mySpecies=speciesById(p.species);
   const hp=Math.max(0,battle.playerHP), ehp=Math.max(0,battle.enemyHP), max=Math.max(1,p.stats.hp), emax=Math.max(1,enemy.stats.hp);
   const log=Array.isArray(battle.log)?battle.log:[];
-  const aiTurn=battle.phase==='ai', playerAction=battle.phase==='player-action', aiAction=battle.phase==='ai-action', transition=battle.phase==='transition';
+  const aiTurn=battle.phase==='ai', playerAction=battle.phase==='player-action', aiAction=battle.phase==='ai-action', transition=battle.phase==='transition'||battle.phase==='entering';
   const actionCooldown=battle.phase==='cooldown';
   const skillCooldown=Math.max(0,Math.ceil((Number(battle.skillReadyAt||0)-Date.now())/1000));
   if(huntingSkillCooldownTimer)clearTimeout(huntingSkillCooldownTimer);
@@ -997,20 +1004,20 @@ function battleView(){
       </div>
       <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}" aria-label="Solo hunting arena">
         <div class="arena-sky"><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
-        <div class="battle-turn-overlay ${transition?'wave-transition':''}"><b>${aiTurn?'BOT TURN':playerAction?'PLAYER ACTION':aiAction?'BOT ACTION':transition?'LEVEL CLEAR!':actionCooldown?'ACTION COMPLETE':'YOUR TURN'}</b><span>${aiTurn?'AI IS CHOOSING':playerAction?'PLAYER MOVE IN PROGRESS':aiAction?'AI MOVE IN PROGRESS':transition?'NEXT OPPONENT ENTERING':actionCooldown?'PREPARING NEXT TURN':'CHOOSE YOUR ACTION'}</span></div>
+        <div class="battle-turn-overlay ${transition?'wave-transition':''}"><b>${aiTurn?'BOT TURN':playerAction?'PLAYER ACTION':aiAction?'BOT ACTION':transition?(battle.phase==='entering'?'WAVE ARRIVAL':'LEVEL CLEAR!'):actionCooldown?'ACTION COMPLETE':'YOUR TURN'}</b><span>${aiTurn?'AI IS CHOOSING':playerAction?'PLAYER MOVE IN PROGRESS':aiAction?'AI MOVE IN PROGRESS':transition?(battle.phase==='entering'?'NEW MONSTER ENTERS':'NEXT OPPONENT ENTERING'):actionCooldown?'PREPARING NEXT TURN':'CHOOSE YOUR ACTION'}</span></div>
         <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
         <div class="battle-side battle-player">
           <div class="battle-nameplate"><b>${esc(p.name)}</b><span>${esc(mySpecies.element)} · Lv.${p.level}</span></div>
-          <div class="battle-sprite" data-species="${esc(p.species)}">${petImage(p.species,'battle-pet-image')}</div>
+          <div class="battle-sprite" data-species="${esc(p.species)}">${battlePetImage(p.species,'player','battle-pet-image')}</div>
           <div class="battle-hp-card"><div class="hp-value">${hp} / ${max} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,hp/max*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(p.name)}</b><span>Lv.${p.level}</span></div></div>
         </div>
         <div class="battle-side battle-enemy">
           <div class="battle-nameplate"><b>${esc(enemy.name)}</b><span>AI TIER · ${esc(enemy.rarity)}</span></div>
-          <div class="battle-sprite" data-species="${esc(enemy.species)}">${petImage(enemy.species,'battle-pet-image')}</div>
+          <div class="battle-sprite" data-species="${esc(enemy.species)}">${battlePetImage(enemy.species,'enemy','battle-pet-image')}</div>
           <div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(enemy.name)}</b><span>LEVEL ${battle.wave}</span></div></div>
         </div>
         <div class="battle-arena-controls">
-          <div class="battle-action-status">${aiTurn||aiAction?'AI TURN — PLEASE WAIT':playerAction?'PLAYER ACTION — PLEASE WAIT':transition?'LEVEL CLEAR — PREPARING NEXT OPPONENT':actionCooldown?'ACTION COMPLETE — PLEASE WAIT':'YOUR TURN — CHOOSE ACTION'}</div>
+          <div class="battle-action-status">${aiTurn||aiAction?'AI TURN — PLEASE WAIT':playerAction?'PLAYER ACTION — PLEASE WAIT':transition?(battle.phase==='entering'?'NEW MONSTER ENTERING — PLEASE WAIT':'LEVEL CLEAR — PREPARING NEXT OPPONENT'):actionCooldown?'ACTION COMPLETE — PLEASE WAIT':'YOUR TURN — CHOOSE ACTION'}</div>
           <div class="battle-action-grid">
             <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
             <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||skillCooldown>0?'disabled':''}><span>✨</span>Skill${skillCooldown>0?` · ${skillCooldown}s`:''}</button>
@@ -1036,11 +1043,11 @@ function battlePage(){
       ${battleSection==='online' ? onlineBattlePage() : `
         <div class="battle-mode-banner solo-banner"><span class="battle-mode-icon solo-banner-pet">${petImage(activePet()?.species||species[0].id,"solo-hub-pet")}</span><div><div class="eyebrow">WILDERNESS MODE</div><h2>Solo Hunting</h2><p>Temui monster liar dan bertarung bergiliran melawan AI.</p></div></div>
         <div class="battle-turn-preview">
-          <div><span class="turn-preview-icon turn-preview-pet">${petImage(activePet()?.species||species[0].id,"solo-preview-pet")}</span><b>PLAYER</b><small>Your action</small></div>
+          <div><span class="turn-preview-icon turn-preview-pet">${battlePetImage(activePet()?.species||species[0].id,"player","solo-preview-pet")}</span><b>PLAYER</b><small>Your action</small></div>
           <span class="turn-preview-arrow">VS</span>
-          <div><span class="turn-preview-icon turn-preview-pet">${petImage(species[0].id,"solo-preview-pet")}</span><b>AI BOT</b><small>Random action</small></div>
+          <div><span class="turn-preview-icon turn-preview-pet">${battlePetImage(species[0].id,"enemy","solo-preview-pet")}</span><b>AI BOT</b><small>Random action</small></div>
         </div>
-        <div class="battle-option-card"><div class="battle-option-art solo-option-art">${petImage(activePet()?.species||species[0].id,"solo-option-pet")}<span class="solo-option-vs">VS</span>${petImage(species[0].id,"solo-option-pet")}</div><span class="pill">TURN-BASED · AI</span><h3>Hunt in the Wild</h3><p>Serang, gunakan skill, bertahan, atau pulihkan HP. AI memilih aksi secara acak pada gilirannya.</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai Hunting</button></div>
+        <div class="battle-option-card"><div class="battle-option-art solo-option-art">${battlePetImage(activePet()?.species||species[0].id,"player","solo-option-pet")}<span class="solo-option-vs">VS</span>${battlePetImage(species[0].id,"enemy","solo-option-pet")}</div><span class="pill">TURN-BASED · AI</span><h3>Hunt in the Wild</h3><p>Serang, gunakan skill, bertahan, atau pulihkan HP. AI memilih aksi secara acak pada gilirannya.</p><button class="button full" data-action="battle-start" data-mode="practice">Mulai Hunting</button></div>
         <div class="notice">Giliran berjalan bergantian: Player → AI → Player. AI tidak menyerang bersamaan dengan aksimu.</div>
       `}
       ${state.battleHistory.length ? `<div class="section-heading"><h2>Battle terakhir</h2></div>${state.battleHistory.slice(0,5).map(item=>`<div class="card battle-history-row"><span>${item.result==='win'?'WIN':item.result==='draw'?'DRAW':'LOSS'} · ${item.result==='win'?'Menang':item.result==='draw'?'Seri':'Kalah'}</span><span class="muted-label">${new Date(item.date).toLocaleDateString('id-ID')}</span></div>`).join('')}` : ''}
