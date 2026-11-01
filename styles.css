@@ -3095,3 +3095,22 @@ body[data-theme="dark"] .battle-turn-overlay{background:#251d30eF;border-color:#
 @keyframes battleOnlinePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.82)}}
 body[data-theme="dark"] .battle-turn-preview{background:linear-gradient(110deg,#a994ff12,#65c9ff08,#ff9acb0a)}
 @media(max-width:380px){.battle-online-hero{padding:14px;gap:10px}.battle-online-hero-icon{width:44px;height:44px;font-size:23px}.battle-online-hero h2{font-size:17px}.battle-turn-preview{padding:10px 7px}.battle-turn-preview>div{grid-template-columns:26px auto;gap:1px 5px}.turn-preview-icon{width:26px;height:26px}}
+
+/* Battle hub polish + readable mode separation */
+.battle-hub{max-width:760px}
+.battle-hub-tabs{position:sticky;top:72px;z-index:3;backdrop-filter:blur(16px)}
+.battle-hub-tab small{line-height:1.35}
+.battle-mode-banner{min-height:104px}
+.solo-banner{border-color:#78d6ad55;background:radial-gradient(circle at 90% 10%,#73e3b333,transparent 42%),linear-gradient(135deg,#173d39,#202b39 72%)}
+.solo-banner .battle-mode-icon{background:#73e3b326;border:1px solid #73e3b344}
+.battle-turn-preview{min-height:78px}
+.battle-turn-preview>div{flex:1}
+.battle-turn-preview .turn-preview-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#a994ff20;font-size:17px}
+.battle-turn-preview-arrow{color:var(--mint);font-size:19px;font-weight:900}
+.battle-option-card{margin-top:12px}
+.battle-option-card .pill{display:inline-flex;padding:5px 9px;border-radius:99px;background:#78d6ad1c;color:#9ceac7;font-size:9px;font-weight:900;letter-spacing:1px}
+.battle-option-card p{max-width:440px}
+.battle-hub .notice{margin-top:12px;border-color:#78d6ad33;background:#78d6ad0b}
+.battle-live-page .battle-action-status{min-height:34px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;letter-spacing:.5px}
+.battle-live-page .battle-action-btn{min-height:62px}
+@media(max-width:380px){.battle-hub-tabs{top:66px}.battle-option-card{padding:14px}.battle-turn-preview{gap:5px}}
