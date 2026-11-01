@@ -101,3 +101,122 @@ $$;
 
 revoke all on function public.purchase_tamaverse_premium_item(text) from public, anon;
 grant execute on function public.purchase_tamaverse_premium_item(text) to authenticated;
+
+
+-- New accounts receive the same 3 starter Diamonds as migrated accounts.
+alter table public.inventory alter column gems set default 0;
+
+create or replace function public.create_tamaverse_player()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.profiles (id, display_name)
+  values (new.id, coalesce(nullif(new.raw_user_meta_data ->> 'display_name', ''), 'Penjelajah'))
+  on conflict (id) do nothing;
+
+  insert into public.inventory (owner_id, diamonds)
+  values (new.id, 3)
+  on conflict (owner_id) do nothing;
+
+  insert into public.daily_rewards (owner_id)
+  values (new.id)
+  on conflict (owner_id) do nothing;
+
+  return new;
+end;
+$$;
+
+-- All authenticated Diamond spending is atomic and server-controlled.
+create or replace function public.tamaverse_spend_diamonds(
+  p_amount integer,
+  p_reason text
+) returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_owner uuid := auth.uid();
+  v_balance bigint;
+  v_limit integer;
+begin
+  if v_owner is null then raise exception 'AUTH_REQUIRED'; end if;
+  if p_reason not in ('astral_gacha', 'quest_rebuy') then
+    raise exception 'INVALID_DIAMOND_SPEND_REASON';
+  end if;
+  v_limit := case when p_reason = 'astral_gacha' then 100 else 1 end;
+  if p_amount is null or p_amount < 1 or p_amount > v_limit then
+    raise exception 'INVALID_DIAMOND_AMOUNT';
+  end if;
+
+  update public.inventory
+  set diamonds = diamonds - p_amount, updated_at = now()
+  where owner_id = v_owner and diamonds >= p_amount
+  returning diamonds into v_balance;
+
+  if not found then raise exception 'NOT_ENOUGH_DIAMONDS'; end if;
+  return jsonb_build_object('success', true, 'diamonds', v_balance);
+end;
+$$;
+
+-- Daily reward cadence is authoritative in the database, preventing repeat claims.
+create or replace function public.tamaverse_claim_daily_reward()
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_owner uuid := auth.uid();
+  v_last date;
+  v_day smallint;
+  v_today date := (now() at time zone 'utc')::date;
+  v_diamonds bigint;
+begin
+  if v_owner is null then raise exception 'AUTH_REQUIRED'; end if;
+
+  insert into public.daily_rewards(owner_id) values (v_owner)
+  on conflict (owner_id) do nothing;
+
+  select last_claim_date, day into v_last, v_day
+  from public.daily_rewards where owner_id = v_owner for update;
+
+  if v_last = v_today then raise exception 'DAILY_REWARD_ALREADY_CLAIMED'; end if;
+
+  if v_last = v_today - 1 then
+    v_day := (v_day % 7) + 1;
+  else
+    v_day := 1;
+  end if;
+
+  update public.daily_rewards
+  set last_claim_date = v_today, day = v_day
+  where owner_id = v_owner;
+
+  insert into public.inventory(owner_id) values (v_owner)
+  on conflict (owner_id) do nothing;
+
+  if v_day = 4 then
+    update public.inventory set diamonds = diamonds + 1, updated_at = now()
+    where owner_id = v_owner returning diamonds into v_diamonds;
+  elsif v_day = 7 then
+    update public.inventory set diamonds = diamonds + 2, updated_at = now()
+    where owner_id = v_owner returning diamonds into v_diamonds;
+  else
+    select diamonds into v_diamonds from public.inventory where owner_id = v_owner;
+  end if;
+
+  return jsonb_build_object(
+    'success', true, 'day', v_day, 'diamonds', v_diamonds,
+    'last_claim_date', v_today, 'diamond_reward', case when v_day = 4 then 1 when v_day = 7 then 2 else 0 end
+  );
+end;
+$$;
+
+revoke all on function public.tamaverse_spend_diamonds(integer, text) from public, anon;
+grant execute on function public.tamaverse_spend_diamonds(integer, text) to authenticated;
+revoke all on function public.tamaverse_claim_daily_reward() from public, anon;
+grant execute on function public.tamaverse_claim_daily_reward() to authenticated;
