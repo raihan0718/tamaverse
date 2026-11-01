@@ -529,11 +529,47 @@ function startBattle(mode){
   if(p.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}
   if(battle)return;
   p.energy=clamp(p.energy-25,0,100);p.careUpdatedAt=Date.now();
-  const pool=species.filter(s=>s.id!==p.species);
-  const os=pool[Math.floor(Math.random()*pool.length)];
-  const opponent={...os,level:Math.max(1,p.level),name:`${os.name} liar`,stats:{...os.stats,hp:Math.round(os.stats.hp*(0.8+p.level*.08)),atk:os.stats.atk+p.level-1}};
-  battle={mode:'practice',petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,enemySnacks:1,turn:1,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:[`${p.name} memasuki arena!`,`Lawan ${opponent.name} muncul!`],ended:false};
+  const opponent=soloEnemyForWave(0);
+  battle={mode:'practice',petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:[`${p.name} memasuki Hunting Tower!`,`Level 1 · ${opponent.name} muncul!`],ended:false};
   save();render();
+}
+function soloEnemyForWave(index){
+  const base=species[index%species.length];
+  const tier=index;
+  const hpScale=.68+tier*.115;
+  const atkScale=.52+tier*.105;
+  const defScale=.55+tier*.085;
+  const enemyLevel=tier+1;
+  return {...base,level:enemyLevel,name:base.name,stats:{
+    ...base.stats,
+    hp:Math.round(base.stats.hp*hpScale),
+    atk:Math.max(3,Math.round(base.stats.atk*atkScale)),
+    def:Math.max(2,Math.round(base.stats.def*defScale)),
+    spd:Math.max(5,Math.round(base.stats.spd*(.75+tier*.025)))
+  }};
+}
+function advanceHuntingLevel(){
+  if(!battle||battle.ended)return;
+  const cleared=battle.wave;
+  battle.clearedLevels++;
+  battle.coinsEarned+=10+cleared*2;
+  battle.xpEarned+=6+cleared*2;
+  if(cleared>=species.length){finishBattle('win');return;}
+  battle.phase='transition';battle.busy=true;battle.actionFx='level-up';
+  battle.log.push(`Level ${cleared} clear! Bersiap menuju level ${cleared+1}.`);
+  save();render();
+  battle.aiTimer=setTimeout(()=>{
+    if(!battle||battle.ended||battle.phase!=='transition')return;
+    const nextIndex=battle.wave;
+    battle.wave++;
+    battle.turn=1;
+    battle.opponent=soloEnemyForWave(nextIndex);
+    battle.enemyHP=battle.opponent.stats.hp;
+    battle.enemySkillUsed=false;battle.enemyItemUsed=false;battle.enemyDefending=false;
+    battle.phase='player';battle.busy=false;battle.actionFx='idle';
+    battle.log.push(`LEVEL ${battle.wave} · ${battle.opponent.name} memasuki arena!`);
+    save();if(page==='battle')render();
+  },1350);
 }
 function elementMultiplier(a,b){const strong={Fire:'Nature',Nature:'Water',Water:'Fire',Light:'Fire'};if(strong[a]===b)return 1.25;if(strong[b]===a)return .8;return 1;}
 function battleAction(move){
@@ -991,14 +1027,14 @@ function battleView(){
   const hp=Math.max(0,battle.playerHP), ehp=Math.max(0,battle.enemyHP), max=Math.max(1,p.stats.hp), emax=Math.max(1,enemy.stats.hp);
   return `
     <section class="page battle-live-page">
-      <div class="battle-live-top"><button class="battle-exit" data-action="battle-cancel">←</button><div><div class="eyebrow">SOLO HUNTING</div><h1>Wild Encounter</h1></div><span class="battle-turn-chip">TURN ${battle.turn}</span></div>
+      <div class="battle-live-top"><button class="battle-exit" data-action="battle-cancel">←</button><div><div class="eyebrow">SOLO HUNTING</div><h1>Hunting Tower</h1><small class="battle-wave-subtitle">LEVEL ${battle.wave} / ${species.length} · ${battle.clearedLevels} CLEARED</small></div><span class="battle-turn-chip">TURN ${battle.turn}</span></div>
       <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}">
         <div class="arena-sky"><span class="arena-moon">✦</span><span class="arena-cloud cloud-one">☁</span><span class="arena-cloud cloud-two">☁</span><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
-        <div class="battle-turn-overlay"><b>${battle.phase==='ai'?'BOT TURN':'YOUR TURN'}</b><span>${battle.phase==='ai'?'AI is choosing a random action':'Choose your move'}</span></div>
+        <div class="battle-turn-overlay ${battle.phase==='transition'?'wave-transition':''}"><b>${battle.phase==='ai'?'BOT TURN':battle.phase==='transition'?'LEVEL CLEAR!':'YOUR TURN'}</b><span>${battle.phase==='ai'?'AI is choosing a random action':battle.phase==='transition'?'Next opponent is entering the arena...':'Choose your move'}</span></div>
         <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
         <div class="battle-side battle-player"><div class="battle-nameplate"><b>${esc(p.name)}</b><span>${mySpecies.element} · Lv.${p.level}</span></div><div class="battle-sprite">${petImage(p.species,'battle-pet-image')}</div><div class="battle-hp-card"><div class="hp-value">${hp} / ${max} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,hp/max*100)}%"></div></div></div></div>
-        <div class="battle-side battle-enemy"><div class="battle-nameplate"><b>${esc(enemy.name)}</b><span>${enemySpecies.element} · Lv.${enemy.level}</span></div><div class="battle-sprite">${petImage(enemy.species,'battle-pet-image')}</div><div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div></div></div>
-        <div class="battle-arena-controls"><div class="battle-action-status">${battle.phase==='ai'?'🤖 BOT SEDANG MEMILIH AKSI...':'✨ GILIRAN KAMU — PILIH AKSI'}</div><div class="battle-action-grid">
+        <div class="battle-side battle-enemy"><div class="battle-nameplate"><b>${esc(enemy.name)}</b><span>AI TIER · ${enemy.rarity}</span></div><div class="battle-sprite">${petImage(enemy.species,'battle-pet-image')}</div><div class="battle-hp-card"><div class="hp-value">${ehp} / ${emax} HP</div><div class="battle-enemy-tier">LEVEL ${battle.wave} · ${enemy.name}</div><div class="progress-track"><div class="progress-fill enemy-hp" style="width:${Math.min(100,ehp/emax*100)}%"></div></div></div></div>
+        <div class="battle-arena-controls"><div class="battle-action-status">${battle.phase==='ai'?'🤖 BOT SEDANG MEMILIH AKSI...':battle.phase==='transition'?'✨ LEVEL CLEAR — MENYIAPKAN LAWAN BERIKUTNYA':'✨ GILIRAN KAMU — PILIH AKSI'}</div><div class="battle-action-grid">
           <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
           <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||battle.skillUsed?'disabled':''}><span>✨</span>Skill</button>
           <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>🛡️</span>Defend</button>
@@ -1210,72 +1246,76 @@ async function exchangeFragments(speciesId,reward){
   save();render();showToast('Fragmen berhasil ditukar.');
 }
 function battleAction(move){
-  if(!battle||battle.ended||battle.busy)return;
+  if(!battle||battle.ended||battle.busy||battle.phase!=='player')return;
+  if(!['attack','skill','defend','item'].includes(move))return;
   if(move==='skill'&&battle.skillUsed){showToast('Skill sudah digunakan pada battle ini.');return;}
   const p=petById(battle.petId);if(!p)return;
-  if(move==='item'&&state.items.snack<1){showToast('Camilan habis.');return;}
-  const activeBattle=battle, ps=speciesById(p.species), os=speciesById(activeBattle.opponent.species), log=activeBattle.log;
+  if(move==='item'&&Number(state.items.snack||0)<1){showToast('Camilan habis.');return;}
+  const activeBattle=battle,ps=speciesById(p.species),os=speciesById(activeBattle.opponent.species),log=activeBattle.log;
   activeBattle.busy=true;activeBattle.actionFx=move;
   if(move==='attack'||move==='skill'){
-    const dodge=clamp(.04+(activeBattle.opponent.stats.spd-p.stats.spd)*.005,.02,.18);
+    const dodge=clamp(.035+(activeBattle.opponent.stats.spd-p.stats.spd)*.003,.01,.12);
     if(Math.random()<dodge)log.push(`${activeBattle.opponent.name} menghindari serangan ${p.name}.`);
     else{
-      const bonus=move==='skill'?5:0;
-      let damage=Math.max(4,Math.round((4+p.stats.atk*.5+bonus-activeBattle.opponent.stats.def*.2)*(0.85+Math.random()*.3)*elementMultiplier(ps.element,os.element)*(activeBattle.opponentDefending?.45:1)));
-      activeBattle.opponentDefending=false;
-      if(Math.random()<clamp(.07+(p.stats.spd-activeBattle.opponent.stats.spd)*.006,.03,.2)){damage=Math.round(damage*1.5);log.push('Serangan kritis!');}
+      const bonus=move==='skill'?Math.max(4,Math.round(p.stats.atk*.22)):0;
+      let damage=Math.max(3,Math.round((3+p.stats.atk*.43+bonus-activeBattle.opponent.stats.def*.16)*(0.9+Math.random()*.2)*elementMultiplier(ps.element,os.element)*(activeBattle.enemyDefending?.45:1)));
+      if(Math.random()<.08)damage=Math.round(damage*1.35);
       activeBattle.enemyHP=Math.max(0,activeBattle.enemyHP-damage);
-      log.push(`${p.name} ${move==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage!`);
+      log.push(`${p.name} ${move==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage.`);
     }
-    if(move==='skill')activeBattle.skillUsed=true;
+    activeBattle.enemyDefending=false;if(move==='skill')activeBattle.skillUsed=true;
   }else if(move==='defend'){activeBattle.defending=true;log.push(`${p.name} bersiap bertahan.`);}
-  else if(move==='item'){state.items.snack--;const healed=Math.min(25,p.stats.hp-activeBattle.playerHP);activeBattle.playerHP+=healed;log.push(`${p.name} memakai camilan dan memulihkan ${healed} HP!`);}
-  else{activeBattle.busy=false;return;}
-  activeBattle.log=log.slice(-30);
-  if(activeBattle.enemyHP<=0){activeBattle.busy=false;finishBattle('win');return;}
+  else{state.items.snack--;const healed=Math.min(25,p.stats.hp-activeBattle.playerHP);activeBattle.playerHP+=healed;log.push(`${p.name} memakai Battle Snack dan memulihkan ${healed} HP.`);}
+  activeBattle.log=log.slice(-30);save();
+  if(activeBattle.enemyHP<=0){advanceHuntingLevel();return;}
   activeBattle.phase='ai';render();
   activeBattle.aiTimer=setTimeout(()=>{
-    if(battle!==activeBattle||activeBattle.ended)return;
-    const enemy=activeBattle.opponent, choices=['attack','attack','skill','defend'];
-    if(activeBattle.enemyHP<=Math.ceil(enemy.stats.hp*.35))choices.push('item');
-    let aiMove=choices[Math.floor(Math.random()*choices.length)];
-    if(aiMove==='skill'&&activeBattle.aiSkillUsed)aiMove='attack';
-    if(aiMove==='item'&&activeBattle.aiItemUsed)aiMove='attack';
-    if(aiMove==='defend'){activeBattle.opponentDefending=true;log.push(`${enemy.name} memilih bertahan.`);activeBattle.actionFx='ai-defend';}
-    else if(aiMove==='item'){activeBattle.aiItemUsed=true;const healed=Math.min(20,enemy.stats.hp-activeBattle.enemyHP);activeBattle.enemyHP+=healed;log.push(`${enemy.name} memulihkan ${healed} HP.`);activeBattle.actionFx='ai-item';}
+    if(battle!==activeBattle||activeBattle.ended||activeBattle.phase!=='ai')return;
+    const enemy=activeBattle.opponent,choices=['attack','attack','attack','defend'];
+    if(!activeBattle.enemySkillUsed)choices.push('skill');
+    if(!activeBattle.enemyItemUsed&&activeBattle.enemyHP<=Math.ceil(enemy.stats.hp*.4))choices.push('item');
+    const aiMove=choices[Math.floor(Math.random()*choices.length)];
+    if(aiMove==='defend'){activeBattle.enemyDefending=true;log.push(`${enemy.name} memilih bertahan.`);activeBattle.actionFx='ai-defend';}
+    else if(aiMove==='item'){activeBattle.enemyItemUsed=true;const healed=Math.min(Math.round(enemy.stats.hp*.16),enemy.stats.hp-activeBattle.enemyHP);activeBattle.enemyHP+=healed;log.push(`${enemy.name} memulihkan ${healed} HP.`);activeBattle.actionFx='ai-item';}
     else{
-      if(aiMove==='skill')activeBattle.aiSkillUsed=true;
-      const dodge=clamp(.04+(p.stats.spd-enemy.stats.spd)*.005,.02,.18);
+      const skill=aiMove==='skill';if(skill)activeBattle.enemySkillUsed=true;
+      const dodge=clamp(.025+(p.stats.spd-enemy.stats.spd)*.003,.01,.12);
       if(Math.random()<dodge)log.push(`${p.name} menghindari serangan ${enemy.name}.`);
-      else{const bonus=aiMove==='skill'?5:0;let damage=Math.max(3,Math.round((4+enemy.stats.atk*.5+bonus-p.stats.def*.2)*(0.85+Math.random()*.3)*elementMultiplier(os.element,ps.element)*(activeBattle.defending?.45:1)));if(Math.random()<.08)damage=Math.round(damage*1.5);activeBattle.playerHP=Math.max(0,activeBattle.playerHP-damage);log.push(`${enemy.name} ${aiMove==='skill'?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage.`);}
+      else{
+        const bonus=skill?Math.max(3,Math.round(enemy.stats.atk*.18)):0;
+        let damage=Math.max(2,Math.round((2+enemy.stats.atk*.43+bonus-p.stats.def*.16)*(0.9+Math.random()*.2)*elementMultiplier(os.element,ps.element)*(activeBattle.defending?.45:1)));
+        if(Math.random()<.06)damage=Math.round(damage*1.3);
+        activeBattle.playerHP=Math.max(0,activeBattle.playerHP-damage);
+        log.push(`${enemy.name} ${skill?'menggunakan Skill':'menyerang'} dan memberi ${damage} damage.`);
+      }
       activeBattle.actionFx=aiMove;
     }
-    activeBattle.defending=false;activeBattle.turn++;activeBattle.phase='player';activeBattle.busy=false;activeBattle.log=log.slice(-30);
+    activeBattle.defending=false;activeBattle.turn++;activeBattle.log=log.slice(-30);save();
     if(activeBattle.playerHP<=0){finishBattle('loss');return;}
-    if(activeBattle.turn>30){finishBattle('draw');return;}
-    render();
-  },700);
+    activeBattle.phase='player';activeBattle.busy=false;activeBattle.actionFx='idle';render();
+  },850);
 }
 function finishBattle(result){
   if(!battle||battle.ended)return;
-  dailyReset();battle.ended=true;
-  const p=petById(battle.petId);
-  if(result==='win'){
-    state.player.wins++;
-    state.player.rating+=battle.mode==='simulated'?12:5;state.player.coins+=35;playerXP(25);grantPetXP(p,20);showToast('Menang! +35 koin, XP pet & pemain.');
-    state.quests.progress.win++;
-  }else if(result==='loss'){
-    state.player.losses++;
-    state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);
-    showToast('Kalah, tapi pet mendapat pengalaman.');
-  }else{
-    state.player.draws++;showToast('Battle berakhir seri.');
-  }
+  dailyReset();battle.ended=true;if(battle.aiTimer)clearTimeout(battle.aiTimer);
+  const completed={...battle};const p=petById(completed.petId);
+  if(completed.mode==='practice'){
+    const coins=Number(completed.coinsEarned||0),xp=Number(completed.xpEarned||0);
+    state.player.coins+=coins;
+    if(xp>0)playerXP(xp);
+    if(p&&completed.clearedLevels>0)grantPetXP(p,completed.clearedLevels*5);
+    if(result==='win'){state.player.wins++;state.quests.progress.win++;}
+    else if(result==='loss')state.player.losses++;
+    showToast(`Hunting selesai · ${completed.clearedLevels} level · +${coins} Coins · +${xp} EXP`);
+  }else if(result==='win'){
+    state.player.wins++;state.player.rating+=completed.mode==='simulated'?12:5;state.player.coins+=35;playerXP(25);grantPetXP(p,20);state.quests.progress.win++;
+  }else if(result==='loss'){state.player.losses++;state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);}
+  else state.player.draws++;
   state.quests.progress.battle++;
-  state.battleHistory.unshift({result,date:Date.now(),mode:battle.mode});
+  state.battleHistory.unshift({result,date:Date.now(),mode:completed.mode,clearedLevels:completed.clearedLevels||0});
   state.battleHistory=state.battleHistory.slice(0,20);
   save();battle=null;render();
-  showModal(`<div class="hatch-egg">${result==='win'?'🏆':result==='draw'?'🤝':'💫'}</div><h2 id="modalTitle" style="text-align:center">${result==='win'?'Kemenangan!':result==='draw'?'Seri!':'Pertarungan selesai'}</h2><p style="text-align:center">${result==='win'?'Hebat! Petmu memperoleh hadiah battle.':result==='draw'?'Pertarungan berakhir imbang.':'Jangan menyerah, petmu tetap mendapat XP.'}</p><button class="button full" data-action="close-modal">Lanjut</button>`);
+  showModal(`<div class="hatch-egg">${result==='win'?'🏆':result==='draw'?'🤝':'💫'}</div><h2 id="modalTitle" style="text-align:center">${result==='win'?'Hunting Clear!':result==='draw'?'Hunting berakhir':'Hunting selesai'}</h2><p style="text-align:center">Kamu melewati <b>${completed.clearedLevels||0} level</b>.</p><div class="stats-row"><div class="stat-tile"><strong>🪙 ${completed.coinsEarned||0}</strong><span>Coins</span></div><div class="stat-tile"><strong>✨ ${completed.xpEarned||0}</strong><span>EXP</span></div><div class="stat-tile"><strong>${completed.clearedLevels||0}</strong><span>Level Clear</span></div></div><button class="button full" data-action="close-modal" style="margin-top:16px">Lanjut</button>`);
 }
 function batchPullConfirmation(egg){
   const currency=egg.currency==='diamond'?'diamond':'koin',cost=egg.price*5;
