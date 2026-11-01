@@ -107,7 +107,7 @@ async function handleCallback(q: any) {
   }
   if (payload === "menu:topup") {
     await answer("Pilih paket");
-    await say(chatId, "PILIH NOMINAL DIAMOND\\n\\nDaftar harga paket Tamaverse (mode pratinjau):\\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
+    await say(chatId, "PILIH NOMINAL DIAMOND\n\nDaftar harga paket Tamaverse (mode pratinjau):\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
       [{ text: "5 💎 — Rp1.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp1.800", callback_data: "packageinfo:10" }],
       [{ text: "25 💎 — Rp3.500", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp5.000", callback_data: "packageinfo:50" }],
       [{ text: "120 💎 — Rp10.800", callback_data: "packageinfo:120" }],
@@ -128,7 +128,7 @@ async function handleCallback(q: any) {
     const price = prices[amount];
     if (!price) { await answer("Paket tidak valid"); return; }
     await answer("Detail paket");
-    await say(chatId, `DETAIL PAKET TAMAVERSE\\n\\n💎 ${amount} Diamonds\\nHarga target: Rp${money(price)}\\n\\nIni masih tampilan pratinjau. Belum membuat order dan jangan melakukan pembayaran dari informasi ini.`, { reply_markup: { inline_keyboard: [
+    await say(chatId, `DETAIL PAKET TAMAVERSE\n\n💎 ${amount} Diamonds\nHarga target: Rp${money(price)}\n\nIni masih tampilan pratinjau. Belum membuat order dan jangan melakukan pembayaran dari informasi ini.`, { reply_markup: { inline_keyboard: [
       [{ text: "⬅️ Kembali ke Paket", callback_data: "menu:topup" }]
     ] } });
     return;
@@ -366,7 +366,7 @@ Ini hanya konfirmasi pilihan dari aplikasi. Untuk informasi dan bantuan, gunakan
         ] } });
       return;
     }
-    await say(chatId, "NEXORA PAY • TAMAVERSE\\n\\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
+    await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
       [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
       [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
       [{ text: "📋 Panduan", callback_data: "menu:help" }]
@@ -440,7 +440,7 @@ Ini hanya konfirmasi pilihan dari aplikasi. Untuk informasi dan bantuan, gunakan
   if (text.startsWith("/buy")) {
     const choice = text.split(/\s+/)[1];
     if (!choice) {
-      await say(chatId, "PILIH NOMINAL DIAMOND\\n\\nDaftar harga paket Tamaverse (mode pratinjau):\\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
+      await say(chatId, "PILIH NOMINAL DIAMOND\n\nDaftar harga paket Tamaverse (mode pratinjau):\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
         [{ text: "5 💎 — Rp1.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp1.800", callback_data: "packageinfo:10" }],
         [{ text: "25 💎 — Rp3.500", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp5.000", callback_data: "packageinfo:50" }],
         [{ text: "120 💎 — Rp10.800", callback_data: "packageinfo:120" }],
