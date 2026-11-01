@@ -782,7 +782,7 @@ function homePage(){
   const s=speciesById(p.species),xpPercent=Math.min(100,p.xp/(p.level*40)*100);
   const cleanStagePet=['fluffin','mossling','voltkit','starwhale'].includes(s.id);
   return `<section class="page home-page">
-    <div class="player-card card"><div class="player-avatar">${state.player.avatar}</div>
+    <div class="player-card card"><div class="player-avatar">${playerAvatarMarkup(state.player.avatar)}</div>
       <div class="player-info"><div class="player-name">${esc(state.player.name)}</div><span class="pill">Lv. ${state.player.level}</span>
       <div class="player-xp"><span>${state.player.xp} / ${state.player.level*100} XP</span><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,state.player.xp/(state.player.level*100)*100)}%"></div></div></div></div>
       <button class="coin-pill" data-action="go" data-page="profile" aria-label="Buka inventori">🪙 <b>${state.player.coins.toLocaleString('id-ID')}</b><span>＋</span></button>
@@ -1075,7 +1075,7 @@ async function renamePlayerWithCard(){const name=(document.getElementById('playe
 async function renameSelectedPet(){const pet=petById(selectedPetId),name=(document.getElementById('newPetName')?.value||'').trim().slice(0,18);if(!pet||!name){showToast('Masukkan nama pet.');return;}if(name===pet.name){closeModal();return;}try{await consumeRenameCard('rename_pet');pet.name=name;closeModal();save();render();showToast('Nama pet berhasil diperbarui.');}catch(error){console.error('Pet rename failed:',error);showToast(error?.message||'Gagal mengganti nama pet.');}}
 function playerAvatarMarkup(value,className='player-avatar-photo'){
   const avatar=String(value||'🧙');
-  return /^https:\/\//i.test(avatar)?`<img class="${className}" src="${esc(avatar)}" alt="Foto profil" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode('🧙'))">`:esc(avatar);
+  return (/^https:\/\//i.test(avatar)||/^data:image\/(?:jpeg|png|webp);base64,/i.test(avatar))?`<img class="${className}" src="${esc(avatar)}" alt="Foto profil" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode('🧙'))">`:esc(avatar);
 }
 function profileAvatarMarkup(sizeClass='profile-avatar-image'){return playerAvatarMarkup(state.player.avatar,sizeClass);}
 function profilePage(){
