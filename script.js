@@ -800,27 +800,28 @@ function gachaPage(){
       <div class="diamond-wallet"><small>DIAMOND BALANCE</small><strong>💎 ${Number(state.player.diamonds||0).toLocaleString('id-ID')}</strong></div>
     </div>
     <div class="notice">Pilih paket di sini, lalu lanjutkan pembelian melalui Nexora Bot. UUID akun game tidak perlu dikirim lewat chat publik.</div>
-    <div class="section-heading"><h2>Daftar Harga Diamond</h2><span class="muted-label">PRICE LIST</span></div>
-    <div class="card" style="padding:14px;margin-bottom:14px">
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;font-size:13px">
-        <b>Paket</b><b>Harga</b><b>Per Diamond</b>
-        <span>💎 5</span><b>Rp1.000</b><span class="subtle">Rp200</span><span>💎 10</span><b>Rp1.800</b><span class="subtle">Rp180</span><span>💎 25</span><b>Rp3.500</b><span class="subtle">Rp140</span><span>💎 50</span><b>Rp5.000</b><span class="subtle">Rp100</span><span>💎 120</span><b>Rp10.800</b><span class="subtle">Rp90</span><span>💎 300</span><b>Rp24.000</b><span class="subtle">Rp80</span><span>💎 700</span><b>Rp49.000</b><span class="subtle">Rp70</span>
-      </div>
-      <p class="subtle" style="margin:12px 0 0;font-size:11px">Daftar harga ini merupakan rancangan informasi. Paket dan harga baru belum tersedia untuk transaksi melalui tombol Purchase.</p>
-    </div>
-    <div class="section-heading"><h2>Paket yang tersedia di aplikasi</h2><span class="muted-label">NEXORA BOT</span></div>
-    <div class="diamond-package-grid">
-      ${[{amount:50,label:'Starter'},{amount:120,label:'Popular'},{amount:300,label:'Value Pack'},{amount:700,label:'Mega Pack'}].map((pack,index)=>`
-        <article class="diamond-package-card ${index===1?'featured':''}">
-          ${index===1?'<span class="diamond-popular">POPULAR</span>':''}
+    <div class="section-heading"><h2>Diamond Packages</h2><span class="muted-label">PRICE LIST · IDR</span></div>
+    <div class="diamond-package-grid diamond-package-grid-all">
+      ${[
+        {amount:5,price:'Rp1.000',unit:'Rp200 / 💎'},
+        {amount:10,price:'Rp1.800',unit:'Rp180 / 💎'},
+        {amount:25,price:'Rp3.500',unit:'Rp140 / 💎'},
+        {amount:50,price:'Rp5.000',unit:'Rp100 / 💎'},
+        {amount:120,price:'Rp10.800',unit:'Rp90 / 💎',featured:true},
+        {amount:300,price:'Rp24.000',unit:'Rp80 / 💎'},
+        {amount:700,price:'Rp49.000',unit:'Rp70 / 💎'}
+      ].map((pack,index)=>`
+        <article class="diamond-package-card ${pack.featured?'featured':''}">
+          ${pack.featured?'<span class="diamond-popular">BEST VALUE</span>':''}
           <span class="diamond-package-icon">💎</span>
           <strong>${pack.amount.toLocaleString('id-ID')}</strong>
           <span class="diamond-package-label">Diamonds</span>
-          <b class="diamond-package-name">${pack.label}</b>
-          <span class="diamond-package-price">Pilih paket untuk melanjutkan</span>
-          <button class="button full" data-action="diamond-purchase" data-amount="${pack.amount}" data-label="${pack.label}">Purchase</button>
+          <b class="diamond-package-price">${pack.price}</b>
+          <span class="subtle diamond-unit-price">${pack.unit}</span>
+          <button class="button full" type="button" disabled aria-disabled="true">Purchase</button>
         </article>`).join('')}
     </div>
+    <div class="notice">Paket dan harga baru sedang disiapkan. Tombol Purchase akan diaktifkan setelah harga di game dan Nexora Bot sudah sinkron.</div>
     <div class="card diamond-history-card">
       <div class="section-heading"><h2>Riwayat Transaksi</h2><span class="muted-label">PAYMENT HISTORY</span></div>
       <div class="diamond-history-empty"><span>🧾</span><b>Riwayat belum tersedia</b><p class="subtle">Riwayat pembelian akan ditampilkan di sini setelah fitur riwayat akun aktif. Untuk saat ini, simpan bukti transaksi secara pribadi.</p></div>
