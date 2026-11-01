@@ -218,9 +218,7 @@
       if (dailyRewardError) {
         console.warn('Load daily rewards failed:', dailyRewardError);
       } else if (dailyRewardData) {
-        const claimedDate = dailyRewardData.last_claim_date
-          ? new Date(dailyRewardData.last_claim_date + 'T12:00:00').toDateString()
-          : '';
+        const claimedDate = dailyRewardData.last_claim_date || '';
         window.state.dailyReward = {
           lastClaimDate: claimedDate,
           day: Number(dailyRewardData.day || 0)
