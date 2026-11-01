@@ -65,20 +65,10 @@ const packages: Record<string, { label: string; diamonds: number; price: number;
 };
 const help = `NEXORA • TAMAVERSE DIAMOND TOP-UP
 
-/uuid UUID — hubungkan akun Tamaverse
-/buy — buat tiket top-up
-/proof ORDER_ID — kirim bukti pembayaran dengan foto
+Gunakan tombol menu untuk memilih paket Diamond dan mengikuti instruksi pembayaran.
 
-Pilih paket:
-/buy 1 — 50 Diamonds
-/buy 2 — 120 Diamonds
-/buy 3 — 300 Diamonds
-/buy 4 — 700 Diamonds
-
-Pertama kali, kirim UUID dari menu Profile Tamaverse dengan format:
-/uuid UUID_KAMU
-
-Pembayaran diproses manual oleh admin. Jangan kirim data rahasia atau PIN.`;
+Jika ingin membuka menu utama, kirim /start.
+Pembayaran diproses manual oleh admin. Jangan kirim data rahasia, PIN, atau OTP.`;
 
 async function handleCallback(q: any) {
   const id = String(q.from?.id ?? "");
@@ -235,10 +225,14 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`, { reply_m
       `⚠️ PEMBAYARAN TIDAK DAPAT DIPROSES
 
 Mohon maaf, bukti pembayaran untuk pesanan ini belum dapat diproses.
-Order lama telah dibatalkan. Kamu bisa membuat pesanan top-up baru melalui /buy.
+Order lama telah dibatalkan. Untuk melakukan top-up kembali, tekan tombol di bawah atau kirim /start untuk membuka menu utama.
 Jika membutuhkan bantuan, hubungi @ipnmesum.
 
-— Nexora Team`);
+— Nexora Team`,
+      { reply_markup: { inline_keyboard: [
+        [{ text: "💎 Kembali ke Menu Top Up", callback_data: "menu:topup" }],
+        [{ text: "🏠 Menu Utama", callback_data: "menu:home" }]
+      ] } });
 
     let topicDeleted = false;
     if (order.telegram_topic_id) {
@@ -336,7 +330,6 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
   if (text.startsWith("/start") || text === "/help") {
     await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
       [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
-      [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
       [{ text: "📋 Panduan", callback_data: "menu:help" }]
     ] } });
     return;
@@ -393,7 +386,10 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
       await say(chatId, "UUID belum berhasil disimpan. Coba lagi atau hubungi admin.");
       return;
     }
-    await say(chatId, "UUID Tamaverse berhasil disimpan! Sekarang kamu bisa gunakan /buy untuk memilih paket Diamond.");
+    await say(chatId, "✅ UUID Tamaverse berhasil terhubung!\n\nSekarang pilih menu berikut:", { reply_markup: { inline_keyboard: [
+      [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
+      [{ text: "📋 Panduan", callback_data: "menu:help" }]
+    ] } });
     return;
   }
 
