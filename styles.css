@@ -3415,3 +3415,31 @@ body[data-theme="dark"] .solo-hunting-page .battle-pet-caption span{color:#f0d8e
   transform:scaleX(-1)!important;
   transform-origin:center center!important;
 }
+
+
+/* Lobby Player vs Monster card: bring both sides closer to the center. */
+.battle-hub .battle-turn-preview{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  padding:11px 12px!important;
+}
+.battle-hub .battle-turn-preview>div{
+  flex:initial!important;
+  width:max-content!important;
+  max-width:100%!important;
+  grid-template-columns:30px auto!important;
+  column-gap:6px!important;
+}
+.battle-hub .battle-turn-preview>div:first-child{justify-self:end!important}
+.battle-hub .battle-turn-preview>div:last-child{justify-self:start!important}
+.battle-hub .battle-turn-preview .turn-preview-arrow{font-size:17px!important}
+@media(max-width:390px){
+  .battle-hub .battle-turn-preview{gap:3px!important;padding:10px 8px!important}
+  .battle-hub .battle-turn-preview>div{grid-template-columns:26px auto!important;column-gap:4px!important}
+  .battle-hub .battle-turn-preview .turn-preview-icon{width:26px!important;height:26px!important}
+  .battle-hub .battle-turn-preview b{font-size:8px!important;letter-spacing:.6px!important}
+  .battle-hub .battle-turn-preview small{font-size:7px!important}
+}
