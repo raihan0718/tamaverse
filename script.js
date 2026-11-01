@@ -529,9 +529,12 @@ function normalizeSavedState(saved){
     return Number.isNaN(date.getTime())?String(value):date.toDateString();
   };
   base.player={...base.player,...previousPlayer,
+    // One-time migration: preserve the old Gems balance and merge it into Diamonds.
+    diamonds:Math.max(0,Number(previousPlayer.diamonds)||0)+Math.max(0,Number(previousPlayer.gems)||0),
     rating:Number.isFinite(previousPlayer.rating)?previousPlayer.rating:(previousPlayer.battleRating||1000),
     lastLogin:toLocalDay(previousPlayer.lastLogin||previousPlayer.lastLoginDate)
   };
+  delete base.player.gems;
   base.pets=saved.pets.map(oldPet=>{
     const speciesId=oldPet.species||oldPet.speciesId||species[0].id;
     const kind=speciesById(speciesId);
