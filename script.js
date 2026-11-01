@@ -923,7 +923,7 @@ function profilePage(){
     return `<div class="fragment-row"><div class="fragment-pet-info"><span class="fragment-pet-icon">${petImage(s.id,'fragment-pet-image')}</span><b>${s.name}</b><span>${count} fragmen</span></div>
       <div class="fragment-actions">
         <button class="button secondary" data-action="exchange-fragment" data-species="${id}" data-reward="coins" ${count<3?'disabled':''}>3 → 30 koin</button>
-        <button class="button secondary" data-action="exchange-fragment" data-species="${id}" data-reward="diamonds" ${count<5?'disabled':''}>5 → 1 diamond</button>
+        
         <button class="button secondary" data-action="exchange-fragment" data-species="${id}" data-reward="training" ${count<4?'disabled':''}>4 → 1 buku</button>
       </div></div>`;
   }).join(''):'<p class="subtle">Fragmen dari pet duplikat akan muncul di sini.</p>';
@@ -1083,23 +1083,12 @@ async function runEggPulls(id,count,free=false){
   }finally{pullInProgress=false;}
 }
 async function exchangeFragments(speciesId,reward){
-  const costs={coins:{fragments:3,amount:30},diamonds:{fragments:5,amount:1},training:{fragments:4,amount:1}};
+  const costs={coins:{fragments:3,amount:30},training:{fragments:4,amount:1}};
   const option=costs[reward],available=state.items.fragments[speciesId]||0;
   if(!option||available<option.fragments){showToast('Fragmen spesies belum cukup.');return;}
-  if(reward==='diamonds'&&window.TAMAVERSE_SUPABASE_CLIENT?.rpc&&window.TAMAVERSE_USER_ID){
-    try{
-      const {data,error}=await window.TAMAVERSE_SUPABASE_CLIENT.rpc('tamaverse_exchange_fragments_for_diamond',{p_species_id:speciesId});
-      if(error)throw error;
-      const result=Array.isArray(data)?data[0]:data;
-      state.items.fragments={...(result.fragments||state.items.fragments)};
-      state.player.diamonds=Number(result.diamonds??state.player.diamonds);
-    }catch(error){console.error('Fragment exchange failed:',error);showToast(error?.message||'Penukaran fragment gagal.');return;}
-  }else{
-    state.items.fragments[speciesId]-=option.fragments;
-    if(reward==='coins')state.player.coins+=option.amount;
-    else if(reward==='diamonds')state.player.diamonds+=option.amount;
-    else state.items.training+=option.amount;
-  }
+  state.items.fragments[speciesId]-=option.fragments;
+  if(reward==='coins')state.player.coins+=option.amount;
+  else state.items.training+=option.amount;
   save();render();showToast('Fragmen berhasil ditukar.');
 }
 function battleAction(move){
