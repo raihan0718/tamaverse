@@ -28,8 +28,11 @@ create table if not exists public.diamond_orders (
   admin_note text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  completed_at timestamptz
+  completed_at timestamptz,
+  telegram_topic_id bigint
 );
+alter table public.diamond_orders
+  add column if not exists telegram_topic_id bigint;
 create index if not exists diamond_orders_owner_created_idx
   on public.diamond_orders(owner_id, created_at desc);
 create index if not exists diamond_orders_status_created_idx
