@@ -799,7 +799,7 @@ function gachaPage(){
       <div><span class="eyebrow">TAMAVERSE TOP UP</span><h2>Diamond Store</h2><p class="subtle">Isi saldo Diamond untuk membuka lebih banyak hal di Tamaverse.</p></div>
       <div class="diamond-wallet"><small>DIAMOND BALANCE</small><strong>💎 ${Number(state.player.diamonds||0).toLocaleString('id-ID')}</strong></div>
     </div>
-    <div class="notice">Pilih paket di sini, lalu lanjutkan pembelian melalui Nexora Bot. UUID akun game tidak perlu dikirim lewat chat publik.</div>
+    <div class="notice">Daftar harga Store adalah harga terbaru yang direncanakan. Menu transaksi Nexora Bot masih memakai daftar paket lama, jadi jangan lanjutkan pembayaran sebelum nominal di bot cocok dengan harga di sini.</div>
     <div class="section-heading"><h2>Diamond Packages</h2><span class="muted-label">PRICE LIST · IDR</span></div>
     <div class="diamond-package-grid diamond-package-grid-all">
       ${[
@@ -821,7 +821,7 @@ function gachaPage(){
           <button class="button full" type="button" data-action="diamond-purchase" data-amount="${pack.amount}" data-label="${pack.price}">Purchase</button>
         </article>`).join('')}
     </div>
-    <div class="notice">Pilih nominal, tentukan metode pembayaran, lalu lanjutkan melalui Nexora Bot. Detail akhir tetap dikonfirmasi di bot.</div>
+    <div class="notice">⚠️ Harga Store dan menu transaksi bot belum sinkron. Tombol di bawah hanya membuka bot; jangan melakukan pembayaran jika nominal paket di bot berbeda.</div>
     <div class="card diamond-history-card">
       <div class="section-heading"><h2>Riwayat Transaksi</h2><span class="muted-label">PAYMENT HISTORY</span></div>
       <div class="diamond-history-empty"><span>🧾</span><b>Riwayat belum tersedia</b><p class="subtle">Riwayat pembelian akan ditampilkan di sini setelah fitur riwayat akun aktif. Untuk saat ini, simpan bukti transaksi secara pribadi.</p></div>
@@ -1155,6 +1155,7 @@ document.addEventListener('click',event=>{
       <h2 id="modalTitle">Purchase ${amount} Diamonds</h2>
       <p class="subtle">Paket ${amount} 💎 · ${prices[amount]}</p>
       <div class="card" style="margin:14px 0;text-align:center"><strong style="font-size:24px">💎 ${amount.toLocaleString('id-ID')}</strong><p class="muted-label">${prices[amount]}</p></div>
+      <p class="notice">Catatan: harga dan paket pada menu transaksi bot masih berbeda. Periksa nominal di bot dan jangan bayar jika tidak sama.</p>
       <h3 style="margin:12px 0">Pilih metode pembayaran</h3>
       <div class="modal-actions" style="display:grid;grid-template-columns:1fr;gap:9px">
         <button class="button full" data-action="diamond-payment" data-method="qris">QRIS</button>
@@ -1168,7 +1169,7 @@ document.addEventListener('click',event=>{
     if(!['qris','gopay'].includes(method))return;
     closeModal();
     window.open('https://t.me/Nexorapaymbot','_blank','noopener');
-    showToast(`Nexora Bot dibuka. Konfirmasi paket dan ${method.toUpperCase()} di bot.`);
+    showToast(`Bot dibuka. Cek ulang nominal dan metode ${method.toUpperCase()}; jangan bayar jika harga berbeda.`);
     return;
   }
 
