@@ -22,11 +22,12 @@
 3. Terapkan berurutan:
    - `supabase-diamond-ticket.sql` (tabel link Telegram dan tabel tiket lama; jalankan/ulang setelah memperbaiki SQL bila sebelumnya berhenti di error).
    - `supabase/migrations/20261101000000_nexora_orders.sql`.
+   - `supabase/migrations/20261101000100_nexora_checkout_intents.sql` (wajib untuk checkout dari Mini App; menambah kolom `source` dan tabel intent).
    - `supabase/migrations/20261101000200_unified_diamonds.sql`.
    - `supabase/migrations/20261101000300_harden_diamond_wallet.sql`.
    Jangan jalankan urutan ini secara membabi buta pada database produksi yang sudah punya riwayat migrasi berbeda; cek tabel dan migration history dulu.
 4. Saldo Nexora dikredit langsung ke `public.inventory.diamonds` dalam transaksi `nexora_approve_order()`; tidak memakai tabel `tamaverse_wallets`.
-5. Deploy function: `supabase functions deploy tamaverse-payment-bot --no-verify-jwt`.
+5. Deploy Edge Functions `tamaverse-payment-bot` dan `create-checkout` sesuai workflow proyek.
 6. Set webhook (wajib `allowed_updates` dan `secret_token`):
    `https://api.telegram.org/bot<TOKEN>/setWebhook?url=<FUNCTION_URL>&secret_token=<SECRET>&allowed_updates=["message","callback_query"]`
 7. Grup admin: Supergroup + Topics aktif, bot jadi admin dengan izin **Manage Topics**.
