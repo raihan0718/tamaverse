@@ -21,6 +21,28 @@
   );
 
   window.TAMAVERSE_SUPABASE_CLIENT = supabase;
+  async function uploadTamaverseAvatar(dataUrl) {
+    const user = await ensureSupabaseUser();
+    if (!user) throw new Error('Akun belum tersambung ke Supabase.');
+    if (typeof dataUrl !== 'string' || !/^data:image\\/jpeg;base64,/i.test(dataUrl)) {
+      throw new Error('Format foto hasil kompresi tidak valid.');
+    }
+    const blob = await (await fetch(dataUrl)).blob();
+    if (!blob.size || blob.size > 5 * 1024 * 1024) throw new Error('Ukuran foto setelah kompresi maksimal 5 MB.');
+    const path = user.id + '/avatar-' + Date.now() + '.jpg';
+    const { error: uploadError } = await supabase.storage.from('player-avatars')
+      .upload(path, blob, { contentType: 'image/jpeg', upsert: false, cacheControl: '3600' });
+    if (uploadError) throw uploadError;
+    const { data: publicData } = supabase.storage.from('player-avatars').getPublicUrl(path);
+    const avatarUrl = publicData?.publicUrl;
+    if (!avatarUrl) throw new Error('URL foto gagal dibuat.');
+    const { error: profileError } = await supabase.from('profiles')
+      .update({ avatar_url: avatarUrl, avatar: '🧙' }).eq('id', user.id);
+    if (profileError) throw profileError;
+    return avatarUrl;
+  }
+  window.uploadTamaverseAvatar = uploadTamaverseAvatar;
+
 
   async function ensureSupabaseUser() {
     try {
@@ -64,7 +86,8 @@
       const profilePayload = {
         id: user.id,
         display_name: player.name || 'Penjelajah',
-        avatar: player.avatar || '🧙',
+        avatar: /^https:\/\//i.test(String(player.avatar || '')) || /^data:image\//i.test(String(player.avatar || '')) ? '🧙' : (player.avatar || '🧙'),
+        avatar_url: player.avatarUrl || (/^https:\/\//i.test(String(player.avatar || '')) ? player.avatar : null),
         level: Number(player.level || 1),
         xp: Number(player.xp || 0),
         rating: Number(player.rating || 1000),
@@ -175,8 +198,9 @@
       } else if (profileData) {
         window.state.player.name =
           profileData.display_name || window.state.player.name;
+        window.state.player.avatarUrl = profileData.avatar_url || '';
         window.state.player.avatar =
-          profileData.avatar || window.state.player.avatar;
+          window.state.player.avatarUrl || profileData.avatar || window.state.player.avatar;
         window.state.player.level =
           Number(profileData.level || 1);
         window.state.player.xp =
@@ -190,7 +214,7 @@
         window.state.player.draws =
           Number(profileData.draws || 0);
         const telegramPhoto = window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url;
-        if (telegramPhoto) window.state.player.avatar = telegramPhoto;
+        if (telegramPhoto && !window.state.player.avatarUrl && !profileData.avatar_url) window.state.player.avatar = telegramPhoto;
       }
 
       const { data: inventoryData, error: inventoryError } =
