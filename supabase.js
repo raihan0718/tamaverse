@@ -332,10 +332,10 @@
 
       if (balance !== previous) {
         if (typeof window.render === 'function') window.render();
-        if (balance > previous && typeof window.showToast === 'function') {
-          const added = balance - previous;
-          window.showToast(`🎉 TOP UP BERHASIL! +${added} Diamond ditambahkan. Terima kasih!`);
-        }
+        if (balance > previous && typeof window.showTopupSuccessModal === 'function') {
+            const added = balance - previous;
+            window.showTopupSuccessModal(added);
+          }
         // Persist the refreshed display locally without ever writing Diamonds
         // back to Supabase; the cloud save payload intentionally omits them.
         try {
@@ -382,9 +382,9 @@
           if (previous === balance) return;
           window.state.player.diamonds = balance;
           if (typeof window.render === 'function') window.render();
-          if (balance > previous && typeof window.showToast === 'function') {
+          if (balance > previous && typeof window.showTopupSuccessModal === 'function') {
             const added = balance - previous;
-            window.showToast(`🎉 TOP UP BERHASIL! +${added} Diamond ditambahkan. Terima kasih!`);
+            window.showTopupSuccessModal(added);
           }
         }
       )
