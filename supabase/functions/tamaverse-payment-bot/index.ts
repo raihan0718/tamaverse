@@ -128,6 +128,10 @@ async function handleCallback(q: any) {
       return;
     }
     if (isAdmin(Number(id))) {
+      const { error: setPriceError } = await db.rpc("set_tamaverse_diamond_order_payment", { p_order_id: data.id, p_amount_idr: pack.price, p_admin_note: "ADMIN TEST TOP-UP" });
+      if (setPriceError) { await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: "Admin test top-up gagal: " + setPriceError.message }); return; }
+      const { error: statusError } = await db.rpc("set_tamaverse_diamond_order_status", { p_order_id: data.id, p_status: "checking_payment" });
+      if (statusError) { await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: "Admin test top-up gagal: " + statusError.message }); return; }
       const { error: approveError } = await db.rpc("approve_tamaverse_diamond_order", { p_order_id: data.id });
       if (approveError) { await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: "Admin test top-up gagal: " + approveError.message }); return; }
       await telegram("editMessageText", { chat_id: chatId, message_id: progress.message_id, text: `ADMIN TEST TOP-UP BERHASIL\\nOrder: ${data.id}\\n+${pack.diamonds} Diamonds masuk ke akun terhubung.` });
