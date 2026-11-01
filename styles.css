@@ -3116,25 +3116,22 @@ body[data-theme="dark"] .battle-turn-preview{background:linear-gradient(110deg,#
 @media(max-width:380px){.battle-hub-tabs{top:66px}.battle-option-card{padding:14px}.battle-turn-preview{gap:5px}}
 
 /* Solo Hunting tower: cleaner HUD, balanced pet scale and wave transition */
-.battle-live-page{padding:12px 13px 24px;max-width:650px;margin:0 auto}
-.battle-live-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.battle-live-top>div{min-width:0;flex:1}
-.battle-live-top h1{font:700 21px 'Space Grotesk',sans-serif;margin:2px 0}
-.battle-wave-subtitle{display:block;color:var(--mint);font-size:9px;font-weight:900;letter-spacing:1.1px;margin-top:3px}
-.battle-turn-chip{flex:none}
-.battle-live-page .battle-scene{min-height:510px;height:min(610px,calc(100svh - 220px));border-radius:24px;overflow:hidden;position:relative}
-.battle-live-page .battle-side{width:43%;top:76px}
-.battle-live-page .battle-sprite{width:clamp(104px,29vw,154px);height:clamp(104px,29vw,154px);font-size:clamp(90px,25vw,130px);margin:0 auto}
-.battle-live-page .battle-sprite .pet-image{width:100%;height:100%;object-fit:contain;image-rendering:auto}
-.battle-live-page .battle-nameplate{margin-bottom:8px}
-.battle-live-page .battle-hp-card{margin-top:9px}
-.battle-enemy-tier{font-size:9px;color:var(--mint);font-weight:900;letter-spacing:.8px;margin-top:5px}
-.battle-live-page .battle-arena-controls{left:10px;right:10px;bottom:10px}
-.battle-live-page .battle-action-status{font-size:10px;letter-spacing:.35px}
-.battle-live-page .battle-log-panel{margin-top:11px}
+.battle-live-page{padding:0!important;max-width:none!important;margin:0!important;min-height:100dvh}
+.battle-live-page .battle-mode-top{margin-bottom:0}
+.battle-live-page .battle-wave-subtitle{display:block;color:#a15f91;font-size:9px;font-weight:900;letter-spacing:1px;margin-top:3px}
+.battle-live-page .battle-scene{flex:1;min-height:480px;height:auto;max-height:calc(100dvh - 190px);margin:0;border-radius:27px;overflow:hidden}
+.battle-live-page .battle-side{top:17%;height:61%;width:49%}
+.battle-live-page .battle-sprite{top:23%;height:42%;width:auto}
+.battle-live-page .battle-sprite .pet-image{width:clamp(125px,34vw,190px);height:clamp(125px,34vw,190px);max-width:none;max-height:none;object-fit:contain;image-rendering:pixelated}
+.battle-live-page .battle-hp-card{bottom:4%;padding:10px 11px;border-radius:14px}
+.battle-live-page .battle-arena-controls{left:12px;right:12px;bottom:12px}
+.battle-live-page .battle-action-btn{min-height:48px}
+.battle-live-page .battle-action-btn span{display:none}
+.battle-live-page .battle-log-panel{margin-top:0}
 .battle-live-page .battle-turn-overlay.wave-transition{background:linear-gradient(120deg,#5c3e91ed,#b15d9bed);box-shadow:0 0 45px #b78cff77;animation:huntingWavePulse .65s ease-in-out infinite alternate}
 @keyframes huntingWavePulse{to{transform:translate(-50%,-50%) scale(1.04);filter:brightness(1.18)}}
-@media(max-width:390px){.battle-live-page .battle-scene{height:540px;min-height:540px}.battle-live-page .battle-side{width:46%}.battle-live-page .battle-sprite{width:clamp(96px,27vw,124px);height:clamp(96px,27vw,124px)}}
+@media(max-height:700px){.battle-live-page .battle-scene{min-height:430px;max-height:calc(100dvh - 145px)}.battle-live-page .battle-action-btn{min-height:42px}}
+@media(max-width:390px){.battle-live-page .battle-side{width:49%}.battle-live-page .battle-sprite .pet-image{width:clamp(115px,32vw,160px);height:clamp(115px,32vw,160px)}}.battle-live-page .battle-side{width:46%}.battle-live-page .battle-sprite{width:clamp(96px,27vw,124px);height:clamp(96px,27vw,124px)}}
 
 
 /* Solo Hunting uses the same full-screen arena geometry as Online Battle */
