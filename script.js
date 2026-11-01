@@ -353,6 +353,10 @@ function profilePage(){const p=activePet();return `<section class="page"><div cl
   <button class="button secondary full" data-action="copy-user-id">
     📋 Salin User ID
   </button>
+  <button class="button primary full" data-action="create-telegram-link" style="margin-top:8px">
+    🔗 Hubungkan Telegram Bot
+  </button>
+  <small class="muted-label">Kode berlaku 10 menit. Kirim ke @Nexorapaymbot dengan format /link KODE.</small>
 </div>
 <div class="profile-stats"><div class="profile-stat"><strong>Lv. ${state.player.level}</strong><span>LEVEL PEMAIN</span></div><div class="profile-stat"><strong>${state.player.rating}</strong><span>RATING</span></div><div class="profile-stat"><strong>${state.player.wins}/${state.player.losses}/${state.player.draws}</strong><span>W/L/D</span></div><div class="profile-stat"><strong>${state.pets.length}/12</strong><span>KOLEKSI</span></div><div class="profile-stat"><strong>${state.player.streak} hari</strong><span>LOGIN STREAK</span></div><div class="profile-stat"><strong>${state.player.xp}/${state.player.level*100}</strong><span>PLAYER XP</span></div></div><button class="button secondary full" style="margin-top:13px" data-action="rename-player">✏️ Ubah nama</button></div><div class="section-heading"><h2>🎒 Inventori</h2></div><button class="button secondary full" data-action="inventory">🎒 Buka Inventori</button><div class="notice">☁️ Progres game disimpan di perangkat ini dan disinkronkan ke akun TAMAVERSE saat koneksi tersedia.</div><button class="button danger full" data-action="reset">Reset semua data</button></section>`;}
 const dailyRewards=[
@@ -1280,6 +1284,33 @@ document.addEventListener('click', async function(event) {
     alert(copied ? 'User ID berhasil disalin!' : 'Gagal menyalin ID.');
   }
 });
+
+document.addEventListener('click', async function(event) {
+  const button = event.target.closest('[data-action="create-telegram-link"]');
+  if (!button) return;
+  const client = window.TAMAVERSE_SUPABASE_CLIENT;
+  if (!client || !window.TAMAVERSE_USER_ID) {
+    alert('Akun cloud belum siap. Tunggu sebentar lalu coba lagi.');
+    return;
+  }
+  button.disabled = true;
+  const oldText = button.textContent;
+  button.textContent = 'Membuat kode...';
+  try {
+    const { data, error } = await client.rpc('create_tamaverse_telegram_link_code');
+    if (error) throw error;
+    const code = String(data || '');
+    try { await navigator.clipboard.writeText(code); } catch (_) {}
+    alert('Kode Telegram: ' + code + '\\n\\nKirim ke @Nexorapaymbot dengan format:\\n/link ' + code + '\\n\\nBerlaku 10 menit.');
+  } catch (error) {
+    console.error('Telegram link code error:', error);
+    alert('Gagal membuat kode: ' + (error.message || 'Coba lagi.'));
+  } finally {
+    button.disabled = false;
+    button.textContent = oldText;
+  }
+});
+
 try{
   const telegramApp=window.Telegram&&window.Telegram.WebApp;
   if(telegramApp){telegramApp.ready();telegramApp.expand();}
