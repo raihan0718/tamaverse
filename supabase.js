@@ -160,6 +160,7 @@
     if (!user) return;
 
     window.TAMAVERSE_USER_ID = user.id;
+    setupDiamondWalletSync(user.id);
 
     try {
       const { data: profileData, error: profileError } =
@@ -302,6 +303,98 @@
   }
 
   window.loadPlayerFromSupabase = loadPlayerFromSupabase;
+
+  // Keep the displayed Diamond balance in sync with the server wallet.
+  // Realtime is the fast path; focus/visibility refresh is the reliable fallback
+  // when the app was backgrounded while a top-up was approved in Telegram.
+  let diamondWalletChannel = null;
+  let diamondRefreshInFlight = false;
+
+  async function refreshDiamondBalance() {
+    if (!window.state || !supabase || diamondRefreshInFlight) return null;
+    diamondRefreshInFlight = true;
+    try {
+      const user = await ensureSupabaseUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('inventory')
+        .select('diamonds')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data || !Number.isFinite(Number(data.diamonds))) return null;
+
+      const balance = Math.max(0, Number(data.diamonds));
+      const previous = Number(window.state.player?.diamonds ?? 0);
+      window.state.player.diamonds = balance;
+
+      if (balance !== previous) {
+        if (typeof window.render === 'function') window.render();
+        // Persist the refreshed display locally without ever writing Diamonds
+        // back to Supabase; the cloud save payload intentionally omits them.
+        try {
+          const key = 'tamaverse_save';
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const saved = JSON.parse(raw);
+            if (saved && saved.player) {
+              saved.player.diamonds = balance;
+              localStorage.setItem(key, JSON.stringify(saved));
+            }
+          }
+        } catch (storageError) {
+          console.warn('Local Diamond cache refresh failed:', storageError);
+        }
+      }
+      return balance;
+    } catch (error) {
+      console.warn('Diamond wallet refresh failed:', error);
+      return null;
+    } finally {
+      diamondRefreshInFlight = false;
+    }
+  }
+
+  async function setupDiamondWalletSync(userId) {
+    if (!userId || diamondWalletChannel) return;
+
+    diamondWalletChannel = supabase
+      .channel('tamaverse-diamond-wallet-' + userId)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'inventory',
+          filter: 'owner_id=eq.' + userId
+        },
+        (payload) => {
+          const value = Number(payload.new?.diamonds);
+          if (!Number.isFinite(value) || !window.state?.player) return;
+          const balance = Math.max(0, value);
+          if (Number(window.state.player.diamonds) === balance) return;
+          window.state.player.diamonds = balance;
+          if (typeof window.render === 'function') window.render();
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Diamond Realtime unavailable; wallet will refresh when the app returns to foreground.');
+        }
+      });
+  }
+
+  window.refreshTamaverseDiamondBalance = refreshDiamondBalance;
+
+  window.addEventListener('focus', () => {
+    refreshDiamondBalance();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshDiamondBalance();
+  });
 
   // Keep the existing local save and also save to Supabase.
   const originalSave =
