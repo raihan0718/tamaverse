@@ -73,12 +73,19 @@
         draws: Number(player.draws || 0),
       };
 
-      const { error: profileError } = await window.TAMAVERSE_SUPABASE_CLIENT
-  .from('profiles')
-        .upsert(profilePayload, { onConflict: 'id' });
+      // The auth trigger creates the profile row; authenticated clients have UPDATE,
+      // not INSERT, permission on profiles.
+      const { data: savedProfile, error: profileError } = await window.TAMAVERSE_SUPABASE_CLIENT
+        .from('profiles')
+        .update(profilePayload)
+        .eq('id', user.id)
+        .select('id')
+        .maybeSingle();
 
       if (profileError) {
         console.warn('Save profile failed:', profileError);
+      } else if (!savedProfile) {
+        console.warn('Save profile skipped: account profile row is missing.');
       }
 
       const inventoryPayload = {
