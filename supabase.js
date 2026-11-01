@@ -210,6 +210,23 @@
           inventoryData.fragments || window.state.items.fragments || {};
       }
 
+      const { data: dailyRewardData, error: dailyRewardError } = await supabase
+        .from('daily_rewards')
+        .select('last_claim_date, day')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+      if (dailyRewardError) {
+        console.warn('Load daily rewards failed:', dailyRewardError);
+      } else if (dailyRewardData) {
+        const claimedDate = dailyRewardData.last_claim_date
+          ? new Date(dailyRewardData.last_claim_date + 'T12:00:00').toDateString()
+          : '';
+        window.state.dailyReward = {
+          lastClaimDate: claimedDate,
+          day: Number(dailyRewardData.day || 0)
+        };
+      }
+
       // Load premium ownership and consumable card balances from the protected table.
       const { data: premiumData, error: premiumError } = await supabase
         .from('premium_inventory')
