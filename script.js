@@ -352,7 +352,7 @@ function rankingPage() {
         ${podium.map((r,i)=>`
           <article class="ranking-podium-card rank-place-${i+1} ${r.me?'is-you':''}">
             <div class="ranking-podium-medal">${medal[i]}</div>
-            <div class="ranking-podium-avatar">${esc(String(r.avatar))}</div>
+            <div class="ranking-podium-avatar">${playerAvatarMarkup(r.avatar,'ranking-avatar-photo')}</div>
             <b class="ranking-podium-name">${esc(r.name)}${r.me?' · You':''}</b>
             <small>LEVEL ${Number(r.level||1)}</small>
             <strong class="ranking-podium-score">${metric(r)}</strong>
@@ -369,7 +369,7 @@ function rankingPage() {
         ${rest.map((r,i)=>`
           <div class="ranking-list-row ${r.me?'is-you':''}">
             <div class="ranking-list-position">${String(i+4).padStart(2,'0')}</div>
-            <div class="ranking-list-avatar">${esc(String(r.avatar))}</div>
+            <div class="ranking-list-avatar">${playerAvatarMarkup(r.avatar,'ranking-avatar-photo')}</div>
             <div class="ranking-list-player"><b>${esc(r.name)}${r.me?' <small>YOU</small>':''}</b><span>Lv. ${Number(r.level||1)} · ${Number(r.wins||0)} wins</span></div>
             <strong>${metric(r)}<small>${esc(labels[category])}</small></strong>
           </div>
@@ -1073,10 +1073,11 @@ async function consumeRenameCard(type){
 }
 async function renamePlayerWithCard(){const name=(document.getElementById('playerNameInput')?.value||'').trim().slice(0,18);if(!name){showToast('Masukkan nama pemain.');return;}if(name===state.player.name){closeModal();return;}try{await consumeRenameCard('rename');state.player.name=name;closeModal();save();render();showToast('Nama pemain berhasil diperbarui.');}catch(error){console.error('Player rename failed:',error);showToast(error?.message||'Gagal mengganti nama.');}}
 async function renameSelectedPet(){const pet=petById(selectedPetId),name=(document.getElementById('newPetName')?.value||'').trim().slice(0,18);if(!pet||!name){showToast('Masukkan nama pet.');return;}if(name===pet.name){closeModal();return;}try{await consumeRenameCard('rename_pet');pet.name=name;closeModal();save();render();showToast('Nama pet berhasil diperbarui.');}catch(error){console.error('Pet rename failed:',error);showToast(error?.message||'Gagal mengganti nama pet.');}}
-function profileAvatarMarkup(sizeClass='profile-avatar-image'){
-  const avatar=String(state.player.avatar||'🧙');
-  return /^https:\/\//i.test(avatar)?`<img class="${sizeClass}" src="${esc(avatar)}" alt="Foto profil" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode('🧙'))">`:esc(avatar);
+function playerAvatarMarkup(value,className='player-avatar-photo'){
+  const avatar=String(value||'🧙');
+  return /^https:\/\//i.test(avatar)?`<img class="${className}" src="${esc(avatar)}" alt="Foto profil" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode('🧙'))">`:esc(avatar);
 }
+function profileAvatarMarkup(sizeClass='profile-avatar-image'){return playerAvatarMarkup(state.player.avatar,sizeClass);}
 function profilePage(){
   const p=state.player,wins=Number(p.wins||0),losses=Number(p.losses||0),draws=Number(p.draws||0);
   return `<section class="page profile-page">
