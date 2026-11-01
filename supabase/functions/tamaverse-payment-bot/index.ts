@@ -110,12 +110,11 @@ async function handleCallback(q: any) {
   }
   if (payload === "menu:topup") {
     await answer("Pilih paket");
-    await say(chatId, "PILIH NOMINAL DIAMOND\n\nDaftar harga paket Tamaverse (mode pratinjau):\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
-      [{ text: "5 💎 — Rp1.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp1.800", callback_data: "packageinfo:10" }],
-      [{ text: "25 💎 — Rp3.500", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp5.000", callback_data: "packageinfo:50" }],
-      [{ text: "120 💎 — Rp10.800", callback_data: "packageinfo:120" }],
-      [{ text: "300 💎 — Rp24.000", callback_data: "packageinfo:300" }],
-      [{ text: "700 💎 — Rp49.000", callback_data: "packageinfo:700" }],
+    await say(chatId, "PILIH PAKET DIAMOND\\n\\nPilih paket untuk membuat tiket pesanan. Pastikan akun Tamaverse sudah terhubung.", { reply_markup: { inline_keyboard: [
+      [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
+      [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
+      [{ text: "100 💎 — Rp20.000", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
+      [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
       [{ text: "⬅️ Kembali", callback_data: "menu:home" }]
     ] } }); return;
   }
@@ -362,7 +361,7 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
   }
 
   if (text.startsWith("/start") || text === "/help") {
-    const startPayload = text.startsWith("/start") ? (text.split(/\\s+/)[1] || "") : "";
+    const startPayload = text.startsWith("/start") ? (text.split(/\s+/)[1] || "") : "";
     const handoff = /^tv_(5|10|25|50|100|120|300|700)_(qris|gopay)$/i.exec(startPayload);
     if (handoff) {
       const amount = Number(handoff[1]);
@@ -425,7 +424,7 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
       return;
     }
 
-    await say(chatId, "NEXORA PAY • TAMAVERSE\\n\\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
+    await say(chatId, "NEXORA PAY • TAMAVERSE\n\nSelamat datang! Pilih menu:", { reply_markup: { inline_keyboard: [
       [{ text: "💎 Top Up Diamond", callback_data: "menu:topup" }],
       [{ text: "🔗 Hubungkan UUID", callback_data: "menu:uuid" }],
       [{ text: "📋 Panduan", callback_data: "menu:help" }]
@@ -499,12 +498,11 @@ Setelah pembayaran, tekan tombol di bawah untuk mengirim foto bukti.`,
   if (text.startsWith("/buy")) {
     const choice = text.split(/\s+/)[1];
     if (!choice) {
-      await say(chatId, "PILIH NOMINAL DIAMOND\n\nDaftar harga paket Tamaverse (mode pratinjau):\nPilih tombol untuk melihat detail paket. Belum ada pesanan atau pembayaran yang dibuat dari menu ini.", { reply_markup: { inline_keyboard: [
-        [{ text: "5 💎 — Rp1.000", callback_data: "packageinfo:5" }, { text: "10 💎 — Rp1.800", callback_data: "packageinfo:10" }],
-        [{ text: "25 💎 — Rp3.500", callback_data: "packageinfo:25" }, { text: "50 💎 — Rp5.000", callback_data: "packageinfo:50" }],
-        [{ text: "120 💎 — Rp10.800", callback_data: "packageinfo:120" }],
-        [{ text: "300 💎 — Rp24.000", callback_data: "packageinfo:300" }],
-        [{ text: "700 💎 — Rp49.000", callback_data: "packageinfo:700" }],
+      await say(chatId, "PILIH PAKET DIAMOND\\n\\nPilih tombol untuk membuat tiket pesanan. Pastikan akun Tamaverse sudah terhubung.", { reply_markup: { inline_keyboard: [
+        [{ text: "5 💎 — Rp1.000", callback_data: "pack:1" }, { text: "10 💎 — Rp1.800", callback_data: "pack:2" }],
+        [{ text: "25 💎 — Rp3.500", callback_data: "pack:3" }, { text: "50 💎 — Rp5.000", callback_data: "pack:4" }],
+        [{ text: "100 💎 — Rp20.000", callback_data: "pack:5" }, { text: "120 💎 — Rp10.800", callback_data: "pack:6" }],
+        [{ text: "300 💎 — Rp24.000", callback_data: "pack:7" }, { text: "700 💎 — Rp49.000", callback_data: "pack:8" }],
         [{ text: "⬅️ Menu utama", callback_data: "menu:home" }]
       ] } });
       return;
