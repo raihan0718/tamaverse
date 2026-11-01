@@ -427,18 +427,6 @@ async function claimDailyReward(){
   state.dailyReward={lastClaimDate:today,day};
   save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
 }
-  const today=new Date().toDateString();
-  if(!state.dailyReward)state.dailyReward={lastClaimDate:'',day:0};
-  if(state.dailyReward.lastClaimDate===today){showToast('Hadiah hari ini sudah diklaim.');return;}
-  const day=dailyRewardDay();
-  const reward=dailyRewards[day-1];
-  if(reward.type==='coins')state.player.coins+=reward.amount;
-  else if(reward.type==='diamonds')state.player.diamonds+=reward.amount;
-  else if(reward.type==='grand'){state.player.diamonds+=2;state.player.coins+=100;}
-  else state.items[reward.type]=(state.items[reward.type]||0)+reward.amount;
-  state.dailyReward={lastClaimDate:today,day};
-  save();closeModal();render();showToast(`Hadiah Hari ${day} diklaim: ${reward.label}!`);
-}
 function questPreview(){return questDefinitions().filter(q=>state.quests.active.includes(q.id)).slice(0,2).map(questRow).join('');}
 function questDefinitions(){return [{id:'feed',title:'Beri makan pet',target:2,icon:'🍓',reward:35,xp:15,difficulty:'Mudah'},{id:'play',title:'Bermain bersama',target:2,icon:'💖',reward:35,xp:15,difficulty:'Mudah'},{id:'egg',title:'Buka telur',target:1,icon:'🥚',reward:40,xp:25,difficulty:'Normal'},{id:'battle',title:'Selesaikan battle 5x',target:5,icon:'⚔️',reward:50,xp:30,difficulty:'Sulit'},{id:'win',title:'Menangkan battle',target:1,icon:'🏆',reward:60,xp:40,difficulty:'Tantangan'}];}
 function questList(){return questDefinitions().filter(q=>state.quests.active.includes(q.id)).map(questRow).join('');}
