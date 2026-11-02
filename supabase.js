@@ -92,8 +92,23 @@
         body: { initData }
       });
       if (authError) {
-        console.error("Telegram auth function failed:", authError);
-        throw new Error("Verifikasi Telegram gagal. Periksa koneksi lalu coba lagi.");
+        let detail = "";
+        try {
+          const response = authError.context;
+          if (response && typeof response.clone === "function") {
+            const payload = await response.clone().json().catch(() => null);
+            detail = payload?.error || payload?.message || "";
+            if (!detail) detail = "HTTP " + response.status;
+          }
+        } catch (_) {}
+        console.error("Telegram auth function failed:", {
+          name: authError.name,
+          message: authError.message,
+          detail,
+          error: authError
+        });
+        const safeDetail = String(detail || authError.message || "Koneksi ke layanan autentikasi gagal").slice(0, 160);
+        throw new Error("Login gagal: " + safeDetail + ". Coba muat ulang Tamaverse.");
       }
       if (!authResult?.session?.access_token || !authResult?.session?.refresh_token || !authResult?.telegram_user_id) {
         throw new Error(authResult?.error || "Server tidak mengembalikan sesi akun Telegram yang valid.");
