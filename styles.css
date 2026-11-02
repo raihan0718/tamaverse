@@ -4933,3 +4933,30 @@ body[data-theme="light"] .collection-page .creature-card,body:not([data-theme="d
     transform:translateY(-7px);
   }
 }
+
+
+/* Store item artwork sizing and alignment */
+.shop-product-art img{
+  display:block;
+  width:70px !important;
+  height:70px !important;
+  max-width:70px !important;
+  max-height:70px !important;
+  object-fit:contain;
+  transform:translateY(-9px);
+}
+.store-item-art{
+  min-height:104px;
+  height:104px;
+  overflow:hidden;
+}
+.store-item-art img{
+  display:block;
+  width:68px;
+  height:68px;
+  max-width:68px;
+  max-height:68px;
+  object-fit:contain;
+  transform:translateY(-5px);
+  filter:drop-shadow(0 5px 9px rgba(75,55,110,.16));
+}
