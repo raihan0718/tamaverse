@@ -4968,11 +4968,11 @@ body.battle-fullscreen .battle-finished .battle-scene{height:min(620px,calc(100d
 body.battle-fullscreen .battle-finished .battle-arena-controls{bottom:12px!important;padding:13px 14px!important;min-height:104px;display:flex;flex-direction:column;justify-content:center;gap:8px}
 body.battle-fullscreen .battle-finished .battle-action-status{font-size:11px!important;line-height:1.3;margin:0 0 2px!important;letter-spacing:1.8px}
 body.battle-fullscreen .battle-finished .battle-action-btn{min-height:46px!important;align-self:flex-start;min-width:170px;padding:0 18px}
-body.battle-fullscreen .battle-finished+.battle-log-panel{max-height:170px!important;overflow:auto!important;flex:none!important}
-body.battle-fullscreen .battle-finished+.battle-log-panel .battle-log{max-height:112px;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
-body.battle-fullscreen .battle-finished+.battle-log-panel .battle-log-heading{position:sticky;top:0;background:inherit;padding-bottom:5px;z-index:1}
+body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel{max-height:170px!important;overflow:auto!important;flex:none!important}
+body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel .battle-log{max-height:112px;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
+body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel .battle-log-heading{position:sticky;top:0;background:inherit;padding-bottom:5px;z-index:1}
 @media(max-height:740px){
  body.battle-fullscreen .battle-finished .battle-scene{height:500px!important;min-height:460px!important}
- body.battle-fullscreen .battle-finished+.battle-log-panel{max-height:145px!important}
- body.battle-fullscreen .battle-finished+.battle-log-panel .battle-log{max-height:92px}
+ body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel{max-height:145px!important}
+ body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel .battle-log{max-height:92px}
 }
