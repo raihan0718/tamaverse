@@ -1122,6 +1122,7 @@ async function handleGroupMessage(message: Any) {
     return;
   }
   await refreshTicket(upd);
+  await sendOrderLog(upd, "ADMIN PAYMENT INSTRUCTIONS SENT", "Admin mengirim instruksi " + o.payment_method + " kepada user.");
   await reply(`✅ Info ${o.payment_method} diteruskan ke user. Status: ${STATUS_LABEL.WAITING_PAYMENT}.`);
 }
 
