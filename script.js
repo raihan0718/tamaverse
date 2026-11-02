@@ -798,6 +798,19 @@ function createPet(speciesId,name){
   const s=speciesById(speciesId);
   return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:35,happiness:75,energy:80,cleanliness:80,evolution:0,fragments:0};
 }
+// Build a local companion from a cloud pet row when this device has no matching save.
+window.createTamaversePetFromCloud = function(cloudPet){
+  const kind=species.find(item=>item.id===String(cloudPet?.species||''));
+  if(!kind||!cloudPet?.client_uid)return null;
+  const pet=createPet(kind.id,cloudPet.nickname||kind.name);
+  pet.uid=String(cloudPet.client_uid);
+  pet.hunger=clamp(Number(cloudPet.hunger??100),0,100);
+  pet.happiness=clamp(Number(cloudPet.happiness??100),0,100);
+  pet.energy=clamp(Number(cloudPet.energy??80),0,100);
+  pet.cleanliness=clamp(Number(cloudPet.cleanliness??80),0,100);
+  pet.evolution=Math.max(0,Number(cloudPet.evolution)||0);
+  return pet;
+};
 function clamp(value,min,max){return Math.min(Math.max(Number(value)||0,min),max);}
 function statusMeter(label,icon,value){
   const safe=Math.round(clamp(Number(value)||0,0,100));
