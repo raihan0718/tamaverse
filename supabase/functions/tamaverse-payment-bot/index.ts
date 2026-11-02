@@ -395,19 +395,16 @@ async function refreshTicket(o: Order) {
   });
 }
 
-async function closeTopic(o: Order) {
+/** Hapus topik pesanan setelah status order masuk tahap akhir. */
+async function afterTerminal(o: Order, _topicNote: string) {
   if (!o.forum_chat_id || !o.topic_thread_id) return;
-  await tgTry("closeForumTopic", {
+  const deleted = await tgTry("deleteForumTopic", {
     chat_id: o.forum_chat_id,
     message_thread_id: o.topic_thread_id,
   });
-}
-
-/** Dipanggil setelah order masuk status akhir. */
-async function afterTerminal(o: Order, topicNote: string) {
-  await refreshTicket(o);
-  await sendTopic(o, topicNote);
-  await closeTopic(o);
+  if (!deleted) {
+    console.error("Order is terminal but its Telegram topic could not be deleted:", o.order_code);
+  }
 }
 
 async function expireStale() {
