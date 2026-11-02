@@ -665,20 +665,20 @@ function showInventory(){
   const fragments=Object.values(state.items.fragments||{}).reduce((a,b)=>a+b,0);
   const items=[
     {id:'food',icon:'🍎',name:'Apple',desc:'Memulihkan Hunger +50',count:state.items.food||0,care:'feed',usable:true},
-    {id:'snack',icon:'🧃',name:'Health Potion',desc:'Memulihkan HP saat battle',count:state.items.snack||0,note:'Gunakan saat battle',usable:false},
-    {id:'energy',icon:'⚡',name:'Energy Potion',desc:'Memulihkan Energy +30',count:state.items.energy||0,care:'energy',usable:true},
+    {id:'snack',icon:'♥',image:'assets/items/HealthPotion.webp',name:'Health Potion',desc:'Memulihkan HP saat battle',count:state.items.snack||0,note:'Gunakan saat battle',usable:false},
+    {id:'energy',icon:'⚡',image:'assets/items/EnergyPotion.webp',name:'Energy Potion',desc:'Memulihkan Energy +30',count:state.items.energy||0,care:'energy',usable:true},
     {id:'training',icon:'📘',name:'Training Manual',desc:'Mengurangi biaya Energy saat Training',count:state.items.training||0,note:'Otomatis digunakan saat Training',usable:false}
   ];
   showModal(`<div class="eyebrow">TAMAVERSE · INVENTORY</div><h2 id="modalTitle">Your Items</h2><p class="subtle">Pilih item untuk melihat detail dan tindakan.</p>
-    <div class="inventory-grid">${items.map(item=>`<button class="inventory-item-card" data-action="inventory-item" data-item="${item.id}"><span class="inventory-item-icon">${item.icon}</span><b>${item.name}</b><small>${item.desc}</small><span class="inventory-item-count">× ${item.count}</span></button>`).join('')}
+    <div class="inventory-grid">${items.map(item=>`<button class="inventory-item-card" data-action="inventory-item" data-item="${item.id}"><span class="inventory-item-icon">${item.image?`<img src="${item.image}" alt="${item.name}" loading="lazy" decoding="async">`:item.icon}</span><b>${item.name}</b><small>${item.desc}</small><span class="inventory-item-count">× ${item.count}</span></button>`).join('')}
     <div class="inventory-fragment-card"><span>🧩</span><div><b>Fragments</b><small>Total fragments terkumpul</small></div><strong>${fragments}</strong></div></div>
     <button class="button secondary full" data-action="close-modal">Tutup</button>`);
 }
 function showInventoryItem(type){
   const items={
     food:{icon:'🍎',name:'Apple',desc:'Memulihkan Hunger pet sebanyak 50 poin.',count:state.items.food||0,care:'feed',usable:true},
-    energy:{icon:'⚡',name:'Energy Potion',desc:'Memulihkan Energy pet sebanyak 30 poin.',count:state.items.energy||0,care:'energy',usable:true},
-    snack:{icon:'🧃',name:'Health Potion',desc:'Item pemulih HP yang digunakan saat battle.',count:state.items.snack||0,note:'Item ini digunakan dari menu battle.',usable:false},
+    energy:{icon:'⚡',image:'assets/items/EnergyPotion.webp',name:'Energy Potion',desc:'Memulihkan Energy pet sebanyak 30 poin.',count:state.items.energy||0,care:'energy',usable:true},
+    snack:{icon:'♥',image:'assets/items/HealthPotion.webp',name:'Health Potion',desc:'Item pemulih HP yang digunakan saat battle.',count:state.items.snack||0,note:'Item ini digunakan dari menu battle.',usable:false},
     training:{icon:'📘',name:'Training Manual',desc:'Mengurangi biaya Energy saat melakukan Training.',count:state.items.training||0,note:'Manual akan otomatis digunakan saat Training.',usable:false}
   };
   const item=items[type];if(!item)return;
