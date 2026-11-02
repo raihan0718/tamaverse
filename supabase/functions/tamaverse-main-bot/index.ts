@@ -1,6 +1,6 @@
 const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN3");
 const WEBHOOK_SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET3") ?? "";
-const APP_URL = "https://tamaverse-pet-quest--raihanmilano07.replit.app";
+const APP_URL = "https://raihan0718.github.io/tamaverse/";
 const API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : "";
 
 type TgMessage = {
@@ -22,7 +22,7 @@ type TgUpdate = {
 
 const mainKeyboard = {
   inline_keyboard: [
-    [{ text: "🌈 Open Tamaverse", url: APP_URL }],
+    [{ text: "🌈 Open Tamaverse", web_app: { url: APP_URL } }],
     [{ text: "✨ About Tamaverse", callback_data: "about" }, { text: "🐣 How to play", callback_data: "guide" }],
     [{ text: "📜 Commands", callback_data: "commands" }, { text: "💌 Help & support", callback_data: "support" }],
   ],
@@ -135,7 +135,7 @@ Deno.serve(async (req: Request) => {
         await send(chatId, pages.support.text, pages.support.keyboard);
         break;
       case "/game":
-        await send(chatId, "🎮 Your Tamaverse adventure is just one tap away! Ready, set, hatch! 🐣✨", { inline_keyboard: [[{ text: "Open Tamaverse", url: APP_URL }], [{ text: "‹ Main menu", callback_data: "home" }]] });
+        await send(chatId, "🎮 Your Tamaverse adventure is just one tap away! Ready, set, hatch! 🐣✨", { inline_keyboard: [[{ text: "Open Tamaverse", web_app: { url: APP_URL } }], [{ text: "‹ Main menu", callback_data: "home" }]] });
         break;
       case "/support":
         await send(chatId, pages.support.text, pages.support.keyboard);
