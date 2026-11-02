@@ -294,14 +294,18 @@
           const { error: deactivateError } = await deactivateQuery;
           if (deactivateError) throw new Error('Gagal menyiapkan pet aktif di cloud: ' + deactivateError.message);
 
-          const { data: savedPets, error: petsError } = await supabase
-            .from('pets')
-            .upsert(petsPayload, { onConflict: 'owner_id,client_uid' })
-            .select('client_uid');
-
-          if (petsError) throw new Error('Penyimpanan pet ke cloud gagal: ' + petsError.message);
-          if (!Array.isArray(savedPets) || savedPets.length !== petsPayload.length) {
-            throw new Error('Tidak semua pet berhasil dikonfirmasi tersimpan di cloud.');
+          // Write rows one at a time. A bulk upsert can evaluate multiple
+          // rows against the partial unique active-pet index in one statement.
+          for (const petPayload of petsPayload) {
+            const { data: savedPet, error: petError } = await supabase
+              .from('pets')
+              .upsert(petPayload, { onConflict: 'owner_id,client_uid' })
+              .select('client_uid')
+              .maybeSingle();
+            if (petError) throw new Error('Penyimpanan pet ke cloud gagal: ' + petError.message);
+            if (!savedPet?.client_uid) {
+              throw new Error('Pet tidak berhasil dikonfirmasi tersimpan di cloud.');
+            }
           }
         }
       }
