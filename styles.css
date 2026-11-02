@@ -4976,3 +4976,9 @@ body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel .battle-
  body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel{max-height:145px!important}
  body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel .battle-log{max-height:92px}
 }
+
+
+/* Online PvP: mirror sprites so both pets face toward the opponent */
+body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
+  transform:scaleX(-1)!important;
+}
