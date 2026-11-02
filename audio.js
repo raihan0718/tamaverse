@@ -18,111 +18,127 @@
     }
   }
 
-  function saveSettings(settings) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch (_) {}
+  function saveSettings() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        muted: audio.muted,
+        volume: audio.volume
+      }));
+    } catch (_) {}
+  }
+
+  function syncProfileControls() {
+    const enabled = !audio.muted;
+    const toggle = document.getElementById('profileBgmToggle');
+    const status = document.getElementById('profileBgmStatus');
+    const slider = document.getElementById('profileBgmVolume');
+    const value = document.getElementById('profileBgmVolumeValue');
+    if (toggle) {
+      toggle.setAttribute('aria-pressed', String(enabled));
+      toggle.textContent = enabled ? 'Music On' : 'Music Off';
+      toggle.classList.toggle('is-on', enabled);
+    }
+    if (status) status.textContent = enabled ? 'Background music is enabled' : 'Background music is disabled';
+    if (slider && document.activeElement !== slider) slider.value = String(audio.volume);
+    if (value) value.textContent = Math.round(audio.volume * 100) + '%';
+  }
+
+  async function setEnabled(enabled) {
+    audio.muted = !enabled;
+    if (enabled) {
+      try {
+        await audio.play();
+        started = true;
+      } catch (_) {
+        // Playback will begin after the next permitted user gesture.
+      }
+    } else {
+      audio.pause();
+    }
+    saveSettings();
+    syncProfileControls();
   }
 
   function mount() {
-    if (document.getElementById('tamaverseMusicControl')) return;
-
+    if (document.getElementById('tamaverseBgm')) return;
+    const settings = readSettings();
     audio = document.createElement('audio');
     audio.id = 'tamaverseBgm';
     audio.src = AUDIO_SRC;
     audio.loop = true;
     audio.preload = 'auto';
-    audio.volume = readSettings().volume;
-    audio.muted = readSettings().muted;
+    audio.volume = settings.volume;
+    audio.muted = settings.muted;
     audio.setAttribute('aria-label', 'Tamaverse background music');
     document.body.appendChild(audio);
 
     const style = document.createElement('style');
     style.textContent = `
-      #tamaverseMusicControl{position:fixed;right:14px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:9;display:flex;align-items:center;gap:8px}
-      #tamaverseMusicToggle{display:flex;align-items:center;gap:7px;min-height:39px;padding:0 13px;border:1px solid #e7d8e8;border-radius:999px;background:#fffafc;color:#765477;box-shadow:0 5px 18px #62405b20;font:700 11px system-ui,sans-serif;cursor:pointer}
-      #tamaverseMusicToggle .music-icon{font-size:15px}
-      #tamaverseMusicPanel{display:none;align-items:center;gap:8px;padding:8px 11px;border:1px solid #e7d8e8;border-radius:14px;background:#fffafc;color:#765477;box-shadow:0 5px 18px #62405b20}
-      #tamaverseMusicPanel.open{display:flex}
-      #tamaverseMusicPanel label{font:700 9px system-ui,sans-serif;white-space:nowrap}
-      #tamaverseMusicVolume{width:78px;accent-color:#b47cba}
-      #tamaverseMusicControl button:focus-visible,#tamaverseMusicVolume:focus-visible{outline:2px solid #a978d3;outline-offset:3px}
-      @media(max-width:380px){#tamaverseMusicControl{right:9px;bottom:calc(78px + env(safe-area-inset-bottom))}#tamaverseMusicToggle{min-height:36px;padding:0 11px}#tamaverseMusicVolume{width:62px}}
+      .profile-bgm-card{margin:15px 0;padding:17px;border:1px solid var(--border-color);border-radius:19px;background:var(--card-bg);box-shadow:0 7px 20px #3520440c}
+      .profile-bgm-heading{display:flex;align-items:center;gap:11px;margin-bottom:15px}
+      .profile-bgm-icon{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:14px;background:linear-gradient(145deg,#e7d9ff,#f7d8e9);color:#70558e;font-size:21px}
+      .profile-bgm-heading h3{margin:2px 0 3px;font:700 16px 'Space Grotesk',sans-serif;color:var(--text)}
+      .profile-bgm-heading p{margin:0;color:var(--muted);font-size:10px}
+      .profile-bgm-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--border-color)}
+      .profile-bgm-toggle-row span{font-size:11px;font-weight:700;color:var(--text)}
+      .profile-bgm-toggle{min-width:88px;padding:8px 13px;border:1px solid var(--border-color);border-radius:999px;background:var(--card-bg);color:var(--text);font:700 10px 'DM Sans',sans-serif;cursor:pointer}
+      .profile-bgm-toggle.is-on{border-color:#9d82c8;background:linear-gradient(120deg,#e9ddff,#f8e0ec);color:#5c4677}
+      .profile-bgm-volume-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;margin-top:12px}
+      .profile-bgm-volume-row label{font-size:11px;font-weight:700;color:var(--text)}
+      .profile-bgm-volume-row output{font:700 11px 'Space Grotesk',sans-serif;color:var(--muted);font-variant-numeric:tabular-nums}
+      #profileBgmVolume{grid-column:1/-1;width:100%;margin:3px 0 0;accent-color:#a987cb;cursor:pointer}
+      .profile-bgm-status{margin:10px 0 0;color:var(--muted);font-size:10px}
     `;
     document.head.appendChild(style);
 
-    const root = document.createElement('div');
-    root.id = 'tamaverseMusicControl';
-    root.innerHTML = `
-      <div id="tamaverseMusicPanel">
-        <label for="tamaverseMusicVolume">VOLUME</label>
-        <input id="tamaverseMusicVolume" type="range" min="0" max="1" step="0.01" value="${audio.volume}">
-      </div>
-      <button id="tamaverseMusicToggle" type="button" aria-pressed="false" aria-label="Aktifkan musik Tamaverse">
-        <span class="music-icon" aria-hidden="true">♫</span><span class="music-label">Music off</span>
-      </button>`;
-    document.body.appendChild(root);
-
-    const toggle = root.querySelector('#tamaverseMusicToggle');
-    const panel = root.querySelector('#tamaverseMusicPanel');
-    const volume = root.querySelector('#tamaverseMusicVolume');
-
-    function syncButton() {
-      const playing = !audio.paused && !audio.muted;
-      toggle.setAttribute('aria-pressed', String(playing));
-      toggle.setAttribute('aria-label', playing ? 'Matikan musik Tamaverse' : 'Aktifkan musik Tamaverse');
-      toggle.querySelector('.music-icon').textContent = playing ? '♫' : '♪';
-      toggle.querySelector('.music-label').textContent = playing ? 'Music on' : 'Music off';
-    }
-
-    async function startMusic() {
-      if (started && !audio.paused) return;
-      try {
-        await audio.play();
-        started = true;
-        syncButton();
-      } catch (error) {
-        syncButton();
-      }
-    }
-
-    toggle.addEventListener('click', async () => {
-      panel.classList.toggle('open');
-      if (audio.paused || audio.muted) {
-        audio.muted = false;
-        await startMusic();
-      } else {
-        audio.pause();
-      }
-      const settings = readSettings();
-      settings.muted = audio.muted;
-      settings.volume = audio.volume;
-      saveSettings(settings);
-      syncButton();
+    document.addEventListener('click', event => {
+      const toggle = event.target.closest('#profileBgmToggle');
+      if (!toggle) return;
+      setEnabled(audio.muted);
+    });
+    document.addEventListener('input', event => {
+      if (event.target.id !== 'profileBgmVolume') return;
+      audio.volume = Math.min(1, Math.max(0, Number(event.target.value)));
+      saveSettings();
+      syncProfileControls();
     });
 
-    volume.addEventListener('input', () => {
-      audio.volume = Number(volume.value);
-      if (audio.volume > 0 && audio.muted) audio.muted = false;
-      const settings = readSettings();
-      settings.volume = audio.volume;
-      settings.muted = audio.muted;
-      saveSettings(settings);
-      syncButton();
-    });
-
-    audio.addEventListener('play', syncButton);
-    audio.addEventListener('pause', syncButton);
-    audio.addEventListener('volumechange', syncButton);
-
-    // Mobile browsers require a user gesture before audio can start.
     const firstGesture = () => {
-      if (!started) startMusic();
+      if (!audio.muted && audio.paused) {
+        audio.play().then(() => { started = true; }).catch(() => {});
+      }
       window.removeEventListener('pointerdown', firstGesture);
       window.removeEventListener('keydown', firstGesture);
     };
     window.addEventListener('pointerdown', firstGesture, { once: true, passive: true });
     window.addEventListener('keydown', firstGesture, { once: true });
-    syncButton();
+    audio.addEventListener('play', syncProfileControls);
+    audio.addEventListener('pause', syncProfileControls);
+    audio.addEventListener('volumechange', syncProfileControls);
   }
+
+  window.TAMAVERSE_AUDIO_SETTINGS = {
+    markup() {
+      const settings = readSettings();
+      const enabled = !settings.muted;
+      return `<section class="profile-bgm-card" aria-label="Background music settings">
+        <div class="profile-bgm-heading">
+          <span class="profile-bgm-icon" aria-hidden="true">♫</span>
+          <div><span class="eyebrow">PERSONAL PREFERENCES</span><h3>Audio Settings</h3><p>Atur musik latar Tamaverse.</p></div>
+        </div>
+        <div class="profile-bgm-toggle-row">
+          <span>Background Music</span>
+          <button id="profileBgmToggle" class="profile-bgm-toggle ${enabled?'is-on':''}" type="button" aria-pressed="${enabled}">${enabled?'Music On':'Music Off'}</button>
+        </div>
+        <div class="profile-bgm-volume-row">
+          <label for="profileBgmVolume">Volume</label>
+          <output id="profileBgmVolumeValue">${Math.round(settings.volume*100)}%</output>
+          <input id="profileBgmVolume" type="range" min="0" max="1" step="0.01" value="${settings.volume}">
+        </div>
+        <p class="profile-bgm-status" id="profileBgmStatus">${enabled?'Background music is enabled':'Background music is disabled'}</p>
+      </section>`;
+    }
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mount, { once: true });
