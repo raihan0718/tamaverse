@@ -532,12 +532,12 @@ function startIntro(){
 function showNewPlayerBonusModal(amount=100){
   showModal(`<div class="topup-success-modal">
     <div class="topup-success-icon">💎</div>
-    <div class="topup-success-eyebrow">TAMAVERSE · WELCOME GIFT</div>
-    <h2>WELCOME, NEW PLAYER!</h2>
-    <p class="topup-success-copy">Sebagai hadiah awal petualanganmu, Tamaverse memberikan bonus spesial.</p>
+    <div class="topup-success-eyebrow">TAMAVERSE · LIMITED EVENT</div>
+    <h2>100 DIAMOND DROP!</h2>
+    <p class="topup-success-copy">Terima kasih sudah jadi bagian dari Tamaverse. Ini hadiah spesial untuk seluruh player!</p>
     <div class="topup-success-amount">+${Number(amount).toLocaleString('id-ID')} <span>DIAMOND</span></div>
-    <p class="topup-success-thanks">Your journey starts with a little sparkle.</p>
-    <button class="button primary topup-success-close" type="button" data-action="close-modal">Mulai bermain</button>
+    <p class="topup-success-thanks">One player. One claim. A little more sparkle.</p>
+    <button class="button primary topup-success-close" type="button" data-action="close-modal">Klaim berhasil</button>
   </div>`);
 }
 async function claimNewPlayerWelcomeBonus(){
@@ -561,7 +561,18 @@ async function claimNewPlayerWelcomeBonus(){
       state.player.diamonds=Number(data.diamonds??state.player.diamonds);
       save();
       render();
+      showModal(`<div class="eyebrow">TAMAVERSE · LIMITED EVENT</div>
+        <h2>Hadiah sudah diklaim</h2>
+        <p class="subtle">Setiap player hanya punya satu kesempatan. Diamond bonus 100 sudah pernah masuk ke akun ini.</p>
+        <button class="button full" data-action="close-modal">Oke, mengerti</button>`);
       return true;
+    }
+    if(data?.event_ended){
+      showModal(`<div class="eyebrow">TAMAVERSE · LIMITED EVENT</div>
+        <h2>Event telah berakhir</h2>
+        <p class="subtle">Periode klaim 100 Diamond sudah selesai. Terima kasih sudah ikut meramaikan Tamaverse!</p>
+        <button class="button full" data-action="close-modal">Tutup</button>`);
+      return false;
     }
     return false;
   }catch(error){
@@ -606,7 +617,6 @@ async function finishIntro(){
     }
   }
   showToast('Selamat datang di Tamaverse!');
-  await claimNewPlayerWelcomeBonus();
 }
 function legacy_createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:100,happiness:100,energy:80,cleanliness:100,evolution:0,fragments:0,sleeping:false,sleepStartedAt:0,careUpdatedAt:Date.now()};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;addCoins(20);return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
@@ -943,6 +953,7 @@ function homePage(){
     </section>
     <div class="home-feature-shortcuts">
       <button class="home-feature-tile" data-action="inventory" aria-label="Buka Inventory"><span class="home-feature-art inventory-art">🎒</span><b>Inventory</b><small>Item & fragments</small></button>
+      <button class="home-feature-tile diamond-event-tile" data-action="claim-diamond-event" aria-label="Klaim 100 Diamond"><span class="home-feature-art reward-art">💎</span><b>100 Diamond Event</b><small>One-time gift · All players</small></button>
       <button class="home-feature-tile" data-action="daily-reward" aria-label="Buka Daily Reward"><span class="home-feature-art reward-art">🎁</span><b>Daily Reward</b><small>7-day login bonus</small></button>
       <button class="home-feature-tile" data-action="daily-quests" aria-label="Buka Daily Quests"><span class="home-feature-art quest-art">📜</span><b>Daily Quests</b><small>Missions & rewards</small></button>
       <button class="home-feature-tile" data-action="shop" aria-label="Buka Store"><span class="home-feature-art store-art">🛍️</span><b>Store</b><small>Items & supplies</small></button>
@@ -1616,7 +1627,7 @@ document.addEventListener('click',event=>{
   }
 
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
-  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='retry-new-player-bonus'){claimNewPlayerWelcomeBonus();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
+  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='retry-new-player-bonus'){claimNewPlayerWelcomeBonus();return;}if(a==='claim-diamond-event'){claimNewPlayerWelcomeBonus();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
   closeModal();
   save();
