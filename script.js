@@ -874,7 +874,8 @@ function normalizeSavedState(saved){
 }
 function createPet(speciesId,name){
   const s=speciesById(speciesId);
-  return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:35,happiness:75,energy:80,cleanliness:80,evolution:0,fragments:0};
+  const now=Date.now();
+  return {uid:'pet-'+now.toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:100,happiness:100,energy:80,cleanliness:80,evolution:0,fragments:0,careUpdatedAt:now};
 }
 // Build a local companion from a cloud pet row when this device has no matching save.
 window.createTamaversePetFromCloud = function(cloudPet){
@@ -1015,7 +1016,10 @@ function dailyReset(){
     state.player.lastLogin=today;
   }
   const now=Date.now();
-  state.pets.forEach(p=>{
+  // Care decay applies only to the currently equipped companion.
+  // Newly collected/bench pets keep their care stats until selected.
+  const p=activePet();
+  if(p){
     p.careUpdatedAt=Number(p.careUpdatedAt)||now;
     const elapsed=Math.max(0,now-p.careUpdatedAt);
     if(petSleeping(p)){
@@ -1030,7 +1034,7 @@ function dailyReset(){
       p.cleanliness=clamp(p.cleanliness-(elapsed/28800000)*100,0,100);
     }
     p.careUpdatedAt=now;
-  });
+  }
 }
 
 function raritySummary(rates){
@@ -2293,8 +2297,12 @@ async function refreshOnlineRoom(roomId, shouldRender = true) {
     return data;
   }
 
+  const previousRoomSnapshot = onlineRoom ? JSON.stringify(onlineRoom) : '';
   onlineRoom = { ...onlineRoom, ...data, id: data.id };
-  if (shouldRender && page === 'battle') render();
+  const nextRoomSnapshot = JSON.stringify(onlineRoom);
+  // Polling runs every 1.5s; avoid rebuilding the whole app when room data
+  // has not changed, which causes visible black flashes on mobile WebViews.
+  if (shouldRender && page === 'battle' && previousRoomSnapshot !== nextRoomSnapshot) render();
   return data;
 }
 
@@ -2340,11 +2348,13 @@ async function subscribeOnlineRoom(roomId) {
           return;
         }
 
+        const previousRoomSnapshot = onlineRoom ? JSON.stringify(onlineRoom) : '';
         onlineRoom = { ...onlineRoom, ...room, id: room.id };
+        const nextRoomSnapshot = JSON.stringify(onlineRoom);
         if (room.status === 'finished' && typeof window.loadPlayerFromSupabase === 'function') {
           await window.loadPlayerFromSupabase();
           render();
-        } else {
+        } else if (previousRoomSnapshot !== nextRoomSnapshot) {
           render();
         }
 
