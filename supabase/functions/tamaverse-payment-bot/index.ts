@@ -1179,10 +1179,18 @@ async function confirmBalance(q:Any,ack:Ack){
   if(error) throw error;
   const result=data as Any;
   const currency=session.currency==="diamond"?"Diamond":"Coin";
-  const logText="WALLET BALANCE AUDIT\n\nTarget: @"+(result.username||"-")+" ("+result.telegram_user_id+")\nOwner UUID: "+result.owner_id+"\nAction: "+session.operation.toUpperCase()+" "+currency+"\nAmount: "+money(Number(result.amount))+"\nBalance: "+money(Number(result.balance_before))+" → "+money(Number(result.balance_after))+"\nReason: "+result.reason+"\nBy Owner: "+id+"\nTime: "+fmtDate(new Date().toISOString());
-  await tg("sendMessage",{chat_id:ADMIN_FORUM_CHAT_ID,message_thread_id:Number(setting.value),text:logText});
+  // Clear confirmation state immediately after the atomic DB adjustment.
+  // This prevents a retry from applying the same balance change twice if Telegram logging fails.
   await clearBalanceSession(id);
-  await sendMessage(q.message.chat.id,"Berhasil. Saldo "+currency+" @"+(result.username||"user")+" berubah dari "+money(Number(result.balance_before))+" menjadi "+money(Number(result.balance_after))+".\nAudit log sudah dikirim ke NEXORA BALANCE LOG.");
+  const logText="WALLET BALANCE AUDIT\n\nTarget: @"+(result.username||"-")+" ("+result.telegram_user_id+")\nOwner UUID: "+result.owner_id+"\nAction: "+session.operation.toUpperCase()+" "+currency+"\nAmount: "+money(Number(result.amount))+"\nBalance: "+money(Number(result.balance_before))+" → "+money(Number(result.balance_after))+"\nReason: "+result.reason+"\nBy Owner: "+id+"\nTime: "+fmtDate(new Date().toISOString());
+  let logSent = true;
+  try {
+    await tg("sendMessage",{chat_id:ADMIN_FORUM_CHAT_ID,message_thread_id:Number(setting.value),text:logText});
+  } catch (logError) {
+    logSent = false;
+    console.error("Balance adjusted but Telegram audit delivery failed:", logError);
+  }
+  await sendMessage(q.message.chat.id,"Berhasil. Saldo "+currency+" @"+(result.username||"user")+" berubah dari "+money(Number(result.balance_before))+" menjadi "+money(Number(result.balance_after))+"."+ (logSent ? "\nAudit log sudah dikirim ke NEXORA BALANCE LOG." : "\nSaldo berhasil diubah, tetapi pengiriman log Telegram gagal. Data audit tetap tersimpan di database."));
 }
 
 // ───────────────────────── ROUTERS ─────────────────────────
