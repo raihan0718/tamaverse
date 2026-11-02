@@ -4907,3 +4907,29 @@ body[data-theme="light"] .collection-page .creature-card,body:not([data-theme="d
 /* Existing WEBP item artwork */
 .shop-product-art img{width:100%;height:100%;max-width:116px;max-height:116px;object-fit:contain;position:relative;z-index:1;image-rendering:auto;filter:drop-shadow(0 8px 16px #0003)}
 .inventory-item-icon img{width:54px;height:54px;object-fit:contain;display:block;margin:auto}
+
+
+/* Shop standard item artwork: smaller and slightly higher */
+.shop-product-art{
+  min-height:94px;
+  height:94px;
+  display:grid;
+  place-items:center;
+}
+.shop-product-art img{
+  width:78px;
+  height:78px;
+  max-width:78px;
+  max-height:78px;
+  object-fit:contain;
+  transform:translateY(-6px);
+}
+@media (max-width:380px){
+  .shop-product-art img{
+    width:72px;
+    height:72px;
+    max-width:72px;
+    max-height:72px;
+    transform:translateY(-7px);
+  }
+}
