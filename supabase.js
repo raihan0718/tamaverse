@@ -320,6 +320,8 @@
     return cloudSavePromise;
   }
   window.queueTamaverseCloudSave = queueCloudSave;
+  // All callers (including battle preflight) share the same serialized writer.
+  window.savePlayerToSupabase = queueCloudSave;
 
   async function loadPlayerFromSupabase() {
     if (!window.state || !supabase) return;
