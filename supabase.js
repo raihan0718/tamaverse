@@ -46,6 +46,7 @@
 
   let telegramAuthReady = false;
   let telegramAuthPromise = null;
+  const TELEGRAM_OIDC_PROVIDER = 'custom:telegram';
 
   async function ensureSupabaseUser() {
     if (!telegramAuthReady) {
@@ -53,7 +54,9 @@
     }
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
-    if (!user || user.is_anonymous === true) {
+    const isTelegramUser = user?.app_metadata?.provider === TELEGRAM_OIDC_PROVIDER
+      || (Array.isArray(user?.identities) && user.identities.some(identity => identity.provider === TELEGRAM_OIDC_PROVIDER));
+    if (!user || user.is_anonymous === true || !isTelegramUser) {
       throw new Error('Sesi Telegram tidak valid. Silakan buka ulang Tamaverse dari bot.');
     }
     window.TAMAVERSE_USER_ID = user.id;
@@ -78,41 +81,82 @@
       if (retry) retry.hidden = true;
       setStatus('Menghubungkan akun Telegram kamu…');
 
+      // Supabase handles the OIDC callback before getSession() resolves.
+      // Capture the callback URL first because the SDK may clean it afterwards.
+      const currentUrl = new URL(window.location.href);
+      const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ''));
+      const isOAuthCallback = currentUrl.searchParams.has('code')
+        || currentUrl.searchParams.has('error')
+        || hashParams.has('error')
+        || hashParams.has('error_description');
+
+      if (currentUrl.searchParams.has('error') || hashParams.has('error')) {
+        const authError = currentUrl.searchParams.get('error_description')
+          || hashParams.get('error_description')
+          || currentUrl.searchParams.get('error')
+          || hashParams.get('error')
+          || 'Verifikasi Telegram dibatalkan.';
+        throw new Error(authError);
+      }
+
       const telegram = window.Telegram?.WebApp;
-      const initData = telegram?.initData || '';
-      if (!telegram || !initData) {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      let user = null;
+      if (sessionData?.session) {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        user = userData?.user || null;
+      }
+
+      const isTelegramUser = user?.app_metadata?.provider === TELEGRAM_OIDC_PROVIDER
+        || (Array.isArray(user?.identities) && user.identities.some(identity => identity.provider === TELEGRAM_OIDC_PROVIDER));
+
+      if (user && user.is_anonymous !== true && isTelegramUser) {
+        // A callback may return in the system browser; normal launches must
+        // still originate from Telegram's Mini App.
+        if (!telegram && !isOAuthCallback) {
+          throw new Error('Buka Tamaverse melalui tombol Open Tamaverse di bot Telegram.');
+        }
+
+        telegramAuthReady = true;
+        window.TAMAVERSE_USER_ID = user.id;
+        setStatus('Memuat dunia Tamaverse…');
+        await loadPlayerFromSupabase();
+        if (gate) gate.dataset.state = 'ready';
+        window.setTimeout(() => { if (gate) gate.hidden = true; }, 250);
+        return user;
+      }
+
+      if (sessionData?.session) {
+        const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' });
+        if (signOutError) console.warn('Invalid local auth session could not be cleared:', signOutError);
+      }
+
+      if (!telegram && !isOAuthCallback) {
         throw new Error('Tamaverse hanya bisa dibuka melalui tombol Open Tamaverse di Telegram.');
       }
 
-      const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' });
-      if (signOutError) console.warn('Old local auth session could not be cleared:', signOutError);
-
-      setStatus('Memverifikasi identitas Telegram…');
-      const { data, error } = await supabase.functions.invoke('telegram-auth', {
-        body: { initData }
-      });
-      if (error) throw error;
-      if (!data?.session?.access_token || !data?.session?.refresh_token) {
-        throw new Error(data?.error || 'Sesi akun tidak berhasil dibuat. Coba lagi.');
+      if (isOAuthCallback) {
+        throw new Error('Verifikasi Telegram belum menghasilkan sesi. Coba buka kembali Tamaverse dari bot.');
       }
 
-      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token
+      setStatus('Membuka verifikasi akun Telegram…');
+      const { data: oauthData, error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: TELEGRAM_OIDC_PROVIDER,
+        options: {
+          redirectTo: window.location.origin + window.location.pathname,
+          scopes: 'openid profile',
+          skipBrowserRedirect: true
+        }
       });
-      if (sessionError) throw sessionError;
-      if (!sessionData?.user || sessionData.user.is_anonymous === true) {
-        throw new Error('Sesi Telegram tidak valid. Coba buka ulang Tamaverse.');
-      }
+      if (oauthError) throw oauthError;
+      if (!oauthData?.url) throw new Error('Halaman verifikasi Telegram gagal dibuka.');
 
-      telegramAuthReady = true;
-      window.TAMAVERSE_USER_ID = sessionData.user.id;
-      setStatus('Memuat dunia Tamaverse…');
-      await loadPlayerFromSupabase();
-
-      if (gate) gate.dataset.state = 'ready';
-      window.setTimeout(() => { if (gate) gate.hidden = true; }, 250);
-      return sessionData.user;
+      setStatus('Mengalihkan ke verifikasi Telegram…');
+      window.location.assign(oauthData.url);
+      return null;
     } catch (error) {
       telegramAuthReady = false;
       window.TAMAVERSE_USER_ID = null;
