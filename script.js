@@ -529,7 +529,85 @@ function startIntro(){
     introSequenceTimers.push(setTimeout(beginVisibleHatch,1500));
   }else beginVisibleHatch();
 }
-async function finishIntro(){const playerName=(document.getElementById('starterPlayerName')?.value||'').trim().slice(0,18);const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';if(!playerName){showToast('Nama pemain wajib diisi dulu.');document.getElementById('starterPlayerName')?.focus();return;}const photo=window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url||'';const pendingAvatar=window.TAMAVERSE_PENDING_AVATAR||photo||'🧙';state=freshState(playerName);state.player.avatar=pendingAvatar;state.player.avatarUrl='';window.TAMAVERSE_PENDING_AVATAR='';const pet=createPet('fluffin',name);state.pets.push(pet);state.activePet=pet.uid;closeModal();page='home';save();render();if(/^data:image\//i.test(pendingAvatar)){try{const url=await window.uploadTamaverseAvatar(pendingAvatar);state.player.avatarUrl=url;state.player.avatar=url;save();render();}catch(error){console.error('Starter avatar upload failed:',error);showToast('Game dimulai, tetapi foto belum tersinkron. Ganti foto lagi dari Profile.');}}showToast('Selamat datang di Tamaverse!');}
+function showNewPlayerBonusModal(amount=100){
+  showModal(`<div class="topup-success-modal">
+    <div class="topup-success-icon">💎</div>
+    <div class="topup-success-eyebrow">TAMAVERSE · WELCOME GIFT</div>
+    <h2>WELCOME, NEW PLAYER!</h2>
+    <p class="topup-success-copy">Sebagai hadiah awal petualanganmu, Tamaverse memberikan bonus spesial.</p>
+    <div class="topup-success-amount">+${Number(amount).toLocaleString('id-ID')} <span>DIAMOND</span></div>
+    <p class="topup-success-thanks">Your journey starts with a little sparkle.</p>
+    <button class="button primary topup-success-close" type="button" data-action="close-modal">Mulai bermain</button>
+  </div>`);
+}
+async function claimNewPlayerWelcomeBonus(){
+  try{
+    if(window.TAMAVERSE_AUTH_READY) await window.TAMAVERSE_AUTH_READY;
+    if(typeof window.ensureTamaverseAuth!=='function') throw new Error('Autentikasi akun belum siap.');
+    await window.ensureTamaverseAuth();
+    if(typeof window.savePlayerToSupabase==='function') await window.savePlayerToSupabase();
+    const db=window.TAMAVERSE_SUPABASE_CLIENT;
+    if(!db) throw new Error('Koneksi cloud belum tersedia.');
+    const {data,error}=await db.rpc('tamaverse_claim_new_player_bonus');
+    if(error) throw error;
+    if(data?.success){
+      state.player.diamonds=Number(data.diamonds??state.player.diamonds);
+      save();
+      render();
+      showNewPlayerBonusModal(Number(data.bonus)||100);
+      return true;
+    }
+    if(data?.already_claimed){
+      state.player.diamonds=Number(data.diamonds??state.player.diamonds);
+      save();
+      render();
+      return true;
+    }
+    return false;
+  }catch(error){
+    console.error('New player bonus claim failed:',error);
+    showModal(`<div class="eyebrow">TAMAVERSE · WELCOME GIFT</div>
+      <h2>Hadiah awal belum berhasil diklaim</h2>
+      <p class="subtle">Pet pertamamu sudah siap. Koneksi hadiah sedang bermasalah, coba klaim lagi.</p>
+      <button class="button full" data-action="retry-new-player-bonus">Coba lagi</button>
+      <button class="button secondary full" data-action="close-modal">Nanti saja</button>`);
+    return false;
+  }
+}
+async function finishIntro(){
+  const playerName=(document.getElementById('starterPlayerName')?.value||'').trim().slice(0,18);
+  const name=(document.getElementById('starterName')?.value||'Mochi').trim().slice(0,18)||'Mochi';
+  if(!playerName){showToast('Nama pemain wajib diisi dulu.');document.getElementById('starterPlayerName')?.focus();return;}
+  const finishButton=document.querySelector('[data-action="finish-intro"]');
+  if(finishButton){finishButton.disabled=true;finishButton.textContent='Menyiapkan pet...';}
+  const photo=window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url||'';
+  const pendingAvatar=window.TAMAVERSE_PENDING_AVATAR||photo||'🧙';
+  state=freshState(playerName);
+  state.player.avatar=pendingAvatar;
+  state.player.avatarUrl='';
+  window.TAMAVERSE_PENDING_AVATAR='';
+  const pet=createPet('fluffin',name);
+  state.pets.push(pet);
+  state.activePet=pet.uid;
+  closeModal();
+  page='home';
+  save();
+  render();
+  if(/^data:image\//i.test(pendingAvatar)){
+    try{
+      const url=await window.uploadTamaverseAvatar(pendingAvatar);
+      state.player.avatarUrl=url;
+      state.player.avatar=url;
+      save();
+      render();
+    }catch(error){
+      console.error('Starter avatar upload failed:',error);
+      showToast('Game dimulai, tetapi foto belum tersinkron. Ganti foto lagi dari Profile.');
+    }
+  }
+  showToast('Selamat datang di Tamaverse!');
+  await claimNewPlayerWelcomeBonus();
+}
 function legacy_createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:100,happiness:100,energy:80,cleanliness:100,evolution:0,fragments:0,sleeping:false,sleepStartedAt:0,careUpdatedAt:Date.now()};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;addCoins(20);return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
 function grantPetXP(p,amount){p.xp+=amount;while(p.xp>=p.level*40){p.xp-=p.level*40;p.level++;p.stats.hp+=5;p.stats.atk+=1;p.stats.def+=1;showToast(`${p.name} naik ke Level ${p.level}!`);}}
@@ -1534,7 +1612,7 @@ document.addEventListener('click',event=>{
   }
 
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
-  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
+  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='retry-new-player-bonus'){claimNewPlayerWelcomeBonus();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
   closeModal();
   save();
