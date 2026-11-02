@@ -1076,6 +1076,113 @@ async function handleGroupMessage(message: Any) {
   await reply(`✅ Info ${o.payment_method} diteruskan ke user. Status: ${STATUS_LABEL.WAITING_PAYMENT}.`);
 }
 
+// ───────────────────────── OWNER BALANCE MANAGER ─────────────────────────
+type BalanceSession = {
+  currency?: "diamond" | "coin"; operation?: "add" | "remove";
+  target_id?: string; target_username?: string | null; owner_id?: string;
+  amount?: number; reason?: string; stage?: "username" | "amount" | "reason" | "confirm";
+};
+const ownerOnly = (id: string) => id === ADMIN_TELEGRAM_ID;
+const balanceMenu = () => ({ inline_keyboard: [
+  [{text:"➕ Add Diamond",callback_data:"bal:diamond:add"},{text:"➖ Remove Diamond",callback_data:"bal:diamond:remove"}],
+  [{text:"➕ Add Coin",callback_data:"bal:coin:add"},{text:"➖ Remove Coin",callback_data:"bal:coin:remove"}],
+  [{text:"Cancel",callback_data:"bal:cancel"}],
+]});
+async function getBalanceSession(id:string):Promise<BalanceSession>{
+  const {data,error}=await db.from("nexora_admin_sessions").select("session").eq("telegram_user_id",id).maybeSingle();
+  if(error) throw error; return (data?.session ?? {}) as BalanceSession;
+}
+async function setBalanceSession(id:string,session:BalanceSession){
+  const {error}=await db.from("nexora_admin_sessions").upsert({telegram_user_id:id,session,updated_at:new Date().toISOString()},{onConflict:"telegram_user_id"});
+  if(error) throw error;
+}
+async function clearBalanceSession(id:string){
+  const {error}=await db.from("nexora_admin_sessions").delete().eq("telegram_user_id",id);
+  if(error) throw error;
+}
+async function beginBalanceSetup(chatId:number,id:string){
+  if(!ownerOnly(id)) return;
+  const {data,error}=await db.from("nexora_bot_settings").select("value").eq("key","balance_log_topic_id").maybeSingle();
+  if(error) throw error;
+  if(data?.value){ await sendMessage(chatId,"Topik NEXORA BALANCE LOG sudah terhubung."); return; }
+  const topic=await tg<Any>("createForumTopic",{chat_id:ADMIN_FORUM_CHAT_ID,name:"NEXORA BALANCE LOG"});
+  const {error:saveError}=await db.from("nexora_bot_settings").upsert({key:"balance_log_topic_id",value:String(topic.message_thread_id),updated_at:new Date().toISOString()},{onConflict:"key"});
+  if(saveError) throw saveError;
+  await sendMessage(chatId,"Topik NEXORA BALANCE LOG berhasil dibuat dan disimpan.");
+}
+async function beginBalance(chatId:number,id:string){
+  if(!ownerOnly(id)) return;
+  await clearBalanceSession(id);
+  await sendMessage(chatId,"OWNER WALLET MANAGER\nPilih jenis perubahan saldo:",{reply_markup:balanceMenu()});
+}
+async function balanceCallback(q:Any,kind:string,a:string,b:string,ack:Ack){
+  const id=String(q.from.id); if(!ownerOnly(id)) return ack("Owner only.",true);
+  if(kind==="cancel"){await clearBalanceSession(id);await ack("Dibatalkan.");return sendMessage(q.message.chat.id,"Proses perubahan saldo dibatalkan.");}
+  if(!["diamond","coin"].includes(a)||!["add","remove"].includes(b)) return ack("Pilihan tidak valid.",true);
+  await setBalanceSession(id,{currency:a as any,operation:b as any,stage:"username"});
+  await ack();
+  await sendMessage(q.message.chat.id,"Kirim username Telegram target (contoh: @username).\nPastikan username benar.");
+}
+async function handleBalanceText(chatId:number,id:string,text:string){
+  if(!ownerOnly(id)) return false;
+  const session=await getBalanceSession(id);
+  if(!session.stage) return false;
+  if(/^\/cancel/i.test(text)){await clearBalanceSession(id);await sendMessage(chatId,"Proses dibatalkan.");return true;}
+  if(session.stage==="username"){
+    const username=text.replace(/^@/,"").trim().toLowerCase();
+    if(!/^[a-z0-9_]{5,32}$/.test(username)){await sendMessage(chatId,"Username tidak valid. Kirim ulang dengan format @username.");return true;}
+    const {data,error}=await db.from("tamaverse_telegram_links").select("telegram_user_id,telegram_username,owner_id").ilike("telegram_username",username).limit(2);
+    if(error) throw error;
+    if(!data?.length){await sendMessage(chatId,"Akun dengan username itu belum terhubung ke Tamaverse. Cek username atau minta user menghubungkan akun.");return true;}
+    if(data.length>1){await sendMessage(chatId,"Username tidak unik. Minta user memperbarui username Telegram lalu coba lagi.");return true;}
+    await setBalanceSession(id,{...session,target_id:String(data[0].telegram_user_id),target_username:data[0].telegram_username,owner_id:data[0].owner_id,stage:"amount"});
+    await sendMessage(chatId,"Target ditemukan: @"+(data[0].telegram_username||username)+"\nKirim jumlah "+(session.currency==="diamond"?"Diamond":"Coin")+" (angka bulat positif).");
+    return true;
+  }
+  if(session.stage==="amount"){
+    const amount=Number(text);
+    if(!Number.isSafeInteger(amount)||amount<1||amount>1000000000){await sendMessage(chatId,"Jumlah tidak valid. Masukkan angka bulat 1 sampai 1.000.000.000.");return true;}
+    await setBalanceSession(id,{...session,amount,stage:"reason"});
+    await sendMessage(chatId,"Kirim alasan perubahan saldo (3–300 karakter).");
+    return true;
+  }
+  if(session.stage==="reason"){
+    if(text.length<3||text.length>300){await sendMessage(chatId,"Alasan harus 3–300 karakter. Coba lagi.");return true;}
+    const col=session.currency==="diamond"?"diamonds":"coins";
+    const {data,error}=await db.from("inventory").select(col).eq("owner_id",session.owner_id).maybeSingle();
+    if(error) throw error;
+    const before=Number(data?.[col]??0), after=before+(session.operation==="add"?1:-1)*Number(session.amount);
+    if(after<0){await sendMessage(chatId,"Saldo tidak cukup untuk dikurangi. Saldo saat ini: "+before);return true;}
+    const next={...session,reason:text,stage:"confirm" as const};
+    await setBalanceSession(id,next);
+    const curr=session.currency==="diamond"?"Diamond":"Coin";
+    await sendMessage(chatId,"KONFIRMASI PERUBAHAN SALDO\n\nTarget: @"+(session.target_username||"unknown")+"\nTelegram ID: "+session.target_id+"\nAksi: "+(session.operation==="add"?"ADD":"REMOVE")+" "+curr+"\nJumlah: "+money(Number(session.amount))+"\nSaldo: "+money(before)+" → "+money(after)+"\nAlasan: "+text+"\n\nLanjutkan?",{reply_markup:{inline_keyboard:[[{text:"CONFIRM",callback_data:"bal:confirm"},{text:"CANCEL",callback_data:"bal:cancel"}]]}});
+    return true;
+  }
+  if(session.stage==="confirm"){await sendMessage(chatId,"Gunakan tombol CONFIRM atau CANCEL.");return true;}
+  return false;
+}
+async function confirmBalance(q:Any,ack:Ack){
+  const id=String(q.from.id); if(!ownerOnly(id)) return ack("Owner only.",true);
+  const session=await getBalanceSession(id);
+  if(session.stage!=="confirm"||!session.target_id||!session.currency||!session.operation||!session.amount||!session.reason) return ack("Sesi tidak valid atau kedaluwarsa.",true);
+  await ack("Memproses perubahan saldo…");
+  const {data,error}=await db.rpc("nexora_owner_adjust_balance",{
+    p_actor_telegram_id:id,p_owner_telegram_id:session.target_id,p_currency:session.currency,
+    p_operation:session.operation,p_amount:session.amount,p_reason:session.reason
+  });
+  if(error) throw error;
+  const result=data as Any;
+  const {data:setting,error:settingError}=await db.from("nexora_bot_settings").select("value").eq("key","balance_log_topic_id").maybeSingle();
+  if(settingError) throw settingError;
+  if(!setting?.value) throw new Error("BALANCE_LOG_TOPIC_NOT_SETUP");
+  const currency=session.currency==="diamond"?"Diamond":"Coin";
+  const logText="WALLET BALANCE AUDIT\n\nTarget: @"+(result.username||"-")+" ("+result.telegram_user_id+")\nOwner UUID: "+result.owner_id+"\nAction: "+session.operation.toUpperCase()+" "+currency+"\nAmount: "+money(Number(result.amount))+"\nBalance: "+money(Number(result.balance_before))+" → "+money(Number(result.balance_after))+"\nReason: "+result.reason+"\nBy Owner: "+id+"\nTime: "+fmtDate(new Date().toISOString());
+  await tg("sendMessage",{chat_id:ADMIN_FORUM_CHAT_ID,message_thread_id:Number(setting.value),text:logText});
+  await clearBalanceSession(id);
+  await sendMessage(q.message.chat.id,"Berhasil. Saldo "+currency+" @"+(result.username||"user")+" berubah dari "+money(Number(result.balance_before))+" menjadi "+money(Number(result.balance_after))+".\nAudit log sudah dikirim ke NEXORA BALANCE LOG.");
+}
+
 // ───────────────────────── ROUTERS ─────────────────────────
 async function handleCallback(q: Any) {
   let answered = false;
@@ -1095,7 +1202,7 @@ async function handleCallback(q: Any) {
 
     const [kind, a, b] = String(q.data ?? "").split(":");
 
-    if (kind === "a" || kind === "d") return await adminDecision(q, kind, a, ack);
+    if (kind === "a" || kind === "d") return await adminDecision(q, kind, a, ack);\n    if (kind === "bal") { if (a === "confirm") return await confirmBalance(q, ack); return await balanceCallback(q, kind, a, b, ack); }
     if (chat.type !== "private") return await ack(TEXT.notPrivate, true);
 
     const tgId = String(q.from.id);
