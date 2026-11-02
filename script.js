@@ -545,7 +545,6 @@ async function claimNewPlayerWelcomeBonus(){
     if(window.TAMAVERSE_AUTH_READY) await window.TAMAVERSE_AUTH_READY;
     if(typeof window.ensureTamaverseAuth!=='function') throw new Error('Autentikasi akun belum siap.');
     await window.ensureTamaverseAuth();
-    if(typeof window.savePlayerToSupabase==='function') await window.savePlayerToSupabase();
     const db=window.TAMAVERSE_SUPABASE_CLIENT;
     if(!db) throw new Error('Koneksi cloud belum tersedia.');
     const {data,error}=await db.rpc('tamaverse_claim_new_player_bonus');
@@ -574,12 +573,20 @@ async function claimNewPlayerWelcomeBonus(){
         <button class="button full" data-action="close-modal">Tutup</button>`);
       return false;
     }
-    return false;
+    if(data?.eligible===false){
+      showModal(`<div class="eyebrow">TAMAVERSE · LIMITED EVENT</div>
+        <h2>Event belum tersedia</h2>
+        <p class="subtle">Periode klaim 100 Diamond adalah 2–11 November 2026.</p>
+        <button class="button full" data-action="close-modal">Tutup</button>`);
+      return false;
+    }
+    throw new Error('Respons klaim tidak dikenali dari server.');
   }catch(error){
-    console.error('New player bonus claim failed:',error);
-    showModal(`<div class="eyebrow">TAMAVERSE · WELCOME GIFT</div>
-      <h2>Hadiah awal belum berhasil diklaim</h2>
-      <p class="subtle">Pet pertamamu sudah siap. Koneksi hadiah sedang bermasalah, coba klaim lagi.</p>
+    console.error('100 Diamond event claim failed:',error);
+    const reason=String(error?.message||error||'Unknown error').slice(0,220);
+    showModal(`<div class="eyebrow">TAMAVERSE · LIMITED EVENT</div>
+      <h2>Klaim belum berhasil</h2>
+      <p class="subtle">Server belum bisa memproses hadiah. Detail: ${esc(reason)}</p>
       <button class="button full" data-action="retry-new-player-bonus">Coba lagi</button>
       <button class="button secondary full" data-action="close-modal">Nanti saja</button>`);
     return false;
