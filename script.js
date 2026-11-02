@@ -741,11 +741,13 @@ function normalizeSavedState(saved){
         def:Number(oldStats.def||oldPet.defense)||kind.stats.def,
         spd:Number(oldStats.spd||oldStats.speed||oldPet.speed)||kind.stats.spd
       },
-      hunger:Number.isFinite(oldPet.hunger)?oldPet.hunger:100,
-      happiness:Number.isFinite(oldPet.happiness)?oldPet.happiness:100,
-      energy:Number.isFinite(oldPet.energy)?oldPet.energy:80,
-      cleanliness:Number.isFinite(oldPet.cleanliness)?oldPet.cleanliness:80,
-      sleeping:!!oldPet.sleeping,sleepStartedAt:Number(oldPet.sleepStartedAt)||0,careUpdatedAt:Number(oldPet.careUpdatedAt)||Date.now(),
+      hunger:clamp(Number.isFinite(oldPet.hunger)?oldPet.hunger:100,0,100),
+      happiness:clamp(Number.isFinite(oldPet.happiness)?oldPet.happiness:100,0,100),
+      energy:clamp(Number.isFinite(oldPet.energy)?oldPet.energy:80,0,100),
+      cleanliness:clamp(Number.isFinite(oldPet.cleanliness)?oldPet.cleanliness:80,0,100),
+      sleeping:!!oldPet.sleeping&&Number.isFinite(Number(oldPet.sleepStartedAt))&&Number(oldPet.sleepStartedAt)>0,
+      sleepStartedAt:Number.isFinite(Number(oldPet.sleepStartedAt))&&Number(oldPet.sleepStartedAt)>0?Number(oldPet.sleepStartedAt):0,
+      careUpdatedAt:Number.isFinite(Number(oldPet.careUpdatedAt))&&Number(oldPet.careUpdatedAt)>0?Number(oldPet.careUpdatedAt):Date.now(),
       evolution:Number(oldPet.evolution)||Math.max(0,(Number(oldPet.evolutionStage)||1)-1)*25,
       fragments:Number(oldPet.fragments)||0
     };
@@ -892,7 +894,8 @@ function doCare(kind){
   }else if(kind==='sleep'){
     if(p.energy>=100){showToast(`${p.name} sudah penuh energi.`);return;}
     p.sleeping=true;p.sleepStartedAt=Date.now();triggerPetAnimation('sleep');
-    showToast(`${p.name} mulai tidur. Energi pulih penuh dalam 15 menit.`);
+    const recoveryMinutes=Math.max(1,Math.ceil((100-p.energy)*900000/100/60000));
+    showToast(`${p.name} mulai tidur. Energi diperkirakan penuh dalam ${recoveryMinutes} menit.`);
   }else if(kind==='train'){
     const hasManual=(state.items.training||0)>0;
     const energyCost=hasManual?20:35;
