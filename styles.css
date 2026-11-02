@@ -4463,3 +4463,39 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
   .accessory-art.aura-royal-sovereign::before,.accessory-art.aura-royal-sovereign::after,
   .home-page .home-frame-aura.aura-royal-sovereign,.home-page .home-frame-aura.aura-royal-sovereign::after{animation:none!important}
 }
+
+
+/* Royal Sovereign: explicitly enable both gallery and Home ornament layers */
+.accessory-art.aura-royal-sovereign .aura-ornament,
+.home-page .pet-stage > .home-frame-ornaments.aura-royal-sovereign .aura-ornament{
+  display:block!important;
+  position:absolute!important;
+  left:0;right:0;width:100%;
+  color:#ffe4eb;
+  text-align:center;
+  font-style:normal;font-weight:900;line-height:1;
+  letter-spacing:6px;
+  font-size:clamp(13px,4vw,19px);
+  text-shadow:0 0 7px #ff244f,0 0 15px #ff315f,0 0 24px #e7dce7;
+  pointer-events:none;
+}
+.accessory-art.aura-royal-sovereign .aura-ornament-top,
+.home-page .pet-stage > .home-frame-ornaments.aura-royal-sovereign .aura-ornament-top{
+  top:5%;animation:ornamentTwinkleTop 1.7s ease-in-out infinite;
+}
+.accessory-art.aura-royal-sovereign .aura-ornament-bottom,
+.home-page .pet-stage > .home-frame-ornaments.aura-royal-sovereign .aura-ornament-bottom{
+  bottom:5%;animation:ornamentTwinkleBottom 2.35s ease-in-out infinite;
+}
+/* Keep the Home aura visible behind the transparent frame artwork. */
+.home-page .pet-stage > .home-frame-aura.aura-royal-sovereign{
+  display:block!important;z-index:8!important;opacity:1!important;
+  background:radial-gradient(ellipse,rgba(255,35,75,.72) 0%,rgba(190,18,55,.48) 34%,rgba(235,225,235,.3) 56%,rgba(255,35,75,.16) 72%,transparent 82%)!important;
+  filter:blur(22px)!important;
+  animation:sovereignAuraPulse 2.1s ease-in-out infinite!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .accessory-art.aura-royal-sovereign .aura-ornament,
+  .home-page .pet-stage > .home-frame-ornaments.aura-royal-sovereign .aura-ornament,
+  .home-page .pet-stage > .home-frame-aura.aura-royal-sovereign{animation:none!important}
+}
