@@ -97,7 +97,15 @@
           const response = authError.context;
           if (response && typeof response.clone === "function") {
             const payload = await response.clone().json().catch(() => null);
-            detail = payload?.error || payload?.message || "";
+            const base = payload?.error || payload?.message || "";
+            const diag = payload?.diagnostic;
+            const diagText = diag ? [
+              diag.stage ? "stage=" + diag.stage : "",
+              diag.code ? "code=" + diag.code : "",
+              diag.message ? "detail=" + String(diag.message).slice(0, 180) : "",
+              diag.status ? "status=" + diag.status : ""
+            ].filter(Boolean).join(" | ") : "";
+            detail = [base, diagText].filter(Boolean).join(" — ");
             if (!detail) detail = "HTTP " + response.status;
           }
         } catch (_) {}
