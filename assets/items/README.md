@@ -1,17 +1,24 @@
 # Tamaverse Item Assets
 
-Place the four generated item icons in this folder:
+Use **WEBP** assets to match the existing game files in this folder. Keep the current naming style and do not convert existing assets to PNG.
 
-- `rename-card.png` — Rename Card
-- `rename-pet-card.png` — Rename Pet Card
-- `energy-potion.png` — Energy Potion
-- `health-potion.png` — Health Potion
+Existing assets:
+- `Rename.webp` — Rename Card
+- `RenamePet.webp` — Rename Pet Card
+- `EnergyPotion.webp` — Energy Potion
+- `HealthPotion.webp` — Health Potion
+
+Suggested future item assets (add only when the matching game feature exists):
+- `ExpPotion.webp` — XP Potion
+- `HappinessTreat.webp` — Happiness Treat
+- `Cleanser.webp` — Cleaning item
+- `ShieldCharm.webp` — Battle protection item
 
 Asset guidelines:
-- PNG with transparent background
-- Square canvas, preferably 512×512 px
-- Consistent polished 2D pixel-art fantasy style
-- Centered item with clear silhouette, readable at 64×64 px
-- No text, watermark, or background scenery
+- WEBP format, transparent background where supported
+- Square composition, centered item, fully visible
+- Match the exact visual style, proportions, shading, and polish of the existing Tamaverse pet/item assets
+- Readable at small inventory-icon size
+- No text, watermark, mockup, or unrelated background
 
-Keep these filenames exactly as written so the game can reference them consistently.
+Keep existing filenames exactly as written. Do not rename or replace existing assets unless explicitly requested.
