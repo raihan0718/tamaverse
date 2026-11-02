@@ -4691,3 +4691,27 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
     drop-shadow(0 0 25px rgba(224,220,235,.34))
     drop-shadow(0 12px 18px #0005)!important;
 }
+
+
+/* Founder ornament overlay on the equipped Home frame — corner filigree */
+.home-page .frame-equipped-royal-sovereign .pet-stage::after{
+  content:"";
+  position:absolute;
+  left:48.5%;
+  top:46.5%;
+  width:min(90%,470px);
+  aspect-ratio:684/768;
+  transform:translate(-50%,-50%);
+  z-index:11;
+  pointer-events:none;
+  border:1px solid rgba(218,190,146,.32);
+  border-radius:13px;
+  background:
+    radial-gradient(ellipse at 0% 0%,transparent 0 15px,rgba(224,195,145,.9) 15.5px 16.5px,transparent 17px 24px,rgba(224,195,145,.45) 24.5px 25.5px,transparent 26px),
+    radial-gradient(ellipse at 100% 0%,transparent 0 15px,rgba(224,195,145,.9) 15.5px 16.5px,transparent 17px 24px,rgba(224,195,145,.45) 24.5px 25.5px,transparent 26px),
+    radial-gradient(ellipse at 0% 100%,transparent 0 15px,rgba(224,195,145,.9) 15.5px 16.5px,transparent 17px 24px,rgba(224,195,145,.45) 24.5px 25.5px,transparent 26px),
+    radial-gradient(ellipse at 100% 100%,transparent 0 15px,rgba(224,195,145,.9) 15.5px 16.5px,transparent 17px 24px,rgba(224,195,145,.45) 24.5px 25.5px,transparent 26px),
+    linear-gradient(90deg,transparent 7%,rgba(224,195,145,.45) 7.5%,transparent 8.2%,transparent 91.8%,rgba(224,195,145,.45) 92.5%,transparent 93%),
+    linear-gradient(0deg,transparent 7%,rgba(224,195,145,.35) 7.5%,transparent 8.2%,transparent 91.8%,rgba(224,195,145,.35) 92.5%,transparent 93%);
+  box-shadow:inset 0 0 16px rgba(202,28,62,.1),0 0 10px rgba(202,28,62,.1);
+}
