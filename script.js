@@ -14,7 +14,8 @@ const species = [
   {id:'lunabun',name:'Bitbelle',emoji:'🤖',element:'Tech',rarity:'Epic',stats:{hp:110,atk:20,def:17,spd:21},pool:['basic']},
   {id:'glacipup',name:'Bambloo',emoji:'🐼',element:'Nature',rarity:'Epic',stats:{hp:118,atk:22,def:18,spd:14},pool:['premium']},
   {id:'starwhale',name:'Solvyr',emoji:'🔥',element:'Light',rarity:'Legendary',stats:{hp:128,atk:23,def:20,spd:17},pool:['basic']},
-  {id:'wyrmling',name:'Dravaryn',emoji:'🐉',element:'Fire',rarity:'Legendary',stats:{hp:116,atk:24,def:16,spd:22},pool:['premium']}
+  {id:'wyrmling',name:'Dravaryn',emoji:'🐉',element:'Fire',rarity:'Legendary',stats:{hp:116,atk:24,def:16,spd:22},pool:['premium']},
+  {id:'sovereign-nexora',name:'Nexora',emoji:'🐉',element:'Crimson',rarity:'Sovereign',stats:{hp:132,atk:26,def:23,spd:19},pool:[],exclusive:'Founder'}
  ];
 const petImages = {
   fluffin: 'assets/pets/slime.webp',
@@ -28,7 +29,8 @@ const petImages = {
   lunabun: 'assets/pets/robo-bunny.webp',
   glacipup: 'assets/pets/panda.webp',
   starwhale: 'assets/pets/phoenix.webp',
-  wyrmling: 'assets/pets/dragon.webp'
+  wyrmling: 'assets/pets/dragon.webp',
+  'sovereign-nexora': 'assets/pets/Soverign-Nexora.webp'
 };
 const leftFacingPetIds = new Set(['petalyn','lunabun','wyrmling','starwhale']);
 function petFacesLeft(speciesId){return leftFacingPetIds.has(speciesId);}
@@ -49,7 +51,8 @@ const accessoryFrames = [
   {id:'uncommon',name:'Sprout Green',rarity:'Uncommon',src:'assets/ui/Uncommon-SproutGreen_1.webp'},
   {id:'rare',name:'Sunny Amber',rarity:'Rare',src:'assets/ui/Rare-SunnyAmber.webp'},
   {id:'legendary',name:'Royal Violet',rarity:'Legendary',src:'assets/ui/Legendary-RoyalViolet.webp'},
-  {id:'celestial',name:'Divine Princesses',rarity:'Celestial',src:'assets/ui/Celestial-DivinePrinceses.webp'}
+  {id:'celestial',name:'Divine Princesses',rarity:'Celestial',src:'assets/ui/Celestial-DivinePrinceses.webp'},
+  {id:'royal-sovereign',name:'Royal Sovereign',rarity:'Sovereign',src:'assets/ui/Exclusive-RoyalSoverign.webp',exclusive:'Founder'}
 ];
 function accessoryFrameById(id){return accessoryFrames.find(frame=>frame.id===id)||accessoryFrames[0];}
 let collectionTab='pets';
@@ -203,7 +206,7 @@ window.render = render;
 function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau diamond, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 diamond</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
 function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',bath:'Splash! 🫧',sleep:'Zzz... 🌙',train:'Go! 💪',greet:'Hello! ♥',idle:''})[action]||'';}
 function emptyPets(){return `<div class="card empty"><div style="font-size:42px">🥚</div><p>Belum ada pet. Tetaskan telur pertamamu untuk memulai!</p><button class="button" data-action="start">Tetaskan telur gratis</button></div>`;}
-function rarityRank(rarity){return ({Common:1,Rare:2,Epic:3,Legendary:4})[rarity]||0;}
+function rarityRank(rarity){return ({Common:1,Rare:2,Epic:3,Legendary:4,Celestial:5,Sovereign:6})[rarity]||0;}
 function petsPage(){
   const owned=new Set(state.pets.map(p=>p.species));
   const sortedPets=[...state.pets].sort((a,b)=>rarityRank(speciesById(a.species).rarity)-rarityRank(speciesById(b.species).rarity));
@@ -211,8 +214,8 @@ function petsPage(){
   const tabs='<div class="collection-tabs" role="tablist" aria-label="Collection categories">'+
     '<button class="collection-tab '+(collectionTab==='pets'?'active':'')+'" role="tab" aria-selected="'+(collectionTab==='pets')+'" data-action="collection-tab" data-tab="pets"><span>🐾</span><b>Pets</b><small>'+state.pets.length+' collected</small></button>'+
     '<button class="collection-tab '+(collectionTab==='accessories'?'active':'')+'" role="tab" aria-selected="'+(collectionTab==='accessories')+'" data-action="collection-tab" data-tab="accessories"><span>🖼️</span><b>Accessories</b><small>'+accessoryFrames.length+' frames</small></button></div>';
-  const petContent='<p class="subtle collection-description">'+owned.size+'/12 species collected · Select a pet to view its details or make it active.</p>'+(sortedPets.length?'<div class="collection-grid">'+sortedPets.map(p=>petCard(p,true)).join('')+'</div>':emptyPets())+'<div class="section-heading"><h2>Not discovered yet</h2></div><div class="collection-grid">'+undiscovered.map(s=>'<article class="creature-card locked"><div class="creature-thumb">❔</div><h3>???</h3><p>'+s.element+' · <span class="rarity rarity-'+s.rarity+'">'+s.rarity+'</span></p></article>').join('')+'</div>';
-  const accessoryContent='<p class="subtle collection-description">Give your companion a new look. Frames from the Premium Shop appear here after purchase.</p><div class="accessory-grid">'+accessoryFrames.map(frame=>{const ownedFrame=ownsFrame(frame.id);const equipped=state.equippedFrame===frame.id;return '<article class="accessory-card '+(equipped?'equipped':'')+' '+(!ownedFrame?'locked':'')+'"><div class="accessory-art aura-'+frame.id+'"><img src="'+frame.src+'" alt="'+esc(frame.name)+' frame" loading="lazy" decoding="async">'+(!ownedFrame?'<span class="frame-lock">🔒</span>':'')+'<span class="aura-ornament aura-ornament-top" aria-hidden="true">✦ · ✧</span><span class="aura-ornament aura-ornament-bottom" aria-hidden="true">✧ · ✦</span></div><div class="accessory-info"><span class="rarity rarity-'+frame.rarity+'">'+frame.rarity+'</span><h3>'+esc(frame.name)+'</h3><button class="accessory-equip '+(equipped?'is-equipped':'')+'" data-action="equip-frame" data-frame="'+frame.id+'" '+(!ownedFrame||equipped?'disabled':'')+'>'+(equipped?'✓ Equipped':ownedFrame?'Use frame':'🔒 Locked')+'</button></div></article>';}).join('')+'</div>';
+  const petContent='<p class="subtle collection-description">'+owned.size+'/'+species.length+' species collected · Select a pet to view its details or make it active.</p>'+(sortedPets.length?'<div class="collection-grid">'+sortedPets.map(p=>petCard(p,true)).join('')+'</div>':emptyPets())+'<div class="section-heading"><h2>Not discovered yet</h2></div><div class="collection-grid">'+undiscovered.map(s=>s.exclusive==='Founder'?'<article class="creature-card locked founder-exclusive-card"><div class="creature-thumb">'+petImage(s.id,'collection-pet-image')+'</div><h3>'+esc(s.name)+'</h3><p><span class="rarity rarity-'+s.rarity+'">'+s.rarity+'</span></p><span class="exclusive-label">FOUNDER EXCLUSIVE</span></article>':'<article class="creature-card locked"><div class="creature-thumb">❔</div><h3>???</h3><p>'+s.element+' · <span class="rarity rarity-'+s.rarity+'">'+s.rarity+'</span></p></article>').join('')+'</div>';
+  const accessoryContent='<p class="subtle collection-description">Give your companion a new look. Frames from the Premium Shop appear here after purchase.</p><div class="accessory-grid">'+accessoryFrames.map(frame=>{const ownedFrame=ownsFrame(frame.id);const equipped=state.equippedFrame===frame.id;return '<article class="accessory-card '+(equipped?'equipped':'')+' '+(!ownedFrame?'locked':'')+' '+(frame.exclusive?'founder-exclusive-card':'')+'"><div class="accessory-art aura-'+frame.id+'"><img src="'+frame.src+'" alt="'+esc(frame.name)+' frame" loading="lazy" decoding="async">'+(!ownedFrame?'<span class="frame-lock">🔒</span>':'')+'<span class="aura-ornament aura-ornament-top" aria-hidden="true">✦ · ✧</span><span class="aura-ornament aura-ornament-bottom" aria-hidden="true">✧ · ✦</span></div><div class="accessory-info"><span class="rarity rarity-'+frame.rarity+'">'+frame.rarity+'</span><h3>'+esc(frame.name)+'</h3>'+(frame.exclusive?'<span class="exclusive-label">FOUNDER EXCLUSIVE</span>':'')+'<button class="accessory-equip '+(equipped?'is-equipped':'')+'" data-action="equip-frame" data-frame="'+frame.id+'" '+(!ownedFrame||equipped?'disabled':'')+'>'+(equipped?'✓ Equipped':ownedFrame?'Use frame':'🔒 Founder Only')+'</button></div></article>';}).join('')+'</div>';
   return '<section class="page collection-page"><div class="eyebrow">YOUR COLLECTION</div><h1 class="page-title">Collection</h1>'+tabs+(collectionTab==='accessories'?accessoryContent:petContent)+'</section>';
 }
 function petCard(p,owned){const s=speciesById(p.species);return `<button class="creature-card ${owned?'owned':''}" data-action="inspect" data-pet="${p.uid}"><div class="creature-thumb">${petImage(s.id, 'collection-pet-image')}</div><h3>${esc(p.name)} ${p.uid===state.activePet?'⭐':''}</h3><p>Lv.${p.level} · ${s.element}<br><span class="rarity rarity-${s.rarity}">${s.rarity}</span></p></button>`;}
@@ -833,7 +836,7 @@ function homePage(){
       <div class="companion-panel">
         <div class="companion-meta">
           <h2>${esc(p.name)}</h2>
-          <span class="pill">LV. ${p.level}</span>
+          <span class="pill">LV. ${p.level}</span>${s.exclusive?'<span class="exclusive-label">FOUNDER EXCLUSIVE</span>':''}
         </div>
         <div class="companion-xp"><span>EXP</span><b>${p.xp} / ${p.level*40}</b></div>
         <div class="progress-track"><div class="progress-fill" style="width:${xpPercent}%"></div></div>
