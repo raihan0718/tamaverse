@@ -809,7 +809,6 @@ function homePage(){
     <div class="player-card card"><div class="player-avatar">${playerAvatarMarkup(state.player.avatar)}</div>
       <div class="player-info"><div class="player-name">${esc(state.player.name)}</div><span class="pill">Lv. ${state.player.level}</span>
       <div class="player-xp"><span>${state.player.xp} / ${state.player.level*100} XP</span><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,state.player.xp/(state.player.level*100)*100)}%"></div></div></div></div>
-      <div class="coin-pill" aria-label="Saldo coin"><span class="coin-pill-icon">◈</span><b>${state.player.coins.toLocaleString('id-ID')}</b><button class="coin-convert-trigger" data-action="currency-convert" aria-label="Convert diamond ke coin" title="Convert diamond ke coin">＋</button></div>
     </div>
     <div class="section-heading universe-heading"><div><div class="eyebrow">YOUR LITTLE UNIVERSE</div><h1 class="page-title">Good day, ${esc(state.player.name)}!</h1></div><button class="icon-button profile-shortcut" data-action="go" data-page="profile" aria-label="Buka profil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.8 20c.5-3.6 3.2-5.6 7.2-5.6s6.7 2 7.2 5.6"></path></svg></button></div>
     <section class="pet-stage pet-action-${petAnimation} frame-equipped-${state.equippedFrame}" aria-label="Your companion">
