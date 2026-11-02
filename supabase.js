@@ -44,34 +44,106 @@
   window.uploadTamaverseAvatar = uploadTamaverseAvatar;
 
 
+  let telegramAuthReady = false;
+  let telegramAuthPromise = null;
+
   async function ensureSupabaseUser() {
+    if (!telegramAuthReady) {
+      throw new Error('Akun Telegram belum terverifikasi.');
+    }
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    if (!user || user.is_anonymous === true) {
+      throw new Error('Sesi Telegram tidak valid. Silakan buka ulang Tamaverse dari bot.');
+    }
+    window.TAMAVERSE_USER_ID = user.id;
+    return user;
+  }
+
+  window.ensureTamaverseAuth = ensureSupabaseUser;
+
+  async function initializeTelegramAuth() {
+    const gate = document.getElementById('telegramAuthGate');
+    const status = document.getElementById('telegramAuthStatus');
+    const retry = document.getElementById('telegramAuthRetry');
+    const setStatus = (message) => { if (status) status.textContent = message; };
+    const showFailure = (message) => {
+      if (gate) gate.dataset.state = 'error';
+      setStatus(message || 'Autentikasi gagal. Coba buka kembali dari bot Tamaverse.');
+      if (retry) retry.hidden = false;
+    };
+
     try {
-      const { data: { session }, error } =
-        await supabase.auth.getSession();
+      if (gate) gate.dataset.state = 'loading';
+      if (retry) retry.hidden = true;
+      setStatus('Menghubungkan akun Telegram kamu…');
 
+      const telegram = window.Telegram?.WebApp;
+      const initData = telegram?.initData || '';
+      if (!telegram || !initData) {
+        throw new Error('Tamaverse hanya bisa dibuka melalui tombol Open Tamaverse di Telegram.');
+      }
+
+      const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' });
+      if (signOutError) console.warn('Old local auth session could not be cleared:', signOutError);
+
+      setStatus('Memverifikasi identitas Telegram…');
+      const { data, error } = await supabase.functions.invoke('telegram-auth', {
+        body: { initData }
+      });
       if (error) throw error;
-
-      let user = session?.user || null;
-
-      if (!user) {
-        const { data, error: signInError } =
-          await supabase.auth.signInAnonymously();
-
-        if (signInError) throw signInError;
-
-        user = data?.user || null;
+      if (!data?.session?.access_token || !data?.session?.refresh_token) {
+        throw new Error(data?.error || 'Sesi akun tidak berhasil dibuat. Coba lagi.');
       }
 
-      if (user) {
-        window.TAMAVERSE_USER_ID = user.id;
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token
+      });
+      if (sessionError) throw sessionError;
+      if (!sessionData?.user || sessionData.user.is_anonymous === true) {
+        throw new Error('Sesi Telegram tidak valid. Coba buka ulang Tamaverse.');
       }
 
-      return user;
+      telegramAuthReady = true;
+      window.TAMAVERSE_USER_ID = sessionData.user.id;
+      setStatus('Memuat dunia Tamaverse…');
+      await loadPlayerFromSupabase();
+
+      if (gate) gate.dataset.state = 'ready';
+      window.setTimeout(() => { if (gate) gate.hidden = true; }, 250);
+      return sessionData.user;
     } catch (error) {
-      console.warn('Supabase auth failed:', error);
-      return null;
+      telegramAuthReady = false;
+      window.TAMAVERSE_USER_ID = null;
+      console.error('Telegram authentication failed:', error);
+      showFailure(error?.message);
+      throw error;
     }
   }
+
+  function startTelegramAuth() {
+    if (telegramAuthPromise) return telegramAuthPromise;
+    telegramAuthPromise = initializeTelegramAuth().catch((error) => {
+      telegramAuthPromise = null;
+      throw error;
+    });
+    return telegramAuthPromise;
+  }
+
+  window.TAMAVERSE_AUTH_READY = new Promise((resolve, reject) => {
+    window.addEventListener('load', () => {
+      startTelegramAuth().then(resolve, reject);
+    }, { once: true });
+  });
+
+  window.addEventListener('load', () => {
+    const retry = document.getElementById('telegramAuthRetry');
+    retry?.addEventListener('click', () => {
+      if (retry) retry.hidden = true;
+      startTelegramAuth().catch(() => {});
+    });
+  }, { once: true });
 
   async function savePlayerToSupabase() {
     if (!window.state || !supabase) return;
@@ -601,10 +673,5 @@
     };
   }
 
-  // Load the account and cloud data once the page has loaded.
-  window.addEventListener('load', () => {
-    loadPlayerFromSupabase().catch((error) => {
-      console.warn('Supabase initial load failed:', error);
-    });
-  });
+  // Telegram authentication owns startup and loads cloud data after a verified session is set.
 })();
