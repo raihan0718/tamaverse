@@ -2,3 +2,6 @@ project_id = "uziyhbgxvdetzlujzozu"
 
 [functions.tamaverse-payment-bot]
 verify_jwt = false
+
+[functions.grant-founder-rewards]
+verify_jwt = false
