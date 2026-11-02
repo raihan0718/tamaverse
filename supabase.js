@@ -326,7 +326,7 @@
         supabase.from('inventory').select('*').eq('owner_id', user.id).maybeSingle(),
         supabase.from('daily_rewards').select('last_claim_date, day').eq('owner_id', user.id).maybeSingle(),
         supabase.from('premium_inventory').select('rename_card_count, rename_pet_card_count, owned_frames').eq('owner_id', user.id).maybeSingle(),
-        supabase.from('pets').select('client_uid, species, nickname, level, xp, is_active').eq('owner_id', user.id)
+        supabase.from('pets').select('client_uid, species, nickname, level, xp, hunger, happiness, energy, cleanliness, evolution, is_active').eq('owner_id', user.id)
       ]);
 
       const { data: profileData, error: profileError } = profileResult;
@@ -391,16 +391,9 @@
             || activeCloudPets[0] || null;
         cloudPets.forEach((cloudPet) => {
           let localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
-          if (!localPet && cloudPet.species === 'sovereign-nexora') {
-            localPet = {
-              uid: String(cloudPet.client_uid), species: cloudPet.species,
-              name: cloudPet.nickname || 'Nexora', level: Number(cloudPet.level || 1),
-              xp: Number(cloudPet.xp || 0), hp: 132,
-              stats: { hp: 132, atk: 26, def: 23, spd: 19 },
-              hunger: 100, happiness: 100, energy: 100, cleanliness: 100,
-              evolution: 0, fragments: 0
-            };
-            localPets.push(localPet);
+          if (!localPet && typeof window.createTamaversePetFromCloud === 'function') {
+            localPet = window.createTamaversePetFromCloud(cloudPet);
+            if (localPet) localPets.push(localPet);
           }
           if (!localPet) return;
           const oldLevel = Math.max(1, Number(localPet.level) || 1);
@@ -420,6 +413,12 @@
             window.state.activePet = localPet.uid;
           }
         });
+        // Keep activePet pointing at an actual local pet after cloud hydration.
+        if (!localPets.some(pet => String(pet.uid) === String(window.state.activePet))) {
+          window.state.activePet = resolvedActiveCloudPet
+            ? String(resolvedActiveCloudPet.client_uid)
+            : (localPets[0]?.uid || null);
+        }
       }
     } catch (error) {
       console.warn('Supabase load failed:', error);
