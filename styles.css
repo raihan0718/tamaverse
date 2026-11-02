@@ -4982,3 +4982,32 @@ body.battle-fullscreen .battle-finished .battle-scene+.battle-log-panel .battle-
 body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
   transform:scaleX(-1)!important;
 }
+
+
+/* Leaderboard profile photos: constrain every uploaded portrait to its avatar frame */
+.ranking-page .ranking-you-avatar,
+.ranking-page .ranking-podium-avatar,
+.ranking-page .ranking-list-avatar{
+  position:relative;
+  overflow:hidden!important;
+  isolation:isolate;
+}
+.ranking-page .ranking-you-avatar>img.ranking-avatar-photo,
+.ranking-page .ranking-podium-avatar>img.ranking-avatar-photo,
+.ranking-page .ranking-list-avatar>img.ranking-avatar-photo{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  aspect-ratio:1/1;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:inherit!important;
+  flex:none!important;
+}
+.ranking-page .ranking-you-avatar{flex:0 0 43px;min-width:43px;min-height:43px}
+.ranking-page .ranking-podium-avatar{overflow:hidden!important}
+.ranking-page .ranking-list-avatar{flex:0 0 39px;min-width:39px;min-height:39px}
