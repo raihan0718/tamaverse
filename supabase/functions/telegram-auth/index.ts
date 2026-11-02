@@ -43,7 +43,8 @@ async function verifyInitData(raw: string) {
       name: [user.first_name, user.last_name].filter(Boolean).join(" ").slice(0, 18) || "Penjelajah" };
   } catch { return null; }
 }
-const randomPassword = () => hex(crypto.getRandomValues(new Uint8Array(48))) + "T9!";
+// Supabase Auth enforces a 72-character password maximum. Keep this at 67 characters.
+const randomPassword = () => hex(crypto.getRandomValues(new Uint8Array(32))) + "T9!";
 
 async function findLegacyTelegramAccount(telegramId: string) {
   // Preserve accounts created by the previous custom:telegram OIDC flow.
