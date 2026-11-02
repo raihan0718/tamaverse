@@ -4416,40 +4416,40 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
 
 
 /* Sovereign / Royal Sovereign: thick crimson + silver founder aura */
-.accessory-art.aura-sovereign::before{
+.accessory-art.aura-royal-sovereign::before{
   inset:-2% -5%;
   opacity:1;
   background:radial-gradient(ellipse,rgba(255,35,75,.58) 0%,rgba(190,18,55,.42) 32%,rgba(235,225,235,.28) 54%,rgba(255,35,75,.12) 68%,transparent 78%);
   filter:blur(25px);
   animation:sovereignAuraPulse 2.1s ease-in-out infinite;
 }
-.accessory-art.aura-sovereign::after{
+.accessory-art.aura-royal-sovereign::after{
   content:"✦  ·  ✧  ✦  ✧  ·  ✦";
   position:absolute;z-index:2;inset:7% 0 auto;text-align:center;
   color:#ffe4eb;font-size:19px;letter-spacing:5px;
   text-shadow:0 0 7px #ff244f,0 0 15px #ff315f,0 0 24px #e7dce7;
   pointer-events:none;animation:frameSparkle 1.15s ease-in-out infinite;
 }
-.accessory-art.aura-sovereign img{
+.accessory-art.aura-royal-sovereign img{
   filter:drop-shadow(0 0 8px rgba(255,35,75,.95))
     drop-shadow(0 0 17px rgba(210,25,65,.78))
     drop-shadow(0 0 24px rgba(235,225,240,.62))
     drop-shadow(0 5px 10px #0003);
 }
-.home-page .home-frame-aura.aura-sovereign{
+.home-page .home-frame-aura.aura-royal-sovereign{
   opacity:1;
   background:radial-gradient(ellipse,rgba(255,35,75,.56) 0%,rgba(190,18,55,.38) 35%,rgba(235,225,235,.22) 55%,rgba(255,35,75,.1) 70%,transparent 80%);
   filter:blur(29px);
   animation:sovereignAuraPulse 2.1s ease-in-out infinite;
 }
-.home-page .home-frame-aura.aura-sovereign::after{
+.home-page .home-frame-aura.aura-royal-sovereign::after{
   content:"✦  ·  ✧  ✦  ✧  ·  ✦";
   position:absolute;inset:8% 0 auto;text-align:center;color:#ffe4eb;
   font-size:20px;letter-spacing:6px;
   text-shadow:0 0 8px #ff244f,0 0 17px #ff315f,0 0 25px #e7dce7;
   animation:frameSparkle 1.15s ease-in-out infinite;
 }
-.home-page .frame-equipped-sovereign .companion-frame-art{
+.home-page .frame-equipped-royal-sovereign .companion-frame-art{
   filter:drop-shadow(0 0 10px rgba(255,35,75,.95))
     drop-shadow(0 0 19px rgba(210,25,65,.78))
     drop-shadow(0 0 26px rgba(235,225,240,.62))
@@ -4460,6 +4460,6 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
   50%{opacity:1;transform:scale(1.07)}
 }
 @media(prefers-reduced-motion:reduce){
-  .accessory-art.aura-sovereign::before,.accessory-art.aura-sovereign::after,
-  .home-page .home-frame-aura.aura-sovereign,.home-page .home-frame-aura.aura-sovereign::after{animation:none!important}
+  .accessory-art.aura-royal-sovereign::before,.accessory-art.aura-royal-sovereign::after,
+  .home-page .home-frame-aura.aura-royal-sovereign,.home-page .home-frame-aura.aura-royal-sovereign::after{animation:none!important}
 }
