@@ -4545,3 +4545,59 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
     animation:none!important;
   }
 }
+
+
+/* Royal Sovereign: organic turbulent energy aura, no decorative glyphs */
+@keyframes sovereignEnergyFlow{
+  0%{opacity:.72;filter:blur(18px) hue-rotate(-8deg);background-position:18% 48%,78% 52%,50% 50%;transform:scale(.92)}
+  25%{opacity:.96;filter:blur(22px) hue-rotate(8deg);background-position:42% 28%,58% 74%,50% 50%;transform:scale(1.04)}
+  50%{opacity:.82;filter:blur(17px) hue-rotate(-4deg);background-position:76% 62%,24% 36%,50% 50%;transform:scale(1.1)}
+  75%{opacity:1;filter:blur(24px) hue-rotate(12deg);background-position:34% 78%,68% 22%,50% 50%;transform:scale(1.02)}
+  100%{opacity:.72;filter:blur(18px) hue-rotate(-8deg);background-position:18% 48%,78% 52%,50% 50%;transform:scale(.92)}
+}
+@keyframes sovereignHomeFlow{
+  0%{opacity:.76;filter:blur(22px);transform:translate(-50%,-50%) scale(.9) rotate(-5deg)}
+  30%{opacity:1;filter:blur(28px);transform:translate(-50%,-50%) scale(1.06) rotate(3deg)}
+  65%{opacity:.84;filter:blur(20px);transform:translate(-50%,-50%) scale(1.12) rotate(-3deg)}
+  100%{opacity:.76;filter:blur(22px);transform:translate(-50%,-50%) scale(.9) rotate(-5deg)}
+}
+.accessory-art.aura-royal-sovereign::after,
+.home-page .home-frame-aura.aura-royal-sovereign::after{
+  content:none!important;display:none!important;
+}
+.accessory-art.aura-royal-sovereign .aura-ornament,
+.home-page .pet-stage > .home-frame-ornaments.aura-royal-sovereign{
+  display:none!important;
+}
+.accessory-art.aura-royal-sovereign::before{
+  content:""!important;display:block!important;position:absolute!important;
+  inset:-12% -16%!important;z-index:0!important;border-radius:50%!important;
+  background:
+    radial-gradient(ellipse at 22% 42%,rgba(255,25,65,.78),transparent 48%),
+    radial-gradient(ellipse at 76% 58%,rgba(235,225,240,.58),transparent 46%),
+    radial-gradient(ellipse at 50% 50%,rgba(170,8,48,.56),transparent 72%)!important;
+  background-size:150% 150%,145% 145%,130% 130%!important;
+  animation:sovereignEnergyFlow 2.4s ease-in-out infinite!important;
+  opacity:1!important;
+}
+.accessory-art.aura-royal-sovereign img{
+  filter:drop-shadow(0 0 10px rgba(255,35,75,.95)) drop-shadow(0 0 22px rgba(210,25,65,.75)) drop-shadow(0 0 30px rgba(235,225,240,.55)) drop-shadow(0 5px 10px #0003)!important;
+}
+.home-page .pet-stage > .home-frame-aura.aura-royal-sovereign{
+  display:block!important;position:absolute!important;left:48.5%!important;top:46.5%!important;
+  width:min(90%,470px)!important;aspect-ratio:684/768!important;border-radius:46%!important;
+  z-index:8!important;pointer-events:none!important;opacity:1!important;
+  background:
+    radial-gradient(ellipse at 22% 42%,rgba(255,25,65,.82),transparent 48%),
+    radial-gradient(ellipse at 76% 58%,rgba(235,225,240,.62),transparent 46%),
+    radial-gradient(ellipse at 50% 50%,rgba(170,8,48,.62),transparent 72%)!important;
+  animation:sovereignHomeFlow 2.4s ease-in-out infinite!important;
+}
+.home-page .pet-stage > .home-frame-ornaments.aura-royal-sovereign{display:none!important}
+.home-page .frame-equipped-royal-sovereign .companion-frame-art{
+  filter:drop-shadow(0 0 12px rgba(255,35,75,.95)) drop-shadow(0 0 24px rgba(210,25,65,.78)) drop-shadow(0 0 32px rgba(235,225,240,.6)) drop-shadow(0 12px 18px #597ba540)!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .accessory-art.aura-royal-sovereign::before,
+  .home-page .pet-stage > .home-frame-aura.aura-royal-sovereign{animation:none!important}
+}
