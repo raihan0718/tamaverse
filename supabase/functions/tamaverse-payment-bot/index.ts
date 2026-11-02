@@ -1117,7 +1117,7 @@ async function beginBalance(chatId:number,id:string){
 }
 async function balanceCallback(q:Any,kind:string,a:string,b:string,ack:Ack){
   const id=String(q.from.id); if(!ownerOnly(id)) return ack("Owner only.",true);
-  if(kind==="cancel"){await clearBalanceSession(id);await ack("Dibatalkan.");return sendMessage(q.message.chat.id,"Proses perubahan saldo dibatalkan.");}
+  if(a==="cancel"){await clearBalanceSession(id);await ack("Dibatalkan.");return sendMessage(q.message.chat.id,"Proses perubahan saldo dibatalkan.");}
   if(!["diamond","coin"].includes(a)||!["add","remove"].includes(b)) return ack("Pilihan tidak valid.",true);
   await setBalanceSession(id,{currency:a as any,operation:b as any,stage:"username"});
   await ack();
@@ -1166,6 +1166,9 @@ async function confirmBalance(q:Any,ack:Ack){
   const id=String(q.from.id); if(!ownerOnly(id)) return ack("Owner only.",true);
   const session=await getBalanceSession(id);
   if(session.stage!=="confirm"||!session.target_id||!session.currency||!session.operation||!session.amount||!session.reason) return ack("Sesi tidak valid atau kedaluwarsa.",true);
+  const {data:setting,error:settingError}=await db.from("nexora_bot_settings").select("value").eq("key","balance_log_topic_id").maybeSingle();
+  if(settingError) throw settingError;
+  if(!setting?.value) return ack("Topik log belum dibuat. Jalankan /balance_setup dulu.",true);
   await ack("Memproses perubahan saldo…");
   const {data,error}=await db.rpc("nexora_owner_adjust_balance",{
     p_actor_telegram_id:id,p_owner_telegram_id:session.target_id,p_currency:session.currency,
@@ -1173,9 +1176,6 @@ async function confirmBalance(q:Any,ack:Ack){
   });
   if(error) throw error;
   const result=data as Any;
-  const {data:setting,error:settingError}=await db.from("nexora_bot_settings").select("value").eq("key","balance_log_topic_id").maybeSingle();
-  if(settingError) throw settingError;
-  if(!setting?.value) throw new Error("BALANCE_LOG_TOPIC_NOT_SETUP");
   const currency=session.currency==="diamond"?"Diamond":"Coin";
   const logText="WALLET BALANCE AUDIT\n\nTarget: @"+(result.username||"-")+" ("+result.telegram_user_id+")\nOwner UUID: "+result.owner_id+"\nAction: "+session.operation.toUpperCase()+" "+currency+"\nAmount: "+money(Number(result.amount))+"\nBalance: "+money(Number(result.balance_before))+" → "+money(Number(result.balance_after))+"\nReason: "+result.reason+"\nBy Owner: "+id+"\nTime: "+fmtDate(new Date().toISOString());
   await tg("sendMessage",{chat_id:ADMIN_FORUM_CHAT_ID,message_thread_id:Number(setting.value),text:logText});
