@@ -4281,3 +4281,18 @@ body[data-theme="light"] .profile-telegram-id strong{color:#fff}
 .currency-balance-note{margin:0 0 17px;color:var(--muted);font-size:11px}
 .currency-balance-note b{color:var(--text)}
 @media(max-width:390px){.coin-pill{gap:6px;padding:6px 7px}.coin-pill-icon{width:26px;height:26px}.coin-pill>b{font-size:12px}.coin-convert-trigger{width:24px;height:24px}.currency-rate-card{padding:12px}.currency-rate-card strong{font-size:13px}}
+
+
+/* Unified topbar wallet layout fix */
+.topbar{gap:12px;}
+.wallet{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0;padding:8px 12px;border:1px solid #ffffff20;border-radius:22px;background:linear-gradient(145deg,#302638,#241d2d);color:#f8eaf3;box-shadow:inset 0 1px 0 #ffffff0c;}
+.wallet-currency{display:flex;align-items:center;gap:8px;min-width:0;}
+.wallet-currency-icon{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:12px;background:#ffffff12;font-size:20px;}
+.wallet-currency strong{font:700 15px 'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.wallet-coin .wallet-currency-icon{background:linear-gradient(145deg,#f4d77d,#c79536);color:#fff;}
+.wallet-diamond .wallet-currency-icon{background:linear-gradient(145deg,#55466b,#3c304d);}
+.wallet-divider{width:1px;height:28px;background:#ffffff20;flex:none;}
+.wallet .coin-convert-trigger{width:30px;height:30px;border-radius:10px;background:#76551d;color:#fff3d2;font-size:21px;flex:none;}
+.wallet .coin-convert-trigger:hover{background:#96702a;}
+@media(max-width:520px){.topbar{padding:0 10px;gap:8px}.brand{gap:6px;font-size:12px}.brand-mark{width:27px;height:27px}.wallet{gap:8px;padding:6px 8px;border-radius:17px}.wallet-currency{gap:5px}.wallet-currency-icon{width:28px;height:28px;border-radius:9px;font-size:17px}.wallet-currency strong{font-size:12px}.wallet .coin-convert-trigger{width:25px;height:25px;font-size:18px}.wallet-divider{height:23px}.theme-toggle{width:38px;height:38px;flex:none}}
+@media(max-width:360px){.brand>span:last-child{font-size:10px}.wallet{gap:6px;padding:5px 6px}.wallet-currency strong{font-size:11px}.wallet-currency-icon{width:25px;height:25px}}
