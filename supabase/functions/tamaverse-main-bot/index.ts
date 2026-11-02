@@ -81,6 +81,21 @@ async function recordBotStart(telegramUserId: number) {
     body: JSON.stringify({ telegram_user_id: String(telegramUserId), started_at: new Date().toISOString() })
   });
   if (!response.ok) throw new Error("Could not record Telegram bot start");
+
+  const linked = await fetch(
+    `${SUPABASE_URL}/rest/v1/tamaverse_telegram_links?telegram_user_id=eq.${telegramUserId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "apikey": SERVICE_ROLE_KEY,
+        "Authorization": `Bearer ${SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({ bot_started_at: new Date().toISOString() })
+    }
+  );
+  if (!linked.ok) throw new Error("Could not update Telegram notification permission");
 }
 
 async function send(chatId: number, text: string, replyMarkup?: unknown) {
