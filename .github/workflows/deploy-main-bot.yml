@@ -10,6 +10,7 @@ on:
       - "supabase/functions/telegram-auth/**"
       - "supabase/functions/grant-founder-rewards/**"
       - "supabase/functions/tamaverse-pet-care-notifications/**"
+      - "supabase/functions/tamaverse-inactivity-notifications/**"
       - "supabase/config.toml"
       - ".github/workflows/deploy-main-bot.yml"
   schedule:
@@ -29,31 +30,30 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: 2.20.12
-
       - name: Deploy Telegram auto-auth
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy telegram-auth --project-ref uziyhbgxvdetzlujzozu --no-verify-jwt
-
       - name: Deploy founder rewards verifier
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy grant-founder-rewards --project-ref uziyhbgxvdetzlujzozu --no-verify-jwt
-
       - name: Deploy Tamaverse main bot
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy tamaverse-main-bot --project-ref uziyhbgxvdetzlujzozu --no-verify-jwt
-
       - name: Deploy pet-care notification sender
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy tamaverse-pet-care-notifications --project-ref uziyhbgxvdetzlujzozu --no-verify-jwt
+      - name: Deploy inactivity notification sender
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy tamaverse-inactivity-notifications --project-ref uziyhbgxvdetzlujzozu --no-verify-jwt
 
   notify:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -69,6 +69,11 @@ jobs:
           fi
           curl --fail-with-body --silent --show-error \
             -X POST "https://uziyhbgxvdetzlujzozu.supabase.co/functions/v1/tamaverse-pet-care-notifications" \
+            -H "x-tamaverse-cron-secret: $NOTIFICATION_SECRET" \
+            -H "Content-Type: application/json" \
+            --data '{}'
+          curl --fail-with-body --silent --show-error \
+            -X POST "https://uziyhbgxvdetzlujzozu.supabase.co/functions/v1/tamaverse-inactivity-notifications" \
             -H "x-tamaverse-cron-secret: $NOTIFICATION_SECRET" \
             -H "Content-Type: application/json" \
             --data '{}'
