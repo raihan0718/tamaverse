@@ -80,7 +80,7 @@
     try {
       if (gate) { gate.hidden = false; gate.dataset.state = "loading"; }
       if (retry) retry.hidden = true;
-      setStatus("Memverifikasi akun Telegram…");
+      setStatus("Menghubungkanmu ke dunia yang baru, memverifikasi retina matamu...");
 
       const telegram = window.Telegram?.WebApp;
       const initData = typeof telegram?.initData === "string" ? telegram.initData : "";
@@ -114,7 +114,7 @@
         throw new Error(authResult?.error || "Server tidak mengembalikan sesi akun Telegram yang valid.");
       }
 
-      setStatus("Menyiapkan akun Tamaverse…");
+      setStatus("Menghubungkanmu ke dunia yang baru, memverifikasi retina matamu...");
       const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
         access_token: authResult.session.access_token,
         refresh_token: authResult.session.refresh_token
@@ -134,7 +134,7 @@
       telegramAuthReady = true;
       window.TAMAVERSE_USER_ID = user.id;
       window.TAMAVERSE_TELEGRAM_ID = returnedTelegramId;
-      setStatus("Memuat dunia Tamaverse…");
+      setStatus("Menghubungkanmu ke dunia yang baru, memverifikasi retina matamu...");
       await loadPlayerFromSupabase();
       if (gate) {
         gate.dataset.state = "ready";
