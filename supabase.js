@@ -292,114 +292,76 @@
     window.TAMAVERSE_USER_ID = user.id;
     setupDiamondWalletSync(user.id);
 
-    let founderGrant = false;
-    try {
-      const initData = window.Telegram?.WebApp?.initData || '';
-      console.info('[Founder] Telegram initData available:', Boolean(initData), 'length:', initData.length);
-      const { data: founderResult, error: founderError } = await supabase.functions.invoke(
-        'grant-founder-rewards',
-        { body: { initData } }
-      );
-      if (founderError) {
-        console.warn('[Founder] Reward check failed:', founderError);
-      } else {
-        console.info('[Founder] Reward check response:', founderResult);
-        if (founderResult?.success && founderResult?.founder) founderGrant = true;
+    // Founder reward verification runs in the background so it cannot hold the lobby.
+    const founderGrantPromise = (async () => {
+      try {
+        const initData = window.Telegram?.WebApp?.initData || '';
+        const { data, error } = await supabase.functions.invoke(
+          'grant-founder-rewards',
+          { body: { initData } }
+        );
+        if (error) {
+          console.warn('[Founder] Reward check failed:', error);
+          return false;
+        }
+        return Boolean(data?.success && data?.founder);
+      } catch (error) {
+        console.warn('[Founder] Reward check unavailable:', error);
+        return false;
       }
-    } catch (founderError) {
-      console.warn('[Founder] Reward check unavailable:', founderError);
-    }
+    })();
 
     try {
-      const { data: profileData, error: profileError } =
-        await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
+      // Independent cloud reads run together instead of waiting one by one.
+      const [profileResult, inventoryResult, dailyResult, premiumResult, petsResult] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+        supabase.from('inventory').select('*').eq('owner_id', user.id).maybeSingle(),
+        supabase.from('daily_rewards').select('last_claim_date, day').eq('owner_id', user.id).maybeSingle(),
+        supabase.from('premium_inventory').select('rename_card_count, rename_pet_card_count, owned_frames').eq('owner_id', user.id).maybeSingle(),
+        supabase.from('pets').select('client_uid, species, nickname, level, xp, is_active').eq('owner_id', user.id)
+      ]);
 
-      if (profileError) {
-        console.warn('Load profile failed:', profileError);
-      } else if (profileData) {
-        window.state.player.name =
-          profileData.display_name || window.state.player.name;
+      const { data: profileData, error: profileError } = profileResult;
+      if (profileError) console.warn('Load profile failed:', profileError);
+      else if (profileData) {
+        window.state.player.name = profileData.display_name || window.state.player.name;
         window.state.player.avatarUrl = profileData.avatar_url || '';
-        window.state.player.avatar =
-          window.state.player.avatarUrl || profileData.avatar || window.state.player.avatar;
-        window.state.player.level =
-          Number(profileData.level || 1);
-        window.state.player.xp =
-          Number(profileData.xp || 0);
-        window.state.player.rating =
-          Number(profileData.rating || 1000);
-        window.state.player.wins =
-          Number(profileData.wins || 0);
-        window.state.player.losses =
-          Number(profileData.losses || 0);
-        window.state.player.draws =
-          Number(profileData.draws || 0);
+        window.state.player.avatar = window.state.player.avatarUrl || profileData.avatar || window.state.player.avatar;
+        window.state.player.level = Number(profileData.level || 1);
+        window.state.player.xp = Number(profileData.xp || 0);
+        window.state.player.rating = Number(profileData.rating || 1000);
+        window.state.player.wins = Number(profileData.wins || 0);
+        window.state.player.losses = Number(profileData.losses || 0);
+        window.state.player.draws = Number(profileData.draws || 0);
         const telegramPhoto = window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url;
         if (telegramPhoto && !window.state.player.avatarUrl && !profileData.avatar_url) window.state.player.avatar = telegramPhoto;
       }
 
-      const { data: inventoryData, error: inventoryError } =
-        await supabase
-          .from('inventory')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle();
-
-      if (inventoryError) {
-        console.warn('Load inventory failed:', inventoryError);
-      } else if (inventoryData) {
+      const { data: inventoryData, error: inventoryError } = inventoryResult;
+      if (inventoryError) console.warn('Load inventory failed:', inventoryError);
+      else if (inventoryData) {
         const player = window.state.player;
         window.state.items = window.state.items || {};
-
-        player.coins = Number(
-          inventoryData.coins ?? player.coins ?? 0
-        );
-        // Purchased Diamonds are server-credited and never included in client save payloads.
-        player.diamonds = Number(
-          inventoryData.diamonds ?? player.diamonds ?? 0
-        );
-
-        window.state.items.snack = Number(
-          inventoryData.snack ?? window.state.items.snack ?? 0
-        );
-        window.state.items.energy = Number(
-          inventoryData.energy ?? window.state.items.energy ?? 0
-        );
-        window.state.items.training = Number(
-          inventoryData.training ?? window.state.items.training ?? 0
-        );
-        window.state.items.fragments =
-          inventoryData.fragments || window.state.items.fragments || {};
+        player.coins = Number(inventoryData.coins ?? player.coins ?? 0);
+        player.diamonds = Number(inventoryData.diamonds ?? player.diamonds ?? 0);
+        window.state.items.snack = Number(inventoryData.snack ?? window.state.items.snack ?? 0);
+        window.state.items.energy = Number(inventoryData.energy ?? window.state.items.energy ?? 0);
+        window.state.items.training = Number(inventoryData.training ?? window.state.items.training ?? 0);
+        window.state.items.fragments = inventoryData.fragments || window.state.items.fragments || {};
       }
 
-      const { data: dailyRewardData, error: dailyRewardError } = await supabase
-        .from('daily_rewards')
-        .select('last_claim_date, day')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-      if (dailyRewardError) {
-        console.warn('Load daily rewards failed:', dailyRewardError);
-      } else if (dailyRewardData) {
-        const claimedDate = dailyRewardData.last_claim_date || '';
+      const { data: dailyRewardData, error: dailyRewardError } = dailyResult;
+      if (dailyRewardError) console.warn('Load daily rewards failed:', dailyRewardError);
+      else if (dailyRewardData) {
         window.state.dailyReward = {
-          lastClaimDate: claimedDate,
+          lastClaimDate: dailyRewardData.last_claim_date || '',
           day: Number(dailyRewardData.day || 0)
         };
       }
 
-      // Load premium ownership and consumable card balances from the protected table.
-      const { data: premiumData, error: premiumError } = await supabase
-        .from('premium_inventory')
-        .select('rename_card_count, rename_pet_card_count, owned_frames')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-      if (premiumError) {
-        console.warn('Load premium inventory failed:', premiumError);
-      } else if (premiumData) {
+      const { data: premiumData, error: premiumError } = premiumResult;
+      if (premiumError) console.warn('Load premium inventory failed:', premiumError);
+      else if (premiumData) {
         window.TAMAVERSE_PREMIUM_INVENTORY = {
           rename_card_count: Number(premiumData.rename_card_count || 0),
           rename_pet_card_count: Number(premiumData.rename_pet_card_count || 0),
@@ -407,51 +369,10 @@
         };
       }
 
-      if (founderGrant) {
-        window.TAMAVERSE_PREMIUM_INVENTORY = window.TAMAVERSE_PREMIUM_INVENTORY || {
-          rename_card_count: 0, rename_pet_card_count: 0, owned_frames: ['common']
-        };
-        const ownedFrames = window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames || ['common'];
-        if (!ownedFrames.includes('royal-sovereign')) {
-          window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames = [...ownedFrames, 'royal-sovereign'];
-        }
-
-        window.state.pets = Array.isArray(window.state.pets) ? window.state.pets : [];
-        const founderPetUid = 'founder-nexora-' + String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '');
-        if (!window.state.pets.some((pet) => pet.species === 'sovereign-nexora')) {
-          window.state.pets.push({
-            uid: founderPetUid,
-            species: 'sovereign-nexora',
-            name: 'Nexora',
-            level: 1,
-            xp: 0,
-            hp: 132,
-            stats: { hp: 132, atk: 26, def: 23, spd: 19 },
-            hunger: 100,
-            happiness: 100,
-            energy: 100,
-            cleanliness: 100,
-            evolution: 0,
-            fragments: 0
-          });
-        }
-        try { localStorage.setItem('tamaverse_save_v1', JSON.stringify(window.state)); } catch (storageError) {
-          console.warn('Founder reward local save failed:', storageError);
-        }
-      }
-
-      // Refresh cloud pet XP/levels after authoritative online battle rewards.
-      const { data: cloudPets, error: petsLoadError } = await supabase
-        .from('pets')
-        .select('client_uid, species, nickname, level, xp, is_active')
-        .eq('owner_id', user.id);
-
-      if (petsLoadError) {
-        console.warn('Load pets failed:', petsLoadError);
-      } else if (Array.isArray(cloudPets) && cloudPets.length) {
+      const { data: cloudPets, error: petsLoadError } = petsResult;
+      if (petsLoadError) console.warn('Load pets failed:', petsLoadError);
+      else if (Array.isArray(cloudPets) && cloudPets.length) {
         const localPets = Array.isArray(window.state.pets) ? window.state.pets : [];
-        // Resolve the active companion once. Multiple is_active rows can exist
-        // from older saves; never let unordered query results decide the Home pet.
         const activeCloudPets = cloudPets
           .filter(pet => pet.is_active)
           .sort((a, b) => String(a.client_uid).localeCompare(String(b.client_uid)));
@@ -459,8 +380,7 @@
         const resolvedActiveCloudPet = activeCloudPets.length === 1
           ? activeCloudPets[0]
           : activeCloudPets.find(pet => String(pet.client_uid) === previousActiveUid)
-            || activeCloudPets[0]
-            || null;
+            || activeCloudPets[0] || null;
         cloudPets.forEach((cloudPet) => {
           let localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
           if (!localPet && cloudPet.species === 'sovereign-nexora') {
@@ -497,6 +417,31 @@
       console.warn('Supabase load failed:', error);
     }
 
+    // Apply founder-only rewards after the lobby has already become available.
+    founderGrantPromise.then((founderGrant) => {
+      if (!founderGrant) return;
+      window.TAMAVERSE_PREMIUM_INVENTORY = window.TAMAVERSE_PREMIUM_INVENTORY || {
+        rename_card_count: 0, rename_pet_card_count: 0, owned_frames: ['common']
+      };
+      const ownedFrames = window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames || ['common'];
+      if (!ownedFrames.includes('royal-sovereign')) {
+        window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames = [...ownedFrames, 'royal-sovereign'];
+      }
+      window.state.pets = Array.isArray(window.state.pets) ? window.state.pets : [];
+      const founderPetUid = 'founder-nexora-' + String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '');
+      if (!window.state.pets.some((pet) => pet.species === 'sovereign-nexora')) {
+        window.state.pets.push({
+          uid: founderPetUid, species: 'sovereign-nexora', name: 'Nexora',
+          level: 1, xp: 0, hp: 132, stats: { hp: 132, atk: 26, def: 23, spd: 19 },
+          hunger: 100, happiness: 100, energy: 100, cleanliness: 100,
+          evolution: 0, fragments: 0
+        });
+      }
+      try { localStorage.setItem('tamaverse_save_v1', JSON.stringify(window.state)); } catch (error) {
+        console.warn('Founder reward local save failed:', error);
+      }
+      if (typeof window.render === 'function') window.render();
+    });
     // Update the ID if its element is already on the page.
     const idElement = document.getElementById('supabaseUserId');
 
