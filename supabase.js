@@ -46,18 +46,19 @@
 
   let telegramAuthReady = false;
   let telegramAuthPromise = null;
-  const TELEGRAM_OIDC_PROVIDER = 'custom:telegram';
+  let verifiedTelegramId = "";
 
   async function ensureSupabaseUser() {
-    if (!telegramAuthReady) {
-      throw new Error('Akun Telegram belum terverifikasi.');
+    if (!telegramAuthReady || !verifiedTelegramId) {
+      throw new Error("Akun Telegram belum terverifikasi.");
     }
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: userData, error } = await supabase.auth.getUser();
     if (error) throw error;
-    const isTelegramUser = user?.app_metadata?.provider === TELEGRAM_OIDC_PROVIDER
-      || (Array.isArray(user?.identities) && user.identities.some(identity => identity.provider === TELEGRAM_OIDC_PROVIDER));
+    const user = userData?.user;
+    const isTelegramUser = user?.app_metadata?.telegram_auth === true
+      && String(user?.app_metadata?.telegram_user_id || "") === verifiedTelegramId;
     if (!user || user.is_anonymous === true || !isTelegramUser) {
-      throw new Error('Sesi Telegram tidak valid. Silakan buka ulang Tamaverse dari bot.');
+      throw new Error("Sesi Telegram tidak valid. Silakan buka ulang Tamaverse dari bot.");
     }
     window.TAMAVERSE_USER_ID = user.id;
     return user;
@@ -66,101 +67,71 @@
   window.ensureTamaverseAuth = ensureSupabaseUser;
 
   async function initializeTelegramAuth() {
-    const gate = document.getElementById('telegramAuthGate');
-    const status = document.getElementById('telegramAuthStatus');
-    const retry = document.getElementById('telegramAuthRetry');
+    const gate = document.getElementById("telegramAuthGate");
+    const status = document.getElementById("telegramAuthStatus");
+    const retry = document.getElementById("telegramAuthRetry");
     const setStatus = (message) => { if (status) status.textContent = message; };
     const showFailure = (message) => {
-      if (gate) gate.dataset.state = 'error';
-      setStatus(message || 'Autentikasi gagal. Coba buka kembali dari bot Tamaverse.');
+      if (gate) gate.dataset.state = "error";
+      setStatus(message || "Autentikasi gagal. Coba buka kembali dari bot Tamaverse.");
       if (retry) retry.hidden = false;
     };
 
     try {
-      if (gate) gate.dataset.state = 'loading';
+      if (gate) { gate.hidden = false; gate.dataset.state = "loading"; }
       if (retry) retry.hidden = true;
-      setStatus('Menghubungkan akun Telegram kamu…');
-
-      // Supabase handles the OIDC callback before getSession() resolves.
-      // Capture the callback URL first because the SDK may clean it afterwards.
-      const currentUrl = new URL(window.location.href);
-      const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ''));
-      const isOAuthCallback = currentUrl.searchParams.has('code')
-        || currentUrl.searchParams.has('error')
-        || hashParams.has('error')
-        || hashParams.has('error_description');
-
-      if (currentUrl.searchParams.has('error') || hashParams.has('error')) {
-        const authError = currentUrl.searchParams.get('error_description')
-          || hashParams.get('error_description')
-          || currentUrl.searchParams.get('error')
-          || hashParams.get('error')
-          || 'Verifikasi Telegram dibatalkan.';
-        throw new Error(authError);
-      }
+      setStatus("Memverifikasi akun Telegram…");
 
       const telegram = window.Telegram?.WebApp;
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      const initData = typeof telegram?.initData === "string" ? telegram.initData : "";
+      if (!initData) {
+        throw new Error("Buka Tamaverse melalui tombol Open Tamaverse di bot Telegram.");
+      }
+
+      const { data: authResult, error: authError } = await supabase.functions.invoke("telegram-auth", {
+        body: { initData }
+      });
+      if (authError) {
+        console.error("Telegram auth function failed:", authError);
+        throw new Error("Verifikasi Telegram gagal. Periksa koneksi lalu coba lagi.");
+      }
+      if (!authResult?.session?.access_token || !authResult?.session?.refresh_token || !authResult?.telegram_user_id) {
+        throw new Error(authResult?.error || "Server tidak mengembalikan sesi akun Telegram yang valid.");
+      }
+
+      setStatus("Menyiapkan akun Tamaverse…");
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+        access_token: authResult.session.access_token,
+        refresh_token: authResult.session.refresh_token
+      });
       if (sessionError) throw sessionError;
 
-      let user = null;
-      if (sessionData?.session) {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError) throw userError;
-        user = userData?.user || null;
+      const user = sessionData?.user;
+      const returnedTelegramId = String(authResult.telegram_user_id);
+      const isTelegramUser = user?.app_metadata?.telegram_auth === true
+        && String(user?.app_metadata?.telegram_user_id || "") === returnedTelegramId;
+      if (!user || user.is_anonymous === true || !isTelegramUser) {
+        await supabase.auth.signOut({ scope: "local" });
+        throw new Error("Identitas Telegram tidak cocok dengan akun Tamaverse.");
       }
 
-      const isTelegramUser = user?.app_metadata?.provider === TELEGRAM_OIDC_PROVIDER
-        || (Array.isArray(user?.identities) && user.identities.some(identity => identity.provider === TELEGRAM_OIDC_PROVIDER));
-
-      if (user && user.is_anonymous !== true && isTelegramUser) {
-        // A callback may return in the system browser; normal launches must
-        // still originate from Telegram's Mini App.
-        if (!telegram && !isOAuthCallback) {
-          throw new Error('Buka Tamaverse melalui tombol Open Tamaverse di bot Telegram.');
-        }
-
-        telegramAuthReady = true;
-        window.TAMAVERSE_USER_ID = user.id;
-        setStatus('Memuat dunia Tamaverse…');
-        await loadPlayerFromSupabase();
-        if (gate) gate.dataset.state = 'ready';
-        window.setTimeout(() => { if (gate) gate.hidden = true; }, 250);
-        return user;
+      verifiedTelegramId = returnedTelegramId;
+      telegramAuthReady = true;
+      window.TAMAVERSE_USER_ID = user.id;
+      window.TAMAVERSE_TELEGRAM_ID = returnedTelegramId;
+      setStatus("Memuat dunia Tamaverse…");
+      await loadPlayerFromSupabase();
+      if (gate) {
+        gate.dataset.state = "ready";
+        window.setTimeout(() => { gate.hidden = true; }, 250);
       }
-
-      if (sessionData?.session) {
-        const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' });
-        if (signOutError) console.warn('Invalid local auth session could not be cleared:', signOutError);
-      }
-
-      if (!telegram && !isOAuthCallback) {
-        throw new Error('Tamaverse hanya bisa dibuka melalui tombol Open Tamaverse di Telegram.');
-      }
-
-      if (isOAuthCallback) {
-        throw new Error('Verifikasi Telegram belum menghasilkan sesi. Coba buka kembali Tamaverse dari bot.');
-      }
-
-      setStatus('Membuka verifikasi akun Telegram…');
-      const { data: oauthData, error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: TELEGRAM_OIDC_PROVIDER,
-        options: {
-          redirectTo: window.location.origin + window.location.pathname,
-          scopes: 'openid profile',
-          skipBrowserRedirect: true
-        }
-      });
-      if (oauthError) throw oauthError;
-      if (!oauthData?.url) throw new Error('Halaman verifikasi Telegram gagal dibuka.');
-
-      setStatus('Mengalihkan ke verifikasi Telegram…');
-      window.location.assign(oauthData.url);
-      return null;
+      return user;
     } catch (error) {
       telegramAuthReady = false;
+      verifiedTelegramId = "";
       window.TAMAVERSE_USER_ID = null;
-      console.error('Telegram authentication failed:', error);
+      window.TAMAVERSE_TELEGRAM_ID = null;
+      console.error("Telegram auto-authentication failed:", error);
       showFailure(error?.message);
       throw error;
     }
@@ -176,14 +147,14 @@
   }
 
   window.TAMAVERSE_AUTH_READY = new Promise((resolve, reject) => {
-    window.addEventListener('load', () => {
+    window.addEventListener("load", () => {
       startTelegramAuth().then(resolve, reject);
     }, { once: true });
   });
 
-  window.addEventListener('load', () => {
-    const retry = document.getElementById('telegramAuthRetry');
-    retry?.addEventListener('click', () => {
+  window.addEventListener("load", () => {
+    const retry = document.getElementById("telegramAuthRetry");
+    retry?.addEventListener("click", () => {
       if (retry) retry.hidden = true;
       startTelegramAuth().catch(() => {});
     });
