@@ -103,15 +103,30 @@
       syncProfileControls();
     });
 
-    const firstGesture = () => {
-      if (!audio.muted && audio.paused) {
-        audio.play().then(() => { started = true; }).catch(() => {});
-      }
-      window.removeEventListener('pointerdown', firstGesture);
-      window.removeEventListener('keydown', firstGesture);
+    const tryResumePlayback = () => {
+      if (audio.muted || !audio.paused) return;
+      audio.play().then(() => {
+        started = true;
+        window.removeEventListener('pointerdown', firstGesture);
+        window.removeEventListener('keydown', firstGesture);
+        window.removeEventListener('touchstart', firstGesture);
+      }).catch(() => {
+        // Keep gesture listeners installed: Telegram/Android may reject
+        // autoplay until a later user interaction is received.
+      });
     };
-    window.addEventListener('pointerdown', firstGesture, { once: true, passive: true });
-    window.addEventListener('keydown', firstGesture, { once: true });
+    const firstGesture = () => {
+      tryResumePlayback();
+    };
+    // Attempt autoplay on launch and whenever the Mini App becomes active again.
+    tryResumePlayback();
+    window.addEventListener('pageshow', tryResumePlayback);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') tryResumePlayback();
+    });
+    window.addEventListener('pointerdown', firstGesture, { passive: true });
+    window.addEventListener('keydown', firstGesture);
+    window.addEventListener('touchstart', firstGesture, { passive: true });
     audio.addEventListener('play', syncProfileControls);
     audio.addEventListener('pause', syncProfileControls);
     audio.addEventListener('volumechange', syncProfileControls);
