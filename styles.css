@@ -4359,3 +4359,54 @@ body[data-theme="light"] .profile-telegram-id strong{color:#fff}
   .profile-uuid-row{grid-column:1/-1;max-width:none}
   .diamond-shop-trigger{width:24px;height:24px;font-size:18px}
 }
+
+
+/* Player profile card: square avatar, landscape info, full-width UUID */
+.profile-identity-card{
+  grid-template-columns: minmax(88px, 0.38fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: stretch;
+  gap: 12px;
+}
+.profile-avatar-shell{
+  width:100%;
+  aspect-ratio:1 / 1;
+  height:auto;
+  min-width:0;
+  border-radius:20px;
+  align-self:stretch;
+}
+.profile-identity-copy{
+  min-width:0;
+  min-height:100%;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:12px;
+  border-radius:17px;
+  border:1px solid #ffffff20;
+  background:linear-gradient(145deg,#ffffff12,#ffffff08);
+}
+.profile-identity-copy h2{margin:5px 0 2px}
+.profile-identity-copy .profile-telegram-id{
+  margin:0 0 5px;
+  color:#f0d7f0;
+  font-size:12px;
+  font-weight:800;
+  overflow-wrap:anywhere;
+}
+.profile-identity-copy .profile-level-label{margin:0 0 8px}
+.profile-identity-buttons{gap:6px;margin-top:2px;flex-wrap:wrap}
+.profile-identity-buttons .profile-action-button{min-width:0;padding:8px 9px;font-size:10px}
+.profile-uuid-row{grid-column:1 / -1;width:100%;box-sizing:border-box}
+@media(max-width:390px){
+  .profile-identity-card{grid-template-columns:minmax(82px, 0.36fr) minmax(0,1fr);gap:9px;padding:13px}
+  .profile-avatar-shell{width:100%;height:auto;aspect-ratio:1/1;border-radius:17px}
+  .profile-identity-copy{padding:9px;border-radius:14px}
+  .profile-identity-copy h2{font-size:17px}
+  .profile-identity-copy .profile-telegram-id{font-size:11px}
+  .profile-identity-buttons .profile-action-button{padding:7px 8px;font-size:9px}
+}
+body[data-theme="light"] .profile-identity-copy{background:#ffffff30;border-color:#ffffff55}
+body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
