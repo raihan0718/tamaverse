@@ -470,6 +470,16 @@ const LINK_MSG: Record<Exclude<LinkResult, "ok">, string> = {
   error: TEXT.genericError,
 };
 
+/** Perbarui username dari update Telegram terbaru tanpa mengubah relasi Telegram ↔ UUID. */
+async function refreshTelegramUsername(telegramId: string, username: string) {
+  if (!username) return;
+  const { error } = await db
+    .from("tamaverse_telegram_links")
+    .update({ telegram_username: username })
+    .eq("telegram_user_id", telegramId);
+  if (error) throw error;
+}
+
 async function linkUuid(chatId: number | string, telegramId: string, username: string, supplied: string) {
   const uuid = supplied.trim().toLowerCase();
   if (!UUID_PATTERN.test(uuid)) {
@@ -1264,6 +1274,8 @@ async function handleMessage(message: Any) {
   const username = String(message.from?.username ?? "");
   const text = String(message.text ?? "").trim();
   if (!telegramId) return;
+
+  await refreshTelegramUsername(telegramId, username);
 
   if (/^\/balance_setup(@\w+)?(\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalanceSetup(chatId, telegramId); return; }
   if (/^\/balance(@\w+)?(\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalance(chatId, telegramId); return; }
