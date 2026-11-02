@@ -4740,3 +4740,67 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
     linear-gradient(0deg,transparent 5%,rgba(235,204,151,.45) 5.5%,transparent 6.2%,transparent 93.8%,rgba(235,204,151,.45) 94.5%,transparent 95%)!important;
   box-shadow:inset 0 0 18px rgba(202,28,62,.12),0 0 12px rgba(202,28,62,.18)!important;
 }
+
+
+/* RESTORE legacy ornaments for Royal Violet (Legendary) and Celestial */
+.accessory-art.aura-legendary::after{
+  content:"✦  ·  ✧       ✧  ·  ✦"!important;
+  position:absolute!important;z-index:3!important;inset:13% 4% auto!important;
+  display:block!important;text-align:center!important;color:#ffd9f4!important;
+  font-size:17px!important;letter-spacing:9px!important;
+  text-shadow:0 0 6px #ff78d0,0 0 13px #d68cff!important;
+  pointer-events:none!important;animation:frameSparkle 1.8s ease-in-out infinite!important;
+}
+.accessory-art.aura-celestial::after{
+  content:"✧  ✦  ·  ✧  ✦  ·  ✧"!important;
+  position:absolute!important;z-index:3!important;inset:8% 0 auto!important;
+  display:block!important;text-align:center!important;color:#fff4c9!important;
+  font-size:18px!important;letter-spacing:5px!important;
+  text-shadow:0 0 7px #fff,0 0 15px #ff8bd7,0 0 22px #8bcfff!important;
+  pointer-events:none!important;animation:frameSparkle 1.35s ease-in-out infinite!important;
+}
+.accessory-art.aura-legendary::before{
+  inset:4%!important;
+  background:radial-gradient(ellipse,rgba(255,105,191,.4),rgba(190,112,255,.18) 48%,transparent 74%)!important;
+  filter:blur(20px)!important;animation:royalAuraPulse 2.8s ease-in-out infinite!important;
+}
+.accessory-art.aura-celestial::before{
+  inset:2%!important;
+  background:conic-gradient(from 0deg,rgba(255,120,160,.36),rgba(255,218,112,.34),rgba(115,224,194,.34),rgba(112,174,255,.38),rgba(193,132,255,.4),rgba(255,120,160,.36))!important;
+  border-radius:50%!important;filter:blur(23px)!important;animation:rainbowAura 5s linear infinite!important;
+}
+.accessory-art.aura-legendary img{
+  filter:drop-shadow(0 0 7px rgba(255,105,196,.68)) drop-shadow(0 0 13px rgba(191,117,255,.42)) drop-shadow(0 5px 10px #0003)!important;
+}
+.accessory-art.aura-celestial img{
+  filter:drop-shadow(0 0 7px rgba(255,153,213,.72)) drop-shadow(0 0 13px rgba(143,190,255,.62)) drop-shadow(0 0 18px rgba(255,220,132,.42)) drop-shadow(0 5px 10px #0003)!important;
+}
+.home-page .pet-stage > .home-frame-ornaments.aura-legendary,
+.home-page .pet-stage > .home-frame-ornaments.aura-celestial{
+  display:block!important;position:absolute!important;left:49%!important;top:46.5%!important;
+  width:min(90%,470px)!important;aspect-ratio:684/768!important;
+  transform:translate(-50%,-50%)!important;z-index:30!important;
+  pointer-events:none!important;
+}
+.home-page .pet-stage > .home-frame-ornaments.aura-legendary .aura-ornament,
+.home-page .pet-stage > .home-frame-ornaments.aura-celestial .aura-ornament{
+  display:block!important;position:absolute!important;left:0!important;right:0!important;
+  width:100%!important;text-align:center!important;font-style:normal!important;
+  font-weight:900!important;line-height:1!important;white-space:nowrap!important;
+}
+.home-page .pet-stage > .home-frame-ornaments.aura-legendary .aura-ornament{
+  color:#ffe0f5!important;font-size:clamp(16px,4.6vw,23px)!important;letter-spacing:7px!important;
+  text-shadow:0 0 7px #ff78d0,0 0 16px #d68cff,0 0 24px #fff!important;
+  animation:frameSparkle 1.8s ease-in-out infinite!important;
+}
+.home-page .pet-stage > .home-frame-ornaments.aura-celestial .aura-ornament{
+  color:#fff8d8!important;font-size:clamp(17px,4.8vw,24px)!important;letter-spacing:6px!important;
+  text-shadow:0 0 8px #fff,0 0 17px #ff8bd7,0 0 25px #8bcfff!important;
+  animation:frameSparkle 1.35s ease-in-out infinite!important;
+}
+.home-page .pet-stage > .home-frame-ornaments .aura-ornament-top{top:3%!important}
+.home-page .pet-stage > .home-frame-ornaments .aura-ornament-bottom{bottom:3%!important}
+@media(prefers-reduced-motion:reduce){
+  .accessory-art.aura-legendary::after,.accessory-art.aura-celestial::after,
+  .home-page .pet-stage > .home-frame-ornaments .aura-ornament{animation:none!important}
+}
