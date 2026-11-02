@@ -45,6 +45,26 @@ async function verifyInitData(raw: string) {
 }
 const randomPassword = () => hex(crypto.getRandomValues(new Uint8Array(48))) + "T9!";
 
+async function findLegacyTelegramAccount(telegramId: string) {
+  // Preserve accounts created by the previous custom:telegram OIDC flow.
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 500 });
+    if (error) throw new Error("LEGACY_ACCOUNT_LOOKUP_FAILED");
+    const match = data.users.find(user => {
+      const identities = Array.isArray(user.identities) ? user.identities : [];
+      const telegramIdentity = identities.some(identity =>
+        identity.provider === "custom:telegram" &&
+        String(identity.identity_data?.sub || identity.id || "") === telegramId
+      );
+      return user.app_metadata?.provider === "custom:telegram" &&
+        (telegramIdentity || String(user.user_metadata?.telegram_user_id || "") === telegramId);
+    });
+    if (match) return match;
+    if (data.users.length < 500) break;
+  }
+  return null;
+}
+
 Deno.serve(async req => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return reply({ error: "METHOD_NOT_ALLOWED" }, 405);
@@ -64,6 +84,10 @@ Deno.serve(async req => {
     let ownerId = found?.owner_id || "";
     let createdId = "";
     if (!ownerId) {
+      const legacyAccount = await findLegacyTelegramAccount(tg.id);
+      if (legacyAccount) ownerId = legacyAccount.id;
+    }
+    if (!ownerId) {
       const { data: created, error: createError } = await admin.auth.admin.createUser({
         email, password: randomPassword(), email_confirm: true,
         user_metadata: { display_name: tg.name, telegram_user_id: tg.id, telegram_username: tg.username }
@@ -71,16 +95,18 @@ Deno.serve(async req => {
       if (createError || !created?.user) throw new Error("TELEGRAM_ACCOUNT_CREATE_FAILED");
       ownerId = created.user.id;
       createdId = ownerId;
+    }
+    if (!found) {
       const { error: insertError } = await admin.from("tamaverse_telegram_links").insert({
         telegram_user_id: tg.id, telegram_username: tg.username, owner_id: ownerId
       });
       if (insertError) {
         const { data: raced } = await admin.from("tamaverse_telegram_links").select("owner_id").eq("telegram_user_id", tg.id).maybeSingle();
         if (raced?.owner_id) {
-          await admin.auth.admin.deleteUser(createdId);
+          if (createdId) await admin.auth.admin.deleteUser(createdId);
           ownerId = raced.owner_id;
         } else {
-          await admin.auth.admin.deleteUser(createdId);
+          if (createdId) await admin.auth.admin.deleteUser(createdId);
           throw new Error("TELEGRAM_ACCOUNT_LINK_FAILED");
         }
       }
