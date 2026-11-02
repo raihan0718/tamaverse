@@ -1083,7 +1083,7 @@ function profilePage(){
   const userId=String(window.TAMAVERSE_USER_ID||'');
   const shortUserId=userId?(userId.length>16?userId.slice(0,8)+'…'+userId.slice(-4):userId):'Memuat ID...';
   const telegramUser=window.Telegram?.WebApp?.initDataUnsafe?.user;
-  const telegramId=telegramUser?.id?String(telegramUser.id):'Belum terhubung';
+  const telegramUsername=telegramUser?.username?'@'+String(telegramUser.username):'Belum diatur';
   const rankData=window.TAMAVERSE_RANKING_DATA||[];
   if(!rankData.length&&!window.TAMAVERSE_RANKING_LOADING&&!window.TAMAVERSE_RANKING_ERROR&&window.TAMAVERSE_SUPABASE_CLIENT)loadGlobalRankings();
   const ranked=[...rankData].sort((a,b)=>Number(b.rating||0)-Number(a.rating||0)||String(a.name||'').localeCompare(String(b.name||'')));
@@ -1094,7 +1094,7 @@ function profilePage(){
     <article class="profile-identity-card"><div class="profile-identity-orbit"></div>
       <div class="profile-avatar-shell">${profileAvatarMarkup()}</div>
       <div class="profile-identity-copy"><span class="profile-online-label"><i></i> PLAYER PROFILE</span><h2>${esc(p.name||'Player')}</h2>
-        <p class="profile-telegram-id">TELEGRAM ID <strong>${esc(telegramId)}</strong></p><p class="profile-level-label">Level ${Number(p.level||1)} adventurer</p>
+        <p class="profile-telegram-id">TELEGRAM USERNAME <strong>${esc(telegramUsername)}</strong></p><p class="profile-level-label">Level ${Number(p.level||1)} adventurer</p>
         <div class="profile-identity-buttons"><button class="profile-action-button" data-action="rename-player"><span>✎</span> Rename</button><button class="profile-action-button profile-change-button" data-action="pick-profile-photo"><span>▧</span> Change Profile</button></div></div>
       <div class="profile-uuid-row" title="UUID akun lengkap"><span class="profile-uuid-icon">◈</span><span class="profile-uuid-value">${esc(shortUserId)}</span><button class="profile-copy-uuid" data-action="copy-user-id" aria-label="Salin UUID lengkap" title="Salin UUID lengkap">⧉</button></div>
     </article>
