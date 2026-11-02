@@ -195,7 +195,7 @@
       const initData = window.Telegram?.WebApp?.initData || '';
       console.info('[Founder] Telegram initData available:', Boolean(initData), 'length:', initData.length);
       const { data: founderResult, error: founderError } = await supabase.functions.invoke(
-        'quick-service',
+        'grant-founder-rewards',
         { body: { initData } }
       );
       if (founderError) {
