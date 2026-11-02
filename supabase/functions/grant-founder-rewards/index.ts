@@ -8,7 +8,7 @@ const env = (name: string) => {
 
 const SUPABASE_URL = env("SUPABASE_URL");
 const SERVICE_ROLE_KEY = env("SUPABASE_SERVICE_ROLE_KEY");
-const BOT_TOKEN = env("TELEGRAM_BOT_TOKEN2");
+const BOT_TOKEN = env("TELEGRAM_BOT_TOKEN3");
 const FOUNDER_TELEGRAM_ID = String(env("ADMIN_TELEGRAM_ID"));
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
