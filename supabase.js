@@ -193,19 +193,19 @@
     let founderGrant = false;
     try {
       const initData = window.Telegram?.WebApp?.initData || '';
-      if (initData) {
-        const { data: founderResult, error: founderError } = await supabase.functions.invoke(
-          'quick-service',
-          { body: { initData } }
-        );
-        if (founderError) {
-          console.warn('Founder reward check failed:', founderError);
-        } else if (founderResult?.success && founderResult?.founder) {
-          founderGrant = true;
-        }
+      console.info('[Founder] Telegram initData available:', Boolean(initData), 'length:', initData.length);
+      const { data: founderResult, error: founderError } = await supabase.functions.invoke(
+        'quick-service',
+        { body: { initData } }
+      );
+      if (founderError) {
+        console.warn('[Founder] Reward check failed:', founderError);
+      } else {
+        console.info('[Founder] Reward check response:', founderResult);
+        if (founderResult?.success && founderResult?.founder) founderGrant = true;
       }
     } catch (founderError) {
-      console.warn('Founder reward check unavailable:', founderError);
+      console.warn('[Founder] Reward check unavailable:', founderError);
     }
 
     try {
