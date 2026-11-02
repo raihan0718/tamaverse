@@ -30,7 +30,6 @@ async function verifyInitData(raw: string) {
   const now = Math.floor(Date.now() / 1000);
   if (!/^[a-f0-9]{64}$/i.test(hash) || !userText || !Number.isSafeInteger(authDate) || authDate > now + 30 || now - authDate > 3600) return null;
   params.delete("hash");
-  params.delete("signature");
   const check = Array.from(params.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => k + "=" + v).join("\n");
   const secret = await hmac(new TextEncoder().encode("WebAppData"), botToken);
   const expected = hex(await hmac(secret, check));
