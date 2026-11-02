@@ -291,7 +291,7 @@ async function loadGlobalRankings() {
 window.loadGlobalRankings = loadGlobalRankings;
 
 window.setRankingSort = function (category) {
-  const allowed = ['rating', 'level', 'wins', 'coins'];
+  const allowed = ['rating', 'level', 'wins', 'playtime'];
   if (!allowed.includes(category)) return;
 
   window.TAMAVERSE_RANKING_SORT = category;
