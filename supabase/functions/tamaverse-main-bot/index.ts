@@ -2,6 +2,8 @@ const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN3");
 const WEBHOOK_SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET3") ?? "";
 const APP_URL = "https://raihan0718.github.io/tamaverse/";
 const API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 type TgMessage = {
   message_id: number;
@@ -66,6 +68,21 @@ async function telegram(method: string, body: Record<string, unknown>) {
   return result;
 }
 
+async function recordBotStart(telegramUserId: number) {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Supabase service configuration missing");
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/tamaverse_telegram_bot_starts`, {
+    method: "POST",
+    headers: {
+      "apikey": SERVICE_ROLE_KEY,
+      "Authorization": `Bearer ${SERVICE_ROLE_KEY}`,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates"
+    },
+    body: JSON.stringify({ telegram_user_id: String(telegramUserId), started_at: new Date().toISOString() })
+  });
+  if (!response.ok) throw new Error("Could not record Telegram bot start");
+}
+
 async function send(chatId: number, text: string, replyMarkup?: unknown) {
   return telegram("sendMessage", {
     chat_id: chatId,
@@ -125,8 +142,11 @@ Deno.serve(async (req: Request) => {
 
     switch (command) {
       case "/start":
-      case "/menu":
+        await recordBotStart(chatId);
         await send(chatId, `🌙 *Hey, ${firstName}!*\n\nWelcome to *Tamaverse* — a cozy universe for your virtual-pet journey.\n\nReady to meet your companion and explore? Pick a menu below.`, mainKeyboard);
+        break;
+      case "/menu":
+        await send(chatId, `🌙 *Hey, ${firstName}!*\\n\\nWelcome back to *Tamaverse* — ready to visit your little companions? Pick a menu below.`, mainKeyboard);
         break;
       case "/about":
         await send(chatId, pages.about.text, pages.about.keyboard);
