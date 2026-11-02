@@ -1260,6 +1260,8 @@ async function handleMessage(message: Any) {
   if (/^\/balance_setup(@\w+)?(\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalanceSetup(chatId, telegramId); return; }
   if (/^\/balance(@\w+)?(\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalance(chatId, telegramId); return; }
   if (await handleBalanceText(chatId, telegramId, text)) return;
+
+  if (Array.isArray(message.photo) && message.photo.length > 0) {
     await handleProof(message);
     return;
   }
