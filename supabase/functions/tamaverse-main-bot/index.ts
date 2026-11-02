@@ -22,9 +22,9 @@ type TgUpdate = {
 
 const mainKeyboard = {
   inline_keyboard: [
-    [{ text: "Open Tamaverse", url: APP_URL }],
-    [{ text: "About Tamaverse", callback_data: "about" }, { text: "How to play", callback_data: "guide" }],
-    [{ text: "Commands", callback_data: "commands" }, { text: "Help & support", callback_data: "support" }],
+    [{ text: "🌈 Open Tamaverse", url: APP_URL }],
+    [{ text: "✨ About Tamaverse", callback_data: "about" }, { text: "🐣 How to play", callback_data: "guide" }],
+    [{ text: "📜 Commands", callback_data: "commands" }, { text: "💌 Help & support", callback_data: "support" }],
   ],
 };
 
@@ -46,8 +46,8 @@ const pages: Record<string, { text: string; keyboard?: unknown }> = {
     keyboard: { inline_keyboard: [[{ text: "‹ Back to menu", callback_data: "home" }]] },
   },
   support: {
-    text: "*Need help?*\n\nTell us what happened and include: your Telegram username, what you were trying to do, and a screenshot if relevant.\n\nPlease never send passwords, login codes, bot tokens, or payment credentials in chat.\n\nOfficial support contact details can be added here when the admin contact is ready.",
-    keyboard: { inline_keyboard: [[{ text: "‹ Back to menu", callback_data: "home" }]] },
+    text: "💌 *Need a little help?*\\n\\nNo worries, we’re here for you! 🐣 Tell our support team what happened and, if you can, include a screenshot so we can understand it better. ✨\\n\\nTap below and say hi to @TamaSupportBot. 💗",
+    keyboard: { inline_keyboard: [[{ text: "💌 Chat with TamaSupport", url: "https://t.me/TamaSupportBot" }], [{ text: "‹ Back to menu 🏡", callback_data: "home" }]] },
   },
 };
 
@@ -135,7 +135,7 @@ Deno.serve(async (req: Request) => {
         await send(chatId, pages.support.text, pages.support.keyboard);
         break;
       case "/game":
-        await send(chatId, "Your Tamaverse adventure is one tap away.", { inline_keyboard: [[{ text: "Open Tamaverse", url: APP_URL }], [{ text: "‹ Main menu", callback_data: "home" }]] });
+        await send(chatId, "🎮 Your Tamaverse adventure is just one tap away! Ready, set, hatch! 🐣✨", { inline_keyboard: [[{ text: "Open Tamaverse", url: APP_URL }], [{ text: "‹ Main menu", callback_data: "home" }]] });
         break;
       case "/support":
         await send(chatId, pages.support.text, pages.support.keyboard);
