@@ -296,6 +296,31 @@
 
   window.savePlayerToSupabase = savePlayerToSupabase;
 
+  // Serialize cloud writes. The old save wrapper launched one independent
+  // upsert per local save; fast care actions could overlap and an older
+  // snapshot could finish last, reverting the newest mood/stat values.
+  let cloudSaveRunning = false;
+  let cloudSavePending = false;
+  let cloudSavePromise = Promise.resolve();
+  function queueCloudSave() {
+    cloudSavePending = true;
+    if (cloudSaveRunning) return cloudSavePromise;
+    cloudSaveRunning = true;
+    cloudSavePromise = (async () => {
+      try {
+        while (cloudSavePending) {
+          cloudSavePending = false;
+          await savePlayerToSupabase();
+        }
+      } finally {
+        cloudSaveRunning = false;
+        if (cloudSavePending) queueCloudSave();
+      }
+    })();
+    return cloudSavePromise;
+  }
+  window.queueTamaverseCloudSave = queueCloudSave;
+
   async function loadPlayerFromSupabase() {
     if (!window.state || !supabase) return;
 
@@ -422,6 +447,15 @@
           }
           localPet.level = newLevel;
           localPet.xp = Math.max(0, Number(cloudPet.xp) || 0);
+          // Hydrate care meters for already-known pets too. Previously only newly
+          // imported pets received cloud care values, leaving existing local pets
+          // (often the starter Mochi) with stale mood/happiness after account reload.
+          for (const key of ['hunger', 'happiness', 'energy', 'cleanliness']) {
+            const value = Number(cloudPet[key]);
+            if (Number.isFinite(value)) localPet[key] = Math.max(0, Math.min(100, Math.round(value)));
+          }
+          const cloudEvolution = Number(cloudPet.evolution);
+          if (Number.isFinite(cloudEvolution)) localPet.evolution = Math.max(0, Math.round(cloudEvolution));
           if (cloudPet.nickname) localPet.name = cloudPet.nickname;
           if (resolvedActiveCloudPet && String(cloudPet.client_uid) === String(resolvedActiveCloudPet.client_uid)) {
             window.state.activePet = localPet.uid;
@@ -662,8 +696,9 @@
       try {
         return originalSave.apply(this, arguments);
       } finally {
-        savePlayerToSupabase().catch((error) => {
+        queueCloudSave().catch((error) => {
           console.warn('Cloud save failed:', error);
+          window.TAMAVERSE_LAST_CLOUD_SAVE_ERROR = String(error?.message || error);
         });
       }
     };
