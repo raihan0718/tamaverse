@@ -4296,3 +4296,8 @@ body[data-theme="light"] .profile-telegram-id strong{color:#fff}
 .wallet .coin-convert-trigger:hover{background:#96702a;}
 @media(max-width:520px){.topbar{padding:0 10px;gap:8px}.brand{gap:6px;font-size:12px}.brand-mark{width:27px;height:27px}.wallet{gap:8px;padding:6px 8px;border-radius:17px}.wallet-currency{gap:5px}.wallet-currency-icon{width:28px;height:28px;border-radius:9px;font-size:17px}.wallet-currency strong{font-size:12px}.wallet .coin-convert-trigger{width:25px;height:25px;font-size:18px}.wallet-divider{height:23px}.theme-toggle{width:38px;height:38px;flex:none}}
 @media(max-width:360px){.brand>span:last-child{font-size:10px}.wallet{gap:6px;padding:5px 6px}.wallet-currency strong{font-size:11px}.wallet-currency-icon{width:25px;height:25px}}
+
+
+/* Energy Potion feedback */
+.pet-action-energy .stage-pet{animation:petEnergy .55s cubic-bezier(.2,.8,.25,1) 3}
+@keyframes petEnergy{0%,100%{transform:translate(-50%,-50%) scale(1)}35%{transform:translate(-50%,-58%) scale(1.08)}70%{transform:translate(-50%,-47%) scale(1.03)}}
