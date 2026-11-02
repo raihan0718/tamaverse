@@ -112,6 +112,11 @@ Deno.serve(async req => {
       }
     }
 
+    const { error: loginTrackError } = await admin.from("tamaverse_telegram_links")
+      .update({ last_login_at: new Date().toISOString(), telegram_username: tg.username })
+      .eq("telegram_user_id", tg.id);
+    if (loginTrackError) throw new Error("LOGIN_ACTIVITY_TRACK_FAILED");
+
     const { data: botStart } = await admin.from("tamaverse_telegram_bot_starts")
       .select("started_at").eq("telegram_user_id", tg.id).maybeSingle();
     if (botStart?.started_at) {
