@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.tamaverse-main-bot]
 verify_jwt = false
+
+[functions.telegram-auth]
+verify_jwt = false
