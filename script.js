@@ -255,25 +255,10 @@ async function loadGlobalRankings() {
     const { data: profiles, error: profileError } =
       await db
   .from('profiles')
-        .select('id, display_name, avatar, avatar_url, level, rating, wins, losses')
+        .select('id, display_name, avatar, avatar_url, level, rating, wins, losses, playtime_seconds')
         .limit(500);
 
     if (profileError) throw profileError;
-
-    const { data: inventories, error: inventoryError } =
-      await db
-  .from('inventory')
-        .select('owner_id, coins')
-        .limit(500);
-
-    if (inventoryError) throw inventoryError;
-
-    const coinsByPlayer = new Map(
-      (inventories || []).map(item => [
-        item.owner_id,
-        Number(item.coins || 0)
-      ])
-    );
 
     window.TAMAVERSE_RANKING_DATA =
       (profiles || []).map(p => ({
@@ -284,7 +269,7 @@ async function loadGlobalRankings() {
         rating: Number(p.rating || 1000),
         wins: Number(p.wins || 0),
         losses: Number(p.losses || 0),
-        coins: coinsByPlayer.get(p.id) || 0,
+        playtime: Number(p.playtime_seconds || 0),
         me: p.id === window.TAMAVERSE_USER_ID
       }));
 
@@ -314,15 +299,22 @@ window.setRankingSort = function (category) {
   }
 };
 
+function formatPlaytime(value) {
+  const total = Math.max(0, Math.floor(Number(value) || 0));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
+
 function rankingPage() {
   const categories = [
     ['rating', 'Rating'],
     ['level', 'Level'],
     ['wins', 'Wins'],
-    ['coins', 'Coins']
+    ['playtime', 'Playtime']
   ];
   const category = window.TAMAVERSE_RANKING_SORT || 'rating';
-  const labels = {rating:'Rating Battle',level:'Level',wins:'Total Wins',coins:'Coins'};
+  const labels = {rating:'Rating Battle',level:'Level',wins:'Total Wins',playtime:'Playtime'};
   const data = window.TAMAVERSE_RANKING_DATA || [];
 
   if (!data.length && !window.TAMAVERSE_RANKING_LOADING && !window.TAMAVERSE_RANKING_ERROR) {
@@ -338,7 +330,7 @@ function rankingPage() {
   const podium = rows.slice(0,3);
   const rest = rows.slice(3);
   const medal = ['🥇','🥈','🥉'];
-  const metric = r => Number(r[category] || 0).toLocaleString('id-ID');
+  const metric = r => category === 'playtime' ? formatPlaytime(r.playtime) : Number(r[category] || 0).toLocaleString('id-ID');
 
   return `<section class="page ranking-page">
     <div class="ranking-heading">
