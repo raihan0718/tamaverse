@@ -4938,12 +4938,12 @@ body[data-theme="light"] .collection-page .creature-card,body:not([data-theme="d
 /* Store item artwork sizing and alignment */
 .shop-product-art img{
   display:block;
-  width:70px !important;
-  height:70px !important;
-  max-width:70px !important;
-  max-height:70px !important;
+  width:80px !important;
+  height:80px !important;
+  max-width:80px !important;
+  max-height:80px !important;
   object-fit:contain;
-  transform:translateY(-9px);
+  transform:translateY(-7px);
 }
 .store-item-art{
   min-height:104px;
@@ -4952,11 +4952,11 @@ body[data-theme="light"] .collection-page .creature-card,body:not([data-theme="d
 }
 .store-item-art img{
   display:block;
-  width:68px;
-  height:68px;
-  max-width:68px;
-  max-height:68px;
+  width:78px;
+  height:78px;
+  max-width:78px;
+  max-height:78px;
   object-fit:contain;
-  transform:translateY(-5px);
+  transform:translateY(-3px);
   filter:drop-shadow(0 5px 9px rgba(75,55,110,.16));
 }
