@@ -397,6 +397,80 @@
 
   window.loadPlayerFromSupabase = loadPlayerFromSupabase;
 
+  // Active Playtime: count only while the app is visible, sync in short secure batches.
+  let playtimeLastTick = document.visibilityState === 'visible' ? Date.now() : 0;
+  let playtimePendingSeconds = 0;
+  let playtimeSyncBusy = false;
+
+  async function syncActivePlaytime(force = false) {
+    if (playtimeSyncBusy || !supabase || !window.TAMAVERSE_USER_ID) return;
+    if (document.visibilityState === 'visible' && playtimeLastTick) {
+      const elapsed = Math.max(0, Math.floor((Date.now() - playtimeLastTick) / 1000));
+      if (elapsed > 0) {
+        playtimePendingSeconds += elapsed;
+        playtimeLastTick = Date.now();
+      }
+    }
+    if (!force && playtimePendingSeconds < 60) return;
+    if (playtimePendingSeconds < 1) return;
+
+    const batch = Math.min(90, playtimePendingSeconds);
+    playtimeSyncBusy = true;
+    try {
+      const { error } = await supabase.rpc('add_tamaverse_playtime', { p_seconds: batch });
+      if (error) throw error;
+      playtimePendingSeconds -= batch;
+      if (window.page === 'ranking' && typeof window.loadGlobalRankings === 'function') {
+        window.loadGlobalRankings();
+      }
+    } catch (error) {
+      console.warn('Active Playtime sync failed:', error);
+    } finally {
+      playtimeSyncBusy = false;
+    }
+  }
+
+  window.setInterval(() => syncActivePlaytime(false), 15000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      syncActivePlaytime(true);
+      playtimeLastTick = 0;
+    } else {
+      playtimeLastTick = Date.now();
+    }
+  });
+  window.addEventListener('pagehide', () => syncActivePlaytime(true));
+  window.addEventListener('focus', () => {
+    if (document.visibilityState === 'visible') playtimeLastTick = Date.now();
+  });
+
+  // Profile updates are the realtime path for all leaderboard categories.
+  let leaderboardChannel = null;
+  function setupLeaderboardRealtime() {
+    if (leaderboardChannel || !supabase) return;
+    leaderboardChannel = supabase
+      .channel('tamaverse-global-leaderboard')
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'profiles'
+      }, () => {
+        if (typeof window.loadGlobalRankings === 'function') window.loadGlobalRankings();
+      })
+      .subscribe(status => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Leaderboard Realtime unavailable; periodic refresh remains active.');
+        }
+      });
+  }
+  setupLeaderboardRealtime();
+  window.setInterval(() => {
+    if (document.visibilityState === 'visible' &&
+        document.querySelector('.ranking-page') &&
+        typeof window.loadGlobalRankings === 'function') {
+      window.loadGlobalRankings();
+    }
+  }, 30000);
+
+
   // Keep the displayed Diamond balance in sync with the server wallet.
   // Realtime is the fast path; focus/visibility refresh is the reliable fallback
   // when the app was backgrounded while a top-up was approved in Telegram.
