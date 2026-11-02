@@ -288,6 +288,8 @@ async function loadGlobalRankings() {
   }
 }
 
+window.loadGlobalRankings = loadGlobalRankings;
+
 window.setRankingSort = function (category) {
   const allowed = ['rating', 'level', 'wins', 'coins'];
   if (!allowed.includes(category)) return;
