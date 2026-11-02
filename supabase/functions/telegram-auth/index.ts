@@ -73,6 +73,7 @@ Deno.serve(async req => {
     return reply({ error: "ORIGIN_NOT_ALLOWED" }, 403);
   }
   let stage = "request";
+  let authCreateDiagnostic: Record<string, unknown> | null = null;
   try {
     const body = await req.json();
     const tg = await verifyInitData(String(body?.initData || ""));
@@ -96,13 +97,14 @@ Deno.serve(async req => {
         user_metadata: { display_name: tg.name, telegram_user_id: tg.id, telegram_username: tg.username }
       });
       if (createError || !created?.user) {
-        console.error("telegram-auth createUser diagnostic", {
+        authCreateDiagnostic = {
           code: createError?.code ?? null,
           message: createError?.message ?? null,
           status: createError?.status ?? null,
           name: createError?.name ?? null,
           hasUser: Boolean(created?.user)
-        });
+        };
+        console.error("telegram-auth createUser diagnostic", authCreateDiagnostic);
         throw new Error("TELEGRAM_ACCOUNT_CREATE_FAILED");
       }
       ownerId = created.user.id;
@@ -167,7 +169,7 @@ Deno.serve(async req => {
       access_token: sessionResult.session.access_token, refresh_token: sessionResult.session.refresh_token
     } });
   } catch (error) {
-    console.error("telegram-auth failed", { stage, message: error instanceof Error ? error.message : String(error), name: error instanceof Error ? error.name : null });
+    console.error("telegram-auth failed", { stage, message: error instanceof Error ? error.message : String(error), name: error instanceof Error ? error.name : null, authCreateDiagnostic });
     const message = error instanceof Error ? error.message : "INTERNAL_ERROR";
     return reply({ error: message }, 500);
   }
