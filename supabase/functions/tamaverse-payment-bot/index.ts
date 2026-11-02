@@ -718,8 +718,7 @@ async function startOrder(chatId: number, messageId: number, from: Any, amount: 
   await show(
     chatId,
     messageId,
-    `✅ Pesanan dibuat\n\n🧾 Order ID: ${res.order.order_code}\n💎 ${pack.diamonds} Diamond\n💰 Rp${money(pack.price)}\n\nPilih metode pembayaran:` +
-
+    `✅ Pesanan dibuat\n\n🧾 Order ID: ${res.order.order_code}\n💎 ${pack.diamonds} Diamond\n💰 Rp${money(pack.price)}\n\nPilih metode pembayaran:`,
     methodMarkup(res.order.order_code),
   );
   return true;
