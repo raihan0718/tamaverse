@@ -5040,3 +5040,15 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
   border-radius:inherit!important;
   margin:0!important;
 }
+
+
+/* Limited-time 100 Diamond event shortcut */
+.home-feature-tile.diamond-event-tile{
+  border-color:rgba(191,151,255,.58);
+  background:linear-gradient(135deg,rgba(102,72,160,.24),rgba(221,145,198,.16));
+  box-shadow:0 8px 24px rgba(126,83,177,.12),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.home-feature-tile.diamond-event-tile .home-feature-art{
+  background:linear-gradient(135deg,#8d6bd4,#d98bc7);
+  color:#fff;
+}
