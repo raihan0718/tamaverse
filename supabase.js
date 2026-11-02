@@ -391,6 +391,15 @@
             || activeCloudPets[0] || null;
         cloudPets.forEach((cloudPet) => {
           let localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
+          // Match a locally-created starter by species and nickname before importing
+          // its cloud copy, since the two devices may have generated different UIDs.
+          if (!localPet && cloudPet.species) {
+            localPet = localPets.find(pet =>
+              String(pet.species) === String(cloudPet.species) &&
+              String(pet.name || '').trim().toLowerCase() === String(cloudPet.nickname || '').trim().toLowerCase()
+            );
+            if (localPet) localPet.uid = String(cloudPet.client_uid);
+          }
           if (!localPet && typeof window.createTamaversePetFromCloud === 'function') {
             localPet = window.createTamaversePetFromCloud(cloudPet);
             if (localPet) localPets.push(localPet);
