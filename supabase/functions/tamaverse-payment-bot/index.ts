@@ -193,6 +193,43 @@ const sendTopic = (o: Order, text: string, extra: Json = {}) =>
     ...extra,
   });
 
+/** Satu topik global untuk seluruh aktivitas order, terpisah dari audit saldo. */
+async function sendOrderLog(o: Order, event: string, detail = "") {
+  try {
+    let { data, error } = await db.from("nexora_bot_settings").select("value").eq("key", "order_log_topic_id").maybeSingle();
+    if (error) throw error;
+    let topicId = data?.value ? Number(data.value) : 0;
+    if (!topicId) {
+      const topic = await tg<Any>("createForumTopic", { chat_id: ADMIN_FORUM_CHAT_ID, name: "NEXORA LOG" });
+      topicId = Number(topic.message_thread_id);
+      const { error: saveError } = await db.from("nexora_bot_settings").upsert({
+        key: "order_log_topic_id", value: String(topicId), updated_at: new Date().toISOString(),
+      }, { onConflict: "key" });
+      if (saveError) throw saveError;
+    }
+    const lines = [
+      "NEXORA ORDER LOG",
+      "",
+      "Event: " + event,
+      "Order: " + o.order_code,
+      "User: " + (o.telegram_username ? "@" + o.telegram_username : "-") + " (" + o.telegram_user_id + ")",
+      "UUID: " + o.owner_id,
+      "Package: " + o.diamonds + " Diamond",
+      "Amount: Rp" + money(o.price),
+      "Method: " + (o.payment_method ?? "-"),
+      "Status: " + o.status,
+      "Time: " + fmtDate(new Date().toISOString()),
+    ];
+    if (detail) lines.push("", detail);
+    const sent = await tgTry("sendMessage", {
+      chat_id: ADMIN_FORUM_CHAT_ID, message_thread_id: topicId, text: lines.join("\n"),
+    });
+    if (!sent) console.error("Order log Telegram delivery failed:", o.order_code, event);
+  } catch (e) {
+    console.error("Order log failed:", o.order_code, event, (e as Error).message);
+  }
+}
+
 const notifyUser = (o: Order, text: string, markup?: Json) =>
   tgTry("sendMessage", {
     chat_id: o.telegram_chat_id,
@@ -396,7 +433,8 @@ async function refreshTicket(o: Order) {
 }
 
 /** Hapus topik pesanan setelah status order masuk tahap akhir. */
-async function afterTerminal(o: Order, _topicNote: string) {
+async function afterTerminal(o: Order, topicNote: string) {
+  await sendOrderLog(o, "ORDER FINISHED", topicNote);
   if (!o.forum_chat_id || !o.topic_thread_id) return;
   const deleted = await tgTry("deleteForumTopic", {
     chat_id: o.forum_chat_id,
@@ -631,8 +669,10 @@ async function createOrderWithTopic(
     await db.from("nexora_orders").update({ admin_message_id: head.message_id }).eq("id", order.id);
     ready = { ...ready, admin_message_id: head.message_id };
   }
+  await sendOrderLog(ready, "ORDER CREATED", "Order baru dibuat melalui " + source + ".");
 
   if (method && ready.status === "WAITING_ADMIN") {
+    await sendOrderLog(ready, "PAYMENT METHOD SELECTED", "User memilih " + method + " dari Mini App.");
     if (method === "GOPAY" && await sendGopayInstructions(ready)) {
       const paidWait = await transition(code, ["WAITING_ADMIN"], "WAITING_PAYMENT", telegramId, source);
       if (paidWait) ready = paidWait;
@@ -821,6 +861,7 @@ async function chooseMethod(chatId: number, messageId: number, tgId: string, cod
     }
   }
   await refreshTicket(ready);
+  await sendOrderLog(ready, "PAYMENT METHOD SELECTED", "User memilih " + method + ".");
   await sendTopic(
     ready,
     method === "GOPAY" && ready.status === "WAITING_PAYMENT"
@@ -915,6 +956,7 @@ async function handleProof(message: Any) {
   }
 
   await refreshTicket(upd);
+  await sendOrderLog(upd, "PAYMENT PROOF RECEIVED", "Bukti pembayaran sudah diteruskan ke admin.");
   await sendMessage(
     chatId,
     `✅ Bukti pembayaran untuk ${o.order_code} sudah diterima.\nAdmin akan memeriksa pembayaran sebelum menyetujui pesanan.`,
@@ -1111,13 +1153,26 @@ async function clearBalanceSession(id:string){
 }
 async function beginBalanceSetup(chatId:number,id:string){
   if(!ownerOnly(id)) return;
-  const {data,error}=await db.from("nexora_bot_settings").select("value").eq("key","balance_log_topic_id").maybeSingle();
-  if(error) throw error;
-  if(data?.value){ await sendMessage(chatId,"Topik NEXORA BALANCE LOG sudah terhubung."); return; }
-  const topic=await tg<Any>("createForumTopic",{chat_id:ADMIN_FORUM_CHAT_ID,name:"NEXORA BALANCE LOG"});
-  const {error:saveError}=await db.from("nexora_bot_settings").upsert({key:"balance_log_topic_id",value:String(topic.message_thread_id),updated_at:new Date().toISOString()},{onConflict:"key"});
-  if(saveError) throw saveError;
-  await sendMessage(chatId,"Topik NEXORA BALANCE LOG berhasil dibuat dan disimpan.");
+  const topics = [
+    { key: "balance_log_topic_id", name: "NEXORA BALANCE LOG" },
+    { key: "order_log_topic_id", name: "NEXORA LOG" },
+  ];
+  const ready: string[] = [];
+  for (const item of topics) {
+    const { data, error } = await db.from("nexora_bot_settings").select("value").eq("key", item.key).maybeSingle();
+    if (error) throw error;
+    if (data?.value) {
+      ready.push(item.name + ": sudah terhubung");
+      continue;
+    }
+    const topic = await tg<Any>("createForumTopic", { chat_id: ADMIN_FORUM_CHAT_ID, name: item.name });
+    const { error: saveError } = await db.from("nexora_bot_settings").upsert({
+      key: item.key, value: String(topic.message_thread_id), updated_at: new Date().toISOString(),
+    }, { onConflict: "key" });
+    if (saveError) throw saveError;
+    ready.push(item.name + ": berhasil dibuat");
+  }
+  await sendMessage(chatId, "Pengaturan topik log selesai.\n" + ready.join("\n"));
 }
 async function beginBalance(chatId:number,id:string){
   if(!ownerOnly(id)) return;
