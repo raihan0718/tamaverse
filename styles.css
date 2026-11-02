@@ -4943,7 +4943,7 @@ body[data-theme="light"] .collection-page .creature-card,body:not([data-theme="d
   max-width:80px !important;
   max-height:80px !important;
   object-fit:contain;
-  transform:translateY(-7px);
+  transform:translateY(0px);
 }
 .store-item-art{
   min-height:104px;
