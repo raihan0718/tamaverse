@@ -208,9 +208,9 @@ async function sendOrderLog(o: Order, event: string, detail = "") {
       if (saveError) throw saveError;
     }
     const lines = [
-      "NEXORA ORDER LOG",
+      "DETAIL ORDER SELESAI",
       "",
-      "Event: " + event,
+      "Status akhir: " + event,
       "Order: " + o.order_code,
       "User: " + (o.telegram_username ? "@" + o.telegram_username : "-") + " (" + o.telegram_user_id + ")",
       "UUID: " + o.owner_id,
@@ -434,7 +434,7 @@ async function refreshTicket(o: Order) {
 
 /** Hapus topik pesanan setelah status order masuk tahap akhir. */
 async function afterTerminal(o: Order, topicNote: string) {
-  await sendOrderLog(o, "ORDER FINISHED", topicNote);
+  await sendOrderLog(o, o.status, topicNote);
   if (!o.forum_chat_id || !o.topic_thread_id) return;
   const deleted = await tgTry("deleteForumTopic", {
     chat_id: o.forum_chat_id,
@@ -669,10 +669,8 @@ async function createOrderWithTopic(
     await db.from("nexora_orders").update({ admin_message_id: head.message_id }).eq("id", order.id);
     ready = { ...ready, admin_message_id: head.message_id };
   }
-  await sendOrderLog(ready, "ORDER CREATED", "Order baru dibuat melalui " + source + ".");
 
   if (method && ready.status === "WAITING_ADMIN") {
-    await sendOrderLog(ready, "PAYMENT METHOD SELECTED", "User memilih " + method + " dari Mini App.");
     if (method === "GOPAY" && await sendGopayInstructions(ready)) {
       const paidWait = await transition(code, ["WAITING_ADMIN"], "WAITING_PAYMENT", telegramId, source);
       if (paidWait) ready = paidWait;
@@ -861,7 +859,6 @@ async function chooseMethod(chatId: number, messageId: number, tgId: string, cod
     }
   }
   await refreshTicket(ready);
-  await sendOrderLog(ready, "PAYMENT METHOD SELECTED", "User memilih " + method + ".");
   await sendTopic(
     ready,
     method === "GOPAY" && ready.status === "WAITING_PAYMENT"
@@ -956,7 +953,6 @@ async function handleProof(message: Any) {
   }
 
   await refreshTicket(upd);
-  await sendOrderLog(upd, "PAYMENT PROOF RECEIVED", "Bukti pembayaran sudah diteruskan ke admin.");
   await sendMessage(
     chatId,
     `✅ Bukti pembayaran untuk ${o.order_code} sudah diterima.\nAdmin akan memeriksa pembayaran sebelum menyetujui pesanan.`,
@@ -1122,7 +1118,6 @@ async function handleGroupMessage(message: Any) {
     return;
   }
   await refreshTicket(upd);
-  await sendOrderLog(upd, "ADMIN PAYMENT INSTRUCTIONS SENT", "Admin mengirim instruksi " + o.payment_method + " kepada user.");
   await reply(`✅ Info ${o.payment_method} diteruskan ke user. Status: ${STATUS_LABEL.WAITING_PAYMENT}.`);
 }
 
