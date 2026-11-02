@@ -35,11 +35,11 @@ const pages: Record<string, { text: string; keyboard?: unknown }> = {
   },
   about: {
     text: "🌷 *A little about Tamaverse*\n\nTamaverse is a cozy little world where you can meet companions, take care of them, collect adorable pets, and enjoy your own adventure! 🐣💗\n\nEvery companion has a story. Let’s make lovely memories together! ✨",
-    keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", url: APP_URL }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
+    keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", web_app: { url: APP_URL } }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
   },
   guide: {
     text: "🥚 *Your little adventure starts here!*\n\n1. Tap the button below to enter Tamaverse.\n2. Meet your very first companion! 🐾\n3. Give your pet some love and care.\n4. Explore the menus and see what fun surprises await! 🌟\n\nHave fun on your journey, Tama Pal! 💕",
-    keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", url: APP_URL }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
+    keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", web_app: { url: APP_URL } }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
   },
   commands: {
     text: "💌 *A few handy commands*\n\n/start — say hello and open the menu 🌷\n/menu — show the main menu 🏡\n/help — get a little help 🧸\n/about — learn about Tamaverse ✨\n/game — jump into the game 🥚\n/support — contact our support team 💗",
