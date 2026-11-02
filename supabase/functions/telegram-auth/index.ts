@@ -72,10 +72,12 @@ Deno.serve(async req => {
   if (origin && origin !== "https://raihan0718.github.io" && origin !== "https://tamaverse-pet-quest--raihanmilano07.replit.app") {
     return reply({ error: "ORIGIN_NOT_ALLOWED" }, 403);
   }
+  let stage = "request";
   try {
     const body = await req.json();
     const tg = await verifyInitData(String(body?.initData || ""));
     if (!tg) return reply({ error: "INVALID_TELEGRAM_INIT_DATA" }, 401);
+    stage = "telegram_link_lookup";
     const { data: found, error: lookupError } = await admin.from("tamaverse_telegram_links")
       .select("owner_id").eq("telegram_user_id", tg.id).maybeSingle();
     if (lookupError) throw new Error("TELEGRAM_LINK_LOOKUP_FAILED");
@@ -88,15 +90,26 @@ Deno.serve(async req => {
       if (legacyAccount) ownerId = legacyAccount.id;
     }
     if (!ownerId) {
+      stage = "auth_create_user";
       const { data: created, error: createError } = await admin.auth.admin.createUser({
         email, password: randomPassword(), email_confirm: true,
         user_metadata: { display_name: tg.name, telegram_user_id: tg.id, telegram_username: tg.username }
       });
-      if (createError || !created?.user) throw new Error("TELEGRAM_ACCOUNT_CREATE_FAILED");
+      if (createError || !created?.user) {
+        console.error("telegram-auth createUser diagnostic", {
+          code: createError?.code ?? null,
+          message: createError?.message ?? null,
+          status: createError?.status ?? null,
+          name: createError?.name ?? null,
+          hasUser: Boolean(created?.user)
+        });
+        throw new Error("TELEGRAM_ACCOUNT_CREATE_FAILED");
+      }
       ownerId = created.user.id;
       createdId = ownerId;
     }
     if (!found) {
+      stage = "telegram_link_insert";
       const { error: insertError } = await admin.from("tamaverse_telegram_links").insert({
         telegram_user_id: tg.id, telegram_username: tg.username, owner_id: ownerId
       });
@@ -112,6 +125,7 @@ Deno.serve(async req => {
       }
     }
 
+    stage = "login_activity_update";
     const { error: loginTrackError } = await admin.from("tamaverse_telegram_links")
       .update({ last_login_at: new Date().toISOString(), telegram_username: tg.username })
       .eq("telegram_user_id", tg.id);
@@ -125,6 +139,7 @@ Deno.serve(async req => {
         .eq("telegram_user_id", tg.id);
     }
 
+    stage = "auth_user_lookup";
     const { data: userResult, error: userError } = await admin.auth.admin.getUserById(ownerId);
     if (userError || !userResult?.user) throw new Error("TELEGRAM_ACCOUNT_NOT_FOUND");
     let account = userResult.user;
@@ -133,15 +148,18 @@ Deno.serve(async req => {
       if (error || !updated?.user) throw new Error("TELEGRAM_ACCOUNT_SETUP_FAILED");
       account = updated.user;
     }
+    stage = "auth_metadata_update";
     const { error: metadataError } = await admin.auth.admin.updateUserById(ownerId, {
       app_metadata: { ...(account.app_metadata || {}), provider: "telegram", providers: ["telegram"], telegram_auth: true, telegram_user_id: tg.id },
       user_metadata: { ...(account.user_metadata || {}), display_name: tg.name, telegram_user_id: tg.id, telegram_username: tg.username }
     });
     if (metadataError) throw new Error("TELEGRAM_ACCOUNT_SETUP_FAILED");
 
+    stage = "magiclink_generation";
     const { data: generated, error: generateError } = await admin.auth.admin.generateLink({ type: "magiclink", email: account.email || email });
     const tokenHash = generated?.properties?.hashed_token;
     if (generateError || !tokenHash) throw new Error("SESSION_ISSUE_FAILED");
+    stage = "otp_session_exchange";
     const { data: sessionResult, error: sessionError } = await authClient.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
     if (sessionError || !sessionResult.session) throw new Error("SESSION_EXCHANGE_FAILED");
 
@@ -149,7 +167,7 @@ Deno.serve(async req => {
       access_token: sessionResult.session.access_token, refresh_token: sessionResult.session.refresh_token
     } });
   } catch (error) {
-    console.error("telegram-auth failed", error);
+    console.error("telegram-auth failed", { stage, message: error instanceof Error ? error.message : String(error), name: error instanceof Error ? error.name : null });
     const message = error instanceof Error ? error.message : "INTERNAL_ERROR";
     return reply({ error: message }, 500);
   }
