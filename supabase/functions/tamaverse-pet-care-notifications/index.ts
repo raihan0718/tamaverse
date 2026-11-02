@@ -64,17 +64,20 @@ Deno.serve(async (req: Request) => {
       const { data: pets, error: petsError } = await admin
         .from("pets")
         .select("nickname, hunger, happiness, cleanliness")
-        .eq("owner_id", link.owner_id);
+        .eq("owner_id", link.owner_id)
+        .eq("is_active", true)
+        .limit(1);
       if (petsError) {
         errors.push("PET_LOOKUP_FAILED");
         continue;
       }
 
-      const needsCare = (pets ?? []).filter(pet =>
-        Number(pet.hunger) < 10 ||
-        Number(pet.happiness) < 10 ||
-        Number(pet.cleanliness) < 10
-      );
+      const activePet = (pets ?? [])[0];
+      const needsCare = activePet && (
+        Number(activePet.hunger) < 10 ||
+        Number(activePet.happiness) < 10 ||
+        Number(activePet.cleanliness) < 10
+      ) ? [activePet] : [];
       if (!needsCare.length) {
         skipped++;
         continue;
@@ -109,8 +112,8 @@ Deno.serve(async (req: Request) => {
         "",
         petBlocks.join("\n\n"),
         "",
-        "Come back and give your little buddies some cuddly care! ✨",
-        "🌙 Your Tamaverse friends miss you!"
+        "Come back and give your active companion some cuddly care! ✨",
+        "🌙 Your Tamaverse friend misses you!"
       ].join("\n");
 
       try {
