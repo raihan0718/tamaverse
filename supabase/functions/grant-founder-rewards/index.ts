@@ -36,6 +36,7 @@ async function verifyTelegramInitData(initData: string): Promise<string | null> 
   if (!Number.isFinite(authDate) || Math.abs(Date.now() / 1000 - authDate) > 3600) return null;
 
   params.delete("hash");
+  params.delete("signature");
   const checkString = Array.from(params.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}=${value}`)
@@ -70,13 +71,17 @@ Deno.serve(async (req) => {
     if (!accessToken) return json({ error: "AUTH_REQUIRED" }, 401);
 
     const { data: authData, error: authError } = await admin.auth.getUser(accessToken);
-    if (authError || !authData.user || authData.user.is_anonymous !== true) {
+    if (authError || !authData.user || authData.user.is_anonymous === true) {
       return json({ error: "INVALID_GAME_SESSION" }, 401);
     }
 
     const body = await req.json();
     const telegramId = await verifyTelegramInitData(String(body?.initData || ""));
     if (!telegramId) return json({ error: "INVALID_TELEGRAM_INIT_DATA" }, 401);
+    const authenticatedTelegramId = String(authData.user.app_metadata?.telegram_user_id || "");
+    if (authData.user.app_metadata?.telegram_auth !== true || authenticatedTelegramId !== telegramId) {
+      return json({ error: "TELEGRAM_SESSION_MISMATCH" }, 403);
+    }
     if (telegramId !== FOUNDER_TELEGRAM_ID) return json({ success: true, founder: false });
 
     const { data: link, error: linkError } = await admin
