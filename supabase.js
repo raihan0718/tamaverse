@@ -264,13 +264,15 @@
             client_uid: String(pet.uid),
             species: String(pet.species),
             nickname: String(pet.name || pet.species).trim().slice(0, 18),
-            level: Math.max(1, Number(pet.level) || 1),
-            xp: Math.max(0, Number(pet.xp) || 0),
-            hunger: Math.min(100, Math.max(0, Number(pet.hunger) || 0)),
-            happiness: Math.min(100, Math.max(0, Number(pet.happiness) || 0)),
-            energy: Math.min(100, Math.max(0, Number(pet.energy) || 0)),
-            cleanliness: Math.min(100, Math.max(0, Number(pet.cleanliness) || 0)),
-            evolution: Math.max(0, Number(pet.evolution) || 0),
+            // PostgreSQL pet stat columns are integers. Care decay can leave
+            // fractional values in local state, so normalize before cloud upsert.
+            level: Math.max(1, Math.round(Number(pet.level) || 1)),
+            xp: Math.max(0, Math.round(Number(pet.xp) || 0)),
+            hunger: Math.min(100, Math.max(0, Math.round(Number(pet.hunger) || 0))),
+            happiness: Math.min(100, Math.max(0, Math.round(Number(pet.happiness) || 0))),
+            energy: Math.min(100, Math.max(0, Math.round(Number(pet.energy) || 0))),
+            cleanliness: Math.min(100, Math.max(0, Math.round(Number(pet.cleanliness) || 0))),
+            evolution: Math.max(0, Math.round(Number(pet.evolution) || 0)),
             is_active: String(pet.uid) === String(window.state.activePet),
           }));
 
