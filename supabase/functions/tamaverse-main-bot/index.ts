@@ -30,24 +30,24 @@ const mainKeyboard = {
 
 const pages: Record<string, { text: string; keyboard?: unknown }> = {
   home: {
-    text: "🌙 *Welcome to Tamaverse Hub*\n\nYour little universe for virtual companions, adventures, and daily discoveries.\n\nChoose where you want to go:",
+    text: "🌙 *Welcome to Tamaverse!*\n\nH hii, Tama Pals! So happy to see you here! 🌷\nYour little adventure with adorable companions starts right here. Ready to explore? 🥚✨\n\nPick a little corner to visit:",
     keyboard: mainKeyboard,
   },
   about: {
-    text: "*About Tamaverse*\n\nTamaverse is a virtual-pet adventure where you can discover companions, take care of them, collect pets, and explore the game world.\n\nYour journey starts with one little companion. Make it count.",
-    keyboard: { inline_keyboard: [[{ text: "Open the game", url: APP_URL }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
+    text: "🌷 *A little about Tamaverse*\n\nTamaverse is a cozy little world where you can meet companions, take care of them, collect adorable pets, and enjoy your own adventure! 🐣💗\n\nEvery companion has a story. Let’s make lovely memories together! ✨",
+    keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", url: APP_URL }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
   },
   guide: {
-    text: "*Quick start guide*\n\n1. Open Tamaverse using the button below.\n2. Explore your companion and learn its needs.\n3. Keep your pet cared for and discover other features.\n4. Check the available menus in-game to explore more.\n\nGame progress and available features depend on the current app version.",
-    keyboard: { inline_keyboard: [[{ text: "Open Tamaverse", url: APP_URL }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
+    text: "🥚 *Your little adventure starts here!*\n\n1. Tap the button below to enter Tamaverse.\n2. Meet your very first companion! 🐾\n3. Give your pet some love and care.\n4. Explore the menus and see what fun surprises await! 🌟\n\nHave fun on your journey, Tama Pal! 💕",
+    keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", url: APP_URL }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
   },
   commands: {
-    text: "*Bot commands*\n\n/start — welcome and main menu\n/menu — open the main menu\n/help — help information\n/about — learn about Tamaverse\n/game — open the Mini App\n/support — support information",
+    text: "💌 *A few handy commands*\n\n/start — say hello and open the menu 🌷\n/menu — show the main menu 🏡\n/help — get a little help 🧸\n/about — learn about Tamaverse ✨\n/game — jump into the game 🥚\n/support — contact our support team 💗",
     keyboard: { inline_keyboard: [[{ text: "‹ Back to menu", callback_data: "home" }]] },
   },
   support: {
-    text: "💌 *Need a little help?*\\n\\nNo worries, we’re here for you! 🐣 Tell our support team what happened and, if you can, include a screenshot so we can understand it better. ✨\\n\\nTap below and say hi to @TamaSupportBot. 💗",
-    keyboard: { inline_keyboard: [[{ text: "💌 Chat with TamaSupport", url: "https://t.me/TamaSupportBot" }], [{ text: "‹ Back to menu 🏡", callback_data: "home" }]] },
+    text: "🧸 *Need a little help?*\n\nOh no, something not working as expected? No worries! We’re happy to help. 🌷\n\nTell our support team what happened and share a screenshot if it helps explain the issue. Please don’t share private account details or verification codes. 💌\n\nWe’ll do our best to help you out. See you there, Tama Pal! ✨",
+    keyboard: { inline_keyboard: [[{ text: "💌 Chat with @TamaSupportBot", url: "https://t.me/TamaSupportBot" }], [{ text: "‹ Back to menu 🌷", callback_data: "home" }]] },
   },
 };
 
