@@ -529,6 +529,20 @@ function startIntro(){
     introSequenceTimers.push(setTimeout(beginVisibleHatch,1500));
   }else beginVisibleHatch();
 }
+function openNewPlayerBonusConfirmation(){
+  showModal(`<div class="topup-success-modal">
+    <div class="topup-success-icon">💎</div>
+    <div class="topup-success-eyebrow">TAMAVERSE · LIMITED EVENT</div>
+    <h2>100 DIAMOND GIFT</h2>
+    <p class="topup-success-copy">Ada hadiah spesial untuk seluruh player Tamaverse! Kamu berhak menerima <b>100 Diamond</b> secara gratis.</p>
+    <div class="topup-success-amount">+100 <span>DIAMOND</span></div>
+    <p class="topup-success-thanks">Satu akun hanya dapat menerima hadiah ini satu kali selama periode event 2–11 November 2026.</p>
+    <div class="modal-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <button class="button secondary" type="button" data-action="close-modal">Nanti</button>
+      <button class="button primary" type="button" data-action="accept-diamond-event">Terima</button>
+    </div>
+  </div>`);
+}
 function showNewPlayerBonusModal(amount=100){
   showModal(`<div class="topup-success-modal">
     <div class="topup-success-icon">💎</div>
@@ -1634,7 +1648,7 @@ document.addEventListener('click',event=>{
   }
 
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
-  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='retry-new-player-bonus'){claimNewPlayerWelcomeBonus();return;}if(a==='claim-diamond-event'){claimNewPlayerWelcomeBonus();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
+  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='retry-new-player-bonus'){claimNewPlayerWelcomeBonus();return;}if(a==='claim-diamond-event'){openNewPlayerBonusConfirmation();return;}if(a==='accept-diamond-event'){btn.disabled=true;btn.textContent='Memproses...';claimNewPlayerWelcomeBonus();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
   state.activePet=btn.dataset.pet;
   closeModal();
   save();
