@@ -154,6 +154,30 @@ window.showTopupSuccessModal = function(diamonds){
     </div>
   `);
 };
+function openCurrencyExchange(){
+  const balance=Math.max(0,Math.floor(Number(state?.player?.diamonds||0)));
+  showModal(`<div class="currency-convert-modal">
+    <div class="currency-convert-emblem">⇄</div>
+    <div class="eyebrow">TAMAVERSE EXCHANGE</div>
+    <h2 id="modalTitle">Convert Diamond</h2>
+    <p class="subtle">Tukar diamond menjadi coin untuk kebutuhan petualanganmu.</p>
+    <div class="currency-rate-card"><span>EXCHANGE RATE</span><strong>1 💎 <i>→</i> 500 ◈</strong></div>
+    <label class="currency-input-label" for="diamondConvertAmount">JUMLAH DIAMOND</label>
+    <div class="currency-input-wrap"><span>💎</span><input id="diamondConvertAmount" class="text-input" type="number" min="1" max="${balance}" step="1" value="${balance>0?1:0}" ${balance>0?'':'disabled'} oninput="updateCurrencyConversionPreview()"></div>
+    <div class="currency-convert-preview"><span>YOU WILL RECEIVE</span><strong id="coinConvertPreview">${balance>0?'500':'0'} <small>COINS</small></strong></div>
+    <p class="currency-balance-note">Diamond tersedia: <b>${balance.toLocaleString('id-ID')}</b></p>
+    <div class="modal-actions"><button class="button secondary" data-action="close-modal">Cancel</button><button class="button" data-action="convert-diamonds" ${balance>0?'':'disabled'}>Convert</button></div>
+  </div>`);
+}
+function updateCurrencyConversionPreview(){
+  const input=document.getElementById('diamondConvertAmount');
+  const output=document.getElementById('coinConvertPreview');
+  if(!input||!output)return;
+  const amount=Math.max(0,Math.floor(Number(input.value)||0));
+  output.innerHTML=(amount*500).toLocaleString('id-ID')+' <small>COINS</small>';
+  input.setCustomValidity(amount<1||amount>Number(input.max)?'Masukkan jumlah diamond yang tersedia.':'');
+}
+window.updateCurrencyConversionPreview=updateCurrencyConversionPreview;
 function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('diamondBalance').textContent=state?state.player.diamonds:0;}
 function applyTheme(){let dark=false;try{dark=localStorage.getItem('tamaverse_theme')==='dark';}catch(e){}document.body.dataset.theme=dark?'dark':'light';const button=document.querySelector('.theme-toggle');if(button){button.textContent=dark?'☀':'☾';button.setAttribute('aria-label',dark?'Gunakan tema terang':'Gunakan tema gelap');}}
 function render(){
@@ -785,9 +809,9 @@ function homePage(){
     <div class="player-card card"><div class="player-avatar">${playerAvatarMarkup(state.player.avatar)}</div>
       <div class="player-info"><div class="player-name">${esc(state.player.name)}</div><span class="pill">Lv. ${state.player.level}</span>
       <div class="player-xp"><span>${state.player.xp} / ${state.player.level*100} XP</span><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,state.player.xp/(state.player.level*100)*100)}%"></div></div></div></div>
-      <button class="coin-pill" data-action="go" data-page="profile" aria-label="Buka inventori">🪙 <b>${state.player.coins.toLocaleString('id-ID')}</b><span>＋</span></button>
+      <div class="coin-pill" aria-label="Saldo coin"><span class="coin-pill-icon">◈</span><b>${state.player.coins.toLocaleString('id-ID')}</b><button class="coin-convert-trigger" data-action="currency-convert" aria-label="Convert diamond ke coin" title="Convert diamond ke coin">＋</button></div>
     </div>
-    <div class="section-heading universe-heading"><div><div class="eyebrow">YOUR LITTLE UNIVERSE</div><h1 class="page-title">Good day, ${esc(state.player.name)}!</h1></div><button class="icon-button" data-action="go" data-page="profile" aria-label="Buka profil">☾</button></div>
+    <div class="section-heading universe-heading"><div><div class="eyebrow">YOUR LITTLE UNIVERSE</div><h1 class="page-title">Good day, ${esc(state.player.name)}!</h1></div><button class="icon-button profile-shortcut" data-action="go" data-page="profile" aria-label="Buka profil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.8 20c.5-3.6 3.2-5.6 7.2-5.6s6.7 2 7.2 5.6"></path></svg></button></div>
     <section class="pet-stage pet-action-${petAnimation} frame-equipped-${state.equippedFrame}" aria-label="Your companion">
       <div class="stage-topline"><span><i></i> YOUR COMPANION</span><b>NO. 01 <em>✦</em></b></div>
       <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
@@ -1398,7 +1422,15 @@ window.purchasePremiumItem=purchasePremiumItem;
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='convert-diamonds'){
+  const input=document.getElementById('diamondConvertAmount');
+  const amount=Math.floor(Number(input?.value)||0);
+  const available=Math.floor(Number(state?.player?.diamonds||0));
+  if(!Number.isFinite(amount)||amount<1||amount>available){showToast('Jumlah diamond tidak valid.');return;}
+  state.player.diamonds=available-amount;
+  state.player.coins=Math.max(0,Number(state.player.coins)||0)+(amount*500);
+  save();closeModal();render();showToast(`Berhasil menukar ${amount} diamond menjadi ${(amount*500).toLocaleString('id-ID')} coin.`);return;
+}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
