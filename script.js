@@ -1136,6 +1136,7 @@ function profilePage(){
     </article>
     <input id="profileAvatarFile" class="visually-hidden" type="file" accept="image/*">
     <div class="profile-stats profile-battle-stats"><div class="profile-stat"><strong>${Number(p.rating||1000).toLocaleString('id-ID')}</strong><span>BATTLE RATING</span></div><div class="profile-stat"><strong>${globalRank}</strong><span>GLOBAL RANK</span></div><div class="profile-stat"><strong>${wins}</strong><span>WINS</span></div><div class="profile-stat"><strong>${losses}</strong><span>LOSSES</span></div><div class="profile-stat"><strong>${draws}</strong><span>DRAWS</span></div><div class="profile-stat profile-collection-stat"><strong>${state.pets.length}</strong><span>PET COLLECTION</span></div></div>
+    ${window.TAMAVERSE_AUDIO_SETTINGS?.markup?.()||""}
     <div class="profile-action-card"><div><span class="eyebrow">NEED A HAND?</span><h3>Butuh bantuan?</h3><p>Hubungi tim support kalau ada kendala saat bermain.</p></div><a class="button profile-help-button" href="https://t.me/TamaSupportBot" target="_blank" rel="noopener"><span>📩</span> Help Center</a></div>
     <button class="button danger full profile-reset-button" data-action="reset">Reset semua data</button>
   </section>`;
