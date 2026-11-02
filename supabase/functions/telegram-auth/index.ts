@@ -112,6 +112,14 @@ Deno.serve(async req => {
       }
     }
 
+    const { data: botStart } = await admin.from("tamaverse_telegram_bot_starts")
+      .select("started_at").eq("telegram_user_id", tg.id).maybeSingle();
+    if (botStart?.started_at) {
+      await admin.from("tamaverse_telegram_links")
+        .update({ bot_started_at: botStart.started_at })
+        .eq("telegram_user_id", tg.id);
+    }
+
     const { data: userResult, error: userError } = await admin.auth.admin.getUserById(ownerId);
     if (userError || !userResult?.user) throw new Error("TELEGRAM_ACCOUNT_NOT_FOUND");
     let account = userResult.user;
