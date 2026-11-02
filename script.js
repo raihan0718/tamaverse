@@ -1983,13 +1983,13 @@ function onlineBattleView() {
     if (onlineRoom?.id === room.id && page === 'battle') render();
   }, 1000);
   return `
-    <section class="page online-battle-page battle-mode-screen">
+    <section class="page online-battle-page battle-mode-screen${finished ? " battle-finished" : ""}">
       <div class="battle-mode-top">
         <button class="battle-exit" data-action="online-leave" type="button" aria-label="Leave battle">←</button>
         <div><div class="eyebrow">TAMAVERSE ARENA</div><h1>Battle Match</h1></div>
         <div class="battle-turn-chip">TURN ${turn}</div>
       </div>
-      <div class="battle-scene battle-fx-${esc(window.onlineBattleFx || 'idle')}" aria-label="Online battle arena">
+      <div class="battle-scene battle-fx-${esc(window.onlineBattleFx || 'idle')}${finished ? " battle-scene-finished" : ""}" aria-label="Online battle arena">
         <div class="arena-sky">
           <span class="arena-moon">✦</span>
           <span class="arena-cloud cloud-one">☁</span>
