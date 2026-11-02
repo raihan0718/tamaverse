@@ -119,7 +119,7 @@ Deno.serve(async (req: Request) => {
 
     const message = update.message;
     if (!message?.text || !message.chat?.id) return Response.json({ ok: true });
-    const command = message.text.trim().split(/\\s+/)[0].split("@")[0].toLowerCase();
+    const command = message.text.trim().split(/\s+/)[0].split("@")[0].toLowerCase();
     const firstName = (message.from?.first_name ?? "there").replace(/[<>]/g, "");
     const chatId = message.chat.id;
 
