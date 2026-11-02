@@ -4499,3 +4499,49 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
   .home-page .pet-stage > .home-frame-ornaments.aura-royal-sovereign .aura-ornament,
   .home-page .pet-stage > .home-frame-aura.aura-royal-sovereign{animation:none!important}
 }
+
+
+/* Royal Sovereign aura final positioning fix */
+@keyframes sovereignAccessoryAuraPulse{
+  0%,100%{opacity:.72}
+  50%{opacity:1}
+}
+@keyframes sovereignHomeAuraPulse{
+  0%,100%{opacity:.78;transform:translate(-50%,-50%) scale(.94)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+}
+.accessory-art.aura-royal-sovereign::before{
+  content:""!important;
+  display:block!important;
+  inset:-8% -12%!important;
+  z-index:0!important;
+  opacity:1!important;
+  background:radial-gradient(ellipse at center,rgba(255,25,65,.78) 0%,rgba(210,20,65,.52) 35%,rgba(245,225,238,.32) 56%,rgba(255,25,65,.18) 72%,transparent 84%)!important;
+  filter:blur(23px)!important;
+  animation:sovereignAccessoryAuraPulse 2s ease-in-out infinite!important;
+}
+.home-page .pet-stage > .home-frame-aura.aura-royal-sovereign{
+  display:block!important;
+  position:absolute!important;
+  left:48.5%!important;
+  top:46.5%!important;
+  width:min(90%,470px)!important;
+  aspect-ratio:684/768!important;
+  border-radius:46%!important;
+  z-index:8!important;
+  opacity:1!important;
+  transform:translate(-50%,-50%)!important;
+  background:radial-gradient(ellipse at center,rgba(255,25,65,.82) 0%,rgba(210,20,65,.56) 35%,rgba(245,225,238,.34) 56%,rgba(255,25,65,.2) 72%,transparent 84%)!important;
+  filter:blur(24px)!important;
+  pointer-events:none!important;
+  animation:sovereignHomeAuraPulse 2s ease-in-out infinite!important;
+}
+.home-page .pet-stage > .companion-frame-art{
+  z-index:10!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .accessory-art.aura-royal-sovereign::before,
+  .home-page .pet-stage > .home-frame-aura.aura-royal-sovereign{
+    animation:none!important;
+  }
+}
