@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.telegram-auth]
 verify_jwt = false
+
+[functions.tamaverse-pet-care-notifications]
+verify_jwt = false
