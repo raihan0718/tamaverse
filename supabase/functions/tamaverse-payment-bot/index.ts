@@ -1204,7 +1204,8 @@ async function handleCallback(q: Any) {
 
     const [kind, a, b] = String(q.data ?? "").split(":");
 
-    if (kind === "a" || kind === "d") return await adminDecision(q, kind, a, ack);\n    if (kind === "bal") { if (a === "confirm") return await confirmBalance(q, ack); return await balanceCallback(q, kind, a, b, ack); }
+    if (kind === "a" || kind === "d") return await adminDecision(q, kind, a, ack);
+    if (kind === "bal") { if (a === "confirm") return await confirmBalance(q, ack); return await balanceCallback(q, kind, a, b, ack); }
     if (chat.type !== "private") return await ack(TEXT.notPrivate, true);
 
     const tgId = String(q.from.id);
