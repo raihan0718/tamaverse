@@ -1502,12 +1502,8 @@ document.addEventListener('click',event=>{
       try{
         const db=window.TAMAVERSE_SUPABASE_CLIENT;
         if(!db?.functions?.invoke)throw new Error('Koneksi akun belum siap. Muat ulang Tamaverse lalu coba lagi.');
-        const {data:{session},error:sessionError}=await db.auth.getSession();
-        if(sessionError)throw sessionError;
-        if(!session){
-          const {error:signInError}=await db.auth.signInAnonymously();
-          if(signInError)throw signInError;
-        }
+        if(typeof window.ensureTamaverseAuth!=='function')throw new Error('Autentikasi Telegram belum siap. Muat ulang Tamaverse.');
+        await window.ensureTamaverseAuth();
         const {data,error}=await db.functions.invoke('create-checkout',{
           body:{diamonds:amount,method:method.toUpperCase()}
         });
@@ -1773,15 +1769,11 @@ async function onlineAuth() {
   const db = window.TAMAVERSE_SUPABASE_CLIENT;
   if (!db) throw new Error('Supabase belum terkoneksi.');
 
-  let { data: { user }, error } = await db.auth.getUser();
-  if (error) throw error;
-
-  if (!user) {
-    const result = await db.auth.signInAnonymously();
-    if (result.error) throw result.error;
-    user = result.data.user;
+  if (typeof window.ensureTamaverseAuth !== 'function') {
+    throw new Error('Autentikasi Telegram belum siap. Muat ulang Tamaverse.');
   }
-
+  const user = await window.ensureTamaverseAuth();
+  if (!user) throw new Error('Akun Telegram belum terhubung.');
   window.TAMAVERSE_USER_ID = user.id;
   return user;
 }
