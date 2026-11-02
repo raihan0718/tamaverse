@@ -537,11 +537,11 @@ function playerXP(amount){state.player.xp+=amount;while(state.player.xp>=state.p
 function chooseRarity(){const r=Math.random()*100;return r<60?'Common':r<85?'Rare':r<97?'Epic':'Legendary';}
 function legacy_pullEgg(id,free){const e=eggs.find(x=>x.id===id);if(!e)return;if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}const currency=e.currency==='diamond'?'diamonds':'coins';const cost=free?0:e.price;if(state.player[currency]<cost){showToast(`Koin/diamond tidak cukup untuk ${e.name}.`);return;}if(!free)state.player[currency]-=cost;else state.gacha.lastFree=new Date().toDateString();
   const pool=species.filter(s=>s.pool.includes(id));let rarity=chooseRarity();if(state.gacha.pityRare>=9&&['Common'].includes(rarity))rarity='Rare';if(state.gacha.pityEpic>=49&&['Common','Rare'].includes(rarity))rarity='Epic';let candidates=pool.filter(s=>s.rarity===rarity);if(!candidates.length){const available=pool.filter(s=>s.rarity==='Common'||s.rarity==='Rare'||s.rarity==='Epic'||s.rarity==='Legendary');candidates=available;}const chosen=candidates[Math.floor(Math.random()*candidates.length)];state.gacha.pityRare=chosen.rarity==='Common'?state.gacha.pityRare+1:0;state.gacha.pityEpic=['Common','Rare'].includes(chosen.rarity)?state.gacha.pityEpic+1:0;state.quests.progress.egg++;const result=addPet(chosen.id);state.gacha.history.unshift({species:chosen.id,name:chosen.name,rarity:chosen.rarity,date:Date.now()});state.gacha.history=state.gacha.history.slice(0,20);save();render();showModal(`<div class="hatch-egg">${petImage(chosen.id, 'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${result.duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2><p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${result.duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p><div class="stats-row"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div></div><button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);}
-function buyItem(type,quantity=1){const shop={food:{name:'Apple',price:50},energy:{name:'Energy Potion',price:40},snack:{name:'Battle Snack',price:60},training:{name:'Training Manual',price:120}};const item=shop[type];if(!item)return;const rawQty=Number(quantity);if(!Number.isSafeInteger(rawQty)||rawQty<1||rawQty>MAX_COINS){showToast('Jumlah pembelian tidak valid.');return;}const qty=rawQty;const total=item.price*qty;if(!Number.isSafeInteger(total)||total>MAX_COINS){showToast('Jumlah pembelian melewati batas.');return;}if(!Number.isSafeInteger(Number(state.player.coins))||state.player.coins<0){showToast('Saldo Coin tidak valid. Muat ulang akun.');return;}if(state.player.coins<total){showToast(`Koin tidak cukup. Butuh ${total} Coins untuk ${qty} ${item.name}.`);return;}state.player.coins-=total;if(type==='food')state.items.food=(state.items.food||0)+qty;else state.items[type]=(state.items[type]||0)+qty;shopQuantities[type]=1;save();render();showToast(`${qty} ${item.name} berhasil dibeli!`);}
+function buyItem(type,quantity=1){const shop={food:{name:'Apple',price:50},energy:{name:'Energy Potion',price:40},snack:{name:'Health Potion',price:60},training:{name:'Training Manual',price:120}};const item=shop[type];if(!item)return;const rawQty=Number(quantity);if(!Number.isSafeInteger(rawQty)||rawQty<1||rawQty>MAX_COINS){showToast('Jumlah pembelian tidak valid.');return;}const qty=rawQty;const total=item.price*qty;if(!Number.isSafeInteger(total)||total>MAX_COINS){showToast('Jumlah pembelian melewati batas.');return;}if(!Number.isSafeInteger(Number(state.player.coins))||state.player.coins<0){showToast('Saldo Coin tidak valid. Muat ulang akun.');return;}if(state.player.coins<total){showToast(`Koin tidak cukup. Butuh ${total} Coins untuk ${qty} ${item.name}.`);return;}state.player.coins-=total;if(type==='food')state.items.food=(state.items.food||0)+qty;else state.items[type]=(state.items[type]||0)+qty;shopQuantities[type]=1;save();render();showToast(`${qty} ${item.name} berhasil dibeli!`);}
 const shopCatalog=[
   {id:'food',icon:'🍎',name:'Apple',category:'CARE',desc:'Memulihkan Hunger companion sebanyak 50 poin.',price:50,owned:()=>state.items.food||0,tag:'Pet care'},
-  {id:'energy',icon:'⚡',name:'Energy Potion',category:'CARE',desc:'Memulihkan Energy companion sebanyak 30 poin.',price:40,owned:()=>state.items.energy||0,tag:'Energy'},
-  {id:'snack',icon:'🧃',name:'Battle Snack',category:'BATTLE',desc:'Pulihkan HP companion saat pertarungan berlangsung.',price:60,owned:()=>state.items.snack||0,tag:'Battle item'},
+  {id:'energy',icon:'⚡',image:'assets/items/EnergyPotion.webp',name:'Energy Potion',category:'CARE',desc:'Memulihkan Energy companion sebanyak 30 poin.',price:40,owned:()=>state.items.energy||0,tag:'Energy'},
+  {id:'snack',icon:'♥',image:'assets/items/HealthPotion.webp',name:'Health Potion',category:'BATTLE',desc:'Memulihkan HP companion saat pertarungan berlangsung.',price:60,owned:()=>state.items.snack||0,tag:'Battle item'},
   {id:'training',icon:'📘',name:'Training Manual',category:'TRAINING',desc:'Mengurangi biaya Energy saat melakukan Training.',price:120,owned:()=>state.items.training||0,tag:'Training'}
 ];
 function shopPage(){
@@ -560,7 +560,7 @@ function shopPage(){
       const canBuy=affordable>=qty;
       return `<article class="shop-product-card">
         <div class="shop-product-top"><span class="shop-product-category">${item.category}</span><span class="shop-product-owned">OWNED × ${Number(item.owned()||0)}</span></div>
-        <div class="shop-product-art shop-art-${item.id}"><span>${item.icon}</span><i>✦</i></div>
+        <div class="shop-product-art shop-art-${item.id}">${item.image?`<img src="${item.image}" alt="${item.name}" loading="lazy" decoding="async">`:`<span>${item.icon}</span>`}<i>✦</i></div>
         <div class="shop-product-info"><span class="shop-product-tag">${item.tag}</span><h3>${item.name}</h3><p>${item.desc}</p></div>
         <div class="shop-product-footer"><strong>🪙 ${item.price.toLocaleString('id-ID')} <small>/ item</small></strong>
           <div class="shop-quantity"><button class="shop-qty-btn" data-action="qty-minus" data-item="${item.id}" aria-label="Kurangi jumlah">−</button><b>${qty}</b><button class="shop-qty-btn" data-action="qty-plus" data-item="${item.id}" aria-label="Tambah jumlah">+</button><button class="shop-max-btn" data-action="qty-max" data-item="${item.id}">MAX</button></div>
@@ -647,7 +647,7 @@ function legacy_battleAction(move){
     state.items.snack--;
     const healed=Math.min(25,Math.max(0,p.stats.hp-battle.playerHP));
     battle.playerHP=Math.min(p.stats.hp,battle.playerHP+25);
-    battle.log.push(`${p.name} memakai Battle Snack dan memulihkan ${healed} HP.`);
+    battle.log.push(`${p.name} memakai Health Potion dan memulihkan ${healed} HP.`);
   }
   battle.log=battle.log.slice(-30);
   save();
@@ -665,7 +665,7 @@ function showInventory(){
   const fragments=Object.values(state.items.fragments||{}).reduce((a,b)=>a+b,0);
   const items=[
     {id:'food',icon:'🍎',name:'Apple',desc:'Memulihkan Hunger +50',count:state.items.food||0,care:'feed',usable:true},
-    {id:'snack',icon:'🧃',name:'Battle Snack',desc:'Memulihkan HP saat battle',count:state.items.snack||0,note:'Gunakan saat battle',usable:false},
+    {id:'snack',icon:'🧃',name:'Health Potion',desc:'Memulihkan HP saat battle',count:state.items.snack||0,note:'Gunakan saat battle',usable:false},
     {id:'energy',icon:'⚡',name:'Energy Potion',desc:'Memulihkan Energy +30',count:state.items.energy||0,care:'energy',usable:true},
     {id:'training',icon:'📘',name:'Training Manual',desc:'Mengurangi biaya Energy saat Training',count:state.items.training||0,note:'Otomatis digunakan saat Training',usable:false}
   ];
@@ -678,7 +678,7 @@ function showInventoryItem(type){
   const items={
     food:{icon:'🍎',name:'Apple',desc:'Memulihkan Hunger pet sebanyak 50 poin.',count:state.items.food||0,care:'feed',usable:true},
     energy:{icon:'⚡',name:'Energy Potion',desc:'Memulihkan Energy pet sebanyak 30 poin.',count:state.items.energy||0,care:'energy',usable:true},
-    snack:{icon:'🧃',name:'Battle Snack',desc:'Item pemulih HP yang digunakan saat battle.',count:state.items.snack||0,note:'Item ini digunakan dari menu battle.',usable:false},
+    snack:{icon:'🧃',name:'Health Potion',desc:'Item pemulih HP yang digunakan saat battle.',count:state.items.snack||0,note:'Item ini digunakan dari menu battle.',usable:false},
     training:{icon:'📘',name:'Training Manual',desc:'Mengurangi biaya Energy saat melakukan Training.',count:state.items.training||0,note:'Manual akan otomatis digunakan saat Training.',usable:false}
   };
   const item=items[type];if(!item)return;
