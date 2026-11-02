@@ -36,7 +36,6 @@ async function verifyTelegramInitData(initData: string): Promise<string | null> 
   if (!Number.isFinite(authDate) || Math.abs(Date.now() / 1000 - authDate) > 3600) return null;
 
   params.delete("hash");
-  params.delete("signature");
   const checkString = Array.from(params.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}=${value}`)
