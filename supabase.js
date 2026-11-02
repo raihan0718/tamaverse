@@ -263,7 +263,7 @@
             owner_id: user.id,
             client_uid: String(pet.uid),
             species: String(pet.species),
-            nickname: String(pet.name || pet.species).slice(0, 40),
+            nickname: String(pet.name || pet.species).trim().slice(0, 18),
             level: Math.max(1, Number(pet.level) || 1),
             xp: Math.max(0, Number(pet.xp) || 0),
             hunger: Math.min(100, Math.max(0, Number(pet.hunger) || 0)),
@@ -275,17 +275,20 @@
           }));
 
         if (petsPayload.length > 0) {
-          const { error: petsError } = await supabase
+          const { data: savedPets, error: petsError } = await supabase
             .from('pets')
-            .upsert(petsPayload, { onConflict: 'owner_id,client_uid' });
+            .upsert(petsPayload, { onConflict: 'owner_id,client_uid' })
+            .select('client_uid');
 
-          if (petsError) {
-            console.warn('Save pets failed:', petsError);
+          if (petsError) throw new Error('Penyimpanan pet ke cloud gagal: ' + petsError.message);
+          if (!Array.isArray(savedPets) || savedPets.length !== petsPayload.length) {
+            throw new Error('Tidak semua pet berhasil dikonfirmasi tersimpan di cloud.');
           }
         }
       }
     } catch (error) {
       console.warn('Supabase save failed:', error);
+      throw error;
     }
   }
 
