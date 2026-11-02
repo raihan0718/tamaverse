@@ -195,7 +195,7 @@
       const initData = window.Telegram?.WebApp?.initData || '';
       if (initData) {
         const { data: founderResult, error: founderError } = await supabase.functions.invoke(
-          'grant-founder-rewards',
+          'quick-service',
           { body: { initData } }
         );
         if (founderError) {
