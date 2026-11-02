@@ -5011,3 +5011,32 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
 .ranking-page .ranking-you-avatar{flex:0 0 43px;min-width:43px;min-height:43px}
 .ranking-page .ranking-podium-avatar{overflow:hidden!important}
 .ranking-page .ranking-list-avatar{flex:0 0 39px;min-width:39px;min-height:39px}
+
+
+/* Profile page: uploaded portrait must stay clipped to the square avatar shell */
+.profile-page .profile-avatar-shell,
+.profile-avatar-shell{
+  position:relative;
+  display:grid;
+  place-items:center;
+  overflow:hidden!important;
+  isolation:isolate;
+  aspect-ratio:1/1;
+}
+.profile-page .profile-avatar-shell>img,
+.profile-avatar-shell>img.profile-avatar-image,
+.profile-avatar-shell>img.player-avatar-photo{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:inherit!important;
+  margin:0!important;
+}
