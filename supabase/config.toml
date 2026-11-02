@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.grant-founder-rewards]
 verify_jwt = false
+
+[functions.tamaverse-main-bot]
+verify_jwt = false
