@@ -1130,7 +1130,7 @@ function profilePage(){
     <article class="profile-identity-card"><div class="profile-identity-orbit"></div>
       <div class="profile-avatar-shell">${profileAvatarMarkup()}</div>
       <div class="profile-identity-copy"><span class="profile-online-label"><i></i> PLAYER PROFILE</span><h2>${esc(p.name||'Player')}</h2>
-        <p class="profile-telegram-id">TELEGRAM USERNAME <strong>${esc(telegramUsername)}</strong></p><p class="profile-level-label">Level ${Number(p.level||1)} adventurer</p>
+        <p class="profile-telegram-id">${esc(telegramUsername)}</p><p class="profile-level-label">Level ${Number(p.level||1)} adventurer</p>
         <div class="profile-identity-buttons"><button class="profile-action-button" data-action="rename-player"><span>✎</span> Rename</button><button class="profile-action-button profile-change-button" data-action="pick-profile-photo"><span>▧</span> Change Profile</button></div></div>
       <div class="profile-uuid-row" title="UUID akun lengkap"><span class="profile-uuid-icon">◈</span><span class="profile-uuid-value">${esc(shortUserId)}</span><button class="profile-copy-uuid" data-action="copy-user-id" aria-label="Salin UUID lengkap" title="Salin UUID lengkap">⧉</button></div>
     </article>
