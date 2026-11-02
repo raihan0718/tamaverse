@@ -82,6 +82,11 @@
     try {
       const player = window.state.player || {};
       const items = window.state.items || {};
+      const coinBalance = Number(player.coins);
+      if (!Number.isSafeInteger(coinBalance) || coinBalance < 0 || coinBalance > 2147483647) {
+        console.warn('Cloud save skipped: Coin balance is outside the supported integer range.');
+        return;
+      }
 
       const profilePayload = {
         id: user.id,
@@ -113,7 +118,7 @@
 
       const inventoryPayload = {
         owner_id: user.id,
-        coins: Number(player.coins || 0),
+        coins: coinBalance,
         // Diamonds are authoritative in Supabase and are changed only by secure RPCs.
         snack: Number(items.snack || 0),
         energy: Number(items.energy || 0),
