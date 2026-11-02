@@ -1418,18 +1418,49 @@ async function purchasePremiumItem(itemId){
 }
 window.purchasePremiumItem=purchasePremiumItem;
 
+async function convertDiamonds(button){
+  const input=document.getElementById('diamondConvertAmount');
+  const amount=Number(input?.value);
+  const available=Math.floor(Number(state?.player?.diamonds)||0);
+  if(!Number.isSafeInteger(amount)||amount<1||amount>available){
+    showToast('Jumlah diamond tidak valid.');
+    input?.focus();
+    return;
+  }
+  const db=window.TAMAVERSE_SUPABASE_CLIENT;
+  if(!db||!window.TAMAVERSE_USER_ID){
+    showToast('Akun belum terhubung ke server. Coba masuk ulang.');
+    return;
+  }
+  if(button?.disabled)return;
+  if(button){button.disabled=true;button.textContent='Processing...';}
+  try{
+    const {data,error}=await db.rpc('tamaverse_convert_diamonds',{p_amount:amount});
+    if(error)throw error;
+    const result=Array.isArray(data)?data[0]:data;
+    if(!result?.success||!Number.isFinite(Number(result.diamonds))||!Number.isFinite(Number(result.coins))){
+      throw new Error('Respons konversi dari server tidak valid.');
+    }
+    state.player.diamonds=Number(result.diamonds);
+    state.player.coins=Number(result.coins);
+    save();
+    closeModal();
+    render();
+    showToast(`Berhasil menukar ${amount} diamond menjadi ${(amount*500).toLocaleString('id-ID')} coin.`);
+  }catch(error){
+    console.error('Diamond conversion failed:',error);
+    if(button){button.disabled=false;button.textContent='Convert';}
+    const message=String(error?.message||'');
+    if(message.includes('NOT_ENOUGH_DIAMONDS'))showToast('Diamond tidak mencukupi. Saldo sedang diperbarui.');
+    else if(message.includes('AUTH_REQUIRED'))showToast('Sesi akun berakhir. Masuk ulang lalu coba lagi.');
+    else if(message.includes('COIN_BALANCE_LIMIT'))showToast('Saldo Coin sudah mencapai batas maksimum.');
+    else showToast('Convert gagal. Coba lagi sebentar.');
+  }
+}
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(target==='battle'&&p&&p.happiness<20){showToast(battleMoodMessage(p));return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='convert-diamonds'){
-  const input=document.getElementById('diamondConvertAmount');
-  const amount=Math.floor(Number(input?.value)||0);
-  const available=Math.floor(Number(state?.player?.diamonds||0));
-  if(!Number.isFinite(amount)||amount<1||amount>available){showToast('Jumlah diamond tidak valid.');return;}
-  state.player.diamonds=available-amount;
-  state.player.coins=Math.max(0,Number(state.player.coins)||0)+(amount*500);
-  save();closeModal();render();showToast(`Berhasil menukar ${amount} diamond menjadi ${(amount*500).toLocaleString('id-ID')} coin.`);return;
-}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
