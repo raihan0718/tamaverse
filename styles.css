@@ -4658,3 +4658,36 @@ body[data-theme="light"] .profile-identity-copy .profile-telegram-id{color:#fff}
     drop-shadow(0 0 25px rgba(224,220,235,.34))
     drop-shadow(0 12px 18px #0005)!important;
 }
+
+
+/* Royal Sovereign — integrated corner filigree ornaments */
+.accessory-art.aura-royal-sovereign::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  inset:6px!important;
+  z-index:2!important;
+  pointer-events:none!important;
+  border:1px solid rgba(214,185,137,.28)!important;
+  border-radius:12px!important;
+  background:
+    radial-gradient(ellipse at 0% 0%,transparent 0 13px,rgba(218,190,146,.82) 13.5px 14.5px,transparent 15px 21px,rgba(218,190,146,.42) 21.5px 22.5px,transparent 23px),
+    radial-gradient(ellipse at 100% 0%,transparent 0 13px,rgba(218,190,146,.82) 13.5px 14.5px,transparent 15px 21px,rgba(218,190,146,.42) 21.5px 22.5px,transparent 23px),
+    radial-gradient(ellipse at 0% 100%,transparent 0 13px,rgba(218,190,146,.82) 13.5px 14.5px,transparent 15px 21px,rgba(218,190,146,.42) 21.5px 22.5px,transparent 23px),
+    radial-gradient(ellipse at 100% 100%,transparent 0 13px,rgba(218,190,146,.82) 13.5px 14.5px,transparent 15px 21px,rgba(218,190,146,.42) 21.5px 22.5px,transparent 23px),
+    linear-gradient(90deg,transparent 8%,rgba(219,190,145,.52) 8.5%,transparent 9.2%,transparent 90.8%,rgba(219,190,145,.52) 91.5%,transparent 92%),
+    linear-gradient(0deg,transparent 8%,rgba(219,190,145,.42) 8.5%,transparent 9.2%,transparent 90.8%,rgba(219,190,145,.42) 91.5%,transparent 92%);
+  box-shadow:inset 0 0 16px rgba(206,31,65,.1),0 0 10px rgba(206,31,65,.08)!important;
+}
+.accessory-art.aura-royal-sovereign::after{
+  background-color:transparent!important;
+}
+.home-page .pet-stage > .companion-frame-art{
+  outline:0!important;
+}
+.home-page .frame-equipped-royal-sovereign .companion-frame-art{
+  filter:drop-shadow(0 0 8px rgba(238,35,72,.78))
+    drop-shadow(0 0 18px rgba(176,24,54,.5))
+    drop-shadow(0 0 25px rgba(224,220,235,.34))
+    drop-shadow(0 12px 18px #0005)!important;
+}
