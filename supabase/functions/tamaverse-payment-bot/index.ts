@@ -1128,8 +1128,6 @@ type BalanceSession = {
   amount?: number; reason?: string; stage?: "username" | "amount" | "reason" | "confirm";
 };
 const ownerOnly = (id: string) => id === ADMIN_TELEGRAM_ID;
-const money = (n: number) => Math.trunc(n).toLocaleString("id-ID");
-const fmtDate = (value: string) => new Date(value).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
 const balanceMenu = () => ({ inline_keyboard: [
   [{text:"➕ Add Diamond",callback_data:"bal:diamond:add"},{text:"➖ Remove Diamond",callback_data:"bal:diamond:remove"}],
   [{text:"➕ Add Coin",callback_data:"bal:coin:add"},{text:"➖ Remove Coin",callback_data:"bal:coin:remove"}],
