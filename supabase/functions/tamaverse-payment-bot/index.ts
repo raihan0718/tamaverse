@@ -1257,7 +1257,9 @@ async function handleMessage(message: Any) {
   const text = String(message.text ?? "").trim();
   if (!telegramId) return;
 
-  if (/^\\/balance_setup(@\\w+)?(\\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalanceSetup(chatId,telegramId); return; }\n  if (/^\\/balance(@\\w+)?(\\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalance(chatId,telegramId); return; }\n  if (await handleBalanceText(chatId,telegramId,text)) return;\n\n  if (Array.isArray(message.photo) && message.photo.length > 0) {
+  if (/^\/balance_setup(@\w+)?(\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalanceSetup(chatId, telegramId); return; }
+  if (/^\/balance(@\w+)?(\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalance(chatId, telegramId); return; }
+  if (await handleBalanceText(chatId, telegramId, text)) return;
     await handleProof(message);
     return;
   }
