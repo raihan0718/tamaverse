@@ -123,13 +123,20 @@ Deno.serve(async (req) => {
       .eq("owner_id", ownerId)
       .maybeSingle();
     if (premiumReadError) throw premiumReadError;
+
+    // Upsert also creates the inventory row for older accounts where the
+    // auth trigger did not create one. On conflict, only supplied fields change.
     const frames = Array.isArray(premium?.owned_frames) ? premium.owned_frames : ["common"];
-    if (!frames.includes("royal-sovereign")) {
-      const { error: frameError } = await admin.from("premium_inventory")
-        .update({ owned_frames: [...frames, "royal-sovereign"], updated_at: new Date().toISOString() })
-        .eq("owner_id", ownerId);
-      if (frameError) throw frameError;
-    }
+    const ownedFrames = frames.includes("royal-sovereign")
+      ? frames
+      : [...frames, "royal-sovereign"];
+    const { error: frameError } = await admin.from("premium_inventory")
+      .upsert({
+        owner_id: ownerId,
+        owned_frames: ownedFrames,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "owner_id" });
+    if (frameError) throw frameError;
 
     return json({ success: true, founder: true, petGranted: true, frameGranted: true });
   } catch (error) {
