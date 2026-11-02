@@ -1082,7 +1082,7 @@ type BalanceSession = {
   target_id?: string; target_username?: string | null; owner_id?: string;
   amount?: number; reason?: string; stage?: "username" | "amount" | "reason" | "confirm";
 };
-const ownerOnly = (id: string) => id === ADMIN_TELEGRAM_ID;
+const ownerOnly = (id: string) => id === ADMIN_TELEGRAM_ID;\nconst money = (n: number) => Math.trunc(n).toLocaleString("id-ID");\nconst fmtDate = (value: string) => new Date(value).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
 const balanceMenu = () => ({ inline_keyboard: [
   [{text:"➕ Add Diamond",callback_data:"bal:diamond:add"},{text:"➖ Remove Diamond",callback_data:"bal:diamond:remove"}],
   [{text:"➕ Add Coin",callback_data:"bal:coin:add"},{text:"➖ Remove Coin",callback_data:"bal:coin:remove"}],
@@ -1254,7 +1254,7 @@ async function handleMessage(message: Any) {
   const text = String(message.text ?? "").trim();
   if (!telegramId) return;
 
-  if (Array.isArray(message.photo) && message.photo.length > 0) {
+  if (/^\\/balance_setup(@\\w+)?(\\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalanceSetup(chatId,telegramId); return; }\n  if (/^\\/balance(@\\w+)?(\\s|$)/i.test(text)) { if (ownerOnly(telegramId)) await beginBalance(chatId,telegramId); return; }\n  if (await handleBalanceText(chatId,telegramId,text)) return;\n\n  if (Array.isArray(message.photo) && message.photo.length > 0) {
     await handleProof(message);
     return;
   }
