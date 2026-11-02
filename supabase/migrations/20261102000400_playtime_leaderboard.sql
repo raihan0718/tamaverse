@@ -33,3 +33,18 @@ $$;
 
 revoke all on function public.add_tamaverse_playtime(integer) from public;
 grant execute on function public.add_tamaverse_playtime(integer) to authenticated;
+
+-- Enable profile row changes for realtime leaderboard updates when publication exists.
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (
+       select 1 from pg_publication_tables
+        where pubname = 'supabase_realtime'
+          and schemaname = 'public'
+          and tablename = 'profiles'
+     ) then
+    alter publication supabase_realtime add table public.profiles;
+  end if;
+end;
+$$;
