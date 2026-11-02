@@ -257,26 +257,43 @@
       if (pets.length > 0) {
         // Keep ordinary background saves from racing the explicit active-pet
         // selection used by online matchmaking and start_pvp_match.
-        const petsPayload = pets
-          .filter((pet) => pet && pet.uid && pet.species)
-          .map((pet) => ({
-            owner_id: user.id,
-            client_uid: String(pet.uid),
-            species: String(pet.species),
-            nickname: String(pet.name || pet.species).trim().slice(0, 18),
-            // PostgreSQL pet stat columns are integers. Care decay can leave
-            // fractional values in local state, so normalize before cloud upsert.
-            level: Math.max(1, Math.round(Number(pet.level) || 1)),
-            xp: Math.max(0, Math.round(Number(pet.xp) || 0)),
-            hunger: Math.min(100, Math.max(0, Math.round(Number(pet.hunger) || 0))),
-            happiness: Math.min(100, Math.max(0, Math.round(Number(pet.happiness) || 0))),
-            energy: Math.min(100, Math.max(0, Math.round(Number(pet.energy) || 0))),
-            cleanliness: Math.min(100, Math.max(0, Math.round(Number(pet.cleanliness) || 0))),
-            evolution: Math.max(0, Math.round(Number(pet.evolution) || 0)),
-            is_active: String(pet.uid) === String(window.state.activePet),
-          }));
+        const activeUid = String(window.state.activePet || '');
+        // Deduplicate local rows by UID before sending them to the unique
+        // (owner_id, client_uid) conflict target.
+        const petByUid = new Map();
+        pets.forEach((pet) => {
+          if (pet && pet.uid && pet.species) petByUid.set(String(pet.uid), pet);
+        });
+        const petsPayload = Array.from(petByUid.entries()).map(([uid, pet]) => ({
+          owner_id: user.id,
+          client_uid: uid,
+          species: String(pet.species),
+          nickname: String(pet.name || pet.species).trim().slice(0, 18),
+          // PostgreSQL pet stat columns are integers. Care decay can leave
+          // fractional values in local state, so normalize before cloud upsert.
+          level: Math.max(1, Math.round(Number(pet.level) || 1)),
+          xp: Math.max(0, Math.round(Number(pet.xp) || 0)),
+          hunger: Math.min(100, Math.max(0, Math.round(Number(pet.hunger) || 0))),
+          happiness: Math.min(100, Math.max(0, Math.round(Number(pet.happiness) || 0))),
+          energy: Math.min(100, Math.max(0, Math.round(Number(pet.energy) || 0))),
+          cleanliness: Math.min(100, Math.max(0, Math.round(Number(pet.cleanliness) || 0))),
+          evolution: Math.max(0, Math.round(Number(pet.evolution) || 0)),
+          is_active: Boolean(activeUid) && uid === activeUid,
+        }));
 
         if (petsPayload.length > 0) {
+          // The partial unique index allows only one active pet per owner.
+          // Clear any previous active row BEFORE upserting the newly selected
+          // pet; a multi-row upsert can otherwise hit the index mid-statement.
+          let deactivateQuery = supabase
+            .from('pets')
+            .update({ is_active: false })
+            .eq('owner_id', user.id)
+            .eq('is_active', true);
+          if (activeUid) deactivateQuery = deactivateQuery.neq('client_uid', activeUid);
+          const { error: deactivateError } = await deactivateQuery;
+          if (deactivateError) throw new Error('Gagal menyiapkan pet aktif di cloud: ' + deactivateError.message);
+
           const { data: savedPets, error: petsError } = await supabase
             .from('pets')
             .upsert(petsPayload, { onConflict: 'owner_id,client_uid' })
