@@ -348,6 +348,17 @@
         console.warn('Load pets failed:', petsLoadError);
       } else if (Array.isArray(cloudPets) && cloudPets.length) {
         const localPets = Array.isArray(window.state.pets) ? window.state.pets : [];
+        // Resolve the active companion once. Multiple is_active rows can exist
+        // from older saves; never let unordered query results decide the Home pet.
+        const activeCloudPets = cloudPets
+          .filter(pet => pet.is_active)
+          .sort((a, b) => String(a.client_uid).localeCompare(String(b.client_uid)));
+        const previousActiveUid = String(window.state.activePet || '');
+        const resolvedActiveCloudPet = activeCloudPets.length === 1
+          ? activeCloudPets[0]
+          : activeCloudPets.find(pet => String(pet.client_uid) === previousActiveUid)
+            || activeCloudPets[0]
+            || null;
         cloudPets.forEach((cloudPet) => {
           let localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
           if (!localPet && cloudPet.species === 'sovereign-nexora') {
@@ -375,7 +386,9 @@
           localPet.level = newLevel;
           localPet.xp = Math.max(0, Number(cloudPet.xp) || 0);
           if (cloudPet.nickname) localPet.name = cloudPet.nickname;
-          if (cloudPet.is_active) window.state.activePet = localPet.uid;
+          if (resolvedActiveCloudPet && String(cloudPet.client_uid) === String(resolvedActiveCloudPet.client_uid)) {
+            window.state.activePet = localPet.uid;
+          }
         });
       }
     } catch (error) {
