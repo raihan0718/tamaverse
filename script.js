@@ -874,7 +874,7 @@ function doCare(kind){
   if(kind==='energy'){
     if((state.items.energy||0)<1){showToast('Energy Potion habis. Beli di Store.');return;}
     if(p.energy>=100){showToast('Energi pet sudah penuh.');return;}
-    state.items.energy--;p.energy=clamp(p.energy+30,0,100);
+    state.items.energy--;p.energy=clamp(p.energy+30,0,100);triggerPetAnimation('energy');
     showToast('Energy Potion digunakan! Energy +30.');
   }else if(kind==='feed'){
     if(p.hunger>=100){showToast(`${p.name} belum lapar.`);return;}
