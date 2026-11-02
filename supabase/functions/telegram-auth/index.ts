@@ -171,6 +171,14 @@ Deno.serve(async req => {
   } catch (error) {
     console.error("telegram-auth failed", { stage, message: error instanceof Error ? error.message : String(error), name: error instanceof Error ? error.name : null, authCreateDiagnostic });
     const message = error instanceof Error ? error.message : "INTERNAL_ERROR";
-    return reply({ error: message }, 500);
+    return reply({
+      error: message,
+      diagnostic: authCreateDiagnostic ? {
+        stage,
+        code: authCreateDiagnostic.code ?? null,
+        message: String(authCreateDiagnostic.message ?? "").slice(0, 180),
+        status: authCreateDiagnostic.status ?? null
+      } : { stage }
+    }, 500);
   }
 });
