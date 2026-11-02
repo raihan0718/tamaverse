@@ -1835,24 +1835,18 @@ async function syncOnlinePetBeforeRoom() {
   }
 
   const userId = window.TAMAVERSE_USER_ID;
-  // Re-assert the selected pet as active after the cloud save. This avoids
-  // strict UID type mismatches leaving every cloud pet inactive.
-  const { error: deactivateError } = await db
+  // The queued cloud-save writer owns active-pet synchronization. Avoid a
+  // second direct deactivate/activate sequence here, which could race with
+  // another background save and violate pets_one_active_per_owner.
+  const { data: selectedPet, error: verifyError } = await db
     .from('pets')
-    .update({ is_active: false })
-    .eq('owner_id', userId);
-  if (deactivateError) throw deactivateError;
-
-  const { data: selectedPet, error: activateError } = await db
-    .from('pets')
-    .update({ is_active: true })
+    .select('client_uid, is_active')
     .eq('owner_id', userId)
     .eq('client_uid', petData.pet_uid)
-    .select('client_uid, is_active')
     .maybeSingle();
-  if (activateError) throw activateError;
+  if (verifyError) throw verifyError;
   if (!selectedPet?.is_active) {
-    throw new Error('Pet pilihan belum tersimpan di cloud. Pilih ulang pet, lalu coba lagi.');
+    throw new Error('Pet pilihan belum tersimpan sebagai pet aktif di cloud. Muat ulang lalu pilih ulang pet.');
   }
 }
 
