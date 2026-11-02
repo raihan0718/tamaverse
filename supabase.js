@@ -190,6 +190,24 @@
     window.TAMAVERSE_USER_ID = user.id;
     setupDiamondWalletSync(user.id);
 
+    let founderGrant = false;
+    try {
+      const initData = window.Telegram?.WebApp?.initData || '';
+      if (initData) {
+        const { data: founderResult, error: founderError } = await supabase.functions.invoke(
+          'grant-founder-rewards',
+          { body: { initData } }
+        );
+        if (founderError) {
+          console.warn('Founder reward check failed:', founderError);
+        } else if (founderResult?.success && founderResult?.founder) {
+          founderGrant = true;
+        }
+      }
+    } catch (founderError) {
+      console.warn('Founder reward check unavailable:', founderError);
+    }
+
     try {
       const { data: profileData, error: profileError } =
         await supabase
@@ -287,6 +305,39 @@
         };
       }
 
+      if (founderGrant) {
+        window.TAMAVERSE_PREMIUM_INVENTORY = window.TAMAVERSE_PREMIUM_INVENTORY || {
+          rename_card_count: 0, rename_pet_card_count: 0, owned_frames: ['common']
+        };
+        const ownedFrames = window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames || ['common'];
+        if (!ownedFrames.includes('royal-sovereign')) {
+          window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames = [...ownedFrames, 'royal-sovereign'];
+        }
+
+        window.state.pets = Array.isArray(window.state.pets) ? window.state.pets : [];
+        const founderPetUid = 'founder-nexora-' + String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '');
+        if (!window.state.pets.some((pet) => pet.species === 'sovereign-nexora')) {
+          window.state.pets.push({
+            uid: founderPetUid,
+            species: 'sovereign-nexora',
+            name: 'Nexora',
+            level: 1,
+            xp: 0,
+            hp: 132,
+            stats: { hp: 132, atk: 26, def: 23, spd: 19 },
+            hunger: 100,
+            happiness: 100,
+            energy: 100,
+            cleanliness: 100,
+            evolution: 0,
+            fragments: 0
+          });
+        }
+        try { localStorage.setItem('tamaverse_save_v1', JSON.stringify(window.state)); } catch (storageError) {
+          console.warn('Founder reward local save failed:', storageError);
+        }
+      }
+
       // Refresh cloud pet XP/levels after authoritative online battle rewards.
       const { data: cloudPets, error: petsLoadError } = await supabase
         .from('pets')
@@ -298,7 +349,18 @@
       } else if (Array.isArray(cloudPets) && cloudPets.length) {
         const localPets = Array.isArray(window.state.pets) ? window.state.pets : [];
         cloudPets.forEach((cloudPet) => {
-          const localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
+          let localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
+          if (!localPet && cloudPet.species === 'sovereign-nexora') {
+            localPet = {
+              uid: String(cloudPet.client_uid), species: cloudPet.species,
+              name: cloudPet.nickname || 'Nexora', level: Number(cloudPet.level || 1),
+              xp: Number(cloudPet.xp || 0), hp: 132,
+              stats: { hp: 132, atk: 26, def: 23, spd: 19 },
+              hunger: 100, happiness: 100, energy: 100, cleanliness: 100,
+              evolution: 0, fragments: 0
+            };
+            localPets.push(localPet);
+          }
           if (!localPet) return;
           const oldLevel = Math.max(1, Number(localPet.level) || 1);
           const newLevel = Math.max(1, Number(cloudPet.level) || 1);
