@@ -11,10 +11,10 @@
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       return {
         muted: saved.muted === true,
-        volume: Number.isFinite(Number(saved.volume)) ? Math.min(1, Math.max(0, Number(saved.volume))) : 0.35
+        volume: Number.isFinite(Number(saved.volume)) ? Math.min(1, Math.max(0, Number(saved.volume))) : 1
       };
     } catch (_) {
-      return { muted: false, volume: 0.35 };
+      return { muted: false, volume: 1 };
     }
   }
 
