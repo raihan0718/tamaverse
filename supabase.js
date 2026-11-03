@@ -345,12 +345,14 @@
   window.savePlayerToSupabase = queueCloudSave;
 
   async function loadPlayerFromSupabase() {
-    if (!window.state || !supabase) return;
+    if (!supabase) return;
 
     const user = await ensureSupabaseUser();
     if (!user) return;
 
     window.TAMAVERSE_USER_ID = user.id;
+    // Load only this Telegram account's local cache; never consult the legacy shared save.
+    window.state = window.loadTamaverseAccountSave?.(window.TAMAVERSE_TELEGRAM_ID) || null;
     setupDiamondWalletSync(user.id);
 
     // Founder reward verification runs in the background so it cannot hold the lobby.
@@ -381,6 +383,16 @@
         supabase.from('premium_inventory').select('rename_card_count, rename_pet_card_count, owned_frames').eq('owner_id', user.id).maybeSingle(),
         supabase.from('pets').select('client_uid, species, nickname, level, xp, hunger, happiness, energy, cleanliness, evolution, is_active').eq('owner_id', user.id)
       ]);
+
+      // A failed cloud read must never be interpreted as an empty/new account.
+      for (const [label, result] of [['profile', profileResult], ['inventory', inventoryResult], ['daily rewards', dailyResult], ['premium inventory', premiumResult], ['pets', petsResult]]) {
+        if (result.error) throw new Error(`Load ${label} failed: ${result.error.message}`);
+      }
+      const hasCloudAccountData = Boolean(profileResult.data || inventoryResult.data || dailyResult.data || premiumResult.data || (Array.isArray(petsResult.data) && petsResult.data.length));
+      if (!window.state && hasCloudAccountData) {
+        window.state = window.createTamaverseFreshState?.(profileResult.data?.display_name || 'Penjelajah') || null;
+      }
+      if (!window.state) return; // New account: keep onboarding flow; no cloud progress exists yet.
 
       const { data: profileData, error: profileError } = profileResult;
       if (profileError) console.warn('Load profile failed:', profileError);
@@ -509,11 +521,13 @@
         }
       }
     } catch (error) {
-      console.warn('Supabase load failed:', error);
+      console.error('Supabase load failed; account hydration aborted to protect progress:', error);
+      throw error;
     }
 
     // Apply founder-only rewards after the lobby has already become available.
     founderGrantPromise.then((founderGrant) => {
+      if (!window.state) return;
       window.TAMAVERSE_IS_FOUNDER = Boolean(founderGrant);
       if (!founderGrant) {
         // Strip stale Founder-only cosmetics/pet from local state on non-Founder accounts.
@@ -524,7 +538,7 @@
           (window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames || ['common']).filter(id => id !== 'royal-sovereign');
         window.state.pets = (window.state.pets || []).filter(pet => pet.species !== 'sovereign-nexora');
         if (window.state.equippedFrame === 'royal-sovereign') window.state.equippedFrame = 'common';
-        try { localStorage.setItem('tamaverse_save_v1', JSON.stringify(window.state)); } catch (_) {}
+        try { window.saveTamaverseLocalAccount?.(); } catch (_) {}
         if (typeof window.render === 'function') window.render();
         return;
       }
@@ -545,11 +559,12 @@
           evolution: 0, fragments: 0
         });
       }
-      try { localStorage.setItem('tamaverse_save_v1', JSON.stringify(window.state)); } catch (error) {
+      try { window.saveTamaverseLocalAccount?.(); } catch (error) {
         console.warn('Founder reward local save failed:', error);
       }
       if (typeof window.render === 'function') window.render();
     });
+    window.saveTamaverseLocalAccount?.();
     // Update the ID if its element is already on the page.
     const idElement = document.getElementById('supabaseUserId');
 
