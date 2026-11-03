@@ -1211,7 +1211,7 @@ function battleView(){
             <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
             <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||skillCooldown>0?'disabled':''}><span>✨</span>Skill${skillCooldown>0?` · ${skillCooldown}s`:''}</button>
             <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>🛡️</span>Defend</button>
-            <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}><img src="assets/items/HealthPotion.webp" alt="" class="battle-item-image">Item · ${state.items.snack}</button>
+            <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}><img src="assets/items/HealthPotion.webp" alt="" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">Item · ${state.items.snack}</button>
           </div>
         </div>
       </div>
