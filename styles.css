@@ -5025,7 +5025,7 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
    Old per-species enlargement/zoom/transform rules have been removed above this block. */
 html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]{
   position:absolute!important;
-  left:46.5%!important;
+  left:48.5%!important;
   top:50%!important;
   width:38%!important;
   height:24.76%!important;
