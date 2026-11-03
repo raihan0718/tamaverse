@@ -509,7 +509,7 @@ async function claimDailyReward(){
   }
 }
 function questPreview(){return questDefinitions().filter(q=>state.quests.active.includes(q.id)).slice(0,2).map(questRow).join('');}
-function questDefinitions(){return [{id:'feed',title:'Beri makan pet',target:2,icon:'🍓',reward:35,xp:15,difficulty:'Mudah'},{id:'play',title:'Bermain bersama',target:2,icon:'💖',reward:35,xp:15,difficulty:'Mudah'},{id:'egg',title:'Buka telur',target:1,icon:'🥚',reward:40,xp:25,difficulty:'Normal'},{id:'battle',title:'Selesaikan battle 5x',target:5,icon:'⚔️',reward:50,xp:30,difficulty:'Sulit'},{id:'win',title:'Menangkan battle',target:1,icon:'🏆',reward:60,xp:40,difficulty:'Tantangan'}];}
+function questDefinitions(){return [{id:'feed',title:'Beri makan pet',target:2,icon:'🍓',reward:35,xp:40,difficulty:'Mudah'},{id:'play',title:'Bermain bersama',target:2,icon:'💖',reward:35,xp:40,difficulty:'Mudah'},{id:'egg',title:'Buka telur',target:1,icon:'🥚',reward:40,xp:45,difficulty:'Normal'},{id:'battle',title:'Selesaikan battle 5x',target:5,icon:'⚔️',reward:50,xp:50,difficulty:'Sulit'},{id:'win',title:'Menangkan battle',target:1,icon:'🏆',reward:60,xp:60,difficulty:'Tantangan'}];}
 function questList(){return questDefinitions().filter(q=>state.quests.active.includes(q.id)).map(questRow).join('');}
 function questRow(q){const progress=state.quests.progress[q.id]||0,done=progress>=q.target,claimed=state.quests.claimed.includes(q.id),rebought=state.quests.rebought.includes(q.id);let action='';if(claimed)action=rebought?'<button class="button daily-quest-claim secondary" disabled>Limit</button>':`<button class="button daily-quest-claim secondary" data-action="rebuy-quest" data-quest="${q.id}">↻ 1 💎</button>`;else action=`<button class="button daily-quest-claim" data-action="claim" data-quest="${q.id}" ${!done?'disabled':''}>${done?'Klaim':'Belum'}</button>`;return `<div class="daily-quest-item"><span class="daily-quest-icon">${q.icon}</span><div class="daily-quest-info"><strong>${q.title}</strong><small>${Math.min(progress,q.target)}/${q.target} · ${q.difficulty} · 🪙 ${q.reward} · ✨ ${q.xp} XP</small><span class="daily-quest-track"><i style="width:${Math.min(100,progress/q.target*100)}%"></i></span></div>${action}</div>`;}
 function startIntro(){
@@ -724,7 +724,7 @@ function advanceHuntingLevel(){
   const cleared=battle.wave;
   battle.clearedLevels++;
   battle.coinsEarned+=10+cleared*2;
-  battle.xpEarned+=6+cleared*2;
+  battle.xpEarned+=40+cleared*5;
   if(cleared>=species.length){finishBattle('win');return;}
   battle.phase='transition';battle.busy=true;battle.actionFx='level-up';
   battle.log.push(`Level ${cleared} clear! Bersiap menuju level ${cleared+1}.`);
@@ -777,7 +777,7 @@ function legacy_battleAction(move){
   render();
   battle.aiTimer=setTimeout(runHuntingAiTurn,850);
 }
-function legacy_finishBattle(result){if(!battle||battle.ended)return;battle.ended=true;if(battle.aiTimer)clearTimeout(battle.aiTimer);const p=petById(battle.petId);if(result==='win'){state.player.wins++;state.player.rating+=battle.mode==='simulated'?12:5;addCoins(35);playerXP(25);grantPetXP(p,50);state.quests.progress.win++;showToast('Menang! +35 koin, XP pet & pemain.');}else if(result==='loss'){state.player.losses++;state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);showToast('Kalah, tapi pet mendapat pengalaman.');}else{state.player.draws++;showToast('Battle berakhir seri.');}state.quests.progress.battle++;state.battleHistory.unshift({result,date:Date.now(),mode:battle.mode});state.battleHistory=state.battleHistory.slice(0,20);save();battle=null;render();showModal(`<div class="hatch-egg">${result==='win'?'🏆':result==='draw'?'🤝':'💫'}</div><h2 id="modalTitle" style="text-align:center">${result==='win'?'Kemenangan!':result==='draw'?'Seri!':'Pertarungan selesai'}</h2><p style="text-align:center">${result==='win'?'Hebat! Petmu memperoleh hadiah battle.':result==='draw'?'Pertarungan berakhir imbang.':'Jangan menyerah, petmu tetap mendapat XP.'}</p><button class="button full" data-action="close-modal">Lanjut</button>`);}
+function legacy_finishBattle(result){if(!battle||battle.ended)return;battle.ended=true;if(battle.aiTimer)clearTimeout(battle.aiTimer);const p=petById(battle.petId);if(result==='win'){state.player.wins++;state.player.rating+=battle.mode==='simulated'?12:5;addCoins(35);playerXP(50);grantPetXP(p,50);state.quests.progress.win++;showToast('Menang! +35 koin, XP pet & pemain.');}else if(result==='loss'){state.player.losses++;state.player.rating=Math.max(0,state.player.rating-5);grantPetXP(p,8);showToast('Kalah, tapi pet mendapat pengalaman.');}else{state.player.draws++;showToast('Battle berakhir seri.');}state.quests.progress.battle++;state.battleHistory.unshift({result,date:Date.now(),mode:battle.mode});state.battleHistory=state.battleHistory.slice(0,20);save();battle=null;render();showModal(`<div class="hatch-egg">${result==='win'?'🏆':result==='draw'?'🤝':'💫'}</div><h2 id="modalTitle" style="text-align:center">${result==='win'?'Kemenangan!':result==='draw'?'Seri!':'Pertarungan selesai'}</h2><p style="text-align:center">${result==='win'?'Hebat! Petmu memperoleh hadiah battle.':result==='draw'?'Pertarungan berakhir imbang.':'Jangan menyerah, petmu tetap mendapat XP.'}</p><button class="button full" data-action="close-modal">Lanjut</button>`);}
 function legacy_inspectPet(uid){const p=petById(uid);if(!p)return;const s=speciesById(p.species);selectedPetId=uid;showModal(`<div class="pet-detail-art">${petImage(s.id, 'detail-pet-image', true)}</div><div class="eyebrow">${s.element} · ${s.rarity}</div><h2 id="modalTitle">${esc(p.name)} · Lv.${p.level}</h2><p>${s.name} · Evolusi ${p.evolution}/100</p><div class="stats-row"><div class="stat-tile"><strong>${p.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${p.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${p.stats.def}</strong><span>DEF</span></div></div><div class="modal-actions"><button class="button secondary" data-action="nickname-pet">Ubah nama</button><button class="button" data-action="set-active" data-pet="${uid}">${uid===state.activePet?'Pet aktif':'Pilih aktif'}</button></div>`);}
 function showDailyQuests(){
   showModal(`<div class="eyebrow">TAMAVERSE · DAILY MISSIONS</div><h2 id="modalTitle">Daily Quests</h2><p class="subtle">Selesaikan misi untuk mendapatkan Coins dan XP.</p><div class="daily-quest-list">${questList()}</div><button class="button secondary full" data-action="close-modal">Tutup</button>`);
@@ -931,11 +931,11 @@ window.createTamaversePetFromCloud = function(cloudPet){
   if(!kind||!cloudPet?.client_uid)return null;
   const pet=createPet(kind.id,cloudPet.nickname||kind.name);
   pet.uid=String(cloudPet.client_uid);
-  pet.careUpdatedAt=Date.parse(cloudPet.care_updated_at||'')||now;
+  pet.careUpdatedAt=Date.parse(cloudPet.care_updated_at||'')||Date.now();
   pet.hunger=clamp(Number(cloudPet.hunger??100),0,100);
   pet.happiness=clamp(Number(cloudPet.happiness??100),0,100);
   pet.energy=clamp(Number(cloudPet.energy??80),0,100);
-  pet.cleanliness=clamp(Number(cloudPet.cleanliness??80),0,100);
+  pet.cleanliness=clamp(Number(cloudPet.cleanliness??100),0,100);
   pet.evolution=Math.max(0,Number(cloudPet.evolution)||0);
   return pet;
 };
@@ -1532,7 +1532,7 @@ function finishBattle(result){
     const coins=Number(completed.coinsEarned||0),xp=Number(completed.xpEarned||0);
     addCoins(coins);
     if(xp>0)playerXP(xp);
-    if(p&&completed.clearedLevels>0)grantPetXP(p,completed.clearedLevels*5);
+    if(p&&completed.clearedLevels>0)grantPetXP(p,completed.clearedLevels*40);
     if(result==='win'){state.player.wins++;state.quests.progress.win++;}
     else if(result==='loss')state.player.losses++;
     showToast(`Hunting selesai · ${completed.clearedLevels} level · +${coins} Coins · +${xp} EXP`);
