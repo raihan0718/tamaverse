@@ -5055,3 +5055,7 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
 
 /* Battle sprite orientation: Phoenix (starwhale) is the only left-facing source asset. */
 .battle-sprite .battle-face-flip{transform:scaleX(-1)!important;transform-origin:center!important}
+
+/* Home companion asset sizing: make the actual pet artwork more prominent inside its frame. */
+.home-page .pet-stage > .stage-pet{font-size:clamp(150px,48vw,260px)!important}
+@media(max-width:380px){.home-page .pet-stage > .stage-pet{font-size:clamp(145px,48vw,220px)!important}}
