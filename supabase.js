@@ -445,8 +445,8 @@
       }
 
       const { data: cloudPets, error: petsLoadError } = petsResult;
-      if (petsLoadError) console.warn('Load pets failed:', petsLoadError);
-      else if (Array.isArray(cloudPets)) {
+      if (petsLoadError) throw new Error('Load pets failed: ' + petsLoadError.message);
+      else if (Array.isArray(cloudPets) && (hasCloudAccountData || cloudPets.length > 0)) {
         // Cloud rows are authoritative for this authenticated owner. Do not merge
         // pets from another Telegram account's shared device localStorage.
         const isFounderAccount = await founderGrantPromise;
