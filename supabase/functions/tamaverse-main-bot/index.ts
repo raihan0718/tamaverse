@@ -4,7 +4,7 @@ const APP_URL = "https://raihan0718.github.io/tamaverse/";
 const API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const ADMIN_TELEGRAM_ID = Deno.env.get("TAMAVERSE_BOT_ADMIN_ID") ?? "";
+const ADMIN_TELEGRAM_ID = Deno.env.get("TELEGRAM_ADMIN_ID") ?? "";
 
 type TgMessage = {
   message_id: number;
