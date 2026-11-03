@@ -4,11 +4,12 @@ const APP_URL = "https://raihan0718.github.io/tamaverse/";
 const API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const ADMIN_TELEGRAM_ID = Deno.env.get("TAMAVERSE_BOT_ADMIN_ID") ?? "";
 
 type TgMessage = {
   message_id: number;
   chat: { id: number; type?: string };
-  from?: { first_name?: string; username?: string };
+  from?: { id?: number; first_name?: string; username?: string };
   text?: string;
 };
 type TgUpdate = {
@@ -18,7 +19,7 @@ type TgUpdate = {
     id: string;
     data?: string;
     message?: { message_id: number; chat: { id: number } };
-    from?: { first_name?: string };
+    from?: { id?: number; first_name?: string };
   };
 };
 
@@ -137,6 +138,28 @@ async function recordBotStart(telegramUserId: number) {
   if (!linked.ok) throw new Error("Could not update Telegram notification permission");
 }
 
+
+async function getBroadcastRecipients(): Promise<string[]> {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Supabase service configuration missing");
+  const ids = new Set<string>();
+  let offset = 0;
+  while (true) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/tamaverse_telegram_bot_starts?select=telegram_user_id&order=telegram_user_id.asc&limit=1000&offset=${offset}`, {
+      headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` }
+    });
+    if (!response.ok) throw new Error("Could not load broadcast recipients");
+    const rows = await response.json() as Array<{ telegram_user_id: string }>;
+    for (const row of rows) if (row.telegram_user_id) ids.add(String(row.telegram_user_id));
+    if (rows.length < 1000) break;
+    offset += rows.length;
+  }
+  return [...ids];
+}
+
+async function copyBroadcastMessage(sourceChatId: number, sourceMessageId: number, recipientId: string) {
+  return telegram("copyMessage", { chat_id: Number(recipientId), from_chat_id: sourceChatId, message_id: sourceMessageId });
+}
+
 async function send(chatId: number, text: string, replyMarkup?: unknown) {
   return telegram("sendMessage", {
     chat_id: chatId,
@@ -181,18 +204,51 @@ Deno.serve(async (req: Request) => {
   try {
     if (update.callback_query) {
       const query = update.callback_query;
-      await telegram("answerCallbackQuery", { callback_query_id: query.id });
       const chatId = query.message?.chat.id;
       const messageId = query.message?.message_id;
-      if (chatId && messageId) await showPage(chatId, messageId, query.data ?? "home");
+      const data = query.data ?? "home";
+      if (data.startsWith("broadcast_send:")) {
+        if (!ADMIN_TELEGRAM_ID || String(query.from?.id ?? "") !== ADMIN_TELEGRAM_ID || chatId !== Number(ADMIN_TELEGRAM_ID)) {
+          await telegram("answerCallbackQuery", { callback_query_id: query.id, text: "Akses ditolak.", show_alert: true });
+          return Response.json({ ok: true });
+        }
+        const sourceMessageId = Number(data.slice(15));
+        if (!Number.isInteger(sourceMessageId) || sourceMessageId < 1 || !chatId) {
+          await telegram("answerCallbackQuery", { callback_query_id: query.id, text: "Pesan tidak valid.", show_alert: true });
+          return Response.json({ ok: true });
+        }
+        await telegram("answerCallbackQuery", { callback_query_id: query.id, text: "Broadcast dimulai." });
+        if (messageId) await telegram("editMessageText", { chat_id: chatId, message_id: messageId, text: "⏳ Broadcast sedang diproses..." });
+        const recipients = await getBroadcastRecipients();
+        let sent = 0;
+        let failed = 0;
+        for (const recipient of recipients) {
+          try { await copyBroadcastMessage(chatId, sourceMessageId, recipient); sent++; }
+          catch { failed++; }
+          await new Promise((resolve) => setTimeout(resolve, 40));
+        }
+        await send(chatId, `✅ *Broadcast selesai*\n\nTerkirim: ${sent}\nGagal: ${failed}\nTotal terdaftar: ${recipients.length}`);
+        return Response.json({ ok: true });
+      }
+      await telegram("answerCallbackQuery", { callback_query_id: query.id });
+      if (chatId && messageId) await showPage(chatId, messageId, data);
       return Response.json({ ok: true });
     }
 
     const message = update.message;
-    if (!message?.text || !message.chat?.id) return Response.json({ ok: true });
-    const command = message.text.trim().split(/\s+/)[0].split("@")[0].toLowerCase();
-    const firstName = (message.from?.first_name ?? "there").replace(/[<>]/g, "");
+    if (!message?.chat?.id) return Response.json({ ok: true });
     const chatId = message.chat.id;
+    const isAdmin = Boolean(ADMIN_TELEGRAM_ID) && String(message.from?.id ?? "") === ADMIN_TELEGRAM_ID && chatId === Number(ADMIN_TELEGRAM_ID) && message.chat.type === "private";
+    if (!message.text && !isAdmin) return Response.json({ ok: true });
+    const command = (message.text ?? "").trim().split(/\s+/)[0].split("@")[0].toLowerCase();
+    const firstName = (message.from?.first_name ?? "there").replace(/[<>]/g, "");
+    if (isAdmin && command !== "/start" && command !== "/menu" && !command.startsWith("/")) {
+      const recipients = await getBroadcastRecipients();
+      await send(chatId, `📣 *Konfirmasi broadcast*\n\nPesan akan disalin ke *${recipients.length}* pengguna yang pernah menekan /start.\n\nLanjutkan?`, {
+        inline_keyboard: [[{ text: "✅ Kirim ke semua", callback_data: `broadcast_send:${message.message_id}` }], [{ text: "✖️ Batal", callback_data: "home" }]]
+      });
+      return Response.json({ ok: true });
+    }
 
     switch (command) {
       case "/start":
