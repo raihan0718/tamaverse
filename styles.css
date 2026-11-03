@@ -5075,3 +5075,15 @@ html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] img.pet
   transform:none!important;
   zoom:1!important;
 }
+
+
+/* Founder pet: Nexora 10% smaller on Home only */
+html body .page.home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora img.stage-pet-image,
+html body .page.home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora img.pet-image{
+  width:90%!important;
+  height:90%!important;
+  max-width:90%!important;
+  max-height:90%!important;
+  flex:0 1 90%!important;
+  object-fit:contain!important;
+}
