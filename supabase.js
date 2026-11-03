@@ -326,7 +326,7 @@
           energy: Math.min(100, Math.max(0, Math.round(Number(pet.energy) || 0))),
           cleanliness: Math.min(100, Math.max(0, Math.round(Number(pet.cleanliness) || 0))),
           evolution: Math.max(0, Math.round(Number(pet.evolution) || 0)),
-          is_active: Boolean(activeUid) && uid === activeUid,
+          is_active: Boolean(activeUid) && String(pet.uid) === activeUid,
         }));
 
         if (petsPayload.length > 0) {
