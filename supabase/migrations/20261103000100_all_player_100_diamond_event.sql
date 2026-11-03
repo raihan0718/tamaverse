@@ -2,6 +2,17 @@
 -- during the campaign window (Jakarta time: Nov 2 through Nov 11, 2026).
 -- Existing claim rows from the new-player campaign remain valid and prevent
 -- duplicate grants to accounts that already received the welcome bonus.
+-- Ensure the claim ledger exists even when the earlier welcome-bonus
+-- migration was not applied independently.
+create table if not exists public.tamaverse_new_player_bonus_claims (
+  owner_id uuid primary key references auth.users(id) on delete cascade,
+  amount integer not null default 100 check (amount = 100),
+  claimed_at timestamptz not null default now()
+);
+
+alter table public.tamaverse_new_player_bonus_claims enable row level security;
+revoke all on public.tamaverse_new_player_bonus_claims from public, anon, authenticated;
+
 create or replace function public.tamaverse_claim_new_player_bonus()
 returns jsonb
 language plpgsql
