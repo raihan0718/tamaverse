@@ -5053,3 +5053,10 @@ html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > span 
 html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > span{
   overflow:visible!important;
 }
+
+/* Individual Home scale correction: Mochi and Pyrris have smaller visible silhouettes. */
+html body .page.home-page .pet-stage > .stage-pet.pet-species-fluffin,
+html body .page.home-page .pet-stage > .stage-pet.pet-species-voltkit{
+  transform:translate(-50%,-50%) scale(1.3)!important;
+  transform-origin:50% 50%!important;
+}
