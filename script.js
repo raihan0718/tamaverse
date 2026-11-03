@@ -208,9 +208,15 @@ function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',
 function emptyPets(){return `<div class="card empty"><div style="font-size:42px">🥚</div><p>Belum ada pet. Tetaskan telur pertamamu untuk memulai!</p><button class="button" data-action="start">Tetaskan telur gratis</button></div>`;}
 function rarityRank(rarity){return ({Common:1,Rare:2,Epic:3,Legendary:4,Celestial:5,Sovereign:6})[rarity]||0;}
 function petsPage(){
-  const owned=new Set(state.pets.map(p=>p.species));
-  const sortedPets=[...state.pets].sort((a,b)=>rarityRank(speciesById(b.species).rarity)-rarityRank(speciesById(a.species).rarity));
-  const undiscovered=species.filter(s=>!owned.has(s.id)).sort((a,b)=>rarityRank(b.rarity)-rarityRank(a.rarity));
+  // Founder-exclusive pets stay locked until this Telegram account is verified.
+  const visiblePets=(state.pets||[]).filter(p=>p.species!=='sovereign-nexora'||window.TAMAVERSE_IS_FOUNDER===true);
+  const owned=new Set(visiblePets.map(p=>p.species));
+  const sortedPets=[...visiblePets].sort((a,b)=>rarityRank(speciesById(b.species).rarity)-rarityRank(speciesById(a.species).rarity));
+  const undiscovered=species.filter(s=>!owned.has(s.id)).sort((a,b)=>{
+    if(a.exclusive==='Founder'&&b.exclusive!=='Founder')return 1;
+    if(b.exclusive==='Founder'&&a.exclusive!=='Founder')return -1;
+    return rarityRank(b.rarity)-rarityRank(a.rarity);
+  });
   const percent=species.length?Math.round(owned.size/species.length*100):0;
   const tabs='<div class="collection-tabs" role="tablist" aria-label="Collection categories">'+
     '<button class="collection-tab '+(collectionTab==='pets'?'active':'')+'" role="tab" aria-selected="'+(collectionTab==='pets')+'" data-action="collection-tab" data-tab="pets"><span>🐾</span><b>Pets</b><small>'+state.pets.length+' collected</small></button>'+
@@ -1267,6 +1273,7 @@ function profilePage(){
 }
 function inspectPet(uid){
   const p=petById(uid);if(!p)return;
+  if(p.species==='sovereign-nexora'&&window.TAMAVERSE_IS_FOUNDER!==true){showToast('Nexora hanya tersedia untuk akun Founder.');return;}
   const s=speciesById(p.species),active=activePet();
   selectedPetId=uid;
   const statRows=(pet,label)=>`<div class="comparison-pet"><b>${esc(label)}${pet.uid===state.activePet?' · Aktif':''}</b><span>HP ${pet.stats.hp}</span><span>ATK ${pet.stats.atk}</span><span>DEF ${pet.stats.def}</span><span>SPD ${pet.stats.spd}</span></div>`;
