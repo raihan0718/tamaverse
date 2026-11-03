@@ -5070,12 +5070,12 @@ html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > span >
 /* Phoenix-specific Home artwork sizing: override the isolated-sprite 100% rule.
    Increase the IMG box itself; do not rely on transform/zoom which is used by care animations. */
 html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean > img.stage-pet-image{
-  width:190%!important;
-  height:190%!important;
+  width:150%!important;
+  height:150%!important;
   max-width:none!important;
   max-height:none!important;
   object-fit:contain!important;
-  flex:0 0 190%!important;
+  flex:0 0 150%!important;
 }
 html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean{
   overflow:visible!important;
