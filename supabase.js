@@ -419,19 +419,25 @@
         }
         if (data?.success && data?.founder) return true;
 
-        // The authenticated owner's own cloud pet row is the durable entitlement.
-        // This also supports manual DB grants if the Edge Function is unavailable.
-        const { data: founderPet, error: founderPetError } = await supabase
-          .from('pets')
-          .select('id')
-          .eq('owner_id', user.id)
-          .eq('species', 'sovereign-nexora')
-          .maybeSingle();
-        if (founderPetError) {
-          console.warn('[Founder] Cloud entitlement check failed:', founderPetError);
-          return false;
+        // Manual DB gifts are authoritative: either the Founder pet row or
+        // the Founder-exclusive frame in this authenticated owner's own inventory
+        // grants Founder access. This avoids the Edge Function hiding valid gifts.
+        const [founderPetResult, premiumResult] = await Promise.all([
+          supabase.from('pets').select('id').eq('owner_id', user.id)
+            .eq('species', 'sovereign-nexora').maybeSingle(),
+          supabase.from('premium_inventory').select('owned_frames')
+            .eq('owner_id', user.id).maybeSingle()
+        ]);
+        if (founderPetResult.error) {
+          console.warn('[Founder] Cloud pet entitlement check failed:', founderPetResult.error);
         }
-        return Boolean(founderPet);
+        if (premiumResult.error) {
+          console.warn('[Founder] Cloud frame entitlement check failed:', premiumResult.error);
+        }
+        const ownsFounderPet = Boolean(founderPetResult.data);
+        const ownsFounderFrame = Array.isArray(premiumResult.data?.owned_frames)
+          && premiumResult.data.owned_frames.includes('royal-sovereign');
+        return ownsFounderPet || ownsFounderFrame;
       } catch (error) {
         console.warn('[Founder] Reward check unavailable:', error);
         return false;
