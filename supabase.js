@@ -451,7 +451,7 @@
             window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames.filter(id => id !== 'royal-sovereign');
         }
         const cloudPetsForAccount = authorizedCloudPets;
-        const activeCloudPets = cloudPets
+        const activeCloudPets = cloudPetsForAccount
           .filter(pet => pet.is_active)
           .sort((a, b) => String(a.client_uid).localeCompare(String(b.client_uid)));
         const previousActiveUid = String(window.state.activePet || '');
