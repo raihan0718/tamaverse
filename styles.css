@@ -328,45 +328,8 @@ body:not([data-theme="dark"]) #supabaseUserId {
   }
 }
 
-/* Mirror selected player pets in battle */
-.battle-player .battle-sprite img[src*="robo-bunny.webp"],
-.battle-player .battle-sprite img[src*="dragon.webp"],
-.battle-player .battle-sprite img[src*="panda.webp"],
-.battle-player .battle-sprite img[src*="golden-fox.webp"],
-/* Raw PNG orientation: these seven assets face right by default.
-   On the left they stay as-is; on the right they are mirrored inward. */
-.battle-player .battle-sprite .pet-image[src*="slime.webp"],
-.battle-player .battle-sprite .pet-image[src*="ice-pup.webp"],
-.battle-player .battle-sprite .pet-image[src*="sprout-dino.webp"],
-.battle-player .battle-sprite .pet-image[src*="glow-frog.webp"],
-.battle-player .battle-sprite .pet-image[src*="fire-cat.webp"],
-.battle-player .battle-sprite .pet-image[src*="wizard.webp"],
-.battle-player .battle-sprite .pet-image[src*="axolotl.webp"] {
-  transform: none !important;
-}
-.battle-player .battle-sprite .pet-image[src*="golden-fox.webp"],
-.battle-player .battle-sprite .pet-image[src*="robo-bunny.webp"],
-.battle-player .battle-sprite .pet-image[src*="panda.webp"],
-.battle-player .battle-sprite .pet-image[src*="phoenix.webp"],
-.battle-player .battle-sprite .pet-image[src*="dragon.webp"] {
-  transform: scaleX(-1) !important;
-}
-.battle-enemy .battle-sprite .pet-image[src*="slime.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="ice-pup.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="sprout-dino.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="glow-frog.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="fire-cat.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="wizard.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="axolotl.webp"] {
-  transform: scaleX(-1) !important;
-}
-.battle-enemy .battle-sprite .pet-image[src*="golden-fox.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="robo-bunny.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="panda.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="phoenix.webp"],
-.battle-enemy .battle-sprite .pet-image[src*="dragon.webp"] {
-  transform: none !important;
-}
+/* Battle orientation is controlled by battlePetImage() and .battle-face-flip.
+   Removed legacy per-filename transforms that overrode the source asset direction. */
 
 /* TAMAVERSE — CS-style gacha case-opening reel */
 .gacha-roll-modal{width:100%;text-align:center;overflow:hidden}
@@ -5056,6 +5019,25 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
 /* Battle sprite orientation: Phoenix (starwhale) is the only left-facing source asset. */
 .battle-sprite .battle-face-flip{transform:scaleX(-1)!important;transform-origin:center!important}
 
-/* Home companion asset sizing: make the actual pet artwork more prominent inside its frame. */
-.home-page .pet-stage > .stage-pet{font-size:clamp(150px,48vw,260px)!important}
-@media(max-width:380px){.home-page .pet-stage > .stage-pet{font-size:clamp(145px,48vw,220px)!important}}
+
+/* Asset sizing audit fix — apply to the actual image, not only its wrapper. */
+.home-page .pet-stage > .stage-pet[class*="pet-species-"] .stage-pet-image{
+  width:120%!important;
+  height:120%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.battle-sprite .battle-pet-image{
+  width:120%!important;
+  height:120%!important;
+  max-width:120%!important;
+  max-height:120%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.battle-sprite .battle-face-flip{
+  transform:scaleX(-1)!important;
+  transform-origin:center!important;
+}
