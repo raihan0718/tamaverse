@@ -5020,122 +5020,23 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
 .battle-sprite .battle-face-flip{transform:scaleX(-1)!important;transform-origin:center!important}
 
 
-/* Asset sizing — enlarge visible artwork inside the existing Home stage. */
-.home-page .pet-stage > .stage-pet[class*="pet-species-"] .stage-pet-image{
-  width:170%!important;
-  height:170%!important;
-  max-width:none!important;
-  max-height:none!important;
-  object-fit:contain!important;
-  object-position:center!important;
-  flex:0 0 170%!important;
-}
-.battle-sprite .battle-pet-image{
-  width:120%!important;
-  height:120%!important;
-  max-width:120%!important;
-  max-height:120%!important;
-  object-fit:contain!important;
-  object-position:center!important;
-}
-.battle-sprite .battle-face-flip{
-  transform:scaleX(-1)!important;
-  transform-origin:center!important;
-}
 
-/* FINAL HOME ARTWORK SCALE OVERRIDE.
-   Older species-specific calibration rules were more specific and reset the image to 100%.
-   Scale the rendered artwork itself; keep the stage wrapper and its idle animation unchanged. */
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > span > img.stage-pet-image{
-  transform:scale(1.8)!important;
-  transform-origin:50% 50%!important;
-}
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > span{
-  overflow:visible!important;
-}
-
-/* Individual Home scale correction: Mochi and Pyrris have smaller visible silhouettes. */
-html body .page.home-page .pet-stage > .stage-pet.pet-species-fluffin,
-html body .page.home-page .pet-stage > .stage-pet.pet-species-voltkit{
-  transform:translate(-50%,-50%) scale(1.3)!important;
-  transform-origin:50% 50%!important;
-}
-
-/* Phoenix Home size correction.
-   Use CSS zoom so existing care/idle transform animations cannot overwrite the enlargement. */
-html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > span > img.stage-pet-image{
-  zoom:1.35!important;
-}
-
-/* Phoenix-specific Home artwork sizing: override the isolated-sprite 100% rule.
-   Increase the IMG box itself; do not rely on transform/zoom which is used by care animations. */
-html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean > img.stage-pet-image{
-  width:150%!important;
-  height:150%!important;
-  max-width:none!important;
-  max-height:none!important;
-  object-fit:contain!important;
-  flex:0 0 150%!important;
-}
-html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean{
-  overflow:visible!important;
-}
-
-
-/* Final Home pet scale normalization: remove legacy 170% image sizing + 1.8 transform. */
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] .stage-pet-image,
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > span > img.stage-pet-image,
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stage-creature-clean > img.stage-pet-image{
-  width:100%!important;
-  height:100%!important;
-  max-width:100%!important;
-  max-height:100%!important;
-  flex:0 0 100%!important;
-  object-fit:contain!important;
-  object-position:center!important;
-  transform:none!important;
-}
-
-
-/* Fix remaining Home pets: give every non-calibrated sprite a real bounded box.
-   Previously their image used 100% without a sized parent, so intrinsic artwork
-   dimensions could make large pets (e.g. Dravaryn) overflow the stage. */
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]:not(.pet-species-fluffin):not(.pet-species-mossling):not(.pet-species-voltkit):not(.pet-species-starwhale){
-  width: min(58%, 270px)!important;
-  height: min(38%, 270px)!important;
-  font-size:0!important;
-}
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]:not(.pet-species-fluffin):not(.pet-species-mossling):not(.pet-species-voltkit):not(.pet-species-starwhale) > .stage-creature{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  width:100%!important;
-  height:100%!important;
-  font-size:0!important;
-  overflow:visible!important;
-}
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]:not(.pet-species-fluffin):not(.pet-species-mossling):not(.pet-species-voltkit):not(.pet-species-starwhale) .stage-pet-image{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  max-width:100%!important;
-  max-height:100%!important;
-  object-fit:contain!important;
-  transform:none!important;
-}
-
-
-/* Unified Home pet sizing: every species, including Phoenix, uses one shared layout. */
+/* HOME PET SIZE — single source of truth for every species, including Phoenix.
+   Old per-species enlargement/zoom/transform rules have been removed above this block. */
 html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]{
   position:absolute!important;
   left:50%!important;
   top:50%!important;
-  width:46%!important;
-  height:30%!important;
+  width:34%!important;
+  height:22.17%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
   margin:0!important;
+  padding:0!important;
   font-size:0!important;
   transform:translate(-50%,-50%)!important;
-  animation:none!important;
 }
 html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stage-creature,
 html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stage-creature-clean{
@@ -5146,6 +5047,8 @@ html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stag
   justify-content:center!important;
   width:100%!important;
   height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
   margin:0!important;
   padding:0!important;
   border:0!important;
@@ -5154,18 +5057,21 @@ html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stag
   box-shadow:none!important;
   filter:none!important;
   font-size:0!important;
-  transform:none!important;
 }
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] .stage-pet-image,
-html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] .pet-image{
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] img.stage-pet-image,
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] img.pet-image{
   display:block!important;
   width:100%!important;
   height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
   max-width:100%!important;
   max-height:100%!important;
+  flex:0 1 100%!important;
   margin:0!important;
   padding:0!important;
   object-fit:contain!important;
   object-position:center!important;
   transform:none!important;
+  zoom:1!important;
 }
