@@ -1,7 +1,11 @@
  'use strict';
 
-// TAMAVERSE prototype: all progress is stored on this device only.
-const SAVE_KEY = 'tamaverse_save_v1';
+// Local cache is namespaced by verified Telegram account. The legacy unscoped key is intentionally left untouched.
+const SAVE_KEY_PREFIX = 'tamaverse_save_v1:';
+function accountSaveKey(telegramId = window.TAMAVERSE_TELEGRAM_ID) {
+  const id = String(telegramId || '');
+  return /^\d{1,24}$/.test(id) ? SAVE_KEY_PREFIX + id : null;
+}
 const species = [
   {id:'fluffin',name:'Mochi',emoji:'🟢',element:'Nature',rarity:'Common',stats:{hp:95,atk:15,def:12,spd:16},pool:['basic']},
   {id:'embercub',name:'Nivelle',emoji:'🐶',element:'Water',rarity:'Common',stats:{hp:88,atk:18,def:10,spd:17},pool:['basic']},
@@ -80,7 +84,7 @@ const eggRates = {
 };
 eggs.forEach(egg=>{egg.rates=eggRates[egg.id];});
 const initialItems = {snack:3,energy:2,training:1};
-let state = loadSave();
+let state = null;
 
 Object.defineProperty(window, 'state', {
   configurable: true,
@@ -111,8 +115,10 @@ function addCoins(amount){
 
 function save(){
   if(!state)return;
+  const key = accountSaveKey();
+  if(!key)return; // Never write shared device data before Telegram identity is verified.
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    localStorage.setItem(key, JSON.stringify(state));
   }catch(e){
     showToast('Penyimpanan penuh. Hapus sebagian data browser.');
   }
@@ -808,9 +814,10 @@ async function rebuyQuest(id){const q=questDefinitions().find(x=>x.id===id);if(!
 function resetGame(){showModal(`<div class="eyebrow">KONFIRMASI</div><h2 id="modalTitle">Hapus semua progres?</h2><p>Data lokal, pet, dan koin akan dihapus dari perangkat ini. Tindakan ini tidak bisa dibatalkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button danger" data-action="confirm-reset">Hapus data</button></div>`);}
 
 // Keep daily actions rewarding without allowing unlimited local XP or currency farming.
-function loadSave(){
+function loadSave(key){
+  if(!key)return null;
   try{
-    const raw=localStorage.getItem(SAVE_KEY);
+    const raw=localStorage.getItem(key);
     if(!raw)return null;
     const saved=JSON.parse(raw);
     if(!saved||!saved.player||!Array.isArray(saved.pets))return null;
@@ -818,11 +825,15 @@ function loadSave(){
     // Persist the legacy-currency conversion immediately so a reload cannot
     // merge the same old Gems balance into Diamonds a second time.
     if(Object.prototype.hasOwnProperty.call(saved.player,'gems')){
-      localStorage.setItem(SAVE_KEY,JSON.stringify(normalized));
+      localStorage.setItem(key,JSON.stringify(normalized));
     }
     return normalized;
   }catch(error){console.warn('Save tidak dapat dibaca:',error);return null;}
 }
+window.loadTamaverseAccountSave = (telegramId) => loadSave(accountSaveKey(telegramId));
+window.saveTamaverseLocalAccount = save;
+window.createTamaverseFreshState = freshState;
+
 function normalizeSavedState(saved){
   const base=freshState(saved.player.name);
   const previousPlayer=saved.player;
@@ -1664,7 +1675,7 @@ document.addEventListener('click',event=>{
   showToast('Pet aktif berhasil diganti.');
   return;
 }
-if(a==='nickname-pet'){const p=petById(selectedPetId);if(!p)return;const count=Number(premiumInventory().rename_pet_card_count||0);showModal(`<div class="eyebrow">RENAME PET CARD</div><h2 id="modalTitle">Ganti nama companion</h2><p class="subtle">Gunakan Rename Pet Card. Kartu tersedia: <b>${count}</b></p><input class="text-input" id="newPetName" maxlength="18" value="${esc(p.name)}"><button class="button full" data-action="save-pet-name" ${count<1?'disabled':''}>Gunakan 1 Rename Pet Card</button>${count<1?'<button class="button secondary full" data-action="go-premium-store">Dapatkan kartu di Premium Store</button>':''}`);return;}if(a==='save-pet-name'){renameSelectedPet();return;}if(a==='rename-player'){const count=Number(premiumInventory().rename_card_count||0);showModal(`<div class="eyebrow">RENAME CARD</div><h2 id="modalTitle">Ganti nama pemain</h2><p class="subtle">Gunakan Rename Card. Kartu tersedia: <b>${count}</b></p><input class="text-input" id="playerNameInput" maxlength="18" value="${esc(state.player.name)}"><button class="button full" data-action="save-player-name" ${count<1?'disabled':''}>Gunakan 1 Rename Card</button>${count<1?'<button class="button secondary full" data-action="go-premium-store">Dapatkan kartu di Premium Store</button>':''}`);return;}if(a==='save-player-name'){renamePlayerWithCard();return;}if(a==='go-premium-store'){closeModal();page='shop';storeTab='premium';render();return;}if(a==='pull'){const e=eggs.find(x=>x.id===btn.dataset.egg);if(!e)return;const curr=e.currency==='diamond'?'diamond':'koin';showModal(`<div class="hatch-egg">${eggImage(e.id)}</div><h2 id="modalTitle">Buka ${e.name}?</h2><p>Biaya: ${e.price} ${curr}. Tarikan mengikuti tarif rarity yang ditampilkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-pull" data-egg="${e.id}">Buka telur</button></div>`);return;}if(a==='confirm-pull'){const id=btn.dataset.egg;closeModal();pullEgg(id,false);return;}if(a==='freeegg'){pullEgg('basic',true);return;}if(a==='battle-start'){startBattle(btn.dataset.mode);return;}if(a==='battle-action'){battleAction(btn.dataset.move);return;}if(a==='claim'){doClaim(btn.dataset.quest);return;}if(a==='rebuy-quest'){rebuyQuest(btn.dataset.quest);return;}if(a==='daily-quests'){showDailyQuests();return;}if(a==='inventory-item'){showInventoryItem(btn.dataset.item);return;}if(a==='inventory-use'){const kind=btn.dataset.care;closeModal();doCare(kind);return;}if(a==='daily-reward'){showModal(`<div class="eyebrow">TAMAVERSE · DAILY BONUS</div><h2 id="modalTitle">Daily Reward</h2><p class="subtle">Login setiap hari untuk mengumpulkan hadiah 7 hari.</p>${dailyRewardCard()}<button class="button secondary full" data-action="close-modal">Tutup</button>`);return;}if(a==='inventory'){showInventory();return;}if(a==='shop'){page='shop';render();return;}if(a==='shop-back'){page='home';render();return;}if(a==='qty-minus'||a==='qty-plus'||a==='qty-max'){const type=btn.dataset.item;const prices={food:50,energy:40,snack:60,training:120};const price=prices[type];if(!price)return;const current=Math.max(1,Math.floor(Number(shopQuantities[type])||1));const affordable=Math.floor(state.player.coins/price);const next=a==='qty-max'?Math.max(1,affordable):a==='qty-plus'?Math.min(Math.max(1,affordable),current+1):Math.max(1,current-1);shopQuantities[type]=next;render();return;}if(a==='buy'){const type=btn.dataset.item;buyItem(type,shopQuantities[type]||1);return;}if(a==='reset'){resetGame();return;}if(a==='confirm-reset'){localStorage.removeItem(SAVE_KEY);state=null;battle=null;page='home';closeModal();render();showToast('Save dihapus.');return;}
+if(a==='nickname-pet'){const p=petById(selectedPetId);if(!p)return;const count=Number(premiumInventory().rename_pet_card_count||0);showModal(`<div class="eyebrow">RENAME PET CARD</div><h2 id="modalTitle">Ganti nama companion</h2><p class="subtle">Gunakan Rename Pet Card. Kartu tersedia: <b>${count}</b></p><input class="text-input" id="newPetName" maxlength="18" value="${esc(p.name)}"><button class="button full" data-action="save-pet-name" ${count<1?'disabled':''}>Gunakan 1 Rename Pet Card</button>${count<1?'<button class="button secondary full" data-action="go-premium-store">Dapatkan kartu di Premium Store</button>':''}`);return;}if(a==='save-pet-name'){renameSelectedPet();return;}if(a==='rename-player'){const count=Number(premiumInventory().rename_card_count||0);showModal(`<div class="eyebrow">RENAME CARD</div><h2 id="modalTitle">Ganti nama pemain</h2><p class="subtle">Gunakan Rename Card. Kartu tersedia: <b>${count}</b></p><input class="text-input" id="playerNameInput" maxlength="18" value="${esc(state.player.name)}"><button class="button full" data-action="save-player-name" ${count<1?'disabled':''}>Gunakan 1 Rename Card</button>${count<1?'<button class="button secondary full" data-action="go-premium-store">Dapatkan kartu di Premium Store</button>':''}`);return;}if(a==='save-player-name'){renamePlayerWithCard();return;}if(a==='go-premium-store'){closeModal();page='shop';storeTab='premium';render();return;}if(a==='pull'){const e=eggs.find(x=>x.id===btn.dataset.egg);if(!e)return;const curr=e.currency==='diamond'?'diamond':'koin';showModal(`<div class="hatch-egg">${eggImage(e.id)}</div><h2 id="modalTitle">Buka ${e.name}?</h2><p>Biaya: ${e.price} ${curr}. Tarikan mengikuti tarif rarity yang ditampilkan.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="confirm-pull" data-egg="${e.id}">Buka telur</button></div>`);return;}if(a==='confirm-pull'){const id=btn.dataset.egg;closeModal();pullEgg(id,false);return;}if(a==='freeegg'){pullEgg('basic',true);return;}if(a==='battle-start'){startBattle(btn.dataset.mode);return;}if(a==='battle-action'){battleAction(btn.dataset.move);return;}if(a==='claim'){doClaim(btn.dataset.quest);return;}if(a==='rebuy-quest'){rebuyQuest(btn.dataset.quest);return;}if(a==='daily-quests'){showDailyQuests();return;}if(a==='inventory-item'){showInventoryItem(btn.dataset.item);return;}if(a==='inventory-use'){const kind=btn.dataset.care;closeModal();doCare(kind);return;}if(a==='daily-reward'){showModal(`<div class="eyebrow">TAMAVERSE · DAILY BONUS</div><h2 id="modalTitle">Daily Reward</h2><p class="subtle">Login setiap hari untuk mengumpulkan hadiah 7 hari.</p>${dailyRewardCard()}<button class="button secondary full" data-action="close-modal">Tutup</button>`);return;}if(a==='inventory'){showInventory();return;}if(a==='shop'){page='shop';render();return;}if(a==='shop-back'){page='home';render();return;}if(a==='qty-minus'||a==='qty-plus'||a==='qty-max'){const type=btn.dataset.item;const prices={food:50,energy:40,snack:60,training:120};const price=prices[type];if(!price)return;const current=Math.max(1,Math.floor(Number(shopQuantities[type])||1));const affordable=Math.floor(state.player.coins/price);const next=a==='qty-max'?Math.max(1,affordable):a==='qty-plus'?Math.min(Math.max(1,affordable),current+1):Math.max(1,current-1);shopQuantities[type]=next;render();return;}if(a==='buy'){const type=btn.dataset.item;buyItem(type,shopQuantities[type]||1);return;}if(a==='reset'){resetGame();return;}if(a==='confirm-reset'){const accountKey=accountSaveKey();if(accountKey)localStorage.removeItem(accountKey);state=null;battle=null;page='home';closeModal();render();showToast('Save dihapus.');return;}
 });
 document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal();});
 document.addEventListener('click',event=>{
