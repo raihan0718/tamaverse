@@ -5080,3 +5080,18 @@ html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage
 html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean{
   overflow:visible!important;
 }
+
+
+/* Final Home pet scale normalization: remove legacy 170% image sizing + 1.8 transform. */
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] .stage-pet-image,
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > span > img.stage-pet-image,
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stage-creature-clean > img.stage-pet-image{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  flex:0 0 100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+}
