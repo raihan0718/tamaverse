@@ -5052,3 +5052,6 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
   background:linear-gradient(135deg,#8d6bd4,#d98bc7);
   color:#fff;
 }
+
+/* Battle sprite orientation: Phoenix (starwhale) is the only left-facing source asset. */
+.battle-sprite .battle-face-flip{transform:scaleX(-1)!important;transform-origin:center!important}
