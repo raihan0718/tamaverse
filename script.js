@@ -1211,7 +1211,7 @@ function battleView(){
             <button class="battle-action-btn battle-action-main" data-action="battle-action" data-move="attack" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>⚔️</span>Attack</button>
             <button class="battle-action-btn battle-action-skill" data-action="battle-action" data-move="skill" ${battle.busy||battle.phase!=='player'||skillCooldown>0?'disabled':''}><span>✨</span>Skill${skillCooldown>0?` · ${skillCooldown}s`:''}</button>
             <button class="battle-action-btn battle-action-defend" data-action="battle-action" data-move="defend" ${battle.busy||battle.phase!=='player'?'disabled':''}><span>🛡️</span>Defend</button>
-            <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}><span>🍓</span>Item · ${state.items.snack}</button>
+            <button class="battle-action-btn battle-action-item" data-action="battle-action" data-move="item" ${battle.busy||battle.phase!=='player'||!state.items.snack?'disabled':''}><img src="assets/items/HealthPotion.webp" alt="" class="battle-item-image">Item · ${state.items.snack}</button>
           </div>
         </div>
       </div>
@@ -2080,7 +2080,7 @@ function onlineBattleView() {
               <button class="battle-action-btn battle-action-main" data-action="online-battle-action" data-move="attack" ${myTurn ? '' : 'disabled'}><span>⚔️</span>Attack</button>
               <button class="battle-action-btn battle-action-skill" data-action="online-battle-action" data-move="skill" ${myTurn && skillCooldown === 0 ? '' : 'disabled'}><span>✨</span>Skill${skillCooldown > 0 ? ` · ${skillCooldown}s` : ''}</button>
               <button class="battle-action-btn battle-action-defend" data-action="online-battle-action" data-move="defend" ${myTurn ? '' : 'disabled'}><span>🛡️</span>Defend</button>
-              <button class="battle-action-btn battle-action-item" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}><span>🍓</span>Item · ${snackCount}</button>
+              <button class="battle-action-btn battle-action-item" data-action="online-battle-action" data-move="item" ${myTurn && snackCount > 0 && snackUseful ? '' : 'disabled'}><img src="assets/items/HealthPotion.webp" alt="" class="battle-item-image">Item · ${snackCount}</button>
             </div>
           `}
         </div>
