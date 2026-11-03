@@ -421,19 +421,36 @@
       }
 
       const { data: premiumData, error: premiumError } = premiumResult;
-      if (premiumError) console.warn('Load premium inventory failed:', premiumError);
-      else if (premiumData) {
+      if (premiumError) {
+        console.warn('Load premium inventory failed:', premiumError);
+      } else {
+        // Never inherit premium ownership from the previous Telegram account's local memory.
         window.TAMAVERSE_PREMIUM_INVENTORY = {
-          rename_card_count: Number(premiumData.rename_card_count || 0),
-          rename_pet_card_count: Number(premiumData.rename_pet_card_count || 0),
-          owned_frames: Array.isArray(premiumData.owned_frames) ? premiumData.owned_frames : ['common']
+          rename_card_count: Number(premiumData?.rename_card_count || 0),
+          rename_pet_card_count: Number(premiumData?.rename_pet_card_count || 0),
+          owned_frames: Array.isArray(premiumData?.owned_frames) ? premiumData.owned_frames : ['common']
         };
       }
 
       const { data: cloudPets, error: petsLoadError } = petsResult;
       if (petsLoadError) console.warn('Load pets failed:', petsLoadError);
-      else if (Array.isArray(cloudPets) && cloudPets.length) {
-        const localPets = Array.isArray(window.state.pets) ? window.state.pets : [];
+      else if (Array.isArray(cloudPets)) {
+        // Cloud rows are authoritative for this authenticated owner. Do not merge
+        // pets from another Telegram account's shared device localStorage.
+        const isFounderAccount = await founderGrantPromise;
+        window.TAMAVERSE_IS_FOUNDER = Boolean(isFounderAccount);
+        const authorizedCloudPets = cloudPets.filter(pet =>
+          pet.species !== 'sovereign-nexora' || isFounderAccount
+        );
+        const localPets = [];
+        window.state.pets = localPets;
+        if (!isFounderAccount) {
+          window.state.pets = [];
+          window.state.equippedFrame = 'common';
+          window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames =
+            window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames.filter(id => id !== 'royal-sovereign');
+        }
+        const cloudPetsForAccount = authorizedCloudPets;
         const activeCloudPets = cloudPets
           .filter(pet => pet.is_active)
           .sort((a, b) => String(a.client_uid).localeCompare(String(b.client_uid)));
@@ -442,7 +459,7 @@
           ? activeCloudPets[0]
           : activeCloudPets.find(pet => String(pet.client_uid) === previousActiveUid)
             || activeCloudPets[0] || null;
-        cloudPets.forEach((cloudPet) => {
+        cloudPetsForAccount.forEach((cloudPet) => {
           let localPet = localPets.find((pet) => String(pet.uid) === String(cloudPet.client_uid));
           // Match a locally-created starter by species and nickname before importing
           // its cloud copy, since the two devices may have generated different UIDs.
@@ -497,7 +514,20 @@
 
     // Apply founder-only rewards after the lobby has already become available.
     founderGrantPromise.then((founderGrant) => {
-      if (!founderGrant) return;
+      window.TAMAVERSE_IS_FOUNDER = Boolean(founderGrant);
+      if (!founderGrant) {
+        // Strip stale Founder-only cosmetics/pet from local state on non-Founder accounts.
+        window.TAMAVERSE_PREMIUM_INVENTORY = window.TAMAVERSE_PREMIUM_INVENTORY || {
+          rename_card_count: 0, rename_pet_card_count: 0, owned_frames: ['common']
+        };
+        window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames =
+          (window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames || ['common']).filter(id => id !== 'royal-sovereign');
+        window.state.pets = (window.state.pets || []).filter(pet => pet.species !== 'sovereign-nexora');
+        if (window.state.equippedFrame === 'royal-sovereign') window.state.equippedFrame = 'common';
+        try { localStorage.setItem('tamaverse_save_v1', JSON.stringify(window.state)); } catch (_) {}
+        if (typeof window.render === 'function') window.render();
+        return;
+      }
       window.TAMAVERSE_PREMIUM_INVENTORY = window.TAMAVERSE_PREMIUM_INVENTORY || {
         rename_card_count: 0, rename_pet_card_count: 0, owned_frames: ['common']
       };
