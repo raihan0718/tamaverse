@@ -457,14 +457,11 @@
         const authorizedCloudPets = cloudPets.filter(pet =>
           pet.species !== 'sovereign-nexora' || isFounderAccount
         );
+        // Keep the same array reference attached to state while importing cloud pets.
+        // Non-founder restrictions are applied to the authorized cloud rows above;
+        // never replace state.pets with a detached empty array or erase DB-owned frames.
         const localPets = [];
         window.state.pets = localPets;
-        if (!isFounderAccount) {
-          window.state.pets = [];
-          window.state.equippedFrame = 'common';
-          window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames =
-            window.TAMAVERSE_PREMIUM_INVENTORY.owned_frames.filter(id => id !== 'royal-sovereign');
-        }
         const cloudPetsForAccount = authorizedCloudPets;
         const activeCloudPets = cloudPetsForAccount
           .filter(pet => pet.is_active)
