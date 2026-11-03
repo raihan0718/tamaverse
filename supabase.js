@@ -415,10 +415,23 @@
           { body: { initData } }
         );
         if (error) {
-          console.warn('[Founder] Reward check failed:', error);
+          console.warn('[Founder] Reward check failed; checking account-owned Founder pet:', error);
+        }
+        if (data?.success && data?.founder) return true;
+
+        // The authenticated owner's own cloud pet row is the durable entitlement.
+        // This also supports manual DB grants if the Edge Function is unavailable.
+        const { data: founderPet, error: founderPetError } = await supabase
+          .from('pets')
+          .select('id')
+          .eq('owner_id', user.id)
+          .eq('species', 'sovereign-nexora')
+          .maybeSingle();
+        if (founderPetError) {
+          console.warn('[Founder] Cloud entitlement check failed:', founderPetError);
           return false;
         }
-        return Boolean(data?.success && data?.founder);
+        return Boolean(founderPet);
       } catch (error) {
         console.warn('[Founder] Reward check unavailable:', error);
         return false;
