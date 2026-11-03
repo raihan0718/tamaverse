@@ -5060,3 +5060,9 @@ html body .page.home-page .pet-stage > .stage-pet.pet-species-voltkit{
   transform:translate(-50%,-50%) scale(1.3)!important;
   transform-origin:50% 50%!important;
 }
+
+/* Phoenix Home size correction.
+   Use CSS zoom so existing care/idle transform animations cannot overwrite the enlargement. */
+html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > span > img.stage-pet-image{
+  zoom:1.35!important;
+}
