@@ -9,7 +9,12 @@ const env = (name: string) => {
 const SUPABASE_URL = env("SUPABASE_URL");
 const SERVICE_ROLE_KEY = env("SUPABASE_SERVICE_ROLE_KEY");
 const BOT_TOKEN = env("TELEGRAM_BOT_TOKEN3");
-const FOUNDER_TELEGRAM_ID = String(env("ADMIN_TELEGRAM_ID"));
+// Founder rewards are shared by the two explicitly approved Telegram accounts.
+const FOUNDER_TELEGRAM_IDS = new Set([
+  String(env("ADMIN_TELEGRAM_ID")),
+  "8906658395", // @ipnmesum
+  "9093236833", // @ipnexoraa
+]);
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -81,7 +86,7 @@ Deno.serve(async (req) => {
     if (authData.user.app_metadata?.telegram_auth !== true || authenticatedTelegramId !== telegramId) {
       return json({ error: "TELEGRAM_SESSION_MISMATCH" }, 403);
     }
-    if (telegramId !== FOUNDER_TELEGRAM_ID) return json({ success: true, founder: false });
+    if (!FOUNDER_TELEGRAM_IDS.has(telegramId)) return json({ success: true, founder: false });
 
     const { data: link, error: linkError } = await admin
       .from("tamaverse_telegram_links")
@@ -94,12 +99,15 @@ Deno.serve(async (req) => {
     }
 
     const ownerId = authData.user.id;
+    // Reuse an existing Founder Nexora row even if its historical client_uid
+    // was created from another approved founder ID. The DB now enforces one
+    // pet per owner/species, so never attempt a second species row.
     const clientUid = `founder-nexora-${telegramId}`;
     const { data: existingPet, error: petReadError } = await admin
       .from("pets")
-      .select("id")
+      .select("id, client_uid")
       .eq("owner_id", ownerId)
-      .eq("client_uid", clientUid)
+      .eq("species", "sovereign-nexora")
       .maybeSingle();
     if (petReadError) throw petReadError;
 
