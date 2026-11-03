@@ -5020,14 +5020,15 @@ body.battle-fullscreen .online-battle-page .battle-sprite .battle-face-flip{
 .battle-sprite .battle-face-flip{transform:scaleX(-1)!important;transform-origin:center!important}
 
 
-/* Asset sizing audit fix — apply to the actual image, not only its wrapper. */
+/* Asset sizing — enlarge visible artwork inside the existing Home stage. */
 .home-page .pet-stage > .stage-pet[class*="pet-species-"] .stage-pet-image{
-  width:120%!important;
-  height:120%!important;
+  width:170%!important;
+  height:170%!important;
   max-width:none!important;
   max-height:none!important;
   object-fit:contain!important;
   object-position:center!important;
+  flex:0 0 170%!important;
 }
 .battle-sprite .battle-pet-image{
   width:120%!important;
