@@ -36,7 +36,7 @@ const petImages = {
   wyrmling: 'assets/pets/dragon.webp',
   'sovereign-nexora': 'assets/pets/Soverign-Nexora.webp'
 };
-const leftFacingPetIds = new Set(['petalyn','lunabun','wyrmling','starwhale']);
+const leftFacingPetIds = new Set(['starwhale']);
 function petFacesLeft(speciesId){return leftFacingPetIds.has(speciesId);}
 function battlePetImage(speciesId,side,className=''){
   const flip=side==='player'?petFacesLeft(speciesId):!petFacesLeft(speciesId);
