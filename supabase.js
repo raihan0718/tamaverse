@@ -325,6 +325,7 @@
           happiness: Math.min(100, Math.max(0, Math.round(Number(pet.happiness) || 0))),
           energy: Math.min(100, Math.max(0, Math.round(Number(pet.energy) || 0))),
           cleanliness: Math.min(100, Math.max(0, Math.round(Number(pet.cleanliness) || 0))),
+          care_updated_at: new Date(Number(pet.careUpdatedAt) || Date.now()).toISOString(),
           evolution: Math.max(0, Math.round(Number(pet.evolution) || 0)),
           is_active: Boolean(activeUid) && String(pet.uid) === activeUid,
         }));
@@ -451,7 +452,7 @@
         supabase.from('inventory').select('*').eq('owner_id', user.id).maybeSingle(),
         supabase.from('daily_rewards').select('last_claim_date, day').eq('owner_id', user.id).maybeSingle(),
         supabase.from('premium_inventory').select('rename_card_count, rename_pet_card_count, owned_frames').eq('owner_id', user.id).maybeSingle(),
-        supabase.from('pets').select('client_uid, species, nickname, level, xp, hunger, happiness, energy, cleanliness, evolution, is_active').eq('owner_id', user.id)
+        supabase.from('pets').select('client_uid, species, nickname, level, xp, hunger, happiness, energy, cleanliness, care_updated_at, evolution, is_active').eq('owner_id', user.id)
       ]);
 
       // A failed cloud read must never be interpreted as an empty/new account.
@@ -576,6 +577,7 @@
             const value = Number(cloudPet[key]);
             if (Number.isFinite(value)) localPet[key] = Math.max(0, Math.min(100, Math.round(value)));
           }
+          localPet.careUpdatedAt = Date.parse(cloudPet.care_updated_at || '') || Date.now();
           const cloudEvolution = Number(cloudPet.evolution);
           if (Number.isFinite(cloudEvolution)) localPet.evolution = Math.max(0, Math.round(cloudEvolution));
           if (cloudPet.nickname) localPet.name = cloudPet.nickname;
