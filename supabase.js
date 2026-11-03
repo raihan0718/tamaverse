@@ -21,6 +21,56 @@
   );
 
   window.TAMAVERSE_SUPABASE_CLIENT = supabase;
+
+  // Enforce one companion per species in memory and during cloud hydration.
+  // An active pet keeps its identity; progression is merged from the best copy.
+  function dedupePetRecords(records, options = {}) {
+    const uidKey = options.uidKey || 'uid';
+    const activeKey = options.activeKey || 'is_active';
+    const activeUid = String(options.activeUid || '');
+    const bySpecies = new Map();
+    const isActive = (pet) => Boolean(pet?.[activeKey])
+      || (activeUid && String(pet?.[uidKey] || '') === activeUid);
+    const progressIsBetter = (a, b) => {
+      const levelA = Math.max(1, Number(a?.level) || 1);
+      const levelB = Math.max(1, Number(b?.level) || 1);
+      if (levelA !== levelB) return levelA > levelB;
+      return Math.max(0, Number(a?.xp) || 0) > Math.max(0, Number(b?.xp) || 0);
+    };
+
+    for (const pet of Array.isArray(records) ? records : []) {
+      const speciesId = String(pet?.species || '').trim().toLowerCase();
+      if (!speciesId) continue;
+      const entry = bySpecies.get(speciesId);
+      if (!entry) {
+        bySpecies.set(speciesId, { keep: pet, progress: pet });
+        continue;
+      }
+      if (progressIsBetter(pet, entry.progress)) entry.progress = pet;
+      if (isActive(pet) && !isActive(entry.keep)) {
+        entry.keep = pet;
+      } else if (isActive(pet) === isActive(entry.keep) && progressIsBetter(pet, entry.keep)) {
+        entry.keep = pet;
+      }
+    }
+
+    return Array.from(bySpecies.values()).map(({ keep, progress }) => {
+      if (progress !== keep) {
+        const oldLevel = Math.max(1, Number(keep.level) || 1);
+        const bestLevel = Math.max(1, Number(progress.level) || 1);
+        if (keep.stats && bestLevel > oldLevel) {
+          const gained = bestLevel - oldLevel;
+          keep.stats.hp = Number(keep.stats.hp || 0) + 5 * gained;
+          keep.stats.atk = Number(keep.stats.atk || 0) + gained;
+          keep.stats.def = Number(keep.stats.def || 0) + gained;
+          keep.hp = keep.stats.hp;
+        }
+        keep.level = bestLevel;
+        keep.xp = Math.max(0, Number(progress.xp) || 0);
+      }
+      return keep;
+    });
+  }
   async function uploadTamaverseAvatar(dataUrl) {
     const user = await ensureSupabaseUser();
     if (!user) throw new Error('Akun belum tersambung ke Supabase.');
@@ -252,21 +302,19 @@
       }
 
       // Sync the local pet collection without deleting existing cloud rows.
-      const pets = Array.isArray(window.state.pets) ? window.state.pets : [];
+      // Normalize the local collection by species before any cloud write.
+      // Keep the active pet identity and merge the highest level/XP copy.
+      const activeUid = String(window.state.activePet || '');
+      const pets = dedupePetRecords(
+        Array.isArray(window.state.pets) ? window.state.pets : [],
+        { uidKey: 'uid', activeUid }
+      );
+      window.state.pets = pets;
 
       if (pets.length > 0) {
-        // Keep ordinary background saves from racing the explicit active-pet
-        // selection used by online matchmaking and start_pvp_match.
-        const activeUid = String(window.state.activePet || '');
-        // Deduplicate local rows by UID before sending them to the unique
-        // (owner_id, client_uid) conflict target.
-        const petByUid = new Map();
-        pets.forEach((pet) => {
-          if (pet && pet.uid && pet.species) petByUid.set(String(pet.uid), pet);
-        });
-        const petsPayload = Array.from(petByUid.entries()).map(([uid, pet]) => ({
+        const petsPayload = pets.filter(pet => pet && pet.uid && pet.species).map((pet) => ({
           owner_id: user.id,
-          client_uid: uid,
+          client_uid: String(pet.uid),
           species: String(pet.species),
           nickname: String(pet.name || pet.species).trim().slice(0, 18),
           // PostgreSQL pet stat columns are integers. Care decay can leave
@@ -457,12 +505,15 @@
         const authorizedCloudPets = cloudPets.filter(pet =>
           pet.species !== 'sovereign-nexora' || isFounderAccount
         );
-        // Keep the same array reference attached to state while importing cloud pets.
-        // Non-founder restrictions are applied to the authorized cloud rows above;
-        // never replace state.pets with a detached empty array or erase DB-owned frames.
+        // Legacy cloud data may already contain multiple rows for one species.
+        // Keep the active row where possible and merge the best progression.
+        const cloudPetsForAccount = dedupePetRecords(
+          authorizedCloudPets,
+          { uidKey: 'client_uid', activeKey: 'is_active' }
+        );
+        // Rebuild one canonical pet per species for this authenticated account.
         const localPets = [];
         window.state.pets = localPets;
-        const cloudPetsForAccount = authorizedCloudPets;
         const activeCloudPets = cloudPetsForAccount
           .filter(pet => pet.is_active)
           .sort((a, b) => String(a.client_uid).localeCompare(String(b.client_uid)));
