@@ -40,8 +40,47 @@ const pages: Record<string, { text: string; keyboard?: unknown }> = {
     keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", web_app: { url: APP_URL } }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
   },
   guide: {
-    text: "🥚 *Your little adventure starts here!*\n\n1. Tap the button below to enter Tamaverse.\n2. Meet your very first companion! 🐾\n3. Give your pet some love and care.\n4. Explore the menus and see what fun surprises await! 🌟\n\nHave fun on your journey, Tama Pal! 💕",
-    keyboard: { inline_keyboard: [[{ text: "🌈 Open Tamaverse", web_app: { url: APP_URL } }], [{ text: "‹ Back to menu", callback_data: "home" }]] },
+    text: "📖 *TAMAVERSE — HOW TO PLAY*\n\nPanduan lengkap buat mulai petualanganmu. Pilih bagian yang mau kamu pelajari:",
+    keyboard: { inline_keyboard: [
+      [{ text: "🏠 Home", callback_data: "guide_home" }, { text: "🐾 Collection", callback_data: "guide_collection" }],
+      [{ text: "🛍 Shop", callback_data: "guide_shop" }, { text: "🥚 Gacha", callback_data: "guide_gacha" }],
+      [{ text: "⚔️ Battle", callback_data: "guide_battle" }, { text: "🏆 Ranking", callback_data: "guide_ranking" }],
+      [{ text: "👤 Profile", callback_data: "guide_profile" }, { text: "💗 Pet Care", callback_data: "guide_care" }],
+      [{ text: "🌈 Open Tamaverse", web_app: { url: APP_URL } }],
+      [{ text: "‹ Back to menu", callback_data: "home" }]
+    ] },
+  },
+  guide_home: {
+    text: "🏠 *HOME — PUSAT AKTIVITASMU*\n\nHome adalah halaman utama tempat kamu melihat companion yang sedang aktif. Di sini kamu bisa memantau Hunger, Mood, Energy, dan Cleanliness, melihat level serta XP pet, lalu melakukan aktivitas perawatan dan training. Pet yang sedang digunakan mengalami perubahan status care seiring waktu; pet yang tidak dipakai menyimpan statusnya sampai dipilih kembali.",
+    keyboard: { inline_keyboard: [[{ text: "💗 Cara merawat pet", callback_data: "guide_care" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
+  },
+  guide_collection: {
+    text: "🐾 *COLLECTION — KOLEKSI COMPANION*\n\nCollection menyimpan semua pet yang sudah kamu miliki dan daftar spesies yang belum ditemukan. Kamu bisa melihat detail companion, rarity, level, dan memilih pet yang ingin dijadikan aktif. Tab Accessories berisi frame untuk tampilan companion; frame yang belum dimiliki akan tetap terkunci.\n\n*Cara mendapatkan pet:* buka Shop → Gacha, lalu tarik Pixie Egg atau Astral Egg. Pet baru akan masuk ke Collection. Jika mendapat spesies yang sudah dimiliki, hasilnya menjadi duplicate dan dikonversi menjadi fragmen serta bonus koin.",
+    keyboard: { inline_keyboard: [[{ text: "🥚 Cara Gacha", callback_data: "guide_gacha" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
+  },
+  guide_shop: {
+    text: "🛍 *SHOP — PERLENGKAPAN PET*\n\nShop adalah tempat membeli item memakai koin untuk membantu perawatan, training, dan battle.\n\n• Apple — 50 koin, memulihkan 50 Hunger.\n• Energy Potion — 40 koin, memulihkan 30 Energy.\n• Health Potion — 60 koin, item pemulih HP saat battle.\n• Training Manual — 120 koin, membuat Training lebih hemat Energy.\n\nDiamond dan item premium tersedia di bagian Shop terkait.",
+    keyboard: { inline_keyboard: [[{ text: "💗 Cara merawat pet", callback_data: "guide_care" }, { text: "⚔️ Cara battle", callback_data: "guide_battle" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
+  },
+  guide_gacha: {
+    text: "🥚 *GACHA — DAPATKAN COMPANION BARU*\n\nGacha adalah sistem untuk menemukan pet secara acak dari egg. Buka Shop → Gacha, pilih egg, lalu tekan tombol pull.\n\n• *Pixie Egg:* 100 koin per pull. Peluang: Common 60%, Rare 28%, Epic 8%, Legendary 4%.\n• *Astral Egg:* 5 Diamonds per pull. Peluang: Rare 55%, Epic 27%, Legendary 18%.\n\nAda satu klaim egg gratis per hari. Hasil gacha langsung masuk Collection. Jika mendapat spesies yang sama, kamu menerima duplicate reward.",
+    keyboard: { inline_keyboard: [[{ text: "🐾 Lihat Collection", callback_data: "guide_collection" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
+  },
+  guide_battle: {
+    text: "⚔️ *BATTLE — UJI KEKUATAN COMPANION*\n\nBattle punya dua mode:\n• *Online (PvP):* melawan pemain lain. Kamu bisa mencari lawan secara acak atau menggunakan room pribadi.\n• *Solo / Hunting (PvE):* melawan Monster untuk memperoleh reward.\n\n*Cara battle:*\n1. Pilih pet aktif yang ingin dibawa bertarung.\n2. Buka Battle dan pilih Online atau Solo / Hunting.\n3. Untuk Online, cari lawan atau buat/gabung room. Untuk Solo, mulai Hunting.\n4. Saat giliranmu, pilih aksi yang tersedia seperti menyerang atau menggunakan skill.\n5. Perhatikan HP dan Energy; gunakan item pemulih bila diperlukan.\n6. Pertarungan berjalan bergiliran sampai salah satu pihak kalah.\n\nSiapkan kondisi pet sebelum masuk arena.",
+    keyboard: { inline_keyboard: [[{ text: "🛍 Item battle", callback_data: "guide_shop" }, { text: "💗 Pet Care", callback_data: "guide_care" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
+  },
+  guide_ranking: {
+    text: "🏆 *RANKING — PAPAN PERINGKAT*\n\nRanking menampilkan pemain Tamaverse berdasarkan beberapa kategori: Rating Battle, Level, Total Wins, dan Playtime. Pilih kategori untuk melihat siapa yang berada di posisi teratas dan membandingkan progresmu dengan pemain lain.",
+    keyboard: { inline_keyboard: [[{ text: "⚔️ Pelajari Battle", callback_data: "guide_battle" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
+  },
+  guide_profile: {
+    text: "👤 *PROFILE — IDENTITAS PEMAIN*\n\nProfile menyimpan identitas dan statistik akunmu, seperti nama pemain, username Telegram, level, catatan performa, dan posisi ranking. Kamu juga bisa mengatur foto profil. Simpan UUID akunmu untuk keperluan identifikasi atau bantuan. Jangan bagikan kode verifikasi atau informasi sensitif.",
+    keyboard: { inline_keyboard: [[{ text: "🏆 Lihat fungsi Ranking", callback_data: "guide_ranking" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
+  },
+  guide_care: {
+    text: "💗 *PET CARE — RAWAT COMPANION-MU*\n\n• *Hunger:* berkurang seiring waktu. Beli Apple di Shop lalu gunakan Feed untuk memulihkan 50 poin Hunger.\n• *Mood:* jaga dengan rutin berinteraksi dan bermain bersama pet.\n• *Energy:* dipakai untuk aktivitas seperti Play, Training, dan Battle. Energy Potion memulihkan 30 poin.\n• *Cleanliness:* kebersihan pet ikut memengaruhi kondisi dan Mood.\n\n*Training:* tanpa Training Manual, Training memberi +45 XP dan memakai 35% Energy. Dengan Training Manual, Training memberi +70 XP dan memakai 5% Energy. Manual dibeli di Shop seharga 120 koin.\n\n*Sleep:* gunakan saat pet perlu memulihkan Energy. Saat tidur, aktivitas tertentu tidak bisa dilakukan sampai pet dibangunkan. Cek status pet di Home secara berkala.",
+    keyboard: { inline_keyboard: [[{ text: "🛍 Buka Shop", callback_data: "guide_shop" }, { text: "🏠 Tentang Home", callback_data: "guide_home" }], [{ text: "‹ Panduan lainnya", callback_data: "guide" }]] },
   },
   commands: {
     text: "💌 *A few handy commands*\n\n/start — say hello and open the menu 🌷\n/menu — show the main menu 🏡\n/help — get a little help 🧸\n/about — learn about Tamaverse ✨\n/game — jump into the game 🥚\n/support — contact our support team 💗",
