@@ -5123,3 +5123,49 @@ html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]:not(.pe
   object-fit:contain!important;
   transform:none!important;
 }
+
+
+/* Unified Home pet sizing: every species, including Phoenix, uses one shared layout. */
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  width:46%!important;
+  height:30%!important;
+  margin:0!important;
+  font-size:0!important;
+  transform:translate(-50%,-50%)!important;
+  animation:none!important;
+}
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stage-creature,
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stage-creature-clean{
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:none!important;
+  font-size:0!important;
+  transform:none!important;
+}
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] .stage-pet-image,
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] .pet-image{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+}
