@@ -5095,3 +5095,31 @@ html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"] > .stag
   object-position:center!important;
   transform:none!important;
 }
+
+
+/* Fix remaining Home pets: give every non-calibrated sprite a real bounded box.
+   Previously their image used 100% without a sized parent, so intrinsic artwork
+   dimensions could make large pets (e.g. Dravaryn) overflow the stage. */
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]:not(.pet-species-fluffin):not(.pet-species-mossling):not(.pet-species-voltkit):not(.pet-species-starwhale){
+  width: min(58%, 270px)!important;
+  height: min(38%, 270px)!important;
+  font-size:0!important;
+}
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]:not(.pet-species-fluffin):not(.pet-species-mossling):not(.pet-species-voltkit):not(.pet-species-starwhale) > .stage-creature{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  font-size:0!important;
+  overflow:visible!important;
+}
+html body .page.home-page .pet-stage > .stage-pet[class*="pet-species-"]:not(.pet-species-fluffin):not(.pet-species-mossling):not(.pet-species-voltkit):not(.pet-species-starwhale) .stage-pet-image{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  transform:none!important;
+}
