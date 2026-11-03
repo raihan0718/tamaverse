@@ -351,6 +351,9 @@
     if (!user) return;
 
     window.TAMAVERSE_USER_ID = user.id;
+    // Fail closed on every authenticated account transition. Founder status is
+    // re-enabled only after the server verifies this exact Telegram identity.
+    window.TAMAVERSE_IS_FOUNDER = false;
     // Load only this Telegram account's local cache; never consult the legacy shared save.
     window.state = window.loadTamaverseAccountSave?.(window.TAMAVERSE_TELEGRAM_ID) || null;
     setupDiamondWalletSync(user.id);
@@ -686,20 +689,10 @@
             const added = balance - previous;
             window.showTopupSuccessModal(added);
           }
-        // Persist the refreshed display locally without ever writing Diamonds
-        // back to Supabase; the cloud save payload intentionally omits them.
-        try {
-          const key = 'tamaverse_save_v1';
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const saved = JSON.parse(raw);
-            if (saved && saved.player) {
-              saved.player.diamonds = balance;
-              localStorage.setItem(key, JSON.stringify(saved));
-            }
-          }
-        } catch (storageError) {
-          console.warn('Local Diamond cache refresh failed:', storageError);
+        // Persist the refreshed display only through the verified account-scoped
+        // cache. Never read or write the legacy shared localStorage key.
+        try { window.saveTamaverseLocalAccount?.(); } catch (storageError) {
+          console.warn('Account-scoped Diamond cache refresh failed:', storageError);
         }
       }
       return balance;
