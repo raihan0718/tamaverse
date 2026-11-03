@@ -5066,3 +5066,17 @@ html body .page.home-page .pet-stage > .stage-pet.pet-species-voltkit{
 html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > span > img.stage-pet-image{
   zoom:1.35!important;
 }
+
+/* Phoenix-specific Home artwork sizing: override the isolated-sprite 100% rule.
+   Increase the IMG box itself; do not rely on transform/zoom which is used by care animations. */
+html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean > img.stage-pet-image{
+  width:190%!important;
+  height:190%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  flex:0 0 190%!important;
+}
+html body .page.home-page .pet-stage > .stage-pet.pet-species-starwhale > .stage-creature-clean{
+  overflow:visible!important;
+}
