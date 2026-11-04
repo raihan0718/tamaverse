@@ -386,8 +386,9 @@ function saveQuestCheckpoint(status){
   if(!state)return;
   state.mainQuestProgress=state.mainQuestProgress||{};
   state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};
-  if(status)state.mainQuestProgress.prologue=status;
-  state.mainQuestCheckpoints.prologue=Math.max(0,Math.min(prologueLines.length,questLineIndex));
+  if(status)state.mainQuestProgress[activeQuestId]=status;
+  state.mainQuestCheckpoints[activeQuestId]=Math.max(0,Math.min(activeQuestLines.length,questLineIndex));
+  state.mainQuestActiveId=activeQuestId;
   state.mainQuestUpdatedAt=Date.now();
   save();
 }
@@ -410,9 +411,10 @@ function preloadGameIntroPortraits(){
 let activeQuestId='prologue';
 let activeQuestLines=prologueLines;
 let activeQuestLocation='starfall';
-const makeStarfallQuestLines=(rows)=>rows.map((text,i)=>{
- const cast=[{name:'Aeloria',speaker:'AELORIA',portrait:'Aeloria.webp'},{name:'Kael',speaker:'KAEL',portrait:'Kael.webp'},{name:'Miri',speaker:'MIRI',portrait:'Miri.webp'},{name:'Noctis',speaker:'NOCTIS',portrait:'Noctis.webp'},{name:'Narator',speaker:'STARFALL VILLAGE'}];
- const line={...cast[i%cast.length],text};
+const makeStarfallQuestLines=(rows)=>rows.map((raw,i)=>{
+ const cast={Aeloria:{name:'Aeloria',speaker:'AELORIA',portrait:'Aeloria.webp'},Kael:{name:'Kael',speaker:'KAEL',portrait:'Kael.webp'},Miri:{name:'Miri',speaker:'MIRI',portrait:'Miri.webp'},Noctis:{name:'Noctis',speaker:'NOCTIS',portrait:'Noctis.webp'},Narator:{name:'Narator',speaker:'STARFALL VILLAGE'}};
+ const match=raw.match(/^(Aeloria|Kael|Miri|Noctis|Narator):\\s*/),speaker=match?match[1]:'Narator';
+ const line={...cast[speaker],text:match?raw.slice(match[0].length):raw};
  if(i===8||i===19||i===26){line.action='help';line.eventText='Tugas warga berhasil diselesaikan.';}
  if(i===14||i===23)line.action='event';
  if(i===14)line.event={question:'Lonceng desa berbunyi: pendek, pendek, panjang. Urutan mana yang benar?',choices:['Pendek · Pendek · Panjang','Panjang · Pendek · Pendek','Pendek · Panjang · Pendek'],answer:0,success:'Pola lonceng berhasil ditiru!'};
@@ -510,6 +512,7 @@ function resumePrologue(){beginMainQuest('prologue');}
 function questStoryPage(){
  questLineIndex=Math.max(0,Math.min(activeQuestLines.length-1,questLineIndex));
  const line=activeQuestLines[questLineIndex],portraitSrc=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');
+ if(line.name&&line.name!=='Narator'){state.mainQuestKnownNPCs=state.mainQuestKnownNPCs||{};state.mainQuestKnownNPCs[line.name.toLowerCase()]=true;save();}
  const character=portraitSrc?'<div class="game-intro-character-wrap"><img class="game-intro-character" src="'+esc(portraitSrc)+'" alt="'+esc(line.name)+'"></div>':'<div class="game-intro-character-wrap"></div>';
  const last=questLineIndex===activeQuestLines.length-1;
  const action=line.action==='battle'?'quest-battle':line.action==='help'?'quest-help':line.action==='event'?'quest-event':last?'quest-finish':'quest-next';
@@ -521,7 +524,7 @@ function showQuestLine(){state.questStoryActive=true;render();}
 function updateVisualNovelLine(line,config){
  const scene=document.querySelector('.game-intro-scene');if(!scene)return false;
  const name=scene.querySelector('.game-intro-name'),textNode=scene.querySelector('.game-intro-dialogue p'),button=scene.querySelector('.game-intro-next'),counter=scene.querySelector('.game-intro-counter'),image=scene.querySelector('.game-intro-character');
- if(name)name.textContent=line.name||'';if(textNode)textNode.textContent=line.text||'';
+ if(name)name.textContent=line.name==='Narator'?'':line.name||'';if(textNode)textNode.textContent=line.text||'';
  if(button){button.dataset.action=config.action;button.innerHTML=config.label+' <span>›</span>';}
  if(counter)counter.textContent=config.counter;
  if(image&&config.portrait&&image.getAttribute('src')!==config.portrait){const src=config.portrait,portrait=preloadVisualNovelPortrait(src);if(portrait?.complete&&portrait.naturalWidth){image.src=src;image.alt=line.name||'';image.removeAttribute('data-pending-src');}else if(portrait){image.dataset.pendingSrc=src;portrait.onload=()=>{if(image.isConnected&&image.dataset.pendingSrc===src){image.src=src;image.alt=line.name||'';image.removeAttribute('data-pending-src');}};}}
@@ -529,7 +532,10 @@ function updateVisualNovelLine(line,config){
 }
 function advanceQuestLine(){
  if(questLineIndex>=activeQuestLines.length-1){completeQuestLine();return;}
- questLineIndex++;saveQuestCheckpoint('in_progress');
+ questLineIndex++;
+ const currentSpeaker=activeQuestLines[questLineIndex]?.name;
+ if(currentSpeaker&&currentSpeaker!=='Narator'){state.mainQuestKnownNPCs=state.mainQuestKnownNPCs||{};state.mainQuestKnownNPCs[currentSpeaker.toLowerCase()]=true;}
+ saveQuestCheckpoint('in_progress');
  const line=activeQuestLines[questLineIndex],last=questLineIndex===activeQuestLines.length-1;
  const action=line.action==='battle'?'quest-battle':line.action==='help'?'quest-help':line.action==='event'?'quest-event':last?'quest-finish':'quest-next';
  const label=line.action==='battle'?'Mulai Battle':line.action==='help'?'Selesaikan Tugas':line.action==='event'?'Ikuti Mini Event':last?'Selesaikan Main Quest':'Lanjutkan';
@@ -556,9 +562,10 @@ function starfallVillagePage(progress){
  const completed=progress.prologue==='completed',bellDone=progress.chapter_01==='completed';
  const chapter=bellDone?'CHAPTER 03 · THE MISSING MEMORY':completed?'CHAPTER 02 · THE SILENT BELL':'PROLOGUE · A FALLING STAR';
  const objective=bellDone?'Talk to Miri':completed?'Talk to Kael':'Talk to Aeloria';
+ const known=state.mainQuestKnownNPCs||{};
  const npcs=completed
-  ?[{id:'kael',name:'Kael',portrait:'Kael.webp',x:39,y:57,quest:'chapter_01',hint:'Main Quest tersedia'},{id:'miri',name:'Miri',portrait:'Miri.webp',x:69,y:55,quest:'chapter_02',hint:'Penduduk desa'}]
-  :[{id:'aeloria',name:'Aeloria',portrait:'Aeloria.webp',x:35,y:57,quest:'prologue',hint:'Main Quest tersedia'},{id:'kael',name:'Kael',portrait:'Kael.webp',x:68,y:55,quest:'chapter_01',hint:'Penduduk desa'}];
+  ?[{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:23,y:76,quest:'chapter_01',hint:'Main Quest tersedia'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:68,y:76,quest:'chapter_02',hint:'Penduduk desa'}]
+  :[{id:'aeloria',name:known.aeloria?'Aeloria':'???',portrait:'Aeloria.webp',x:23,y:76,quest:'prologue',hint:'Main Quest tersedia'},{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:68,y:76,quest:'chapter_01',hint:'Penduduk desa'}];
  const npcMarkup=npcs.map(n=>'<button class="tama-village-npc '+(tamaVillageSelectedNpc===n.id?'is-focused':'')+'" style="--npc-x:'+n.x+'%;--npc-y:'+n.y+'%" data-action="village-npc-open" data-npc="'+n.id+'" aria-label="Bicara dengan '+n.name+'"><img src="assets/main-quest/npcs/'+n.portrait+'" alt=""><span>'+n.name+'</span></button>').join('');
  const selected=npcs.find(n=>n.id===tamaVillageSelectedNpc);
  const pop=selected?'<div class="tama-npc-choice" role="dialog" aria-label="Interaksi '+selected.name+'"><div class="tama-npc-choice-head"><b>'+selected.name+'</b><button data-action="village-npc-close" aria-label="Tutup">×</button></div><button data-action="village-npc-main" data-npc="'+selected.id+'" data-quest="'+selected.quest+'">📖 Main Quest</button><button data-action="village-npc-talk" data-npc="'+selected.id+'">💬 Ajak Ngobrol</button><button class="is-muted" data-action="village-npc-close">Nevermind</button></div>':'';
