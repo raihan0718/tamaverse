@@ -242,7 +242,8 @@ function advanceGameIntro(){
     gameIntroIndex++;
     state.introStoryIndex=gameIntroIndex;
     save();
-    render();
+    const line=gameIntroLines[gameIntroIndex],final=gameIntroIndex===gameIntroLines.length-1;
+    if(!updateVisualNovelLine(line,{action:'intro-story-next',label:final?'Masuk ke Tamaverse':'Lanjutkan',counter:(gameIntroIndex+1)+' / '+gameIntroLines.length,portrait:'assets/main-quest/npcs/'+line.portrait}))render();
     return;
   }
   state.introStoryCompleted=true;
@@ -293,7 +294,24 @@ function questStoryPage(){
   return '<section class="game-intro-scene" style="background-image:url(assets/main-quest/locations/StarfallVillage.webp)"><div class="game-intro-shade"></div>'+character+'<div class="game-intro-dialogue" style="background-image:url(assets/main-quest/ui/DialogueBox.webp)"><div class="game-intro-name">'+esc(line.name)+'</div><p>'+esc(line.text)+'</p><button class="game-intro-next" data-action="'+action+'">'+label+' <span>›</span></button><div class="game-intro-counter">'+(questLineIndex+1)+' / '+prologueLines.length+'</div></div></section>';
 }
 function showQuestLine(){state.questStoryActive=true;render();}
-function advanceQuestLine(){if(questLineIndex>=prologueLines.length-1){completeQuestLine();return;}questLineIndex++;saveQuestCheckpoint('in_progress');render();}
+function updateVisualNovelLine(line,config){
+  const scene=document.querySelector('.game-intro-scene');if(!scene)return false;
+  const name=scene.querySelector('.game-intro-name'),textNode=scene.querySelector('.game-intro-dialogue p'),button=scene.querySelector('.game-intro-next'),counter=scene.querySelector('.game-intro-counter'),image=scene.querySelector('.game-intro-character');
+  if(name)name.textContent=line.name||'';
+  if(textNode)textNode.textContent=line.text||'';
+  if(button){button.dataset.action=config.action;button.innerHTML=config.label+' <span>›</span>';}
+  if(counter)counter.textContent=config.counter;
+  if(image){image.src=config.portrait;image.alt=line.name||'';}
+  return true;
+}
+function advanceQuestLine(){
+  if(questLineIndex>=prologueLines.length-1){completeQuestLine();return;}
+  questLineIndex++;saveQuestCheckpoint('in_progress');
+  const line=prologueLines[questLineIndex],last=questLineIndex===prologueLines.length-1;
+  const action=line.action==='battle'?'quest-battle':line.action==='help'?'quest-help':last?'quest-finish':'quest-next';
+  const label=line.action==='battle'?'Mulai Battle':line.action==='help'?'Bantu Warga':last?'Selesaikan Prologue':'Lanjutkan';
+  if(!updateVisualNovelLine(line,{action,label,counter:(questLineIndex+1)+' / '+prologueLines.length,portrait:line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'')}))render();
+}
 function completeQuestLine(){if(state.mainQuestProgress?.prologue==='completed'){state.questStoryActive=false;render();return;}questLineIndex=prologueLines.length;state.questStoryActive=false;saveQuestCheckpoint('completed');render();showToast('Prologue selesai! Starfall Village kini menjadi rumah keduamu.');}
 function mainQuestPage(){
   const chapters=mainQuestChapters;
