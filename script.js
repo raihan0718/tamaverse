@@ -487,7 +487,7 @@ function mainQuestPage(){
     <span class="quest-chapter-tag">${selectedOpen?(selected.id==='starfall'&&progress.prologue==='completed'?'VISITED · CAN RETURN':'LOCATION AVAILABLE'):'UNDISCOVERED LOCATION'}</span>
     <h2>${selected.name}</h2><p>${selected.description}</p>
     <small>${selected.chapter}</small>
-    ${selectedOpen?(selected.id==='starfall'?'<button class="button full" data-action="quest-start">'+(inProgress?'Lanjutkan Prologue':progress.prologue==='completed'?'Lihat Prologue':'Mulai Petualangan')+' <span>→</span></button>':'<button class="button full" disabled>Story content coming soon</button>'):'<button class="button secondary full" disabled>Lokasi belum terbuka</button>'}
+    ${selectedOpen?(selected.id==='starfall'?(progress.prologue==='completed'?'<button class="button full" disabled>Prologue telah selesai</button>':'<button class="button full" data-action="quest-start">'+(inProgress?'Lanjutkan Prologue':'Mulai Petualangan')+' <span>→</span></button>'):'<button class="button full" disabled>Story content coming soon</button>'):'<button class="button secondary full" disabled>Lokasi belum terbuka</button>'}
    </div>
   </section>
   <div class="tama-world-hint"><span>✦</span><p><b>Petunjuk perjalanan</b><br>${inProgress?'Progres ceritamu tersimpan. Lanjutkan dari bagian terakhir.':progress.prologue==='completed'?'Starfall Village tetap bisa kamu kunjungi kembali. Perjalanan berikutnya akan terbuka seiring progres Main Story.':'Mulai dari Starfall Village. Selesaikan perjalanan cerita di sana untuk membuka wilayah berikutnya.'}</p></div>
