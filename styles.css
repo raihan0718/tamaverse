@@ -5151,7 +5151,7 @@ body.game-intro-mode #mainContent{width:100%;max-width:none;min-height:100dvh;he
 .game-intro-counter{position:absolute;left:8%;bottom:20px;font-size:10px;font-weight:800;color:#865b7c}
 @keyframes gameIntroFade{from{opacity:0}to{opacity:1}}
 @keyframes gameIntroCharacter{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@media(max-width:420px){.game-intro-character-wrap{bottom:17%}.game-intro-dialogue{left:2%;right:2%;min-height:165px;padding:30px 14px 20px}.game-intro-name{font-size:13px;top:5px}.game-intro-dialogue p{margin:20px 5% 30px;font-size:14px}.game-intro-next{bottom:12px}.game-intro-counter{bottom:15px}}
+
 @media(min-width:700px){.game-intro-character{max-width:850px}.game-intro-dialogue{left:calc(50% - 390px);right:calc(50% - 390px);min-height:205px}.game-intro-dialogue p{font-size:20px}}
 
 .quest-test-panel{margin-top:22px;padding:15px;border:1px dashed var(--purple);border-radius:16px;background:var(--panel);display:grid;gap:12px}
@@ -5211,10 +5211,10 @@ body.game-intro-mode .game-intro-dialogue p{top:34%;bottom:22%;font-size:clamp(1
 }
 
 /* Fine-tune NPC nameplate position */
-@media(max-width:420px){body.game-intro-mode .game-intro-name{top:7%!important}}
+
 
 /* Stronger nameplate offset: lower NPC name visibly inside its plate */
-@media(max-width:420px){body.game-intro-mode .game-intro-dialogue .game-intro-name{top:11.5%!important;height:20%!important}}
+
 /* Single source of truth for the visual-novel NPC name position. */
 body.game-intro-mode .game-intro-name{
   position:absolute;left:11%;top:11.5%;width:32%;max-width:36%;height:20%;
