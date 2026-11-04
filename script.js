@@ -275,10 +275,20 @@ function saveQuestCheckpoint(status){
   state.mainQuestUpdatedAt=Date.now();
   save();
 }
+const questNpcPortraitPreloadCache=new Set();
+function preloadQuestNpcPortraits(){
+  for(const line of prologueLines){
+    const src=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');
+    if(!src||questNpcPortraitPreloadCache.has(src))continue;
+    questNpcPortraitPreloadCache.add(src);
+    const portrait=new Image();portrait.decoding='async';portrait.src=src;
+  }
+}
 function resumePrologue(){
   state.mainQuestProgress=state.mainQuestProgress||{};
   if(state.mainQuestProgress.prologue==='completed'){showToast('Prologue sudah diselesaikan.');return;}
   state.mainQuestProgress.prologue='in_progress';
+  preloadQuestNpcPortraits();
   const checkpoint=Number(state.mainQuestCheckpoints?.prologue);
   questLineIndex=Number.isInteger(checkpoint)?Math.max(0,Math.min(prologueLines.length-1,checkpoint)):0;
   state.questStoryActive=true;saveQuestCheckpoint('in_progress');page='quest';render();
@@ -301,7 +311,7 @@ function updateVisualNovelLine(line,config){
   if(textNode)textNode.textContent=line.text||'';
   if(button){button.dataset.action=config.action;button.innerHTML=config.label+' <span>›</span>';}
   if(counter)counter.textContent=config.counter;
-  if(image){image.src=config.portrait;image.alt=line.name||'';}
+  if(image&&config.portrait&&image.getAttribute('src')!==config.portrait){image.src=config.portrait;image.alt=line.name||'';}
   return true;
 }
 function advanceQuestLine(){
@@ -862,9 +872,10 @@ function startStoryBattle(){
   if(petSleeping(p)){showToast(p.name+' sedang tidur. Bangunkan dulu sebelum battle.');return;}
   // Main Quest battles ignore hunger, mood, and energy requirements and costs.
   if(battle)return;
-  const boss={id:'story-king-slime',species:'fluffin',name:'King Slime',element:'Nature',rarity:'BOSS',level:1,image:'assets/main-quest/monsters/slime-king.webp',stats:{hp:Math.max(135,Math.round(p.stats.hp*1.55)),atk:Math.max(10,Math.round(p.stats.atk*.68)),def:Math.max(7,Math.round(p.stats.def*.55)),spd:Math.max(8,Math.round(p.stats.spd*.62))}};
+  const commonStats={...speciesById('fluffin').stats};
+  const boss={id:'story-king-slime',species:'fluffin',name:'King Slime',element:'Nature',rarity:'BOSS',level:1,image:'assets/main-quest/monsters/slime-king.webp',stats:commonStats};
   state.questStoryActive=false;
-  battle={mode:'story',petId:p.uid,opponent:boss,playerHP:p.stats.hp,enemyHP:boss.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:['Kamu menghadapi King Slime di Starfall Village!'],ended:false};
+  battle={mode:'story',petId:p.uid,opponent:boss,sceneBackground:'assets/main-quest/locations/StarfallVillage.webp',playerHP:p.stats.hp,enemyHP:boss.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:['Kamu menghadapi King Slime di Starfall Village!'],ended:false};
   page='battle';save();closeModal();render();
 }
 function soloEnemyForWave(index){
@@ -1361,7 +1372,7 @@ function battleView(){
         <div><div class="eyebrow">${isStoryBattle?'MAIN QUEST':'SOLO HUNTING'}</div><h1>${isStoryBattle?'King Slime':'Hunting Tower'}</h1><small class="battle-wave-subtitle">${isStoryBattle?'PROLOGUE · STARFALL VILLAGE':'LEVEL '+battle.wave+' / '+species.length+' · '+battle.clearedLevels+' CLEARED'}</small></div>
         <div class="battle-turn-chip">TURN ${battle.turn}</div>
       </div>
-      <div class="battle-scene battle-fx-${esc(battle.actionFx||'idle')}" aria-label="Solo hunting arena">
+      <div class="battle-scene ${isStoryBattle?'main-quest-battle-scene':''} battle-fx-${esc(battle.actionFx||'idle')}" style="${isStoryBattle?'background-image:linear-gradient(180deg,rgba(25,17,42,.12),rgba(25,17,42,.58)),url('+esc(battle.sceneBackground||'assets/main-quest/locations/StarfallVillage.webp')+');':''}" aria-label="Solo hunting arena">
         <div class="arena-sky"><span class="arena-light light-one"></span><span class="arena-light light-two"></span></div>
         <div class="battle-turn-overlay ${transition?'wave-transition':''}"><b>${aiTurn?'BOT TURN':playerAction?'PLAYER ACTION':aiAction?'BOT ACTION':transition?(battle.phase==='entering'?'WAVE ARRIVAL':'LEVEL CLEAR!'):actionCooldown?'ACTION COMPLETE':'YOUR TURN'}</b><span>${aiTurn?'AI IS CHOOSING':playerAction?'PLAYER MOVE IN PROGRESS':aiAction?'AI MOVE IN PROGRESS':transition?(battle.phase==='entering'?'NEW MONSTER ENTERS':'NEXT OPPONENT ENTERING'):actionCooldown?'PREPARING NEXT TURN':'CHOOSE YOUR ACTION'}</span></div>
         <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
