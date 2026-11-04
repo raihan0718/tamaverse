@@ -219,6 +219,18 @@ const mainQuestChapters=[
   {number:'CHAPTER 05',title:'The Hollow Kingdom',place:'Hollow Kingdom',image:'HollowKingdom.webp',description:'Kerajaan sunyi menyembunyikan asal mula Great Silence.'},
   {number:'CHAPTER 06',title:'Beyond Memories',place:'The Forgotten Realm',image:'TheForgottenRealm.webp',description:'Di ujung ingatan, kebenaran terakhir menanti.'}
 ];
+const prologueLines=[
+{name:'Narator',speaker:'THE NIGHT OF SILENCE',text:'Malam itu, sebuah bintang jatuh menyinari Starfall Village. Sesaat kemudian, penduduk mulai kehilangan kenangan mereka.'},
+{name:'Aeloria',speaker:'AELORIA',portrait:'Aeloria.webp',text:'Kau melihat cahaya itu juga? Rasanya seperti seseorang sedang memanggil namaku dari balik langit.'},
+{name:'Kael',speaker:'KAEL',portrait:'Kael.webp',text:'Jangan mendekat! Sejak cahaya itu muncul, aku bahkan mulai lupa wajah ibuku.'},
+{name:'Miri',speaker:'MIRI',portrait:'Miri.webp',text:'Lihat, ada kristal di tanah. Nenek pernah menyebut benda seperti ini Memory Fragment. Katanya, kristal ini menyimpan kenangan.'},
+{name:'Suara Misterius',speaker:'UNKNOWN',portrait:'Noctis.webp',text:'Kalian mencari jawaban yang belum siap kalian ingat. Great Silence bukan kehancuran... melainkan perlindungan.'},
+{name:'Narator',speaker:'TO BE CONTINUED',text:'Kristal itu meredup. Sebuah jalan menuju Whispering Forest terbuka. Perjalanan kalian baru saja dimulai.'}
+];
+let questLineIndex=0;
+function showQuestLine(){const line=prologueLines[questLineIndex];const portrait=line.portrait?'<img class="quest-line-portrait" src="assets/main-quest/npcs/'+line.portrait+'">':'<div class="quest-line-portrait quest-line-star">✦</div>';const last=questLineIndex===prologueLines.length-1;showModal('<div class="quest-line-scene"><img src="assets/main-quest/locations/StarfallVillage.webp"></div><div class="quest-line-body"><small>'+line.speaker+'</small><div class="quest-line-row">'+portrait+'<div><h2 id="modalTitle">'+line.name+'</h2><p>'+line.text+'</p></div></div><div class="quest-line-footer"><span>'+(questLineIndex+1)+' / '+prologueLines.length+'</span><button class="button" data-action="'+(last?'quest-finish':'quest-next')+'">'+(last?'Selesaikan':'Lanjutkan')+'</button></div></div>');}
+function advanceQuestLine(){if(questLineIndex<prologueLines.length-1){questLineIndex++;showQuestLine();}}
+function completeQuestLine(){state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestProgress.prologue='completed';save();closeModal();render();showToast('Prologue selesai!');}
 function mainQuestPage(){
   const chapters=mainQuestChapters;
   return `<section class="page main-quest-page">
@@ -1651,7 +1663,7 @@ async function convertDiamonds(button){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='quest-start'){showModal(`<div class="eyebrow">TAMAVERSE · PROLOGUE</div><h2 id="modalTitle">A Falling Star</h2><p class="subtle">Pada malam ketika bintang jatuh, seluruh penjuru Tamaverse mendadak kehilangan sebagian ingatannya. Seseorang harus mencari tahu apa yang sebenarnya terjadi.</p><div class="quest-modal-art"><img src="assets/main-quest/locations/StarfallVillage.webp" alt="Starfall Village"></div><p class="muted-label">Chapter gameplay, dialog, dan penyimpanan progres akan hadir di tahap berikutnya.</p><button class="button full" data-action="close-modal">Mengerti</button>`);return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='quest-start'){questLineIndex=0;showQuestLine();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
