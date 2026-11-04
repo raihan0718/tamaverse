@@ -35,6 +35,7 @@ const hs=(t,hits)=>{let d=9;for(const h of hits)if(t>=h)d=Math.min(d,t-h);return
 const HITS=[.6,1.2,1.8];
 const A={
 idle:{T:3,p:t=>{const b=Math.sin(t*TAU/3);return{sy:1+.012*b,sx:1-.004*b,flap:.05*Math.sin(t*TAU/3+1.2),head:.025*b}}},
+battle:{T:2.2,night:1,p:t=>({sy:1+.018*Math.sin(t*TAU/2.2),sx:1+.012*Math.sin(t*TAU/2.2),flap:.3+.12*Math.sin(t*TAU/1.1),head:-.025*Math.sin(t*TAU/2.2)}),fx:t=>{const pulse=.65+.25*Math.sin(t*TAU/1.1);glow(BX+20,BY-260,170,'rgba(255,65,92,.8)',pulse)}},
 play:{T:1.6,ev:[[.1,heart],[.5,heart],[.9,heart],[1.3,heart]],p:t=>{const k=(t%.8)/.8,j=Math.sin(k*Math.PI),l=k<.1||k>.9;
   return{dy:-j*70,sy:l?.9:1.03,sx:l?1.06:.98,flap:.28*Math.sin(t*TAU*2.5),rot:.06*Math.sin(t*TAU/.8),head:-.05*j}}},
 eat:{T:3.2,ev:[1,1.7,2.4].map(b=>[b,()=>{const m=mp({dx:0,dy:0,head:.2});for(let i=0;i<6;i++)sp('•',m[0]+40,m[1]+34,R()*140-30,-120-R()*80,.5,16,'#d9a066')}]),
@@ -139,6 +140,10 @@ function petFacesLeft(speciesId){return leftFacingPetIds.has(speciesId);}
 function battlePetImage(speciesId,side,className=''){
   const flip=side==='player'?petFacesLeft(speciesId):!petFacesLeft(speciesId);
   return petImage(speciesId,className+(flip?' battle-face-flip':''));
+}
+function battlePetVisual(speciesId,side,className=''){
+  if(speciesId==='sovereign-nexora'&&side==='player')return '<canvas id="nexora-animation-canvas" class="battle-nexora-canvas" width="450" height="315" aria-label="Nexora battle animation"></canvas>';
+  return battlePetImage(speciesId,side,className);
 }
 function petImage(speciesId, className = '', eager = false) {
   const normalizedId = speciesId || 'fluffin';
@@ -315,7 +320,7 @@ function render(){
   dailyReset();
   const pages={home:homePage,pets:petsPage,quest:mainQuestPage,gacha:gachaPage,shop:shopPage,battle:battlePage,ranking:rankingPage,profile:profilePage};
   root.innerHTML=(pages[page]||homePage)();
-  if(page==='home'&&activePet()?.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.mount?.();
+  if((page==='home'&&activePet()?.species==='sovereign-nexora')||(page==='battle'&&document.getElementById('nexora-animation-canvas')))window.TamaverseNexoraAnimation?.mount?.();
 }
 window.render = render;
 const gameIntroLines=[
@@ -982,6 +987,7 @@ function startBattle(mode){
   p.energy=clamp(p.energy-25,0,100);p.careUpdatedAt=Date.now();
   const opponent=soloEnemyForWave(0);
   battle={mode:'practice',petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:[`${p.name} memasuki Hunting Tower!`,`Level 1 · ${opponent.name} muncul!`],ended:false};
+  if(p.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.setMode?.('battle');
   save();render();
 }
 function startStoryBattle(){
@@ -994,6 +1000,7 @@ function startStoryBattle(){
   const boss={id:'story-king-slime',species:'fluffin',name:'King Slime',element:'Nature',rarity:'BOSS',level:1,image:'assets/main-quest/monsters/slime-king.webp',stats:commonStats};
   state.questStoryActive=false;
   battle={mode:'story',petId:p.uid,opponent:boss,sceneBackground:'assets/main-quest/locations/StarfallVillage.webp',playerHP:p.stats.hp,enemyHP:boss.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:['Kamu menghadapi King Slime di Starfall Village!'],ended:false};
+  if(p.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.setMode?.('battle');
   page='battle';save();closeModal();render();
 }
 function soloEnemyForWave(index){
@@ -1497,7 +1504,7 @@ function battleView(){
         <div class="arena-platform platform-player"></div><div class="arena-platform platform-enemy"></div>
         <div class="battle-side battle-player">
           <div class="battle-nameplate"><b>${esc(p.name)}</b><span>${esc(mySpecies.element)} · Lv.${p.level}</span></div>
-          <div class="battle-sprite" data-species="${esc(p.species)}">${battlePetImage(p.species,'player','battle-pet-image')}</div>
+          <div class="battle-sprite" data-species="${esc(p.species)}">${battlePetVisual(p.species,'player','battle-pet-image')}</div>
           <div class="battle-hp-card"><div class="hp-value">${hp} / ${max} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,hp/max*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(p.name)}</b><span>Lv.${p.level}</span></div></div>
         </div>
         <div class="battle-side battle-enemy">
@@ -1744,6 +1751,7 @@ function battleAction(move){
   const log=activeBattle.log;
   activeBattle.busy=true;
   activeBattle.actionFx=move;
+  if(p.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.setMode?.(move==='item'?'potion':move);
 
   if(move==='attack'||move==='skill'){
     const os=speciesById(activeBattle.opponent.species);
@@ -1823,6 +1831,7 @@ function battleAction(move){
       activeBattle.phase='player';
       activeBattle.busy=false;
       activeBattle.actionFx='idle';
+      if(p.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.setMode?.('battle');
       render();
     },1500);
     render();
@@ -2274,6 +2283,7 @@ async function onlineBattleAction(move) {
     if (!actionResult || typeof actionResult !== 'object') throw new Error('Server tidak mengembalikan status battle yang valid.');
     onlineRoom = { ...onlineRoom, ...actionResult };
     if(move==='skill')onlineSkillClientReadyAt=Date.now()+5000;
+    if(onlineRoom){const myPetSpecies=(onlineRoom.host_id===window.TAMAVERSE_USER_ID?onlineRoom.host_data:onlineRoom.guest_data)?.species;if(myPetSpecies==='sovereign-nexora')window.TamaverseNexoraAnimation?.setMode?.(move==='item'?'potion':move);}
     window.onlineBattleFx = move;
     if (onlineBattleFxTimer) clearTimeout(onlineBattleFxTimer);
     onlineBattleFxTimer = setTimeout(() => { window.onlineBattleFx = 'idle'; if (onlineRoom?.id) render(); }, 1100);
@@ -2375,7 +2385,7 @@ function onlineBattleView() {
             <b>${esc(mine?.name || mine?.display_name || 'Your Pet')}</b>
             <span>${esc(mySpecies.element || mine?.element || 'Unknown')} · Lv.${Number(mine?.level || 1)}</span>
           </div>
-          <div class="battle-sprite" data-species="${esc(mine?.species || '')}">${battlePetImage(mine?.species, 'player', 'battle-pet-image')}</div>
+          <div class="battle-sprite" data-species="${esc(mine?.species || '')}">${battlePetVisual(mine?.species, 'player', 'battle-pet-image')}</div>
           <span class="battle-effect effect-player"></span><span class="battle-impact impact-player"></span>${myFloat ? `<span class="battle-floating-number ${myFloat.kind}">${myFloat.text}</span>` : ""}
           <div class="battle-hp-card"><div class="hp-value">${myHp} / ${myMax} HP</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,myHp/myMax*100)}%"></div></div><div class="battle-pet-caption"><b>${esc(mine?.name || mine?.display_name || "Your Pet")}</b><span>Lv.${Number(mine?.level || 1)}</span></div></div>
         </div>
