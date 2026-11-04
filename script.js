@@ -823,6 +823,7 @@ function shopPage(){
   </section>`;
 }
 function startBattle(mode){
+  if(mode==='story'){startStoryBattle();return;}
   const p=activePet();
   if(!p){showToast('Kamu belum punya pet!');return;}
   if(petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}
@@ -833,6 +834,19 @@ function startBattle(mode){
   const opponent=soloEnemyForWave(0);
   battle={mode:'practice',petId:p.uid,opponent,playerHP:p.stats.hp,enemyHP:opponent.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:[`${p.name} memasuki Hunting Tower!`,`Level 1 · ${opponent.name} muncul!`],ended:false};
   save();render();
+}
+function startStoryBattle(){
+  const p=activePet();
+  if(!p){showToast('Kamu belum punya pet!');return;}
+  if(petSleeping(p)){showToast(p.name+' sedang tidur. Bangunkan dulu sebelum battle.');return;}
+  if(p.happiness<20){showToast(battleMoodMessage(p));return;}
+  if(p.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}
+  if(battle)return;
+  p.energy=clamp(p.energy-25,0,100);p.careUpdatedAt=Date.now();
+  const boss={id:'story-king-slime',species:'fluffin',name:'King Slime',element:'Nature',rarity:'BOSS',level:1,image:'assets/main-quest/monsters/slime-king.webp',stats:{hp:Math.max(135,Math.round(p.stats.hp*1.55)),atk:Math.max(10,Math.round(p.stats.atk*.68)),def:Math.max(7,Math.round(p.stats.def*.55)),spd:Math.max(8,Math.round(p.stats.spd*.62))}};
+  state.questStoryActive=false;
+  battle={mode:'story',petId:p.uid,opponent:boss,playerHP:p.stats.hp,enemyHP:boss.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:['Kamu menghadapi King Slime di Starfall Village!'],ended:false};
+  page='battle';save();closeModal();render();
 }
 function soloEnemyForWave(index){
   const base=species[index%species.length];
@@ -1598,7 +1612,7 @@ function battleAction(move){
 
   activeBattle.log=log.slice(-30);
   save();
-  if(activeBattle.enemyHP<=0){advanceHuntingLevel();return;}
+  if(activeBattle.enemyHP<=0){if(activeBattle.mode==='story'){finishBattle('win');return;}advanceHuntingLevel();return;}
 
   // Keep the player's action visible for a full 1.5 seconds before the AI responds.
   activeBattle.phase='player-action';
@@ -1661,6 +1675,17 @@ function finishBattle(result){
   if(!battle||battle.ended)return;
   dailyReset();battle.ended=true;if(battle.aiTimer)clearTimeout(battle.aiTimer);
   const completed={...battle};const p=petById(completed.petId);
+  if(completed.mode==='story'){
+    state.quests.progress.battle++;
+    if(result==='win'){state.player.wins++;addCoins(60);playerXP(80);grantPetXP(p,60);questLineIndex=18;saveQuestCheckpoint('in_progress');}
+    else{state.player.losses++;saveQuestCheckpoint('in_progress');}
+    state.battleHistory.unshift({result,date:Date.now(),mode:'story',clearedLevels:0});
+    state.battleHistory=state.battleHistory.slice(0,20);
+    state.questStoryActive=true;save();battle=null;render();
+    if(result==='win'){showModal('<div class="hatch-egg">🏆</div><h2 id="modalTitle" style="text-align:center">King Slime dikalahkan!</h2><p style="text-align:center">Kamu mendapat <b>60 Coins</b>, <b>80 EXP</b>, dan pet mendapat <b>60 XP</b>. Battle cerita tidak mengubah Battle Rating.</p><button class="button full" data-action="quest-battle-continue">Lanjutkan Cerita</button>');}
+    else{showModal('<div class="hatch-egg">💫</div><h2 id="modalTitle" style="text-align:center">King Slime masih bertahan</h2><p style="text-align:center">Progres cerita aman. Kamu bisa mencoba lagi setelah pet siap bertarung.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Nanti</button><button class="button" data-action="quest-battle-retry">Coba Lagi</button></div>');}
+    return;
+  }
   if(completed.mode==='practice'){
     const coins=Number(completed.coinsEarned||0),xp=Number(completed.xpEarned||0);
     addCoins(coins);
