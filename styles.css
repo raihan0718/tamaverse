@@ -5303,3 +5303,10 @@ body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;heig
 .tama-village-location-label{position:absolute;right:12px;bottom:10px;z-index:3;padding:5px 8px;border-radius:7px;background:#211b35a8;color:#fff;font-size:8px;letter-spacing:1px}
 @keyframes tamaNpcChoiceIn{from{opacity:0;transform:translate(-50%,5px)}to{opacity:1;transform:translate(-50%,0)}}
 @media(max-width:420px){.tama-village-scene{min-height:460px;height:calc(100dvh - 172px)}.tama-village-npc{height:43%;min-height:145px;width:clamp(70px,19vw,100px)}.tama-quest-guide{width:min(225px,64%)}.tama-quest-guide b{font-size:10px}.tama-quest-guide span{font-size:9px}}
+
+
+/* Character placement tuned to the open lower paths in Starfall Village */
+.tama-village-scene .tama-village-npc{top:var(--npc-y);height:35%;max-height:210px;min-height:118px;width:clamp(72px,16vw,108px);gap:2px}
+.tama-village-scene .tama-village-npc img{height:calc(100% - 21px);object-fit:contain;object-position:center bottom}
+.tama-village-scene .tama-village-npc span{font-size:9px;padding:3px 7px}
+@media(max-width:420px){.tama-village-scene .tama-village-npc{height:34%;min-height:112px;width:clamp(70px,17vw,94px)}}
