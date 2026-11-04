@@ -5195,3 +5195,39 @@ body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;heig
   transform:translateX(-50%);image-rendering:pixelated;pointer-events:none;background:transparent;
 }
 @media(max-width:380px){.battle-mode-screen .battle-sprite:has(.battle-nexora-canvas){height:158px}.battle-mode-screen .battle-nexora-canvas{width:150%;top:-10px}}
+
+
+/* TAMA WORLD MAP — first integration pass. Keep Visual Novel geometry untouched. */
+.tama-world-page{padding-bottom:30px}
+.tama-world-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:8px 0 16px}
+.tama-world-header .page-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(25px,6.5vw,34px);letter-spacing:-1px;margin:5px 0}
+.tama-world-header .subtle{font-size:12px;line-height:1.5;margin:0;max-width:330px}
+.tama-world-progress{flex:0 0 auto;display:grid;gap:2px;text-align:center;padding:9px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.tama-world-progress b{font-size:19px;color:var(--purple)}
+.tama-world-progress small{font-size:9px;color:var(--muted)}
+.tama-map-stage{position:relative;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:20px;background:#d9e9d0;box-shadow:0 12px 30px #09061324;isolation:isolate}
+.tama-world-map-image{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover}
+.tama-map-pin{position:absolute;left:var(--pin-x);top:var(--pin-y);z-index:2;display:grid;justify-items:center;gap:3px;transform:translate(-50%,-50%);padding:0;border:0;background:transparent;color:#fff;min-width:0;cursor:pointer}
+.tama-map-pin-icon{display:grid;place-items:center;width:34px;height:34px;border:2px solid #fff;border-radius:50%;background:#a85dba;color:#fff;font-size:17px;font-weight:900;box-shadow:0 3px 12px #1b143b70}
+.tama-map-pin.is-selected .tama-map-pin-icon{outline:3px solid #f8d47a;outline-offset:2px;transform:scale(1.12)}
+.tama-map-pin.is-locked .tama-map-pin-icon{background:#575365;color:#fff;filter:saturate(.55)}
+.tama-map-pin-label{max-width:110px;padding:3px 6px;border:1px solid #ffffffa8;border-radius:7px;background:#211a38d9;color:#fff;font-size:9px;font-weight:850;line-height:1.15;text-align:center;text-shadow:0 1px 2px #000;white-space:normal}
+.tama-map-pin:disabled{cursor:not-allowed;opacity:.82}
+.tama-map-legend{position:absolute;left:8px;right:8px;bottom:8px;z-index:3;display:flex;justify-content:center;gap:12px;padding:7px 9px;border:1px solid #ffffff80;border-radius:10px;background:#211a38d9;color:#fff;font-size:9px;font-weight:800}
+.tama-map-legend span{display:flex;align-items:center;gap:5px}
+.tama-map-legend i{width:8px;height:8px;border-radius:50%;background:#d8a4ed}
+.tama-map-legend i.locked{background:#9994a5}
+.tama-map-detail{display:grid;grid-template-columns:112px minmax(0,1fr);gap:13px;margin-top:13px;padding:12px;border:1px solid var(--line);border-radius:17px;background:var(--panel);box-shadow:0 7px 22px #09061316}
+.tama-map-detail-art{height:100%;min-height:142px;overflow:hidden;border-radius:11px;background:var(--panel2)}
+.tama-map-detail-art img{width:100%;height:100%;min-height:142px;display:block;object-fit:cover}
+.tama-map-detail-copy{min-width:0}
+.tama-map-detail-copy h2{font-size:16px;margin:5px 0}
+.tama-map-detail-copy p{font-size:10px;line-height:1.5;color:var(--muted);margin:5px 0}
+.tama-map-detail-copy small{display:block;margin:7px 0 9px;font-size:9px;color:var(--purple);font-weight:800}
+.tama-map-detail-copy .button{font-size:11px;min-height:38px;padding:9px}
+.tama-world-hint{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:12px;border:1px solid #d9b7e9;border-radius:14px;background:linear-gradient(110deg,#f8eafa,#fff5f8);color:#62436e}
+.tama-world-hint>span{font-size:20px}
+.tama-world-hint p{margin:0;font-size:10px;line-height:1.55}
+[data-theme="dark"] .tama-world-hint{background:linear-gradient(110deg,#382b49,#493047);border-color:#74538a;color:#f3e8fa}
+@media(max-width:390px){.tama-map-detail{grid-template-columns:88px minmax(0,1fr);gap:9px;padding:9px}.tama-map-detail-art,.tama-map-detail-art img{min-height:132px}.tama-map-pin-icon{width:29px;height:29px;font-size:14px}.tama-map-pin-label{font-size:8px;max-width:88px}.tama-map-legend{font-size:8px}}
+@media(min-width:650px){.tama-map-stage{max-width:620px;margin-inline:auto}.tama-map-detail,.tama-world-hint{max-width:620px;margin-left:auto;margin-right:auto}}
