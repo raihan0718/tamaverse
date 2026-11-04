@@ -5180,3 +5180,8 @@ body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;heig
 /* Quest nav availability label */
 .nav-under-development{font-size:5.5px;font-style:normal;font-weight:800;line-height:1;color:#e9a9c7;letter-spacing:-.15px;white-space:nowrap;text-transform:uppercase;}
 .nav-item[data-page="quest"]{gap:2px;}
+
+
+/* Nexora: Claude canvas animation integrated into the Home companion stage */
+.home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora{animation:none!important;filter:none!important;}
+.home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora #nexora-animation-canvas{position:absolute!important;left:50%!important;top:50%!important;width:220%!important;height:auto!important;max-width:none!important;max-height:none!important;display:block!important;transform:translate(-50%,-50%)!important;image-rendering:pixelated!important;pointer-events:none!important;background:transparent!important;}
