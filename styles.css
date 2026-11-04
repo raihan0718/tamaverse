@@ -5140,17 +5140,15 @@ body.game-intro-mode{overflow:hidden;background:#100b20}
 body.game-intro-mode .topbar,
 body.game-intro-mode .bottom-nav{display:none!important}
 body.game-intro-mode #mainContent{width:100%;max-width:none;min-height:100dvh;height:100dvh;margin:0;padding:0;overflow:hidden}
-.game-intro-scene{position:relative;width:100%;height:100dvh;min-height:520px;overflow:hidden;background-size:cover;background-position:center;background-color:#171126;isolation:isolate;animation:gameIntroFade .65s ease both}
+.game-intro-scene{position:relative;width:100%;height:100dvh;min-height:520px;overflow:hidden;background-size:cover;background-position:center;background-color:#171126;isolation:isolate}
 .game-intro-shade{position:absolute;inset:0;background:linear-gradient(180deg,#100b2020 25%,#100b2040 55%,#100b2080 100%);z-index:0}
 .game-intro-character-wrap{position:absolute;inset:0 0 12%;display:flex;align-items:flex-end;justify-content:center;z-index:1;pointer-events:none}
-.game-intro-character{height:100%;width:100%;max-width:760px;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 18px #100b2055);animation:gameIntroCharacter .55s ease both}
+.game-intro-character{height:100%;width:100%;max-width:760px;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 18px #100b2055)}
 .game-intro-dialogue{position:absolute;z-index:2;left:3.5%;right:3.5%;bottom:calc(16px + env(safe-area-inset-bottom));min-height:180px;padding:34px 22px 24px;background-size:100% 100%;background-position:center;background-repeat:no-repeat;filter:drop-shadow(0 8px 18px #09061366);color:#49334d}
 .game-intro-dialogue p{margin:22px 5% 34px;font-size:clamp(14px,3.8vw,19px);font-weight:750;line-height:1.55;text-shadow:0 1px #fff8;white-space:pre-line}
 .game-intro-next{position:absolute;right:8%;bottom:17px;border:0;border-radius:20px;padding:8px 15px;background:#a94e91;color:#fff;font-weight:850;font-size:12px;box-shadow:0 4px 12px #74345b55}
 .game-intro-next span{font-size:17px;margin-left:5px}
 .game-intro-counter{position:absolute;left:8%;bottom:20px;font-size:10px;font-weight:800;color:#865b7c}
-@keyframes gameIntroFade{from{opacity:0}to{opacity:1}}
-@keyframes gameIntroCharacter{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 @media(min-width:700px){.game-intro-character{max-width:850px}.game-intro-dialogue{left:calc(50% - 390px);right:calc(50% - 390px);min-height:205px}.game-intro-dialogue p{font-size:20px}}
 
