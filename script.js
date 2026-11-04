@@ -1568,11 +1568,16 @@ function showBatchGachaResult(results){
   const counts={Common:0,Rare:0,Epic:0,Legendary:0},duplicates=results.filter(result=>result.duplicate).length;
   results.forEach(result=>counts[result.chosen.rarity]++);
   const list=results.map(({chosen,duplicate})=>`<div class="batch-result rarity-${chosen.rarity}"><span>${petImage(chosen.id,"batch-pet-image")}</span><b>${esc(chosen.name)}</b><small>${chosen.rarity} · ${chosen.element}${duplicate?' · +fragmen':''}</small><small class="batch-stats">HP ${chosen.stats.hp} · ATK ${chosen.stats.atk} · DEF ${chosen.stats.def} · SPD ${chosen.stats.spd}</small></div>`).join('');
-  showModal(`<div class="eyebrow">HASIL 5 SPIN</div><h2 id="modalTitle">Telur menetas!</h2><p>${raritySummary(counts)} · ${duplicates} duplikat menghasilkan fragmen.</p><div class="batch-results">${list}</div><button class="button full" data-action="close-modal">Lanjut</button>`);
+  const fragmentDrops=results.filter(result=>result.duplicate).map(({chosen})=>fragmentItemCard(chosen,1)).join('');
+  showModal(`<div class="eyebrow">HASIL 5 SPIN</div><h2 id="modalTitle">Telur menetas!</h2><p>${raritySummary(counts)} · ${duplicates} duplikat menghasilkan fragmen.</p><div class="batch-results">${list}</div>${fragmentDrops?'<div class="fragment-drop-list"><div class="fragment-drop-heading">ITEM DIDAPATKAN</div>'+fragmentDrops+'</div>':''}<button class="button full" data-action="close-modal">Lanjut</button>`);
+}
+function fragmentItemCard(chosen,quantity=1){
+  return `<div class="fragment-item-drop"><span class="fragment-item-icon">🧩</span><div class="fragment-item-copy"><small>ITEM DIDAPATKAN</small><b>${esc(chosen.name)} Fragment</b><span>Fragmen spesies · dapat dikumpulkan</span></div><strong>×${quantity}</strong></div>`;
 }
 function showGachaResult(chosen,duplicate){
   showModal(`<div class="hatch-egg">${petImage(chosen.id,'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2>
     <p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p>
+    ${duplicate?fragmentItemCard(chosen,1):''}
     <div class="stats-row stats-four"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div><div class="stat-tile"><strong>${chosen.stats.spd}</strong><span>SPD</span></div></div>
     <button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);
 }
