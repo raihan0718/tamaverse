@@ -5161,3 +5161,6 @@ body.game-intro-mode #mainContent{width:100%;max-width:none;min-height:100dvh;he
 .quest-test-actions{display:grid;grid-template-columns:1fr;gap:8px}
 .quest-test-actions .button{width:100%;font-size:11px}
 @media(min-width:440px){.quest-test-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.quest-test-actions .button:last-child{grid-column:1/-1}}
+
+/* Let the visual-novel scene escape the normal centered game shell. */
+body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;height:100dvh;margin:0}
