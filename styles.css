@@ -5231,3 +5231,23 @@ body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;heig
 [data-theme="dark"] .tama-world-hint{background:linear-gradient(110deg,#382b49,#493047);border-color:#74538a;color:#f3e8fa}
 @media(max-width:390px){.tama-map-detail{grid-template-columns:88px minmax(0,1fr);gap:9px;padding:9px}.tama-map-detail-art,.tama-map-detail-art img{min-height:132px}.tama-map-pin-icon{width:29px;height:29px;font-size:14px}.tama-map-pin-label{font-size:8px;max-width:88px}.tama-map-legend{font-size:8px}}
 @media(min-width:650px){.tama-map-stage{max-width:620px;margin-inline:auto}.tama-map-detail,.tama-world-hint{max-width:620px;margin-left:auto;margin-right:auto}}
+
+
+/* TAMA WORLD MAP mobile polish — scoped navigation and page header fixes */
+.bottom-nav{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+.bottom-nav .nav-item{position:relative;min-width:0;width:100%;gap:3px;padding:5px 1px 7px;overflow:visible}
+.bottom-nav .nav-item span{font-size:clamp(16px,4.8vw,21px);line-height:1}
+.bottom-nav .nav-item small{font-size:clamp(7px,2.15vw,9px);line-height:1.1;white-space:nowrap}
+.bottom-nav .nav-item[data-page="quest"]{gap:3px;padding-bottom:9px}
+.bottom-nav .nav-under-development{position:absolute;left:50%;bottom:1px;transform:translateX(-50%);font-size:4.2px;line-height:1;letter-spacing:0;white-space:nowrap;pointer-events:none}
+.tama-world-page{scroll-margin-top:76px}
+.tama-world-header{margin-top:2px;align-items:center}
+.tama-world-header>div:first-child{min-width:0;flex:1}
+.tama-world-header .page-title{overflow-wrap:anywhere}
+@media(max-width:380px){
+ .bottom-nav{height:calc(72px + env(safe-area-inset-bottom));padding:5px 2px calc(6px + env(safe-area-inset-bottom))}
+ .bottom-nav .nav-item span{font-size:17px}
+ .bottom-nav .nav-item small{font-size:7px}
+ .bottom-nav .nav-under-development{font-size:3.8px}
+ .tama-world-progress{padding:7px 8px}
+}
