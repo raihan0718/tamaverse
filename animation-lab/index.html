@@ -96,6 +96,8 @@ button:active{transform:scale(.96)}button.active{background:linear-gradient(135d
   if(mode==='potion'){bob=Math.sin(p*Math.PI*2)*3;tilt=-.12*Math.max(0,Math.sin(p*Math.PI));drop=7}
   ctx.save();ctx.translate(cx+dx,ground-10+bob);ctx.scale(squash,1/squash);ctx.drawImage(base,-cx,-ground+10);ctx.restore();
   ctx.save();ctx.translate(cx+dx,ground-10+bob);ctx.scale(squash,1/squash);drawHead(tilt,drop);ctx.restore();
+  if(mode==='eat')drawProp(t,'food');
+  if(mode==='potion')drawProp(t,'potion');
   drawFx(t);
   if(mode==='sleep'){ctx.font='bold 30px system-ui';ctx.fillStyle='#d8c6ff';ctx.fillText('Z z z',cx+155,ground-390+Math.sin(t*1.5)*9)}
   if(mode==='training'){textFx(t,'✧',ground-400,.8)}
