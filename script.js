@@ -211,13 +211,13 @@ function render(){
 window.render = render;
 function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau diamond, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 diamond</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
 const mainQuestChapters=[
-  {number:'PROLOGUE',title:'A Falling Star',place:'Starfall Village',image:'StarfallVillage.webp',description:'Sebuah cahaya jatuh dari langit. Sejak malam itu, kenangan mulai menghilang.',available:true},
-  {number:'CHAPTER 01',title:'The Forgotten Village',place:'Starfall Village',image:'StarfallVillage.webp',description:'Desa yang perlahan melupakan nama dan kisah penghuninya.'},
-  {number:'CHAPTER 02',title:'Whispers of the Forest',place:'Whispering Forest',image:'WhisperingForest.webp',description:'Bisikan lama memanggil dari balik pepohonan.'},
-  {number:'CHAPTER 03',title:'Pages That Never Existed',place:'Astral Library',image:'AstralLibrary.webp',description:'Ada halaman yang hilang dari sejarah dunia.'},
-  {number:'CHAPTER 04',title:'The Memory Keeper',place:'Memory Sanctuary',image:'MemorySanctuary.webp',description:'Penjaga kenangan menyimpan jawaban yang tak mudah diterima.'},
-  {number:'CHAPTER 05',title:'The Hollow Kingdom',place:'Hollow Kingdom',image:'HollowKingdom.webp',description:'Kerajaan sunyi menyembunyikan asal mula Great Silence.'},
-  {number:'CHAPTER 06',title:'Beyond Memories',place:'The Forgotten Realm',image:'TheForgottenRealm.webp',description:'Di ujung ingatan, kebenaran terakhir menanti.'}
+  {number:'PROLOGUE',title:'A Falling Star',place:'Starfall Village',image:'StarfallVillage.webp',description:'Sebuah cahaya jatuh dari langit. Sejak malam itu, kenangan mulai menghilang.',minLevel:1},
+  {number:'CHAPTER 01',title:'The Forgotten Village',place:'Starfall Village',image:'StarfallVillage.webp',description:'Desa yang perlahan melupakan nama dan kisah penghuninya.',minLevel:3},
+  {number:'CHAPTER 02',title:'Whispers of the Forest',place:'Whispering Forest',image:'WhisperingForest.webp',description:'Bisikan lama memanggil dari balik pepohonan.',minLevel:5},
+  {number:'CHAPTER 03',title:'Pages That Never Existed',place:'Astral Library',image:'AstralLibrary.webp',description:'Ada halaman yang hilang dari sejarah dunia.',minLevel:8},
+  {number:'CHAPTER 04',title:'The Memory Keeper',place:'Memory Sanctuary',image:'MemorySanctuary.webp',description:'Penjaga kenangan menyimpan jawaban yang tak mudah diterima.',minLevel:11},
+  {number:'CHAPTER 05',title:'The Hollow Kingdom',place:'Hollow Kingdom',image:'HollowKingdom.webp',description:'Kerajaan sunyi menyembunyikan asal mula Great Silence.',minLevel:14},
+  {number:'CHAPTER 06',title:'Beyond Memories',place:'The Forgotten Realm',image:'TheForgottenRealm.webp',description:'Di ujung ingatan, kebenaran terakhir menanti.',minLevel:18}
 ];
 const prologueLines=[
 {name:'Narator',speaker:'THE NIGHT OF SILENCE',text:'Malam itu, sebuah bintang jatuh menyinari Starfall Village. Sesaat kemudian, penduduk mulai kehilangan kenangan mereka.'},
@@ -233,27 +233,40 @@ function advanceQuestLine(){if(questLineIndex<prologueLines.length-1){questLineI
 function completeQuestLine(){state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestProgress.prologue='completed';save();closeModal();render();showToast('Prologue selesai!');}
 function mainQuestPage(){
   const chapters=mainQuestChapters;
+  const progress=state.mainQuestProgress||{};
+  const playerLevel=Math.max(1,Number(state.player.level)||1);
+  const completed=chapters.filter((chapter,index)=>progress[chapter.number.toLowerCase().replace(/[^a-z0-9]+/g,'_')]==='completed'||(index===0&&progress.prologue==='completed')).length;
+  let previousCompleted=true;
+  const chapterCards=chapters.map((chapter,index)=>{
+    const key=index===0?'prologue':chapter.number.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    const isCompleted=progress[key]==='completed';
+    const levelMet=playerLevel>=chapter.minLevel;
+    const unlocked=previousCompleted&&levelMet;
+    previousCompleted=isCompleted;
+    const status=isCompleted?'COMPLETED':unlocked?(progress[key]==='in_progress'?'IN PROGRESS':'AVAILABLE'):!levelMet?'LEVEL LOCKED':'LOCKED';
+    return `<article class="quest-chapter ${isCompleted?'is-completed':unlocked?'is-available':'is-locked'}">
+      <img src="assets/main-quest/locations/${chapter.image}" alt="${chapter.place}" loading="lazy">
+      <div class="quest-chapter-copy"><span class="quest-chapter-tag">${chapter.number} · ${status}</span><h3>${chapter.title}</h3><p>${chapter.description}</p><small>⌖ ${chapter.place} · Minimal Level ${chapter.minLevel}</small></div>
+      <span class="quest-chapter-state">${isCompleted?'✓':unlocked?'✦':'🔒'}</span>
+    </article>`;
+  }).join('');
   return `<section class="page main-quest-page">
     <div class="quest-heading"><div class="eyebrow">TAMAVERSE STORY MODE</div><h1 class="page-title">The Lost Memories</h1><p class="subtle">Sebuah dunia kehilangan cahaya, warna, dan kenangannya. Temukan alasan di balik Great Silence.</p></div>
     <article class="quest-hero" style="background-image:linear-gradient(90deg,rgba(18,12,34,.92),rgba(18,12,34,.25)),url('assets/main-quest/locations/StarfallVillage.webp')">
       <div class="quest-hero-content"><span class="quest-kicker">A MYSTERY ADVENTURE</span><h2>THE LOST<br>MEMORIES</h2><p>Some memories were never meant to be forgotten.</p><span class="quest-hero-mark">✦</span></div>
     </article>
-    <div class="quest-section-title"><div><span class="eyebrow">YOUR JOURNEY BEGINS</span><h2>Featured Chapter</h2></div><span class="quest-count">0 / 7</span></div>
+    <div class="quest-section-title"><div><span class="eyebrow">YOUR JOURNEY BEGINS</span><h2>Story Progress</h2></div><span class="quest-count">${completed} / ${chapters.length}</span></div>
     <article class="quest-feature-card">
       <img src="assets/main-quest/locations/StarfallVillage.webp" alt="Starfall Village">
-      <div class="quest-feature-copy"><span class="quest-chapter-tag">PROLOGUE · AVAILABLE</span><h3>A Falling Star</h3><p>Sebuah bintang jatuh membawa awal dari misteri yang mengubah seluruh Tamaverse.</p><button class="button quest-start-button" data-action="quest-start">Mulai Petualangan <span>→</span></button></div>
+      <div class="quest-feature-copy"><span class="quest-chapter-tag">PROLOGUE · ${progress.prologue==='completed'?'COMPLETED':playerLevel>=1?'AVAILABLE':'LEVEL LOCKED'}</span><h3>A Falling Star</h3><p>Sebuah bintang jatuh membawa awal dari misteri yang mengubah seluruh Tamaverse.</p><small>Minimal Level 1 · Level kamu ${playerLevel}</small><button class="button quest-start-button" data-action="quest-start" ${progress.prologue==='completed'?'disabled':''}> ${progress.prologue==='completed'?'Selesai':'Mulai Petualangan'} <span>→</span></button></div>
     </article>
-    <div class="quest-section-title"><div><span class="eyebrow">UNRAVEL THE STORY</span><h2>Story Chapters</h2></div><span class="quest-count">1 available</span></div>
-    <div class="quest-chapter-list">${chapters.map((chapter,index)=>`<article class="quest-chapter ${index===0?'is-available':'is-locked'}">
-      <img src="assets/main-quest/locations/${chapter.image}" alt="${chapter.place}" loading="lazy">
-      <div class="quest-chapter-copy"><span class="quest-chapter-tag">${chapter.number}</span><h3>${chapter.title}</h3><p>${chapter.description}</p><small>⌖ ${chapter.place}</small></div>
-      <span class="quest-chapter-state">${index===0?'✦':'🔒'}</span>
-    </article>`).join('')}</div>
+    <div class="quest-section-title"><div><span class="eyebrow">UNRAVEL THE STORY</span><h2>Story Chapters</h2></div><span class="quest-count">${chapters.length} chapters</span></div>
+    <div class="quest-chapter-list">${chapterCards}</div>
     <div class="quest-section-title"><div><span class="eyebrow">EXPLORE THE WORLD</span><h2>World Atlas</h2></div></div>
     <div class="quest-world-grid">${[
       ['Starfall Village','StarfallVillage.webp'],['Whispering Forest','WhisperingForest.webp'],['Astral Library','AstralLibrary.webp'],['Memory Sanctuary','MemorySanctuary.webp'],['Hollow Kingdom','HollowKingdom.webp'],['The Forgotten Realm','TheForgottenRealm.webp']
     ].map(([name,image])=>`<div class="quest-world-card"><img src="assets/main-quest/locations/${image}" alt="${name}" loading="lazy"><span>${name}</span></div>`).join('')}</div>
-    <p class="quest-footnote">Story progress & dialogue system sedang disiapkan.</p>
+    <p class="quest-footnote">Setiap chapter memiliki level minimum dan battle cerita tersendiri. Kisah akan terus diperbarui.</p>
   </section>`;
 }
 function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',bath:'Splash! 🫧',sleep:'Zzz... 🌙',train:'Go! 💪',greet:'Hello! ♥',idle:''})[action]||'';}
@@ -700,7 +713,7 @@ async function finishIntro(){
 function legacy_createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:100,happiness:100,energy:80,cleanliness:100,evolution:0,fragments:0,sleeping:false,sleepStartedAt:0,careUpdatedAt:Date.now()};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;addCoins(20);return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
 function grantPetXP(p,amount){p.xp+=amount;while(p.xp>=p.level*40){p.xp-=p.level*40;p.level++;p.stats.hp+=5;p.stats.atk+=1;p.stats.def+=1;showToast(`${p.name} naik ke Level ${p.level}!`);}}
-function playerXP(amount){state.player.xp+=amount;while(state.player.xp>=state.player.level*100){state.player.xp-=state.player.level*100;state.player.level++;addCoins(50);showToast(`Level pemain naik! Hadiah +50 koin.`);}}
+function playerXP(amount){const boostedAmount=Math.max(0,Math.round((Number(amount)||0)*1.3));state.player.xp+=boostedAmount;while(state.player.xp>=state.player.level*100){state.player.xp-=state.player.level*100;state.player.level++;addCoins(50);showToast(`Level pemain naik! Hadiah +50 koin.`);}}
 function chooseRarity(){const r=Math.random()*100;return r<60?'Common':r<85?'Rare':r<97?'Epic':'Legendary';}
 function legacy_pullEgg(id,free){const e=eggs.find(x=>x.id===id);if(!e)return;if(free&&state.gacha.lastFree===new Date().toDateString()){showToast('Telur gratis hari ini sudah diklaim.');return;}const currency=e.currency==='diamond'?'diamonds':'coins';const cost=free?0:e.price;if(state.player[currency]<cost){showToast(`Koin/diamond tidak cukup untuk ${e.name}.`);return;}if(!free)state.player[currency]-=cost;else state.gacha.lastFree=new Date().toDateString();
   const pool=species.filter(s=>s.pool.includes(id));let rarity=chooseRarity();if(state.gacha.pityRare>=9&&['Common'].includes(rarity))rarity='Rare';if(state.gacha.pityEpic>=49&&['Common','Rare'].includes(rarity))rarity='Epic';let candidates=pool.filter(s=>s.rarity===rarity);if(!candidates.length){const available=pool.filter(s=>s.rarity==='Common'||s.rarity==='Rare'||s.rarity==='Epic'||s.rarity==='Legendary');candidates=available;}const chosen=candidates[Math.floor(Math.random()*candidates.length)];state.gacha.pityRare=chosen.rarity==='Common'?state.gacha.pityRare+1:0;state.gacha.pityEpic=['Common','Rare'].includes(chosen.rarity)?state.gacha.pityEpic+1:0;state.quests.progress.egg++;const result=addPet(chosen.id);state.gacha.history.unshift({species:chosen.id,name:chosen.name,rarity:chosen.rarity,date:Date.now()});state.gacha.history=state.gacha.history.slice(0,20);save();render();showModal(`<div class="hatch-egg">${petImage(chosen.id, 'detail-pet-image')}✨</div><div class="eyebrow" style="text-align:center">TELUR MENETAS</div><h2 id="modalTitle" style="text-align:center">${result.duplicate?'Duplikat! Fragmen didapat':esc(chosen.name)}</h2><p style="text-align:center"><span class="rarity rarity-${chosen.rarity}">${chosen.rarity}</span> · ${chosen.element}<br>${result.duplicate?'+1 fragmen spesies dan 20 koin':'Teman baru masuk koleksimu!'}</p><div class="stats-row"><div class="stat-tile"><strong>${chosen.stats.hp}</strong><span>HP</span></div><div class="stat-tile"><strong>${chosen.stats.atk}</strong><span>ATK</span></div><div class="stat-tile"><strong>${chosen.stats.def}</strong><span>DEF</span></div></div><button class="button full" style="margin-top:14px" data-action="close-modal">Keren!</button>`);}
@@ -1663,7 +1676,7 @@ async function convertDiamonds(button){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='quest-start'){questLineIndex=0;showQuestLine();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='quest-start'){if((Number(state.player.level)||1)<1){showToast('Minimal Level 1 untuk memulai Prologue.');return;}state.mainQuestProgress=state.mainQuestProgress||{};if(state.mainQuestProgress.prologue==='completed'){showToast('Prologue sudah diselesaikan.');return;}state.mainQuestProgress.prologue='in_progress';save();questLineIndex=0;showQuestLine();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
