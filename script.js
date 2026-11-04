@@ -124,7 +124,7 @@ function save(){
   }
 }
 function freshState(name){
-  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,diamonds:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,equippedFrame:'common',items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],lastCareUpdate:Date.now(),createdAt:Date.now()};
+  return {player:{id:'guest-'+Math.random().toString(36).slice(2,9),name:name||'Penjelajah',avatar:'🧙',level:1,xp:0,coins:300,diamonds:3,rating:1000,wins:0,losses:0,draws:0,streak:1,lastLogin:new Date().toDateString()},pets:[],activePet:null,equippedFrame:'common',items:{...initialItems,food:0,fragments:{}},gacha:{pityRare:0,pityEpic:0,lastFree:'',history:[]},quests:{date:new Date().toDateString(),progress:{feed:0,play:0,battle:0,win:0,egg:0},claimed:[]},dailyReward:{lastClaimDate:'',day:0},battleHistory:[],mainQuestProgress:{},mainQuestCheckpoints:{},questStoryActive:false,mainQuestHelpCount:0,lastCareUpdate:Date.now(),createdAt:Date.now()};
 }
 function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function petById(id){return state?.pets.find(p=>p.uid===id)||null;}
@@ -1063,6 +1063,10 @@ function normalizeSavedState(saved){
   base.lastCareUpdate=Number(saved.lastCareUpdate)||Date.now();
   base.dailyReward=saved.dailyReward?{...saved.dailyReward,lastClaimDate:(()=>{const value=saved.dailyReward.lastClaimDate;if(!value)return '';if(/^\d{4}-\d{2}-\d{2}$/.test(value))return value;const d=new Date(value);return Number.isNaN(d.getTime())?'':[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');})()}:{lastClaimDate:'',day:0};
   base.battleHistory=Array.isArray(saved.battleHistory)?saved.battleHistory:[];
+  base.mainQuestProgress=saved.mainQuestProgress&&typeof saved.mainQuestProgress==='object'?{...saved.mainQuestProgress}:{};
+  base.mainQuestCheckpoints=saved.mainQuestCheckpoints&&typeof saved.mainQuestCheckpoints==='object'?{...saved.mainQuestCheckpoints}:{};
+  base.questStoryActive=saved.questStoryActive===true&&base.mainQuestProgress.prologue!=='completed';
+  base.mainQuestHelpCount=Math.max(0,Math.min(3,Math.floor(Number(saved.mainQuestHelpCount)||0)));
   base.introStoryStarted=saved.introStoryStarted===true;
   base.introStoryCompleted=saved.introStoryCompleted===true;
   base.introStoryIndex=Math.max(0,Math.floor(Number(saved.introStoryIndex)||0));
