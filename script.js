@@ -157,7 +157,7 @@ function clearIntroSequence(){
   introSequenceTimers=[];
 }
 function showModal(html){document.getElementById('modalCard').innerHTML=html;document.getElementById('modalBackdrop').classList.remove('hidden');}
-function closeModal(){clearIntroSequence();document.getElementById('modalBackdrop').classList.add('hidden');}
+function closeModal(){if(state?.mainQuestProgress?.prologue==='in_progress')saveQuestCheckpoint('in_progress');clearIntroSequence();document.getElementById('modalBackdrop').classList.add('hidden');}
 window.showTopupSuccessModal = function(diamonds){
   const amount = Math.max(0, Math.floor(Number(diamonds) || 0));
   showModal(`
@@ -225,12 +225,30 @@ const prologueLines=[
 {name:'Kael',speaker:'KAEL',portrait:'Kael.webp',text:'Jangan mendekat! Sejak cahaya itu muncul, aku bahkan mulai lupa wajah ibuku.'},
 {name:'Miri',speaker:'MIRI',portrait:'Miri.webp',text:'Lihat, ada kristal di tanah. Nenek pernah menyebut benda seperti ini Memory Fragment. Katanya, kristal ini menyimpan kenangan.'},
 {name:'Suara Misterius',speaker:'UNKNOWN',portrait:'Noctis.webp',text:'Kalian mencari jawaban yang belum siap kalian ingat. Great Silence bukan kehancuran... melainkan perlindungan.'},
-{name:'Narator',speaker:'TO BE CONTINUED',text:'Kristal itu meredup. Sebuah jalan menuju Whispering Forest terbuka. Perjalanan kalian baru saja dimulai.'}
+{name:'Narator',speaker:'TO BE CONTINUED',text:'Kristal itu meredup. Sebuah jalan menuju Whispering Forest terbuka. Namun sebelum mereka sempat melangkah, kristal itu memancarkan suara yang hanya Aeloria kenali.\n\n“Jangan percaya pada orang yang membawamu ke sini.”\n\nDari balik pepohonan, seseorang menyebut nama Aeloria—dengan suara ibunya yang telah lama hilang.'}
 ];
 let questLineIndex=0;
-function showQuestLine(){const line=prologueLines[questLineIndex];const portrait=line.portrait?'<img class="quest-line-portrait" src="assets/main-quest/npcs/'+line.portrait+'">':'<div class="quest-line-portrait quest-line-star">✦</div>';const last=questLineIndex===prologueLines.length-1;showModal('<div class="quest-line-scene"><img src="assets/main-quest/locations/StarfallVillage.webp"></div><div class="quest-line-body"><small>'+line.speaker+'</small><div class="quest-line-row">'+portrait+'<div><h2 id="modalTitle">'+line.name+'</h2><p>'+line.text+'</p></div></div><div class="quest-line-footer"><span>'+(questLineIndex+1)+' / '+prologueLines.length+'</span><button class="button" data-action="'+(last?'quest-finish':'quest-next')+'">'+(last?'Selesaikan':'Lanjutkan')+'</button></div></div>');}
-function advanceQuestLine(){if(questLineIndex<prologueLines.length-1){questLineIndex++;showQuestLine();}}
-function completeQuestLine(){state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestProgress.prologue='completed';save();closeModal();render();showToast('Prologue selesai!');}
+function saveQuestCheckpoint(status){
+  if(!state)return;
+  state.mainQuestProgress=state.mainQuestProgress||{};
+  state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};
+  if(status)state.mainQuestProgress.prologue=status;
+  state.mainQuestCheckpoints.prologue=Math.max(0,Math.min(prologueLines.length,questLineIndex));
+  state.mainQuestUpdatedAt=Date.now();
+  save();
+}
+function resumePrologue(){
+  state.mainQuestProgress=state.mainQuestProgress||{};
+  if(state.mainQuestProgress.prologue==='completed'){showToast('Prologue sudah diselesaikan.');return;}
+  state.mainQuestProgress.prologue='in_progress';
+  const checkpoint=Number(state.mainQuestCheckpoints?.prologue);
+  questLineIndex=Number.isInteger(checkpoint)?Math.max(0,Math.min(prologueLines.length-1,checkpoint)):0;
+  saveQuestCheckpoint('in_progress');
+  showQuestLine();
+}
+function showQuestLine(){questLineIndex=Math.max(0,Math.min(prologueLines.length-1,questLineIndex));const line=prologueLines[questLineIndex];const portrait=line.portrait?'<img class="quest-line-portrait" src="assets/main-quest/npcs/'+line.portrait+'">':'<div class="quest-line-portrait quest-line-star">✦</div>';const last=questLineIndex===prologueLines.length-1;showModal('<div class="quest-line-scene"><img src="assets/main-quest/locations/StarfallVillage.webp"></div><div class="quest-line-body"><small>'+line.speaker+'</small><div class="quest-line-row">'+portrait+'<div><h2 id="modalTitle">'+line.name+'</h2><p>'+line.text+'</p></div></div><div class="quest-line-footer"><span>'+(questLineIndex+1)+' / '+prologueLines.length+'</span><button class="button" data-action="'+(last?'quest-finish':'quest-next')+'">'+(last?'Selesaikan':'Lanjutkan')+'</button></div></div>');}
+function advanceQuestLine(){if(questLineIndex<prologueLines.length-1){questLineIndex++;saveQuestCheckpoint('in_progress');showQuestLine();}}
+function completeQuestLine(){if(state.mainQuestProgress?.prologue==='completed'){closeModal();return;}questLineIndex=prologueLines.length;saveQuestCheckpoint('completed');closeModal();render();showToast('Prologue selesai!');}
 function mainQuestPage(){
   const chapters=mainQuestChapters;
   const progress=state.mainQuestProgress||{};
@@ -258,7 +276,7 @@ function mainQuestPage(){
     <div class="quest-section-title"><div><span class="eyebrow">YOUR JOURNEY BEGINS</span><h2>Story Progress</h2></div><span class="quest-count">${completed} / ${chapters.length}</span></div>
     <article class="quest-feature-card">
       <img src="assets/main-quest/locations/StarfallVillage.webp" alt="Starfall Village">
-      <div class="quest-feature-copy"><span class="quest-chapter-tag">PROLOGUE · ${progress.prologue==='completed'?'COMPLETED':playerLevel>=1?'AVAILABLE':'LEVEL LOCKED'}</span><h3>A Falling Star</h3><p>Sebuah bintang jatuh membawa awal dari misteri yang mengubah seluruh Tamaverse.</p><small>Minimal Level 1 · Level kamu ${playerLevel}</small><button class="button quest-start-button" data-action="quest-start" ${progress.prologue==='completed'?'disabled':''}> ${progress.prologue==='completed'?'Selesai':'Mulai Petualangan'} <span>→</span></button></div>
+      <div class="quest-feature-copy"><span class="quest-chapter-tag">PROLOGUE · ${progress.prologue==='completed'?'COMPLETED':playerLevel>=1?'AVAILABLE':'LEVEL LOCKED'}</span><h3>A Falling Star</h3><p>Sebuah bintang jatuh membawa awal dari misteri yang mengubah seluruh Tamaverse.</p><small>Minimal Level 1 · Level kamu ${playerLevel}</small><button class="button quest-start-button" data-action="quest-start" ${progress.prologue==='completed'?'disabled':''}> ${progress.prologue==='completed'?'Selesai':progress.prologue==='in_progress'?'Lanjutkan Petualangan':'Mulai Petualangan'} <span>→</span></button></div>
     </article>
     <div class="quest-section-title"><div><span class="eyebrow">UNRAVEL THE STORY</span><h2>Story Chapters</h2></div><span class="quest-count">${chapters.length} chapters</span></div>
     <div class="quest-chapter-list">${chapterCards}</div>
@@ -1674,9 +1692,9 @@ async function convertDiamonds(button){
   }
 }
 document.addEventListener('click',event=>{
-  const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}
+  const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(state?.mainQuestProgress?.prologue==='in_progress'){saveQuestCheckpoint('in_progress');closeModal();}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='quest-start'){if((Number(state.player.level)||1)<1){showToast('Minimal Level 1 untuk memulai Prologue.');return;}state.mainQuestProgress=state.mainQuestProgress||{};if(state.mainQuestProgress.prologue==='completed'){showToast('Prologue sudah diselesaikan.');return;}state.mainQuestProgress.prologue='in_progress';save();questLineIndex=0;showQuestLine();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='quest-start'){if((Number(state.player.level)||1)<1){showToast('Minimal Level 1 untuk memulai Prologue.');return;}resumePrologue();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
