@@ -2183,6 +2183,7 @@ render();
 
 let onlineRoom = null;
 let onlineChannel = null;
+let nexoraAnimationBattleRoomId = null;
 let onlineRoomPoller = null;
 
 const onlineActionLocks = new Set();
@@ -2319,6 +2320,7 @@ async function onlineBattleAction(move) {
 
 function onlineBattleView() {
   const room = onlineRoom;
+  if(nexoraAnimationBattleRoomId!==room.id){nexoraAnimationBattleRoomId=room.id;const mine=room.host_id===window.TAMAVERSE_USER_ID?room.host_data:room.guest_data;if(mine?.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.setMode?.('battle');}
   const mineIsHost = room.host_id === window.TAMAVERSE_USER_ID;
   const mine = mineIsHost ? room.host_data : room.guest_data;
   const rival = mineIsHost ? room.guest_data : room.host_data;
