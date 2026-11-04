@@ -5184,4 +5184,4 @@ body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;heig
 
 /* Nexora: Claude canvas animation integrated into the Home companion stage */
 .home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora{animation:none!important;filter:none!important;}
-.home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora #nexora-animation-canvas{position:absolute!important;left:50%!important;top:50%!important;width:220%!important;height:auto!important;max-width:none!important;max-height:none!important;display:block!important;transform:translate(-50%,-50%)!important;image-rendering:pixelated!important;pointer-events:none!important;background:transparent!important;}
+.home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora #nexora-animation-canvas{position:absolute!important;left:50%!important;top:42%!important;width:176%!important;height:auto!important;max-width:none!important;max-height:none!important;display:block!important;transform:translate(-50%,-50%)!important;image-rendering:pixelated!important;pointer-events:none!important;background:transparent!important;}
