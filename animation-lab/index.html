@@ -87,13 +87,13 @@ button:active{transform:scale(.96)}button.active{background:linear-gradient(135d
   let bob=0,squash=1,tilt=0,drop=0,dx=0;
   if(mode==='idle'){bob=Math.sin(t*2.4)*5;tilt=Math.sin(t*1.2)*.018}
   if(mode==='sleep'){bob=Math.sin(t*1.1)*2;tilt=.055+Math.sin(t*1.4)*.012;drop=13}
-  if(mode==='eat'){bob=Math.sin(p*Math.PI*4)*3;tilt=Math.sin(p*Math.PI*4)*.10;drop=8+Math.max(0,Math.sin(p*Math.PI*4))*10;drawProp(t,'food')}
+  if(mode==='eat'){bob=Math.sin(p*Math.PI*4)*3;tilt=Math.sin(p*Math.PI*4)*.10;drop=8+Math.max(0,Math.sin(p*Math.PI*4))*10}
   if(mode==='play'){bob=Math.abs(wave)*22;squash=1-Math.abs(wave)*.035;dx=wave*13;tilt=wave*.045}
   if(mode==='training'){bob=Math.sin(t*8)*4;tilt=Math.sin(t*8)*.035;squash=1+Math.sin(t*8)*.018}
   if(mode==='attack'){bob=Math.sin(p*Math.PI)*12;dx=p<.5?p*32:(1-p)*32;tilt=-Math.sin(p*Math.PI)*.12;squash=1-Math.sin(p*Math.PI)*.06}
   if(mode==='skill'){bob=Math.sin(t*5)*8;tilt=Math.sin(t*3)*.025}
   if(mode==='defend'){bob=2+Math.sin(t*3)*2;squash=.94;tilt=.035}
-  if(mode==='potion'){bob=Math.sin(p*Math.PI*2)*3;tilt=-.12*Math.max(0,Math.sin(p*Math.PI));drop=7;drawProp(t,'potion')}
+  if(mode==='potion'){bob=Math.sin(p*Math.PI*2)*3;tilt=-.12*Math.max(0,Math.sin(p*Math.PI));drop=7}
   ctx.save();ctx.translate(cx+dx,ground-10+bob);ctx.scale(squash,1/squash);ctx.drawImage(base,-cx,-ground+10);ctx.restore();
   ctx.save();ctx.translate(cx+dx,ground-10+bob);ctx.scale(squash,1/squash);drawHead(tilt,drop);ctx.restore();
   drawFx(t);
