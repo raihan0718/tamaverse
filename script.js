@@ -200,13 +200,14 @@ window.updateCurrencyConversionPreview=updateCurrencyConversionPreview;
 function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('diamondBalance').textContent=state?state.player.diamonds:0;}
 function applyTheme(){let dark=false;try{dark=localStorage.getItem('tamaverse_theme')==='dark';}catch(e){}document.body.dataset.theme=dark?'dark':'light';const button=document.querySelector('.theme-toggle');if(button){button.textContent=dark?'☀':'☾';button.setAttribute('aria-label',dark?'Gunakan tema terang':'Gunakan tema gelap');}}
 function render(){
-  const introActive=Boolean(state?.introStoryStarted&&!state?.introStoryCompleted);
+  const questStoryActive=Boolean(state?.questStoryActive&&!battle);
+  const introActive=Boolean((state?.introStoryStarted&&!state?.introStoryCompleted)||questStoryActive);
   document.body.classList.toggle('game-intro-mode',introActive);
   document.body.classList.toggle('battle-fullscreen', Boolean(page === 'battle' && ((onlineRoom && ['playing','finished'].includes(onlineRoom.status)) || battle)));
   updateWallet(); document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   const root=document.getElementById('mainContent');
   if(!state){root.innerHTML=welcomePage();return;}
-  if(introActive){gameIntroIndex=Math.max(0,Math.min(gameIntroLines.length-1,Number(state.introStoryIndex)||0));root.innerHTML=gameIntroPage();return;}
+  if(introActive){if(questStoryActive){root.innerHTML=questStoryPage();return;}gameIntroIndex=Math.max(0,Math.min(gameIntroLines.length-1,Number(state.introStoryIndex)||0));root.innerHTML=gameIntroPage();return;}
   dailyReset();
   const pages={home:homePage,pets:petsPage,quest:mainQuestPage,gacha:gachaPage,shop:shopPage,battle:battlePage,ranking:rankingPage,profile:profilePage};
   root.innerHTML=(pages[page]||homePage)();
