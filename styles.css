@@ -5087,3 +5087,47 @@ html body .page.home-page .pet-stage > .stage-pet.pet-species-sovereign-nexora i
   flex:0 1 90%!important;
   object-fit:contain!important;
 }
+
+/* Main Quest — The Lost Memories */
+.main-quest-page{padding-bottom:28px}
+.quest-heading{margin:8px 0 18px}
+.quest-heading .page-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(27px,7vw,36px);margin:5px 0 8px;letter-spacing:-1px}
+.quest-heading .subtle{max-width:560px;line-height:1.6;margin:0}
+.quest-hero{position:relative;min-height:205px;border:1px solid var(--line);border-radius:23px;overflow:hidden;background-size:cover;background-position:center 48%;box-shadow:0 14px 34px #09061338}
+.quest-hero-content{position:relative;z-index:1;padding:25px 22px;max-width:80%;color:#fff}
+.quest-kicker,.quest-chapter-tag{font-size:9px;font-weight:900;letter-spacing:1.5px;color:var(--pink)}
+.quest-hero h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,8vw,40px);line-height:.98;letter-spacing:1px;margin:10px 0}
+.quest-hero p{font-size:11px;line-height:1.5;color:#f1e8ff;max-width:210px}
+.quest-hero-mark{position:absolute;right:-36px;bottom:-65px;font-size:150px;color:#ffffff20}
+.quest-section-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:25px 0 12px}
+.quest-section-title h2{font-size:19px;margin:3px 0 0;font-family:'Space Grotesk',sans-serif}
+.quest-count{font-size:10px;color:var(--muted);padding:6px 9px;border:1px solid var(--line);border-radius:20px}
+.quest-feature-card,.quest-chapter{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 8px 24px #08051220}
+.quest-feature-card>img{display:block;width:100%;height:145px;object-fit:cover}
+.quest-feature-copy{padding:15px}
+.quest-feature-copy h3,.quest-chapter-copy h3{font-size:17px;margin:5px 0}
+.quest-feature-copy p,.quest-chapter-copy p{font-size:11px;line-height:1.55;color:var(--muted);margin:6px 0 12px}
+.quest-start-button{width:100%;display:flex;justify-content:space-between;align-items:center}
+.quest-start-button span{font-size:18px}
+.quest-chapter-list{display:grid;gap:10px}
+.quest-chapter{display:grid;grid-template-columns:100px minmax(0,1fr) 24px;gap:11px;align-items:center;padding:9px}
+.quest-chapter>img{width:100px;height:94px;object-fit:cover;border-radius:11px}
+.quest-chapter-copy{min-width:0}
+.quest-chapter-copy h3{font-size:13px}
+.quest-chapter-copy p{margin:4px 0;font-size:10px}
+.quest-chapter-copy small{font-size:9px;color:var(--purple)}
+.quest-chapter-state{font-size:15px;text-align:center;color:var(--muted)}
+.quest-chapter.is-locked{opacity:.62;filter:saturate(.65)}
+.quest-chapter.is-available{border-color:#d99bc755}
+.quest-world-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.quest-world-card{position:relative;height:112px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+.quest-world-card:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#100b20df)}
+.quest-world-card img{width:100%;height:100%;object-fit:cover;display:block}
+.quest-world-card span{position:absolute;z-index:1;left:10px;right:8px;bottom:9px;color:#fff;font-size:11px;font-weight:800}
+.quest-footnote{text-align:center;color:var(--muted);font-size:10px;margin:18px 0 0}
+.quest-modal-art{height:130px;border-radius:14px;overflow:hidden;margin:14px 0}
+.quest-modal-art img{width:100%;height:100%;object-fit:cover}
+.bottom-nav{gap:0}
+.bottom-nav .nav-item{min-width:0;flex:1;padding-left:2px;padding-right:2px}
+.bottom-nav .nav-item small{font-size:9px}
+@media(min-width:560px){.quest-hero{min-height:250px}.quest-feature-card{display:grid;grid-template-columns:42% 1fr}.quest-feature-card>img{height:100%;min-height:190px}.quest-feature-copy{align-self:center;padding:20px}.quest-world-card{height:145px}.quest-chapter>img{height:110px}}
