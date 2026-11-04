@@ -71,13 +71,13 @@ potion:{T:3.4,ev:[[1.7,()=>{for(let i=0;i<10;i++)sp('+',BX+(R()-.4)*220,BY-80-R(
     const hp=t<1.7?.4:Math.min(1,.4+.6*(t-1.7)/.9);x.fillStyle='rgba(0,0,0,.5)';x.fillRect(BX-70,BY-395,140,12);x.fillStyle='#4cd97b';x.fillRect(BX-70,BY-395,140*hp,12)}}
 };
 const DEF={dx:0,dy:0,sx:1,sy:1,rot:0,flap:0,head:0,flash:0,fc:'#fff',eyes:0};
-let loopRunning=false,lastFrame=0,lastTs=0;
+let loopRunning=false,lastFrame=0,lastTs=0,onScreen=true,observer=null;
 function startLoop(){if(loopRunning||!c||!src||document.hidden)return;loopRunning=true;lastFrame=0;lastTs=0;requestAnimationFrame(loop)}
-function mount(){const next=document.getElementById('nexora-animation-canvas');if(!next)return;if(c!==next){c=next;c.width=600;c.height=420;x=c.getContext('2d',{alpha:true,desynchronized:true});x.setTransform(.75,0,0,.75,0,0);}if(!im.src)im.src=IMG;startLoop()}
+function mount(){const next=document.getElementById('nexora-animation-canvas');if(!next)return;if(c!==next){if(observer)observer.disconnect();c=next;c.width=450;c.height=315;x=c.getContext('2d',{alpha:true,desynchronized:true});x.setTransform(.5625,0,0,.5625,0,0);if('IntersectionObserver'in window){observer=new IntersectionObserver(entries=>{onScreen=entries[0]?.isIntersecting??true;if(onScreen)startLoop();else loopRunning=false;});observer.observe(c);}}if(!im.src)im.src=IMG;startLoop()}
 function setMode(mode){if(!A[mode])mode='idle';cur=mode;t0=performance.now();prev=-1;parts.length=0;}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)loopRunning=false;else startLoop()});
 function loop(ts){
-  if(!c||!c.isConnected||document.hidden){loopRunning=false;return;}
+  if(!c||!c.isConnected||document.hidden||!onScreen){loopRunning=false;return;}
   if(lastFrame&&ts-lastFrame<FRAME_MS){requestAnimationFrame(loop);return;}
   const dt=lastTs?Math.min((ts-lastTs)/1000,.05):1/30;lastFrame=ts;lastTs=ts;
   const a=A[cur],t=((ts-t0)/1000)%a.T;
