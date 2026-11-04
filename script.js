@@ -537,10 +537,10 @@ function advanceQuestLine(){
 }
 function completeQuestLine(){
  if(state.mainQuestProgress?.[activeQuestId]==='completed'){state.questStoryActive=false;render();return;}
- const quest=starfallQuestCatalog[activeQuestId];questLineIndex=activeQuestLines.length;state.questStoryActive=false;saveQuestCheckpoint('completed');
- addCoins(90);playerXP(120);const rewardPet=activePet();if(rewardPet)grantPetXP(rewardPet,80);
+ const quest=starfallQuestCatalog[activeQuestId],coins=activeQuestId==='prologue'?60:90,playerExp=activeQuestId==='prologue'?80:120,petExp=activeQuestId==='prologue'?60:80;questLineIndex=activeQuestLines.length;state.questStoryActive=false;saveQuestCheckpoint('completed');
+ addCoins(coins);playerXP(playerExp);const rewardPet=activePet();if(rewardPet)grantPetXP(rewardPet,petExp);
  save();render();
- showModal('<div class="hatch-egg">🎁</div><h2 id="modalTitle" style="text-align:center">'+esc(quest.title)+' selesai!</h2><p style="text-align:center">Kamu menyelesaikan Main Quest bersama '+esc(quest.npc)+'.</p><div class="card" style="text-align:center;margin:14px 0"><p>🪙 <b>+90 Coins</b></p><p>✨ <b>+120 Player EXP</b></p><p>🐾 <b>+80 Pet XP</b></p></div><button class="button full" data-action="close-modal">Lanjutkan</button>');
+ showModal('<div class="hatch-egg">🎁</div><h2 id="modalTitle" style="text-align:center">'+esc(quest.title)+' selesai!</h2><p style="text-align:center">Kamu menyelesaikan Main Quest bersama '+esc(quest.npc)+'.</p><div class="card" style="text-align:center;margin:14px 0"><p>🪙 <b>+'+coins+' Coins</b></p><p>✨ <b>+'+playerExp+' Player EXP</b></p><p>🐾 <b>+'+petExp+' Pet XP</b></p></div><button class="button full" data-action="close-modal">Lanjutkan</button>');
 }
 let tamaWorldSelectedLocation='starfall',tamaWorldInsideLocation='';
 const tamaWorldLocations=[
