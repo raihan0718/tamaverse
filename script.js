@@ -226,7 +226,7 @@ function gameIntroPage(){
     '<div class="game-intro-shade"></div>'+
     '<div class="game-intro-character-wrap"><img class="game-intro-character" src="assets/main-quest/npcs/'+line.portrait+'" alt="'+line.name+'"></div>'+
     '<div class="game-intro-dialogue" style="background-image:url(assets/main-quest/ui/DialogueBox.webp)">'+
-      '<div class="game-intro-name" style="transform:translateY(0)">'+line.name+'</div>'+
+      '<div class="game-intro-name">'+line.name+'</div>'+
       '<p>'+line.text+'</p>'+
       '<button class="game-intro-next" data-action="intro-story-next">'+(final?'Masuk ke Tamaverse':'Lanjutkan')+' <span>›</span></button>'+
       '<div class="game-intro-counter">'+(gameIntroIndex+1)+' / '+gameIntroLines.length+'</div>'+
