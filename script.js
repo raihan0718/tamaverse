@@ -223,6 +223,7 @@ const gameIntroLines=[
 ];
 let gameIntroIndex=0;
 function gameIntroPage(){
+  preloadGameIntroPortraits();
   const line=gameIntroLines[Math.max(0,Math.min(gameIntroLines.length-1,gameIntroIndex))];
   const final=gameIntroIndex===gameIntroLines.length-1;
   return '<section class="game-intro-scene" style="background-image:url(assets/main-quest/locations/StarfallVillage.webp)">'+
@@ -275,14 +276,21 @@ function saveQuestCheckpoint(status){
   state.mainQuestUpdatedAt=Date.now();
   save();
 }
-const questNpcPortraitPreloadCache=new Set();
+const visualNovelPortraitCache=new Map();
+function preloadVisualNovelPortrait(src){
+  if(!src||visualNovelPortraitCache.has(src))return visualNovelPortraitCache.get(src)||null;
+  const portrait=new Image();portrait.decoding='async';portrait.src=src;
+  visualNovelPortraitCache.set(src,portrait);
+  return portrait;
+}
 function preloadQuestNpcPortraits(){
   for(const line of prologueLines){
     const src=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');
-    if(!src||questNpcPortraitPreloadCache.has(src))continue;
-    questNpcPortraitPreloadCache.add(src);
-    const portrait=new Image();portrait.decoding='async';portrait.src=src;
+    if(src)preloadVisualNovelPortrait(src);
   }
+}
+function preloadGameIntroPortraits(){
+  for(const line of gameIntroLines)preloadVisualNovelPortrait('assets/main-quest/npcs/'+line.portrait);
 }
 function resumePrologue(){
   state.mainQuestProgress=state.mainQuestProgress||{};
@@ -311,7 +319,14 @@ function updateVisualNovelLine(line,config){
   if(textNode)textNode.textContent=line.text||'';
   if(button){button.dataset.action=config.action;button.innerHTML=config.label+' <span>›</span>';}
   if(counter)counter.textContent=config.counter;
-  if(image&&config.portrait&&image.getAttribute('src')!==config.portrait){image.src=config.portrait;image.alt=line.name||'';}
+  if(image&&config.portrait&&image.getAttribute('src')!==config.portrait){
+    const src=config.portrait,portrait=preloadVisualNovelPortrait(src);
+    if(portrait?.complete&&portrait.naturalWidth){image.src=src;image.alt=line.name||'';image.removeAttribute('data-pending-src');}
+    else if(portrait){
+      image.dataset.pendingSrc=src;
+      portrait.onload=()=>{if(image.isConnected&&image.dataset.pendingSrc===src){image.src=src;image.alt=line.name||'';image.removeAttribute('data-pending-src');}};
+    }
+  }
   return true;
 }
 function advanceQuestLine(){
