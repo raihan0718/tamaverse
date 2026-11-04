@@ -466,7 +466,7 @@ function mainQuestPage(){
  const inProgress=progress.prologue==='in_progress';
  const mapPins=tamaWorldLocations.map(loc=>{
    const open=unlocked(loc),done=loc.id==='starfall'&&progress.prologue==='completed';
-   return `<button type="button" class="tama-map-pin ${open?'is-open':'is-locked'} ${loc.id===selected.id?'is-selected':''}" style="--pin-x:${loc.x}%;--pin-y:${loc.y}%" data-action="quest-location" data-location="${loc.id}" aria-label="${loc.name} · ${open?'Terbuka':'Terkunci'}" ${open?'':'disabled'}>
+   return `<button type="button" class="tama-map-pin ${open?'is-open':'is-locked'} ${loc.id===selected.id?'is-selected':''}" style="--pin-x:${loc.x}%;--pin-y:${loc.y}%" data-action="quest-location" data-location="${loc.id}" aria-label="${loc.name} · ${open?'Terbuka':'Terkunci'}">
     <span class="tama-map-pin-icon">${done?'✓':open?'✦':'🔒'}</span><span class="tama-map-pin-label">${loc.name}</span>
    </button>`;
  }).join('');
