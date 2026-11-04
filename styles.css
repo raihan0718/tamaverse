@@ -5251,3 +5251,30 @@ body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;heig
  .bottom-nav .nav-under-development{font-size:3.8px}
  .tama-world-progress{padding:7px 8px}
 }
+
+
+/* Starfall Village interior and NPC quest cards */
+.tama-location-page{padding-bottom:28px}
+.tama-location-back{margin:2px 0 12px;min-height:36px}
+.tama-location-hero{min-height:165px;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;border:1px solid var(--line);border-radius:18px;background-size:cover;background-position:center 48%;color:#fff;overflow:hidden;box-shadow:0 10px 26px #09061330}
+.tama-location-hero .eyebrow{color:#f4d9ff}
+.tama-location-hero h1{margin:0;font-size:clamp(23px,6vw,31px);text-shadow:0 2px 8px #171020}
+.tama-location-hero p{margin:0;max-width:330px;font-size:11px;line-height:1.45;color:#fff;text-shadow:0 1px 5px #171020}
+.tama-location-section-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:19px 0 9px}
+.tama-location-section-title h2{margin:4px 0 0;font-size:17px}
+.tama-location-section-title>small{font-size:9px;color:var(--muted);text-align:right}
+.tama-npc-quest-card{display:grid;grid-template-columns:76px minmax(0,1fr);gap:11px;align-items:center;margin:9px 0;padding:10px;border:1px solid var(--line);border-radius:15px;background:var(--panel);box-shadow:0 5px 16px #09061312}
+.tama-npc-portrait{height:92px;overflow:hidden;border-radius:10px;background:var(--panel2);display:grid;place-items:end center}
+.tama-npc-portrait img{width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.tama-npc-copy{min-width:0;display:grid;gap:4px}
+.tama-npc-copy small{font-size:8px;color:var(--purple);font-weight:900;letter-spacing:.4px}
+.tama-npc-copy b{font-size:14px}
+.tama-npc-copy span{font-size:10px;color:var(--muted)}
+.tama-npc-copy .button{min-height:34px;padding:7px 9px;font-size:10px;margin-top:3px}
+.tama-idle-npc{width:100%;display:flex;align-items:center;gap:11px;margin:7px 0;padding:9px 11px;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--text);text-align:left}
+.tama-idle-npc img{width:45px;height:52px;object-fit:contain;object-position:center bottom}
+.tama-idle-npc span{display:grid;gap:3px;flex:1}
+.tama-idle-npc b{font-size:12px}
+.tama-idle-npc small{font-size:9px;color:var(--muted)}
+.tama-idle-npc i{font-size:22px;color:var(--purple);font-style:normal}
+@media(max-width:360px){.tama-npc-quest-card{grid-template-columns:65px minmax(0,1fr);gap:8px;padding:8px}.tama-npc-portrait{height:82px}.tama-npc-copy b{font-size:13px}}
