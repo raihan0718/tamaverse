@@ -142,13 +142,16 @@ function triggerPetAnimation(action){
   const bubble=document.querySelector('.action-bubble');
   if(bubble)bubble.textContent=petActionLabel(action);
   if(activePet()?.species==='sovereign-nexora'){const modes={eat:'eat',feed:'eat',play:'play',energy:'potion',sleep:'sleep',train:'training'};window.TamaverseNexoraAnimation?.setMode?.(modes[action]||'idle');}
+  const animationDuration={eat:3200,play:1600,energy:3400,sleep:4200,train:2000}[action]||1800;
   petAnimationTimer=setTimeout(()=>{
-    petAnimation='idle';
+    const sleeping=action==='sleep'&&petSleeping(activePet());
+    petAnimation=sleeping?'sleep':'idle';
+    if(activePet()?.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.setMode?.(sleeping?'sleep':'idle');
     const currentStage=document.querySelector('.pet-stage');
     if(currentStage){currentStage.className=currentStage.className.replace(/pet-action-[\w-]+/g,'').trim();currentStage.classList.add('pet-action-idle');}
     const currentBubble=document.querySelector('.action-bubble');
     if(currentBubble)currentBubble.textContent='';
-  },1800);
+  },animationDuration);
 }
 let introSequenceTimers=[];
 let introSequenceToken=0;
@@ -1205,6 +1208,7 @@ function doCare(kind){
     const elapsed=Math.max(0,Date.now()-p.sleepStartedAt);
     p.energy=clamp(p.energy+(elapsed/900000)*100,0,100);
     p.sleeping=false;p.sleepStartedAt=0;p.careUpdatedAt=Date.now();
+    if(p.species==='sovereign-nexora'){petAnimation='idle';window.TamaverseNexoraAnimation?.setMode?.('idle');}
     save();render();showToast(`${p.name} sudah bangun. Pemulihan energi dihentikan.`);return;
   }
   if(petActivityBlocked(p))return;
