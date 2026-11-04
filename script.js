@@ -141,6 +141,7 @@ function triggerPetAnimation(action){
   if(stage){stage.className=stage.className.replace(/pet-action-[\w-]+/g,'').trim();stage.classList.add(`pet-action-${action}`);}
   const bubble=document.querySelector('.action-bubble');
   if(bubble)bubble.textContent=petActionLabel(action);
+  if(activePet()?.species==='sovereign-nexora'){const modes={eat:'eat',feed:'eat',play:'play',energy:'potion',sleep:'sleep',train:'training'};window.TamaverseNexoraAnimation?.setMode?.(modes[action]||'idle');}
   petAnimationTimer=setTimeout(()=>{
     petAnimation='idle';
     const currentStage=document.querySelector('.pet-stage');
@@ -213,6 +214,7 @@ function render(){
   dailyReset();
   const pages={home:homePage,pets:petsPage,quest:mainQuestPage,gacha:gachaPage,shop:shopPage,battle:battlePage,ranking:rankingPage,profile:profilePage};
   root.innerHTML=(pages[page]||homePage)();
+  if(page==='home'&&activePet()?.species==='sovereign-nexora')window.TamaverseNexoraAnimation?.mount?.();
 }
 window.render = render;
 const gameIntroLines=[
@@ -1163,7 +1165,7 @@ function homePage(){
       <span class="stage-spark spark-one">✦</span><span class="stage-spark spark-two">✧</span><span class="stage-spark spark-three">✦</span>
       <div class="stage-caption"><span class="caption-kicker">A LITTLE FRIEND FROM</span><b>THE TAMAVERSE</b><span class="caption-line"></span></div>
       <span class="home-frame-aura aura-${state.equippedFrame}" aria-hidden="true"></span><div class="home-frame-ornaments aura-${state.equippedFrame}" aria-hidden="true"><i class="aura-ornament aura-ornament-top">✦ · ✧ · ✦</i><i class="aura-ornament aura-ornament-bottom">✧ · ✦ · ✧</i></div><img class="companion-frame-art" src="${accessoryFrameById(state.equippedFrame).src}" alt="" aria-hidden="true">
-      <div class="pet-shadow"></div><div class="stage-pet pet-species-${s.id}" style="" aria-hidden="true"><span class="${cleanStagePet?'stage-creature stage-creature-clean':`creature stage-creature element-${s.element.toLowerCase()}`}">${petImage(s.id, 'stage-pet-image')}</span><span class="pet-heart">♥</span></div>
+      <div class="pet-shadow"></div><div class="stage-pet pet-species-${s.id}" style="" aria-hidden="true">${s.id==='sovereign-nexora'?'<canvas id="nexora-animation-canvas" width="800" height="560" aria-label="Nexora animated companion"></canvas>':`<span class="${cleanStagePet?'stage-creature stage-creature-clean':`creature stage-creature element-${s.element.toLowerCase()}`}">${petImage(s.id, 'stage-pet-image')}</span>`}<span class="pet-heart">♥</span></div>
       <div class="companion-panel">
         <div class="companion-meta">
           <h2>${esc(p.name)}</h2>
