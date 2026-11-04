@@ -5224,3 +5224,7 @@ body.game-intro-mode .game-intro-dialogue p{top:34%;bottom:22%;font-size:clamp(1
 /* Fine-tune NPC nameplate position */
 body.game-intro-mode .game-intro-name{top:7%!important}
 @media(max-width:420px){body.game-intro-mode .game-intro-name{top:7%!important}}
+
+/* Stronger nameplate offset: lower NPC name visibly inside its plate */
+body.game-intro-mode .game-intro-name{top:13%!important}
+@media(max-width:420px){body.game-intro-mode .game-intro-name{top:13%!important}}
