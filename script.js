@@ -200,15 +200,56 @@ window.updateCurrencyConversionPreview=updateCurrencyConversionPreview;
 function updateWallet(){document.getElementById('coinBalance').textContent=state?state.player.coins:0;document.getElementById('diamondBalance').textContent=state?state.player.diamonds:0;}
 function applyTheme(){let dark=false;try{dark=localStorage.getItem('tamaverse_theme')==='dark';}catch(e){}document.body.dataset.theme=dark?'dark':'light';const button=document.querySelector('.theme-toggle');if(button){button.textContent=dark?'☀':'☾';button.setAttribute('aria-label',dark?'Gunakan tema terang':'Gunakan tema gelap');}}
 function render(){
+  const introActive=Boolean(state?.introStoryStarted&&!state?.introStoryCompleted);
+  document.body.classList.toggle('game-intro-mode',introActive);
   document.body.classList.toggle('battle-fullscreen', Boolean(page === 'battle' && ((onlineRoom && ['playing','finished'].includes(onlineRoom.status)) || battle)));
   updateWallet(); document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   const root=document.getElementById('mainContent');
   if(!state){root.innerHTML=welcomePage();return;}
+  if(introActive){gameIntroIndex=Math.max(0,Math.min(gameIntroLines.length-1,Number(state.introStoryIndex)||0));root.innerHTML=gameIntroPage();return;}
   dailyReset();
   const pages={home:homePage,pets:petsPage,quest:mainQuestPage,gacha:gachaPage,shop:shopPage,battle:battlePage,ranking:rankingPage,profile:profilePage};
   root.innerHTML=(pages[page]||homePage)();
 }
 window.render = render;
+const gameIntroLines=[
+  {name:'Aeloria',portrait:'Aeloria.webp',text:'Oh! Kamu akhirnya tiba di Starfall Village. Kami sudah menunggumu.'},
+  {name:'Kael',portrait:'Kael.webp',text:'Jangan terlalu cepat percaya, Aeloria. Kita bahkan belum tahu siapa dia.'},
+  {name:'Miri',portrait:'Miri.webp',text:'Tunggu... cahaya kecil itu muncul lagi! Sepertinya pet barumu punya hubungan dengan bintang jatuh.'},
+  {name:'Aeloria',portrait:'Aeloria.webp',text:'Apa pun yang terjadi, perjalananmu dimulai di sini. Selamat datang di Tamaverse!'}
+];
+let gameIntroIndex=0;
+function gameIntroPage(){
+  const line=gameIntroLines[Math.max(0,Math.min(gameIntroLines.length-1,gameIntroIndex))];
+  const final=gameIntroIndex===gameIntroLines.length-1;
+  return '<section class="game-intro-scene" style="background-image:url(assets/main-quest/locations/StarfallVillage.webp)">'+
+    '<div class="game-intro-shade"></div>'+
+    '<div class="game-intro-character-wrap"><img class="game-intro-character" src="assets/main-quest/npcs/'+line.portrait+'" alt="'+line.name+'"></div>'+
+    '<div class="game-intro-dialogue" style="background-image:url(assets/main-quest/ui/DialogueBox.webp)">'+
+      '<div class="game-intro-name">'+line.name+'</div>'+
+      '<p>'+line.text+'</p>'+
+      '<button class="game-intro-next" data-action="intro-story-next">'+(final?'Masuk ke Tamaverse':'Lanjutkan')+' <span>›</span></button>'+
+      '<div class="game-intro-counter">'+(gameIntroIndex+1)+' / '+gameIntroLines.length+'</div>'+
+    '</div>'+
+  '</section>';
+}
+function advanceGameIntro(){
+  if(!state?.introStoryStarted)return;
+  if(gameIntroIndex<gameIntroLines.length-1){
+    gameIntroIndex++;
+    state.introStoryIndex=gameIntroIndex;
+    save();
+    render();
+    return;
+  }
+  state.introStoryCompleted=true;
+  state.introStoryStarted=false;
+  state.introStoryIndex=gameIntroLines.length;
+  page='home';
+  save();
+  render();
+  showToast('Selamat datang di Tamaverse!');
+}
 function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau diamond, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 diamond</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
 const mainQuestChapters=[
   {number:'PROLOGUE',title:'A Falling Star',place:'Starfall Village',image:'StarfallVillage.webp',description:'Sebuah cahaya jatuh dari langit. Sejak malam itu, kenangan mulai menghilang.',minLevel:1},
@@ -710,6 +751,9 @@ async function finishIntro(){
   const pet=createPet('fluffin',name);
   state.pets.push(pet);
   state.activePet=pet.uid;
+  state.introStoryStarted=true;
+  state.introStoryCompleted=false;
+  state.introStoryIndex=0;
   closeModal();
   page='home';
   save();
@@ -726,7 +770,6 @@ async function finishIntro(){
       showToast('Game dimulai, tetapi foto belum tersinkron. Ganti foto lagi dari Profile.');
     }
   }
-  showToast('Selamat datang di Tamaverse!');
 }
 function legacy_createPet(speciesId,name){const s=speciesById(speciesId);return {uid:'pet-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5),species:s.id,name:name||s.name,level:1,xp:0,hp:s.stats.hp,stats:{...s.stats},hunger:100,happiness:100,energy:80,cleanliness:100,evolution:0,fragments:0,sleeping:false,sleepStartedAt:0,careUpdatedAt:Date.now()};}
 function addPet(speciesId){const s=speciesById(speciesId);const existing=state.pets.find(p=>p.species===speciesId);if(existing){state.items.fragments[speciesId]=(state.items.fragments[speciesId]||0)+1;addCoins(20);return {duplicate:true,pet:existing,s};}const p=createPet(speciesId,s.name);state.pets.push(p);if(!state.activePet)state.activePet=p.uid;return {duplicate:false,pet:p,s};}
@@ -995,6 +1038,9 @@ function normalizeSavedState(saved){
   base.lastCareUpdate=Number(saved.lastCareUpdate)||Date.now();
   base.dailyReward=saved.dailyReward?{...saved.dailyReward,lastClaimDate:(()=>{const value=saved.dailyReward.lastClaimDate;if(!value)return '';if(/^\d{4}-\d{2}-\d{2}$/.test(value))return value;const d=new Date(value);return Number.isNaN(d.getTime())?'':[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');})()}:{lastClaimDate:'',day:0};
   base.battleHistory=Array.isArray(saved.battleHistory)?saved.battleHistory:[];
+  base.introStoryStarted=saved.introStoryStarted===true;
+  base.introStoryCompleted=saved.introStoryCompleted===true;
+  base.introStoryIndex=Math.max(0,Math.floor(Number(saved.introStoryIndex)||0));
   return base;
 }
 function createPet(speciesId,name){
@@ -1744,7 +1790,7 @@ document.addEventListener('click',event=>{
   }
 
   if(a==='online-leave'){event.stopImmediatePropagation();onlineLeaveRoom();return;}if(a==='online-result-dismiss'){event.stopImmediatePropagation();dismissOnlineResult();return;}
-  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='retry-new-player-bonus'){claimNewPlayerWelcomeBonus();return;}if(a==='claim-diamond-event'){openNewPlayerBonusConfirmation();return;}if(a==='accept-diamond-event'){btn.disabled=true;btn.textContent='Memproses...';claimNewPlayerWelcomeBonus();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
+  if(a==='pick-profile-photo'){document.getElementById('profileAvatarFile')?.click();return;}if(a==='theme-toggle'){const next=document.body.dataset.theme==='dark'?'light':'dark';document.body.dataset.theme=next;try{localStorage.setItem('tamaverse_theme',next);}catch(e){showToast('Tema berubah, tetapi tidak dapat disimpan.');}applyTheme();return;}if(a==='start'){startIntro();return;}if(a==='finish-intro'){finishIntro();return;}if(a==='intro-story-next'){advanceGameIntro();return;}if(a==='retry-new-player-bonus'){claimNewPlayerWelcomeBonus();return;}if(a==='claim-diamond-event'){openNewPlayerBonusConfirmation();return;}if(a==='accept-diamond-event'){btn.disabled=true;btn.textContent='Memproses...';claimNewPlayerWelcomeBonus();return;}if(a==='close-modal'){closeModal();return;}if(a==='go'){const target=btn.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}if(a==='claim-daily'){claimDailyReward();return;}if(a==='care'){doCare(btn.dataset.care);return;}if(a==='inspect'){inspectPet(btn.dataset.pet);return;}if(a==='set-active'){
    const nextPet=petById(btn.dataset.pet);
    if(!nextPet)return;
    const now=Date.now();
