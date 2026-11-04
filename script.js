@@ -205,11 +205,45 @@ function render(){
   const root=document.getElementById('mainContent');
   if(!state){root.innerHTML=welcomePage();return;}
   dailyReset();
-  const pages={home:homePage,pets:petsPage,gacha:gachaPage,shop:shopPage,battle:battlePage,ranking:rankingPage,profile:profilePage};
+  const pages={home:homePage,pets:petsPage,quest:mainQuestPage,gacha:gachaPage,shop:shopPage,battle:battlePage,ranking:rankingPage,profile:profilePage};
   root.innerHTML=(pages[page]||homePage)();
 }
 window.render = render;
 function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau diamond, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 diamond</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
+const mainQuestChapters=[
+  {number:'PROLOGUE',title:'A Falling Star',place:'Starfall Village',image:'StarfallVillage.webp',description:'Sebuah cahaya jatuh dari langit. Sejak malam itu, kenangan mulai menghilang.',available:true},
+  {number:'CHAPTER 01',title:'The Forgotten Village',place:'Starfall Village',image:'StarfallVillage.webp',description:'Desa yang perlahan melupakan nama dan kisah penghuninya.'},
+  {number:'CHAPTER 02',title:'Whispers of the Forest',place:'Whispering Forest',image:'WhisperingForest.webp',description:'Bisikan lama memanggil dari balik pepohonan.'},
+  {number:'CHAPTER 03',title:'Pages That Never Existed',place:'Astral Library',image:'AstralLibrary.webp',description:'Ada halaman yang hilang dari sejarah dunia.'},
+  {number:'CHAPTER 04',title:'The Memory Keeper',place:'Memory Sanctuary',image:'MemorySanctuary.webp',description:'Penjaga kenangan menyimpan jawaban yang tak mudah diterima.'},
+  {number:'CHAPTER 05',title:'The Hollow Kingdom',place:'Hollow Kingdom',image:'HollowKingdom.webp',description:'Kerajaan sunyi menyembunyikan asal mula Great Silence.'},
+  {number:'CHAPTER 06',title:'Beyond Memories',place:'The Forgotten Realm',image:'TheForgottenRealm.webp',description:'Di ujung ingatan, kebenaran terakhir menanti.'}
+];
+function mainQuestPage(){
+  const chapters=mainQuestChapters;
+  return `<section class="page main-quest-page">
+    <div class="quest-heading"><div class="eyebrow">TAMAVERSE STORY MODE</div><h1 class="page-title">The Lost Memories</h1><p class="subtle">Sebuah dunia kehilangan cahaya, warna, dan kenangannya. Temukan alasan di balik Great Silence.</p></div>
+    <article class="quest-hero" style="background-image:linear-gradient(90deg,rgba(18,12,34,.92),rgba(18,12,34,.25)),url('assets/main-quest/locations/StarfallVillage.webp')">
+      <div class="quest-hero-content"><span class="quest-kicker">A MYSTERY ADVENTURE</span><h2>THE LOST<br>MEMORIES</h2><p>Some memories were never meant to be forgotten.</p><span class="quest-hero-mark">✦</span></div>
+    </article>
+    <div class="quest-section-title"><div><span class="eyebrow">YOUR JOURNEY BEGINS</span><h2>Featured Chapter</h2></div><span class="quest-count">0 / 7</span></div>
+    <article class="quest-feature-card">
+      <img src="assets/main-quest/locations/StarfallVillage.webp" alt="Starfall Village">
+      <div class="quest-feature-copy"><span class="quest-chapter-tag">PROLOGUE · AVAILABLE</span><h3>A Falling Star</h3><p>Sebuah bintang jatuh membawa awal dari misteri yang mengubah seluruh Tamaverse.</p><button class="button quest-start-button" data-action="quest-start">Mulai Petualangan <span>→</span></button></div>
+    </article>
+    <div class="quest-section-title"><div><span class="eyebrow">UNRAVEL THE STORY</span><h2>Story Chapters</h2></div><span class="quest-count">1 available</span></div>
+    <div class="quest-chapter-list">${chapters.map((chapter,index)=>`<article class="quest-chapter ${index===0?'is-available':'is-locked'}">
+      <img src="assets/main-quest/locations/${chapter.image}" alt="${chapter.place}" loading="lazy">
+      <div class="quest-chapter-copy"><span class="quest-chapter-tag">${chapter.number}</span><h3>${chapter.title}</h3><p>${chapter.description}</p><small>⌖ ${chapter.place}</small></div>
+      <span class="quest-chapter-state">${index===0?'✦':'🔒'}</span>
+    </article>`).join('')}</div>
+    <div class="quest-section-title"><div><span class="eyebrow">EXPLORE THE WORLD</span><h2>World Atlas</h2></div></div>
+    <div class="quest-world-grid">${[
+      ['Starfall Village','StarfallVillage.webp'],['Whispering Forest','WhisperingForest.webp'],['Astral Library','AstralLibrary.webp'],['Memory Sanctuary','MemorySanctuary.webp'],['Hollow Kingdom','HollowKingdom.webp'],['The Forgotten Realm','TheForgottenRealm.webp']
+    ].map(([name,image])=>`<div class="quest-world-card"><img src="assets/main-quest/locations/${image}" alt="${name}" loading="lazy"><span>${name}</span></div>`).join('')}</div>
+    <p class="quest-footnote">Story progress & dialogue system sedang disiapkan.</p>
+  </section>`;
+}
 function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',bath:'Splash! 🫧',sleep:'Zzz... 🌙',train:'Go! 💪',greet:'Hello! ♥',idle:''})[action]||'';}
 function emptyPets(){return `<div class="card empty"><div style="font-size:42px">🥚</div><p>Belum ada pet. Tetaskan telur pertamamu untuk memulai!</p><button class="button" data-action="start">Tetaskan telur gratis</button></div>`;}
 function rarityRank(rarity){return ({Common:1,Rare:2,Epic:3,Legendary:4,Celestial:5,Sovereign:6})[rarity]||0;}
@@ -1617,7 +1651,7 @@ async function convertDiamonds(button){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='quest-start'){showModal(`<div class="eyebrow">TAMAVERSE · PROLOGUE</div><h2 id="modalTitle">A Falling Star</h2><p class="subtle">Pada malam ketika bintang jatuh, seluruh penjuru Tamaverse mendadak kehilangan sebagian ingatannya. Seseorang harus mencari tahu apa yang sebenarnya terjadi.</p><div class="quest-modal-art"><img src="assets/main-quest/locations/StarfallVillage.webp" alt="Starfall Village"></div><p class="muted-label">Chapter gameplay, dialog, dan penyimpanan progres akan hadir di tahap berikutnya.</p><button class="button full" data-action="close-modal">Mengerti</button>`);return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
