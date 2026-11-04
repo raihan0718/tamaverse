@@ -70,7 +70,7 @@ potion:{T:3.4,ev:[[1.7,()=>{for(let i=0;i<10;i++)sp('+',BX+(R()-.4)*220,BY-80-R(
 const DEF={dx:0,dy:0,sx:1,sy:1,rot:0,flap:0,head:0,flash:0,fc:'#fff',eyes:0};
 let loopRunning=false;
 function startLoop(){if(loopRunning||!c||!src)return;loopRunning=true;requestAnimationFrame(loop)}
-function mount(){const next=document.getElementById('nexora-animation-canvas');if(!next)return;if(c!==next){c=next;x=c.getContext('2d',{alpha:true});}startLoop()}
+function mount(){const next=document.getElementById('nexora-animation-canvas');if(!next)return;if(c!==next){c=next;x=c.getContext('2d',{alpha:true});}if(!im.src)im.src=IMG;startLoop()}
 function setMode(mode){if(!A[mode])mode='idle';cur=mode;t0=performance.now();prev=-1;parts=[];}
 function loop(ts){
   if(!c||!c.isConnected){loopRunning=false;return;}
