@@ -5278,3 +5278,28 @@ body.game-intro-mode .app-shell{width:100%;max-width:none;min-height:100dvh;heig
 .tama-idle-npc small{font-size:9px;color:var(--muted)}
 .tama-idle-npc i{font-size:22px;color:var(--purple);font-style:normal}
 @media(max-width:360px){.tama-npc-quest-card{grid-template-columns:65px minmax(0,1fr);gap:8px;padding:8px}.tama-npc-portrait{height:82px}.tama-npc-copy b{font-size:13px}}
+
+
+/* Starfall Village clickable scene */
+.tama-village-scene{position:relative;isolation:isolate;overflow:hidden;min-height:clamp(480px,72vh,760px);height:calc(100dvh - 178px);max-height:820px;padding:0!important;border-radius:16px;background:#283b39}
+.tama-village-background{position:absolute;inset:0;z-index:-2;background-image:linear-gradient(180deg,#14102035 0%,transparent 42%,#14102035 100%),url("assets/main-quest/locations/StarfallVillage.webp");background-size:cover;background-position:center;background-repeat:no-repeat}
+.tama-village-topbar{position:absolute;top:10px;left:10px;right:10px;z-index:8;display:flex;align-items:flex-start;gap:8px;pointer-events:none}
+.tama-village-back{pointer-events:auto;border:1px solid #ffffff65;border-radius:9px;padding:7px 9px;background:#211b35dc;color:#fff;font-size:10px;white-space:nowrap}
+.tama-quest-guide{pointer-events:none;display:grid;gap:4px;width:min(255px,68%);padding:9px 11px;border:1px solid #ffffff70;border-radius:10px;background:#211b35eF;color:#fff;box-shadow:0 4px 16px #100b1c40}
+.tama-quest-guide small{font-size:8px;letter-spacing:1px;font-weight:900;color:#d9a8ff}
+.tama-quest-guide b{font-size:11px;line-height:1.25}
+.tama-quest-guide span{font-size:10px;color:#fff1c9}
+.tama-village-npc-layer{position:absolute;inset:0;z-index:4}
+.tama-village-npc{position:absolute;left:var(--npc-x);top:var(--npc-y);transform:translate(-50%,-50%);width:clamp(76px,18vw,124px);height:48%;max-height:280px;min-height:155px;padding:0;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;cursor:pointer;filter:drop-shadow(0 5px 5px #100b1c55)}
+.tama-village-npc img{width:100%;height:calc(100% - 22px);object-fit:contain;object-position:center bottom;transition:transform .16s ease}
+.tama-village-npc:active img,.tama-village-npc.is-focused img{transform:translateY(-5px) scale(1.035)}
+.tama-village-npc span{max-width:100%;padding:3px 8px;border-radius:20px;background:#211b35eF;color:#fff;font-size:10px;font-weight:800;white-space:nowrap;border:1px solid #ffffff65}
+.tama-npc-choice{position:absolute;z-index:12;left:50%;bottom:18px;transform:translateX(-50%);width:min(220px,calc(100% - 28px));padding:9px;border:1px solid #ffffff80;border-radius:13px;background:#211b35f5;color:#fff;box-shadow:0 9px 28px #100b1c80;display:grid;gap:6px;animation:tamaNpcChoiceIn .14s ease-out}
+.tama-npc-choice-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 3px}
+.tama-npc-choice-head b{font-size:12px}
+.tama-npc-choice-head button{width:25px;height:25px;border:0;border-radius:7px;background:#ffffff1c;color:#fff;font-size:18px}
+.tama-npc-choice>button:not(.tama-npc-choice-head button){min-height:32px;padding:7px 9px;border:1px solid #ffffff25;border-radius:8px;background:#ffffff12;color:#fff;text-align:left;font-size:11px}
+.tama-npc-choice>button.is-muted{opacity:.72}
+.tama-village-location-label{position:absolute;right:12px;bottom:10px;z-index:3;padding:5px 8px;border-radius:7px;background:#211b35a8;color:#fff;font-size:8px;letter-spacing:1px}
+@keyframes tamaNpcChoiceIn{from{opacity:0;transform:translate(-50%,5px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(max-width:420px){.tama-village-scene{min-height:460px;height:calc(100dvh - 172px)}.tama-village-npc{height:43%;min-height:145px;width:clamp(70px,19vw,100px)}.tama-quest-guide{width:min(225px,64%)}.tama-quest-guide b{font-size:10px}.tama-quest-guide span{font-size:9px}}
