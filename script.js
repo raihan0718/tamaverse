@@ -446,51 +446,53 @@ function advanceQuestLine(){
   if(!updateVisualNovelLine(line,{action,label,counter:(questLineIndex+1)+' / '+prologueLines.length,portrait:line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'')}))render();
 }
 function completeQuestLine(){if(state.mainQuestProgress?.prologue==='completed'){state.questStoryActive=false;render();return;}questLineIndex=prologueLines.length;state.questStoryActive=false;saveQuestCheckpoint('completed');render();showToast('Prologue selesai! Starfall Village kini menjadi rumah keduamu.');}
+let tamaWorldSelectedLocation='starfall';
+const tamaWorldLocations=[
+ {id:'starfall',name:'Starfall Village',chapter:'Prologue · A Falling Star',image:'StarfallVillage.webp',x:18,y:76,description:'Desa tempat perjalananmu dimulai. Temui penduduk dan lanjutkan misteri bintang jatuh.',unlock:0},
+ {id:'forest',name:'Whispering Forest',chapter:'Chapter 02 · Whispers of the Forest',image:'WhisperingForest.webp',x:31,y:35,description:'Hutan tua yang menyimpan bisikan dan ingatan yang terlupakan.',unlock:2},
+ {id:'library',name:'Astral Library',chapter:'Chapter 03 · Pages That Never Existed',image:'AstralLibrary.webp',x:48,y:54,description:'Arsip kuno yang menyimpan catatan sejarah yang seharusnya tidak pernah ada.',unlock:3},
+ {id:'sanctuary',name:'Memory Sanctuary',chapter:'Chapter 04 · Memory Keeper’s Trial',image:'MemorySanctuary.webp',x:68,y:50,description:'Tempat suci yang menjaga pecahan ingatan dunia.',unlock:4},
+ {id:'kingdom',name:'Hollow Kingdom',chapter:'Chapter 05 · Hollow Kingdom Guards',image:'HollowKingdom.webp',x:61,y:16,description:'Kerajaan tua yang menyimpan rahasia masa lalu.',unlock:5},
+ {id:'forgotten',name:'The Forgotten Realm',chapter:'Chapter 06 · The Forgotten Realm',image:'TheForgottenRealm.webp',x:87,y:22,description:'Wilayah misterius di balik batas dunia yang dikenal.',unlock:6}
+];
 function mainQuestPage(){
-  const chapters=mainQuestChapters;
-  const progress=state.mainQuestProgress||{};
-  const playerLevel=Math.max(1,Number(state.player.level)||1);
-  const completed=chapters.filter((chapter,index)=>progress[chapter.number.toLowerCase().replace(/[^a-z0-9]+/g,'_')]==='completed'||(index===0&&progress.prologue==='completed')).length;
-  let previousCompleted=true;
-  const chapterCards=chapters.map((chapter,index)=>{
-    const key=index===0?'prologue':chapter.number.toLowerCase().replace(/[^a-z0-9]+/g,'_');
-    const isCompleted=progress[key]==='completed';
-    const levelMet=playerLevel>=chapter.minLevel;
-    const unlocked=previousCompleted&&levelMet;
-    previousCompleted=isCompleted;
-    const status=isCompleted?'COMPLETED':unlocked?(progress[key]==='in_progress'?'IN PROGRESS':'AVAILABLE'):!levelMet?'LEVEL LOCKED':'LOCKED';
-    return `<article class="quest-chapter ${isCompleted?'is-completed':unlocked?'is-available':'is-locked'}">
-      <img src="assets/main-quest/locations/${chapter.image}" alt="${chapter.place}" loading="lazy">
-      <div class="quest-chapter-copy"><span class="quest-chapter-tag">${chapter.number} · ${status}</span><h3>${chapter.title}</h3><p>${chapter.description}</p><small>⌖ ${chapter.place} · Minimal Level ${chapter.minLevel}</small></div>
-      <span class="quest-chapter-state">${isCompleted?'✓':unlocked?'✦':'🔒'}</span>
-    </article>`;
-  }).join('');
-  return `<section class="page main-quest-page">
-    <div class="quest-heading"><div class="eyebrow">TAMAVERSE STORY MODE</div><h1 class="page-title">The Lost Memories</h1><p class="subtle">Sebuah dunia kehilangan cahaya, warna, dan kenangannya. Temukan alasan di balik Great Silence.</p></div>
-    <article class="quest-hero" style="background-image:linear-gradient(90deg,rgba(18,12,34,.92),rgba(18,12,34,.25)),url('assets/main-quest/locations/StarfallVillage.webp')">
-      <div class="quest-hero-content"><span class="quest-kicker">A MYSTERY ADVENTURE</span><h2>THE LOST<br>MEMORIES</h2><p>Some memories were never meant to be forgotten.</p><span class="quest-hero-mark">✦</span></div>
-    </article>
-    <div class="quest-section-title"><div><span class="eyebrow">YOUR JOURNEY BEGINS</span><h2>Story Progress</h2></div><span class="quest-count">${completed} / ${chapters.length}</span></div>
-    <article class="quest-feature-card">
-      <img src="assets/main-quest/locations/StarfallVillage.webp" alt="Starfall Village">
-      <div class="quest-feature-copy"><span class="quest-chapter-tag">PROLOGUE · ${progress.prologue==='completed'?'COMPLETED':playerLevel>=1?'AVAILABLE':'LEVEL LOCKED'}</span><h3>A Falling Star</h3><p>Sebuah bintang jatuh membawa awal dari misteri yang mengubah seluruh Tamaverse.</p><small>Minimal Level 1 · Level kamu ${playerLevel}</small><button class="button quest-start-button" data-action="quest-start" ${progress.prologue==='completed'?'disabled':''}> ${progress.prologue==='completed'?'Selesai':progress.prologue==='in_progress'?'Lanjutkan Petualangan':'Mulai Petualangan'} <span>→</span></button></div>
-    </article>
-    <div class="quest-section-title"><div><span class="eyebrow">UNRAVEL THE STORY</span><h2>Story Chapters</h2></div><span class="quest-count">${chapters.length} chapters</span></div>
-    <div class="quest-chapter-list">${chapterCards}</div>
-    <div class="quest-section-title"><div><span class="eyebrow">EXPLORE THE WORLD</span><h2>World Atlas</h2></div></div>
-    <div class="quest-world-grid">${[
-      ['Starfall Village','StarfallVillage.webp'],['Whispering Forest','WhisperingForest.webp'],['Astral Library','AstralLibrary.webp'],['Memory Sanctuary','MemorySanctuary.webp'],['Hollow Kingdom','HollowKingdom.webp'],['The Forgotten Realm','TheForgottenRealm.webp']
-    ].map(([name,image])=>`<div class="quest-world-card"><img src="assets/main-quest/locations/${image}" alt="${name}" loading="lazy"><span>${name}</span></div>`).join('')}</div>
-    <section class="quest-test-panel">
-      <div><span class="quest-chapter-tag">DEVELOPER TOOLS</span><h3>Quest Test Mode</h3><p>Ulangi cerita untuk pengujian. Data player, pet, dan currency tidak akan dihapus.</p></div>
-      <div class="quest-test-actions">
-        <button class="button secondary" data-action="quest-test-reset" data-scope="prologue">Reset Prologue</button>
-        <button class="button secondary" data-action="quest-test-reset" data-scope="all">Reset All Quest</button>
-        <button class="button secondary" data-action="quest-test-opening">Test Opening Scene</button>
-      </div>
-    </section>
-    <p class="quest-footnote">Setiap chapter memiliki level minimum dan battle cerita tersendiri. Kisah akan terus diperbarui.</p>
-  </section>`;
+ const progress=state.mainQuestProgress||{};
+ const chapterKeys=['prologue','chapter_01','chapter_02','chapter_03','chapter_04','chapter_05','chapter_06'];
+ const completedCount=chapterKeys.filter(key=>progress[key]==='completed').length;
+ const currentKey=chapterKeys.find(key=>progress[key]!=='completed')||'prologue';
+ const currentChapter=mainQuestChapters.find((c,i)=>chapterKeys[i]===currentKey)||mainQuestChapters[0];
+ const selected=tamaWorldLocations.find(l=>l.id===tamaWorldSelectedLocation)||tamaWorldLocations[0];
+ const unlocked=(loc)=>loc.id==='starfall'||completedCount>=loc.unlock;
+ const inProgress=progress.prologue==='in_progress';
+ const mapPins=tamaWorldLocations.map(loc=>{
+   const open=unlocked(loc),done=loc.id==='starfall'&&progress.prologue==='completed';
+   return `<button type="button" class="tama-map-pin ${open?'is-open':'is-locked'} ${loc.id===selected.id?'is-selected':''}" style="--pin-x:${loc.x}%;--pin-y:${loc.y}%" data-action="quest-location" data-location="${loc.id}" aria-label="${loc.name} · ${open?'Terbuka':'Terkunci'}" ${open?'':'disabled'}>
+    <span class="tama-map-pin-icon">${done?'✓':open?'✦':'🔒'}</span><span class="tama-map-pin-label">${loc.name}</span>
+   </button>`;
+ }).join('');
+ const selectedOpen=unlocked(selected);
+ return `<section class="page tama-world-page">
+  <header class="tama-world-header">
+   <div><span class="eyebrow">TAMAVERSE · THE LOST MEMORIES</span><h1 class="page-title">TAMA WORLD MAP</h1><p class="subtle">Pilih lokasi yang sudah terbuka untuk melanjutkan perjalananmu.</p></div>
+   <div class="tama-world-progress"><b>${completedCount}/7</b><small>Story progress</small></div>
+  </header>
+  <section class="tama-map-stage" aria-label="Peta dunia Tamaverse">
+   <img class="tama-world-map-image" src="assets/main-quest/locations/WorldMap.webp" alt="Tama World Map" fetchpriority="high">
+   ${mapPins}
+   <div class="tama-map-legend"><span><i class="open"></i> Terbuka</span><span><i class="locked"></i> Belum terbuka</span></div>
+  </section>
+  <section class="tama-map-detail">
+   <div class="tama-map-detail-art"><img src="assets/main-quest/locations/${selected.image}" alt="${selected.name}"></div>
+   <div class="tama-map-detail-copy">
+    <span class="quest-chapter-tag">${selectedOpen?(selected.id==='starfall'&&progress.prologue==='completed'?'VISITED · CAN RETURN':'LOCATION AVAILABLE'):'UNDISCOVERED LOCATION'}</span>
+    <h2>${selected.name}</h2><p>${selected.description}</p>
+    <small>${selected.chapter}</small>
+    ${selectedOpen?(selected.id==='starfall'?'<button class="button full" data-action="quest-start">'+(inProgress?'Lanjutkan Prologue':progress.prologue==='completed'?'Lihat Prologue':'Mulai Petualangan')+' <span>→</span></button>':'<button class="button full" disabled>Story content coming soon</button>'):'<button class="button secondary full" disabled>Lokasi belum terbuka</button>'}
+   </div>
+  </section>
+  <div class="tama-world-hint"><span>✦</span><p><b>Petunjuk perjalanan</b><br>${inProgress?'Progres ceritamu tersimpan. Lanjutkan dari bagian terakhir.':progress.prologue==='completed'?'Starfall Village tetap bisa kamu kunjungi kembali. Perjalanan berikutnya akan terbuka seiring progres Main Story.':'Mulai dari Starfall Village. Selesaikan perjalanan cerita di sana untuk membuka wilayah berikutnya.'}</p></div>
+  <section class="quest-test-panel"><div><span class="quest-chapter-tag">DEVELOPER TOOLS</span><h3>Quest Test Mode</h3><p>Tools pengujian tetap tersedia khusus developer.</p></div><div class="quest-test-actions"><button class="button secondary" data-action="quest-test-reset" data-scope="prologue">Reset Prologue</button><button class="button secondary" data-action="quest-test-reset" data-scope="all">Reset All Quest</button><button class="button secondary" data-action="quest-test-opening">Test Opening Scene</button></div></section>
+ </section>`;
 }
 function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',bath:'Splash! 🫧',sleep:'Zzz... 🌙',train:'Go! 💪',greet:'Hello! ♥',idle:''})[action]||'';}
 function emptyPets(){return `<div class="card empty"><div style="font-size:42px">🥚</div><p>Belum ada pet. Tetaskan telur pertamamu untuk memulai!</p><button class="button" data-action="start">Tetaskan telur gratis</button></div>`;}
@@ -1942,7 +1944,7 @@ async function convertDiamonds(button){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;if(target==='quest'&&!isQuestOwner()){showToast('Quest masih dalam pengembangan.');return;}const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(state?.mainQuestProgress?.prologue==='in_progress'){saveQuestCheckpoint('in_progress');closeModal();if(state.questStoryActive){state.questStoryActive=false;save();}}page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='quest-start'){if(!isQuestOwner()){showToast('Quest masih dalam pengembangan.');return;}if((Number(state.player.level)||1)<1){showToast('Minimal Level 1 untuk memulai Prologue.');return;}resumePrologue();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='quest-battle'){if(questLineIndex!==17){showToast('Battle belum tersedia pada bagian ini.');return;}startStoryBattle();return;}if(a==='quest-help'){if(prologueLines[questLineIndex]?.action!=='help')return;state.mainQuestHelpCount=Math.min(3,Number(state.mainQuestHelpCount||0)+1);advanceQuestLine();showToast(['Persediaan warga berhasil dikumpulkan.','Warga desa mulai merasa tenang.','Gerbang timur berhasil diamankan.'][state.mainQuestHelpCount-1]);return;}if(a==='quest-battle-continue'){closeModal();questLineIndex=18;state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}if(a==='quest-battle-retry'){closeModal();startStoryBattle();return;}if(a==='quest-battle-later'){closeModal();state.questStoryActive=false;page='home';save();render();showToast('Progres Prologue tersimpan. Pulihkan pet sebelum kembali.');return;}if(a==='quest-test-reset'){const scope=btn.dataset.scope==='all'?'all':'prologue';showModal('<div class="eyebrow">QUEST TEST MODE</div><h2 id="modalTitle">Reset '+(scope==='all'?'semua quest':'Prologue')+'?</h2><p class="subtle">Ini hanya akan menghapus status dan checkpoint quest. Level, pet, coin, diamond, dan inventory tetap aman.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="quest-test-confirm" data-scope="'+scope+'">Ya, reset quest</button></div>');return;}if(a==='quest-test-confirm'){const scope=btn.dataset.scope==='all'?'all':'prologue';state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};if(scope==='all'){state.mainQuestProgress={};state.mainQuestCheckpoints={};}else{delete state.mainQuestProgress.prologue;delete state.mainQuestCheckpoints.prologue;}questLineIndex=0;state.questStoryActive=false;state.mainQuestHelpCount=0;save();closeModal();page='quest';render();showToast(scope==='all'?'Semua progres quest direset.':'Prologue siap dites ulang.');return;}if(a==='quest-test-opening'){state.introStoryStarted=true;state.introStoryCompleted=false;state.introStoryIndex=0;gameIntroIndex=0;save();closeModal();page='home';render();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);if(battle?.mode==='story'){battle=null;state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='quest-location'){const loc=tamaWorldLocations.find(item=>item.id===btn.dataset.location);if(loc&&loc.id==='starfall')tamaWorldSelectedLocation=loc.id;else if(loc)tamaWorldSelectedLocation=loc.id;render();return;}if(a==='quest-start'){if(!isQuestOwner()){showToast('Quest masih dalam pengembangan.');return;}if((Number(state.player.level)||1)<1){showToast('Minimal Level 1 untuk memulai Prologue.');return;}resumePrologue();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='quest-battle'){if(questLineIndex!==17){showToast('Battle belum tersedia pada bagian ini.');return;}startStoryBattle();return;}if(a==='quest-help'){if(prologueLines[questLineIndex]?.action!=='help')return;state.mainQuestHelpCount=Math.min(3,Number(state.mainQuestHelpCount||0)+1);advanceQuestLine();showToast(['Persediaan warga berhasil dikumpulkan.','Warga desa mulai merasa tenang.','Gerbang timur berhasil diamankan.'][state.mainQuestHelpCount-1]);return;}if(a==='quest-battle-continue'){closeModal();questLineIndex=18;state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}if(a==='quest-battle-retry'){closeModal();startStoryBattle();return;}if(a==='quest-battle-later'){closeModal();state.questStoryActive=false;page='home';save();render();showToast('Progres Prologue tersimpan. Pulihkan pet sebelum kembali.');return;}if(a==='quest-test-reset'){const scope=btn.dataset.scope==='all'?'all':'prologue';showModal('<div class="eyebrow">QUEST TEST MODE</div><h2 id="modalTitle">Reset '+(scope==='all'?'semua quest':'Prologue')+'?</h2><p class="subtle">Ini hanya akan menghapus status dan checkpoint quest. Level, pet, coin, diamond, dan inventory tetap aman.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="quest-test-confirm" data-scope="'+scope+'">Ya, reset quest</button></div>');return;}if(a==='quest-test-confirm'){const scope=btn.dataset.scope==='all'?'all':'prologue';state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};if(scope==='all'){state.mainQuestProgress={};state.mainQuestCheckpoints={};}else{delete state.mainQuestProgress.prologue;delete state.mainQuestCheckpoints.prologue;}questLineIndex=0;state.questStoryActive=false;state.mainQuestHelpCount=0;save();closeModal();page='quest';render();showToast(scope==='all'?'Semua progres quest direset.':'Prologue siap dites ulang.');return;}if(a==='quest-test-opening'){state.introStoryStarted=true;state.introStoryCompleted=false;state.introStoryIndex=0;gameIntroIndex=0;save();closeModal();page='home';render();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);if(battle?.mode==='story'){battle=null;state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
