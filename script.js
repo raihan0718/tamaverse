@@ -860,10 +860,8 @@ function startStoryBattle(){
   const p=activePet();
   if(!p){showToast('Kamu belum punya pet!');return;}
   if(petSleeping(p)){showToast(p.name+' sedang tidur. Bangunkan dulu sebelum battle.');return;}
-  if(p.happiness<20){showToast(battleMoodMessage(p));return;}
-  if(p.energy<25){showToast('Energi pet minimal 25 untuk battle.');return;}
+  // Main Quest battles ignore hunger, mood, and energy requirements and costs.
   if(battle)return;
-  p.energy=clamp(p.energy-25,0,100);p.careUpdatedAt=Date.now();
   const boss={id:'story-king-slime',species:'fluffin',name:'King Slime',element:'Nature',rarity:'BOSS',level:1,image:'assets/main-quest/monsters/slime-king.webp',stats:{hp:Math.max(135,Math.round(p.stats.hp*1.55)),atk:Math.max(10,Math.round(p.stats.atk*.68)),def:Math.max(7,Math.round(p.stats.def*.55)),spd:Math.max(8,Math.round(p.stats.spd*.62))}};
   state.questStoryActive=false;
   battle={mode:'story',petId:p.uid,opponent:boss,playerHP:p.stats.hp,enemyHP:boss.stats.hp,turn:1,wave:1,clearedLevels:0,coinsEarned:0,xpEarned:0,skillUsed:false,enemySkillUsed:false,enemyItemUsed:false,defending:false,enemyDefending:false,phase:'player',busy:false,aiTimer:null,log:['Kamu menghadapi King Slime di Starfall Village!'],ended:false};
