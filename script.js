@@ -483,8 +483,76 @@ const starfallChapter02Lines=makeStarfallQuestLines([
 'Aeloria: Sosok itu terlihat seperti penjaga lama Whispering Forest. Tapi kenapa ia muncul dalam ingatanmu?',
 'Kael: Aku mengenali lambangnya. Penjaga itu menghilang pada malam Great Silence dimulai.',
 'Miri: Fragment ini menunjukkan bahwa ia sedang melindungi sesuatu, bukan menyerang desa.',
-'Narator: Bisikan mendadak berhenti. Di kejauhan, sebuah lentera menyala sendiri dan menandai jalan lebih dalam ke hutan.'
+'Narator: Bisikan mendadak berhenti. Di kejauhan, sebuah lentera menyala sendiri dan menandai jalan lebih dalam ke hutan.',
+'Narator: Lentera itu melayang beberapa langkah di depan, seolah menunggu rombonganmu mengikutinya.',
+'Miri: Cahayanya berdenyut mengikuti kompas. Aku rasa lentera ini terhubung dengan Memory Fragment.',
+'Kael: Kita sudah cukup jauh dari desa. Aku akan menandai jalur pulang agar tidak tersesat.',
+'Aeloria: Lihat akar pohon itu. Ada pita tua yang diikatkan pada salah satu cabangnya.',
+'Noctis: Pita itu memakai lambang penjaga hutan. Sudah lama sekali sejak terakhir kali aku melihatnya.',
+'Miri: Tulisan di balik pita hampir pudar. Ada nama yang sengaja dihapus dari catatan ini.',
+'Kael: Aku menemukan bekas perkemahan. Sepertinya seseorang pernah tinggal di sini sebelum Great Silence.',
+'Aeloria: Api unggunnya sudah dingin, tapi masih ada cangkir yang tertinggal.',
+'Narator: Di dekat perkemahan, kamu menemukan tiga keping kayu dengan ukiran yang berbeda.',
+'Miri: Tolong kumpulkan kepingan itu. Aku ingin membandingkan ukirannya dengan pola pada Fragment.',
+'Kael: Aku akan menjaga sekitar. Suara langkah tadi bukan berasal dari kelompok kita.',
+'Noctis: Jangan panik. Hutan sedang menguji apakah kita bisa membedakan gema dan suara asli.',
+'Aeloria: Keping pertama bergambar daun. Yang kedua seperti matahari terbit.',
+'Miri: Keping ketiga punya lambang bulan sabit. Ketiganya membentuk satu lambang yang utuh.',
+'Narator: Saat kepingan disatukan, lentera memancarkan cahaya ke sebuah batu besar.',
+'Kael: Batu ini menutup jalan menuju lembah. Ada tiga tuas kecil di sisinya.',
+'Aeloria: Perhatikan ukiran di setiap tuas. Urutannya mungkin mengikuti perubahan langit.',
+'Miri: Aku melihat catatan kecil: fajar, siang, lalu malam. Kita harus menyusunnya sesuai urutan waktu.',
+'Noctis: Jangan sentuh tuas sebelum semuanya siap. Mekanisme tua sering punya cara sendiri untuk menolak.',
+'Narator: Kamu berhasil mengatur ketiga tuas. Batu besar bergeser dan membuka jalan sempit.',
+'Kael: Ada jejak sepatu baru di tanah. Seseorang melewati tempat ini belum lama.',
+'Aeloria: Jejaknya menuju lembah, tetapi langkahnya tidak beraturan.',
+'Miri: Aku menemukan botol kecil berisi serbuk kristal. Warnanya sama dengan cahaya dari Fragment.',
+'Noctis: Itu bukan serbuk biasa. Ia menyimpan gema suara yang pernah diucapkan di tempat ini.',
+'Narator: Sebuah suara samar terdengar dari botol itu, menyebut kata “penjaga” berulang kali.',
+'Kael: Kita harus mencari sumber suara tersebut. Aku akan memeriksa sisi timur lembah.',
+'Aeloria: Aku ikut dengan Kael. Miri, tetaplah bersama pendatang itu dan periksa botolnya.',
+'Miri: Ada pola gelombang pada permukaannya. Aku bisa membacanya jika kita menemukan tiga titik resonansi.',
+'Noctis: Titik pertama berada dekat batu berlumut. Titik kedua di bawah akar melengkung.',
+'Narator: Titik ketiga tersembunyi di balik air terjun kecil yang hampir tertutup tanaman.',
+'Miri: Kita sudah menemukan semuanya. Sekarang bantu aku menyelaraskan ketiga resonansi itu.',
+'Kael: Sisi timur aman untuk sementara. Tapi aku melihat bayangan bergerak di antara pepohonan.',
+'Aeloria: Jangan mengejarnya sendirian. Kita belum tahu apakah bayangan itu manusia atau pantulan ingatan.',
+'Noctis: Pantulan itu berhenti saat kita berhenti. Ia sedang menunggu seseorang mengenali dirinya.',
+'Narator: Cahaya dari tiga titik menyatu dan membentuk peta kecil di udara.',
+'Miri: Peta ini menunjukkan sebuah altar tua di pusat lembah. Itu pasti tujuan lentera.',
+'Kael: Jalannya dijaga oleh akar yang saling mengunci. Aku akan membuka celah dari sisi kiri.',
+'Aeloria: Aku melihat simbol pada akar. Ada tiga simbol yang sama dengan ukiran kepingan kayu tadi.',
+'Noctis: Urutannya berubah. Kali ini simbol bulan berada paling awal, bukan paling akhir.',
+'Narator: Akar-akar bergerak perlahan setelah urutan simbol dipahami.',
+'Miri: Di altar ini ada empat lingkaran kosong. Memory Fragment kita cocok dengan salah satunya.',
+'Kael: Jangan letakkan Fragment dulu. Periksa retakan di dasar altar, ada tulisan yang tertutup tanah.',
+'Aeloria: Tulisan itu menyebut “mereka yang menjaga pintu, bukan mereka yang menguasainya”.',
+'Noctis: Penjaga hutan bukan penguasa tempat ini. Ia melindungi sesuatu yang bahkan lebih tua.',
+'Miri: Aku akan membersihkan altar. Tolong cari empat batu penyangga yang tersebar di sekitar sini.',
+'Narator: Batu pertama ditemukan di dekat akar besar, batu kedua di sisi aliran air.',
+'Kael: Aku menemukan batu ketiga di balik reruntuhan. Yang terakhir mungkin berada dekat lentera.',
+'Aeloria: Lentera itu kini diam. Sepertinya ia sudah membawa kita tepat ke tempat yang dituju.',
+'Noctis: Ada bayangan lain di balik altar. Kali ini ia tidak berusaha bersembunyi.',
+'Narator: Sosok berjubah muncul sebagai pantulan cahaya, wajahnya masih tertutup kabut.',
+'Miri: Aku bisa merasakan Fragment bereaksi. Sosok ini mengenali benda yang kita bawa.',
+'Kael: Siapa pun dia, ia tidak menunjukkan tanda ingin menyerang. Kita dengarkan dulu.',
+'Aeloria: Apakah kau penjaga yang menghilang pada malam Great Silence?',
+'Narator: Sosok itu mengangkat tangan. Suaranya terdengar seperti datang dari dalam pepohonan.',
+'Noctis: Ia tidak bisa menjawab dengan kata-kata. Perhatikan cahaya pada lambangnya.',
+'Miri: Lambang itu berubah mengikuti denyut Fragment. Aku akan mencoba menerjemahkan pesannya.',
+'Kael: Apa pun yang tertulis, kita harus tahu apakah jalan pulang masih terbuka.',
+'Aeloria: Aku melihat satu kalimat muncul: “Jangan biarkan pintu pertama terbuka.”',
+'Narator: Tanah bergetar pelan. Di bawah altar, terdengar bunyi kunci yang berputar.',
+'Noctis: Jadi bisikan itu bukan panggilan untuk masuk. Itu peringatan agar kita tidak membuka sesuatu.'
 ]);
+// Chapter 02 terdiri dari 90 dialog; mini-event dan tugas tersebar di beberapa bagian.
+[36,55,73].forEach(i=>{if(starfallChapter02Lines[i]){starfallChapter02Lines[i].action='help';starfallChapter02Lines[i].eventText='Tugas eksplorasi berhasil diselesaikan.';}});
+const chapter02Events=[
+ {index:43,event:{question:'Tiga resonansi terdengar berurutan: batu, akar, air. Mana yang harus diaktifkan terakhir?',choices:['Batu','Akar','Air'],answer:2,success:'Resonansi lembah berhasil diselaraskan!'}},
+ {index:67,event:{question:'Tulisan altar menyebut penjaga pintu. Simbol mana yang muncul lebih dulu pada petunjuk terakhir?',choices:['Bulan','Daun','Bintang'],answer:0,success:'Petunjuk altar berhasil dibaca!'}},
+ {index:84,event:{question:'Lentera menunjukkan jalan pulang melalui tiga tanda. Tanda mana yang menjadi penutup?',choices:['Altar','Gerbang','Sungai'],answer:1,success:'Jalur pulang berhasil dipastikan!'}}
+];
+chapter02Events.forEach(({index,event})=>{if(starfallChapter02Lines[index]){starfallChapter02Lines[index].action='event';starfallChapter02Lines[index].event=event;}});
 const starfallQuestCatalog={
  prologue:{title:'A Falling Star',npc:'Aeloria',portrait:'Aeloria.webp',location:'starfall',lines:prologueLines,requires:[]},
  chapter_01:{title:'The Silent Bell',npc:'Kael',portrait:'Kael.webp',location:'starfall',lines:starfallChapter01Lines,requires:['prologue']},
@@ -501,7 +569,9 @@ function preloadQuestNpcPortraits(){for(const quest of Object.values(starfallQue
 function beginMainQuest(questId){
  const quest=starfallQuestCatalog[questId];if(!quest||!isQuestOwner())return;
  state.mainQuestProgress=state.mainQuestProgress||{};
- if(state.mainQuestProgress[questId]==='completed'){const q=starfallQuestCatalog[questId];showModal('<div class="eyebrow">STARFALL VILLAGE · NPC</div><h2 id="modalTitle">'+esc(q.npc)+'</h2><p>Terima kasih sudah membantu kami. Masih banyak hal yang harus dijaga di desa ini. Datanglah lagi jika perjalananmu berlanjut.</p><button class="button full" data-action="close-modal">Sampai nanti</button>');return;}
+ const savedCheckpoint=Number(state.mainQuestCheckpoints?.[questId]||0);
+ if(state.mainQuestProgress[questId]==='completed'&&savedCheckpoint>=quest.lines.length){const q=starfallQuestCatalog[questId];showModal('<div class="eyebrow">TAMAVERSE · NPC</div><h2 id="modalTitle">'+esc(q.npc)+'</h2><p>Terima kasih sudah membantu kami. Masih banyak hal yang harus dijaga. Datanglah lagi saat perjalananmu berlanjut.</p><button class="button full" data-action="close-modal">Sampai nanti</button>');return;}
+ if(state.mainQuestProgress[questId]==='completed'&&savedCheckpoint<quest.lines.length){state.mainQuestProgress[questId]='in_progress';state.mainQuestCheckpoints[questId]=Math.min(quest.lines.length-1,savedCheckpoint||0);save();}
  if(!quest.requires.every(key=>state.mainQuestProgress[key]==='completed')){showToast('Selesaikan Main Quest sebelumnya terlebih dahulu.');return;}
  activeQuestId=questId;activeQuestLines=quest.lines;activeQuestLocation=quest.location;state.mainQuestActiveId=questId;
  const checkpoint=Number(state.mainQuestCheckpoints?.[questId]);
