@@ -642,6 +642,180 @@ const tamaWorldLocations=[
  {id:'forgotten',name:'The Forgotten Realm',chapter:'Chapter 05 · Beyond Memories',image:'TheForgottenRealm.webp',x:87,y:22,description:'Wilayah misterius di balik batas dunia yang dikenal.',requires:['chapter_05']}
 ];
 let tamaVillageSelectedNpc='';
+
+const tamaQuestSegmentPlan={
+ prologue:[
+  {id:'prologue_aeloria',owner:'aeloria',title:'A Falling Star · Aeloria',lines:[...prologueLines.slice(0,10),...prologueLines.slice(24,44)]},
+  {id:'prologue_kael',owner:'kael',title:'A Falling Star · Kael',lines:[...prologueLines.slice(10,24),...prologueLines.slice(44,60)]},
+  {id:'prologue_miri',owner:'miri',title:'A Falling Star · Miri',lines:prologueLines.slice(60,90)}
+ ],
+ chapter_02:[
+  {id:'chapter_02_aeloria',owner:'aeloria',title:'Whispers of the Forest · Aeloria',lines:starfallChapter02Lines.slice(0,30)},
+  {id:'chapter_02_kael',owner:'kael',title:'Whispers of the Forest · Kael',lines:starfallChapter02Lines.slice(30,60)},
+  {id:'chapter_02_miri',owner:'miri',title:'Whispers of the Forest · Miri',lines:starfallChapter02Lines.slice(60,90)}
+ ]
+};
+const tamaQuestParentMeta={
+ prologue:{title:'A Falling Star',location:'starfall',label:'PROLOGUE · A FALLING STAR',requires:[]},
+ chapter_02:{title:'Whispers of the Forest',location:'forest',label:'CHAPTER 01 · WHISPERS OF THE FOREST',requires:['prologue']}
+};
+const tamaNpcMeta={
+ aeloria:{name:'Aeloria',portrait:'Aeloria.webp',x:27,y:80},
+ kael:{name:'Kael',portrait:'Kael.webp',x:72,y:80},
+ miri:{name:'Miri',portrait:'Miri.webp',x:50,y:84}
+};
+const tamaCopyLine=line=>({...line});
+tamaQuestSegmentPlan.prologue.forEach(segment=>segment.lines=segment.lines.map(tamaCopyLine));
+tamaQuestSegmentPlan.chapter_02.forEach(segment=>segment.lines=segment.lines.map(tamaCopyLine));
+tamaQuestSegmentPlan.prologue[0].lines[3]={name:'Narator',speaker:'STARFALL VILLAGE',text:'Seorang penjaga desa mendekat. Ia mengamati cahaya yang masih tersisa di tanah.'};
+tamaQuestSegmentPlan.prologue[0].lines[5]={name:'Narator',speaker:'STARFALL VILLAGE',text:'Seorang peneliti bergegas mendekat setelah melihat cahaya pada pet-mu.'};
+tamaQuestSegmentPlan.prologue[0].lines[29]={name:'Aeloria',speaker:'AELORIA',portrait:'Aeloria.webp',text:'Kael sedang berjaga di dekat gerbang. Temui dia; ada sesuatu yang harus kita pastikan sebelum malam tiba.'};
+tamaQuestSegmentPlan.prologue[1].lines[0]={name:'Kael',speaker:'KAEL',portrait:'Kael.webp',text:'Namaku Kael. Aku penjaga Starfall Village. Maaf menyambutmu dalam keadaan seperti ini, tapi gerbang timur sedang tidak aman.'};
+tamaQuestSegmentPlan.prologue[1].lines[29]={name:'Kael',speaker:'KAEL',portrait:'Kael.webp',text:'Miri paling memahami pecahan kristal yang tertinggal. Temui dia di dekat laboratorium; kita perlu tahu kenapa Fragment itu memilihmu.'};
+tamaQuestSegmentPlan.prologue[2].lines[0]={name:'Miri',speaker:'MIRI',portrait:'Miri.webp',text:'Aku Miri, peneliti desa. Aku sudah memeriksa cahaya yang tertinggal pada pet-mu. Itu bukan kristal biasa.'};
+tamaQuestSegmentPlan.prologue[2].lines[20]={name:'Miri',speaker:'MIRI',portrait:'Miri.webp',text:'Clue: amati tiga denyut cahaya. Urutannya dimulai dari yang paling redup, lalu yang paling terang.',action:'event',event:{question:'Tiga cahaya berdenyut dengan urutan redup, terang, sedang. Mana yang harus disentuh pertama?',choices:['Cahaya redup','Cahaya terang','Cahaya sedang'],answer:0,success:'Resonansi Memory Fragment berhasil dibaca!'}};
+tamaQuestSegmentPlan.prologue[2].lines[29]={name:'Miri',speaker:'MIRI',portrait:'Miri.webp',text:'Fragment ini menunjuk ke Whispering Forest. Jika ingin tahu siapa yang memanggilmu, kita harus mengikuti petunjuk itu.'};
+const prologueCameo=tamaQuestSegmentPlan.prologue[0].lines.find(line=>line.name==='Noctis');
+if(prologueCameo){prologueCameo.name='???';prologueCameo.speaker='???';prologueCameo.text='Sosok berjubah berdiri di kejauhan. “King Slime hanya mengikuti panggilan yang lebih tua darinya.”';}
+starfallChapter02Lines.forEach((line,index)=>{
+ if(line.name==='Noctis'&&![5,15,34].includes(index)){
+  line.name='Narator';line.speaker='WHISPERING FOREST';delete line.portrait;
+  line.text='Dari balik pepohonan terdengar gema samar: '+line.text;
+ }else if(line.name==='Noctis'){
+  line.name='???';line.speaker='???';line.text='Sosok berjubah berkata pelan: '+line.text;
+ }
+});
+tamaQuestSegmentPlan.chapter_02[0].lines[0]={name:'Aeloria',speaker:'AELORIA',portrait:'Aeloria.webp',text:'Kita sudah tiba di Whispering Forest. Tetap dekat denganku; kabut di sini bisa memisahkan jalan yang terlihat dan jalan yang benar-benar ada.'};
+tamaQuestSegmentPlan.chapter_02[0].lines[29]={name:'Aeloria',speaker:'AELORIA',portrait:'Aeloria.webp',text:'Jalur berikutnya tertutup akar besar. Temui Kael; dia bisa menemukan cara melewatinya tanpa merusak penanda hutan.'};
+tamaQuestSegmentPlan.chapter_02[1].lines[0]={name:'Kael',speaker:'KAEL',portrait:'Kael.webp',text:'Aku Kael. Perhatikan akar di depan kita; pola simpulnya seperti mekanisme gerbang desa. Aku akan membukanya, tapi kamu harus membaca tandanya.'};
+tamaQuestSegmentPlan.chapter_02[1].lines[29]={name:'Kael',speaker:'KAEL',portrait:'Kael.webp',text:'Altar sudah terlihat, tetapi simbolnya berubah setiap kali disentuh. Miri harus membaca resonansinya. Temui dia sebelum kita mendekat.'};
+tamaQuestSegmentPlan.chapter_02[2].lines[0]={name:'Miri',speaker:'MIRI',portrait:'Miri.webp',text:'Aku Miri. Fragment-mu bereaksi kuat di dekat altar ini. Kita harus menyelaraskan petunjuknya sebelum penjaga hutan menyadari keberadaan kita.'};
+tamaQuestSegmentPlan.chapter_02[2].lines[29]={name:'Miri',speaker:'MIRI',portrait:'Miri.webp',text:'Penjaga itu bukan sumber bisikan. Ia justru menahan sesuatu di bawah altar. Dan sekarang... segelnya mulai terbuka.'};
+for(const [parent,segments] of Object.entries(tamaQuestSegmentPlan)){
+ for(let index=0;index<segments.length;index++){
+  const segment=segments[index];
+  if(segment.lines.length!==30)throw new Error(parent+' '+segment.id+' has '+segment.lines.length+' lines');
+  segment.parentId=parent;segment.location=tamaQuestParentMeta[parent].location;
+  segment.npc=tamaNpcMeta[segment.owner].name;segment.portrait=tamaNpcMeta[segment.owner].portrait;
+  segment.requiresSegment=index?segments[index-1].id:null;
+  starfallQuestCatalog[segment.id]={...segment,requires:segment.requiresSegment?[segment.requiresSegment]:[]};
+ }
+}
+function tamaQuestSegments(parentId){return tamaQuestSegmentPlan[parentId]||[];}
+function tamaNextQuestSegment(parentId){
+ if(state.mainQuestProgress?.[parentId]==='completed')return null;
+ return tamaQuestSegments(parentId).find(segment=>state.mainQuestProgress?.[segment.id]!=='completed')||null;
+}
+function tamaParentForLocation(locationId){return locationId==='starfall'?'prologue':locationId==='forest'?'chapter_02':null;}
+function tamaCurrentQuestObjective(locationId){
+ const parent=tamaParentForLocation(locationId),meta=tamaQuestParentMeta[parent];
+ if(!parent||!meta)return {chapter:'STORY CONTENT IN DEVELOPMENT',objective:'Petualangan berikutnya sedang disiapkan.'};
+ if(state.mainQuestProgress?.[parent]==='completed')return {chapter:meta.label+' · COMPLETE',objective:'Semua Main Quest di lokasi ini selesai.'};
+ const next=tamaNextQuestSegment(parent);
+ if(!next)return {chapter:meta.label,objective:'Semua Main Quest di lokasi ini selesai.'};
+ const completed=tamaQuestSegments(parent).filter(segment=>state.mainQuestProgress?.[segment.id]==='completed').length;
+ return {chapter:meta.label,objective:'Temui '+next.npc+' · Main Quest '+(completed+1)+'/3'};
+}
+function tamaDisplayNpcName(line){
+ if(!line||line.name==='Narator')return '';
+ const intro=line.text?.match(/\b(?:Namaku|Aku)\s+(Aeloria|Kael|Miri)\b/i);
+ if(intro&&!state.mainQuestIntroductions?.[intro[1].toLowerCase()])return '???';
+ const key=String(line.name||'').toLowerCase();
+ if(['aeloria','kael','miri'].includes(key)&&!state.mainQuestIntroductions?.[key])return '???';
+ return line.name||'';
+}
+function tamaRecordNpcIntroduction(line){
+ const match=line?.text?.match(/\b(?:Namaku|Aku)\s+(Aeloria|Kael|Miri)\b/i);
+ if(!match)return;
+ state.mainQuestIntroductions=state.mainQuestIntroductions||{};
+ state.mainQuestIntroductions[match[1].toLowerCase()]=true;
+}
+function saveQuestCheckpoint(status){
+ if(!state)return;
+ state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};
+ const quest=starfallQuestCatalog[activeQuestId],parent=quest?.parentId;
+ if(status)state.mainQuestProgress[activeQuestId]=status;
+ if(parent&&state.mainQuestProgress[parent]!=='completed')state.mainQuestProgress[parent]='in_progress';
+ state.mainQuestCheckpoints[activeQuestId]=Math.max(0,Math.min(activeQuestLines.length,questLineIndex));
+ state.mainQuestActiveId=activeQuestId;state.mainQuestUpdatedAt=Date.now();save();
+}
+function preloadQuestNpcPortraits(){
+ for(const segments of Object.values(tamaQuestSegmentPlan))for(const segment of segments)for(const line of segment.lines){
+  const src=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');
+  if(src)preloadVisualNovelPortrait(src);
+ }
+}
+function beginMainQuest(questId){
+ const quest=starfallQuestCatalog[questId];if(!quest||!isQuestOwner())return;
+ state.mainQuestProgress=state.mainQuestProgress||{};
+ if(quest.requiresSegment&&state.mainQuestProgress[quest.requiresSegment]!=='completed'){showToast('Selesaikan Main Quest sebelumnya terlebih dahulu.');return;}
+ if(state.mainQuestProgress[quest.parentId]==='completed'||state.mainQuestProgress[questId]==='completed'){showToast('Main Quest ini sudah selesai. Temui NPC berikutnya di Quest Guide.');return;}
+ activeQuestId=questId;activeQuestLines=quest.lines;activeQuestLocation=quest.location;state.mainQuestActiveId=questId;
+ questLineIndex=Math.max(0,Math.min(activeQuestLines.length-1,Number(state.mainQuestCheckpoints?.[questId]||0)));
+ preloadQuestNpcPortraits();state.questStoryActive=true;saveQuestCheckpoint('in_progress');page='quest';render();
+}
+function questStoryPage(){
+ questLineIndex=Math.max(0,Math.min(activeQuestLines.length-1,questLineIndex));
+ const line=activeQuestLines[questLineIndex],portraitSrc=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');
+ const character=portraitSrc?'<div class="game-intro-character-wrap"><img class="game-intro-character" src="'+esc(portraitSrc)+'" alt="'+esc(tamaDisplayNpcName(line))+'"></div>':'<div class="game-intro-character-wrap"></div>';
+ const last=questLineIndex===activeQuestLines.length-1;
+ const action=line.action==='battle'?'quest-battle':line.action==='help'?'quest-help':line.action==='event'?'quest-event':last?'quest-finish':'quest-next';
+ const label=line.action==='battle'?'Mulai Battle':line.action==='help'?'Selesaikan Tugas':line.action==='event'?'Ikuti Random Event':last?'Selesaikan Main Quest':'Lanjutkan';
+ const scene=tamaWorldLocations.find(item=>item.id===activeQuestLocation)||tamaWorldLocations[0];
+ return '<section class="game-intro-scene" style="background-image:url(assets/main-quest/locations/'+esc(scene.image)+')"><div class="game-intro-shade"></div>'+character+'<div class="game-intro-dialogue" style="background-image:url(assets/main-quest/ui/DialogueBox.webp)"><div class="game-intro-name">'+esc(tamaDisplayNpcName(line))+'</div><p>'+esc(line.text)+'</p><button class="game-intro-next" data-action="'+action+'">'+label+' <span>›</span></button><div class="game-intro-counter">'+(questLineIndex+1)+' / '+activeQuestLines.length+'</div></div></section>';
+}
+function updateVisualNovelLine(line,config){
+ const scene=document.querySelector('.game-intro-scene');if(!scene)return false;
+ const name=scene.querySelector('.game-intro-name'),textNode=scene.querySelector('.game-intro-dialogue p'),button=scene.querySelector('.game-intro-next'),counter=scene.querySelector('.game-intro-counter'),image=scene.querySelector('.game-intro-character');
+ if(name)name.textContent=tamaDisplayNpcName(line);if(textNode)textNode.textContent=line.text||'';
+ if(button){button.dataset.action=config.action;button.innerHTML=config.label+' <span>›</span>';}
+ if(counter)counter.textContent=config.counter;
+ if(image){const src=config.portrait||'',portrait=src?preloadVisualNovelPortrait(src):null;if(src&&image.getAttribute('src')!==src){if(portrait?.complete&&portrait.naturalWidth){image.src=src;image.alt=tamaDisplayNpcName(line);image.removeAttribute('data-pending-src');}else if(portrait){image.dataset.pendingSrc=src;portrait.onload=()=>{if(image.isConnected&&image.dataset.pendingSrc===src){image.src=src;image.alt=tamaDisplayNpcName(line);image.removeAttribute('data-pending-src');}};}}}
+ return true;
+}
+function advanceQuestLine(){
+ if(questLineIndex>=activeQuestLines.length-1){completeQuestLine();return;}
+ tamaRecordNpcIntroduction(activeQuestLines[questLineIndex]);questLineIndex++;saveQuestCheckpoint('in_progress');
+ const line=activeQuestLines[questLineIndex],last=questLineIndex===activeQuestLines.length-1;
+ const action=line.action==='battle'?'quest-battle':line.action==='help'?'quest-help':line.action==='event'?'quest-event':last?'quest-finish':'quest-next';
+ const label=line.action==='battle'?'Mulai Battle':line.action==='help'?'Selesaikan Tugas':line.action==='event'?'Ikuti Random Event':last?'Selesaikan Main Quest':'Lanjutkan';
+ if(!updateVisualNovelLine(line,{action,label,counter:(questLineIndex+1)+' / '+activeQuestLines.length,portrait:line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'')}))render();
+}
+function completeQuestLine(){
+ const quest=starfallQuestCatalog[activeQuestId];if(!quest){state.questStoryActive=false;render();return;}
+ if(state.mainQuestProgress?.[activeQuestId]==='completed'){state.questStoryActive=false;render();return;}
+ questLineIndex=activeQuestLines.length;state.questStoryActive=false;saveQuestCheckpoint('completed');
+ const segments=tamaQuestSegments(quest.parentId),allDone=segments.length===3&&segments.every(segment=>state.mainQuestProgress?.[segment.id]==='completed');
+ if(allDone)state.mainQuestProgress[quest.parentId]='completed';
+ const coins=30,playerExp=40,petExp=30;addCoins(coins);playerXP(playerExp);
+ const rewardPet=activePet();if(rewardPet)grantPetXP(rewardPet,petExp);
+ save();render();
+ const next=tamaNextQuestSegment(quest.parentId);
+ const message=allDone?'Seluruh Main Quest di '+esc(tamaQuestParentMeta[quest.parentId].title)+' selesai. Lokasi berikutnya kini terbuka.':next?'Main Quest bersama '+esc(quest.npc)+' selesai. Temui '+esc(next.npc)+' untuk melanjutkan.':'Main Quest selesai.';
+ showModal('<div class="hatch-egg">🎁</div><h2 id="modalTitle" style="text-align:center">'+esc(quest.title)+' selesai!</h2><p style="text-align:center">'+message+'</p><div class="card" style="text-align:center;margin:14px 0"><p>🪙 <b>+'+coins+' Coins</b></p><p>✨ <b>+'+playerExp+' Player EXP</b></p><p>🐾 <b>+'+petExp+' Pet XP</b></p></div><button class="button full" data-action="close-modal">Lanjutkan</button>');
+}
+function tamaStoryLocationPage(locationId,progress){
+ const parent=tamaParentForLocation(locationId),objective=tamaCurrentQuestObjective(locationId),known=state.mainQuestIntroductions||{};
+ const npcs=Object.entries(tamaNpcMeta).map(([id,npc])=>({id,...npc,name:known[id]?npc.name:'???'}));
+ const npcMarkup=npcs.map(n=>'<button class="tama-village-npc '+(tamaVillageSelectedNpc===n.id?'is-focused':'')+'" style="--npc-x:'+n.x+'%;--npc-y:'+n.y+'%" data-action="village-npc-open" data-npc="'+n.id+'" aria-label="Bicara dengan '+n.name+'"><img src="assets/main-quest/npcs/'+n.portrait+'" alt=""><span>'+n.name+'</span></button>').join('');
+ const selected=npcs.find(n=>n.id===tamaVillageSelectedNpc),next=parent?tamaNextQuestSegment(parent):null;
+ const canStart=!!(next&&selected&&next.owner===selected.id);
+ const pop=selected?'<div class="tama-npc-choice" role="dialog" aria-label="Interaksi '+selected.name+'"><div class="tama-npc-choice-head"><b>'+selected.name+'</b><button data-action="village-npc-close" aria-label="Tutup">×</button></div><button data-action="village-npc-main" data-npc="'+selected.id+'" data-parent="'+(parent||'')+'" '+(canStart?'':'disabled title="Belum waktunya Main Quest NPC ini"')+'>📖 Main Quest</button><button data-action="village-npc-talk" data-npc="'+selected.id+'">💬 Ajak Ngobrol</button><button class="is-muted" data-action="village-npc-close">Nevermind</button></div>':'';
+ const location=tamaWorldLocations.find(item=>item.id===locationId)||tamaWorldLocations[0];
+ return '<section class="page tama-village-scene"><div class="tama-village-background" role="img" aria-label="'+esc(location.name)+'" style="background-image:url(assets/main-quest/locations/'+esc(location.image)+')"></div><div class="tama-village-topbar"><button class="tama-village-back" data-action="quest-exit-location">← World Map</button><div class="tama-quest-guide"><small>QUEST GUIDE</small><b>'+esc(objective.chapter)+'</b><span>◉ '+esc(objective.objective)+'</span></div></div><div class="tama-village-npc-layer">'+npcMarkup+'</div>'+pop+'<div class="tama-village-location-label">'+esc(location.name.toUpperCase())+'</div></section>';
+}
+function starfallVillagePage(progress){return tamaStoryLocationPage('starfall',progress);}
+function mainQuestPage(){
+ if(tamaWorldInsideLocation==='starfall'||tamaWorldInsideLocation==='forest')return tamaStoryLocationPage(tamaWorldInsideLocation,state.mainQuestProgress||{});
+ const progress=state.mainQuestProgress||{},chapterKeys=['prologue','chapter_02','chapter_03','chapter_04','chapter_05','chapter_06'];
+ const completedCount=chapterKeys.filter(key=>progress[key]==='completed').length;
+ const selected=tamaWorldLocations.find(location=>location.id===tamaWorldSelectedLocation)||tamaWorldLocations[0];
+ const unlocked=location=>location.id==='starfall'||(Array.isArray(location.requires)&&location.requires.every(key=>progress[key]==='completed'));
+ const mapPins=tamaWorldLocations.map(location=>{const open=unlocked(location),done=location.id==='starfall'?progress.prologue==='completed':location.id==='forest'?progress.chapter_02==='completed':false;return '<button type="button" class="tama-map-pin '+(open?'is-open':'is-locked')+' '+(location.id===selected.id?'is-selected':'')+'" style="--pin-x:'+location.x+'%;--pin-y:'+location.y+'%" data-action="quest-location" data-location="'+location.id+'" aria-label="'+esc(location.name)+' · '+(open?'Terbuka':'Terkunci')+'"><span class="tama-map-pin-icon">'+(done?'✓':open?'✦':'🔒')+'</span><span class="tama-map-pin-label">'+esc(location.name)+'</span></button>';}).join('');
+ const selectedOpen=unlocked(selected),playable=selected.id==='starfall'||selected.id==='forest';
+ return '<section class="page tama-world-page"><header class="tama-world-header"><div><span class="eyebrow">TAMAVERSE · THE LOST MEMORIES</span><h1 class="page-title">TAMA WORLD MAP</h1><p class="subtle">Pilih lokasi, masuk ke dalam area, lalu klik NPC untuk memulai Main Quest.</p></div><div class="tama-world-progress"><b>'+completedCount+'/6</b><small>Story progress</small></div></header><section class="tama-map-stage" aria-label="Peta dunia Tamaverse"><img class="tama-world-map-image" src="assets/main-quest/locations/WorldMap.webp" alt="Tama World Map" fetchpriority="high">'+mapPins+'<div class="tama-map-legend"><span><i class="open"></i> Terbuka</span><span><i class="locked"></i> Belum terbuka</span></div></section><section class="tama-map-detail"><div class="tama-map-detail-art"><img src="assets/main-quest/locations/'+esc(selected.image)+'" alt="'+esc(selected.name)+'"></div><div class="tama-map-detail-copy"><span class="quest-chapter-tag">'+(selectedOpen?'LOCATION AVAILABLE':'UNDISCOVERED LOCATION')+'</span><h2>'+esc(selected.name)+'</h2><p>'+esc(selected.description)+'</p><small>'+esc(selected.chapter)+'</small>'+(selectedOpen&&playable?'<button class="button full" data-action="quest-enter-location">Masuk ke Lokasi <span>→</span></button>':selectedOpen?'<button class="button full" disabled>Story content coming soon</button>':'<button class="button secondary full" disabled>Lokasi belum terbuka</button>')+'</div></section><div class="tama-world-hint"><span>✦</span><p><b>Petunjuk perjalanan</b><br>Masuk ke lokasi, pilih NPC, lalu tekan Main Quest. Dialog tidak akan dimulai otomatis.</p></div><section class="quest-test-panel"><div><span class="quest-chapter-tag">DEVELOPER TOOLS</span><h3>Quest Test Mode</h3><p>Tools pengujian tetap tersedia khusus developer.</p></div><div class="quest-test-actions"><button class="button secondary" data-action="quest-test-reset" data-scope="prologue">Reset Prologue</button><button class="button secondary" data-action="quest-test-reset" data-scope="all">Reset All Quest</button><button class="button secondary" data-action="quest-test-opening">Test Opening Scene</button></div></section></section>';
+}
+
 function starfallVillagePage(progress){
  const completed=progress.prologue==='completed';
  const chapter=completed?'PROLOGUE COMPLETE · FOREST EXPEDITION AWAITS':'PROLOGUE · A FALLING STAR';
@@ -1167,7 +1341,7 @@ function startStoryBattle(questId='prologue'){
   if(!p){showToast('Kamu belum punya pet!');return;}
   if(petSleeping(p)){showToast(p.name+' sedang tidur. Bangunkan dulu sebelum battle.');return;}
   if(battle)return;
-  const isForestBoss=questId==='chapter_02';
+  const isForestBoss=String(questId).startsWith('chapter_02_');
   const commonStats={...speciesById('fluffin').stats};
   const boss=isForestBoss
    ?{id:'story-forest-guardian',species:'fluffin',name:'Forest Guardian',element:'Nature',rarity:'BOSS',level:8,image:'assets/main-quest/monsters/forest-guardian.webp',stats:{...commonStats,hp:Math.round(commonStats.hp*1.45),atk:Math.round(commonStats.atk*1.15),def:Math.round(commonStats.def*1.1)}}
@@ -2121,7 +2295,7 @@ async function convertDiamonds(button){
 document.addEventListener('click',event=>{
   const nav=event.target.closest('.nav-item');if(nav){const target=nav.dataset.page;if(target==='quest'&&!isQuestOwner()){showToast('Quest masih dalam pengembangan.');return;}const p=activePet();if(target==='battle'&&p&&petSleeping(p)){showToast(`${p.name} sedang tidur. Bangunkan dulu sebelum battle.`);return;}if(state&&(state.mainQuestProgress?.[state.mainQuestActiveId||'prologue']==='in_progress')){saveQuestCheckpoint('in_progress');closeModal();if(state.questStoryActive){state.questStoryActive=false;save();}}if(target==='quest')window.scrollTo(0,0);page=target;render();return;}
   const btn=event.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
-  if(a==='quest-location'){const loc=tamaWorldLocations.find(item=>item.id===btn.dataset.location);if(loc){tamaWorldSelectedLocation=loc.id;if(loc.id==='starfall'&&(loc.id==='starfall'||(Array.isArray(loc.requires)&&loc.requires.every(key=>state.mainQuestProgress?.[key]==='completed')))){tamaWorldInsideLocation='starfall';tamaVillageSelectedNpc='';}else tamaWorldInsideLocation='';}render();return;}if(a==='quest-enter-location'){if(tamaWorldSelectedLocation==='starfall'){tamaWorldInsideLocation='starfall';tamaVillageSelectedNpc='';render();}else if(tamaWorldSelectedLocation==='forest'){beginMainQuest('chapter_02');}return;}if(a==='quest-exit-location'){tamaWorldInsideLocation='';tamaVillageSelectedNpc='';render();return;}if(a==='village-npc-open'){tamaVillageSelectedNpc=btn.dataset.npc||'';render();return;}if(a==='village-npc-close'){tamaVillageSelectedNpc='';render();return;}if(a==='village-npc-main'){const npc=btn.dataset.npc;tamaVillageSelectedNpc='';if(npc==='aeloria'&&state.mainQuestProgress?.prologue!=='completed')beginMainQuest('prologue');else showToast('Prologue sudah selesai. Lanjutkan ke Whispering Forest dari World Map.');return;}if(a==='village-npc-talk'){const npc=btn.dataset.npc,progress=state.mainQuestProgress||{};const talks={aeloria:progress.prologue==='completed'?['Terima kasih sudah menolong desa. Kael sedang memeriksa menara lonceng.','Aku masih memikirkan cahaya yang jatuh malam itu.']:['Kamu datang tepat waktu. Ada sesuatu yang ingin kubicarakan tentang cahaya jatuh itu.','Desa ini menyimpan rahasia yang bahkan belum berani kuceritakan kepada warga lain.'],kael:progress.prologue==='completed'?['Lonceng tua kembali berbunyi. Aku butuh bantuanmu memeriksa menara.','Jangan sentuh kristal yang berdenyut sebelum kita tahu fungsinya.']:['Aku sedang memastikan semua warga aman. Bicara lagi setelah keadaan lebih tenang.','Aeloria tahu lebih banyak tentang desa ini daripada yang ia ceritakan.'],miri:progress.chapter_01==='completed'?['Fragmen ingatan mulai menunjukkan bentuk yang lebih jelas.','Aku menemukan catatan lama yang mungkin mengarah ke hutan.']:['Aku sedang meneliti kristal yang tertinggal setelah serangan.','Kalau menemukan simbol aneh, tolong ingat bentuknya.']};const list=talks[npc]||['Senang melihatmu kembali di desa.'];const msg=list[Math.floor(Math.random()*list.length)];const name={aeloria:'Aeloria',kael:'Kael',miri:'Miri'}[npc]||'Penduduk';tamaVillageSelectedNpc='';showModal('<div class="eyebrow">STARFALL VILLAGE · NPC</div><h2 id="modalTitle">'+name+'</h2><p>'+msg+'</p><button class="button full" data-action="close-modal">Sampai nanti</button>');return;}if(a==='quest-npc'){beginMainQuest(btn.dataset.quest);return;}if(a==='quest-idle-npc'){const lines={Noctis:'Aku mengawasi gema yang datang dari luar desa. Jangan abaikan simbol yang muncul di dekat hutan.',Miri:'Memory Fragment menyimpan potongan masa lalu. Setiap potongan punya cerita yang berbeda.'};const npc=btn.dataset.npc;showModal('<div class="eyebrow">STARFALL VILLAGE · NPC</div><h2 id="modalTitle">'+esc(npc)+'</h2><p>'+esc(lines[npc]||'Senang melihatmu kembali di desa.')+'</p><button class="button full" data-action="close-modal">Sampai nanti</button>');return;}if(a==='quest-start'){resumePrologue();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='quest-battle'){if(activeQuestLines[questLineIndex]?.action!=='battle'){showToast('Battle belum tersedia pada bagian ini.');return;}startStoryBattle(activeQuestId);return;}if(a==='quest-help'){const line=activeQuestLines[questLineIndex];if(line?.action!=='help')return;state.mainQuestHelpCount=Math.min(99,Number(state.mainQuestHelpCount||0)+1);advanceQuestLine();showToast(line.eventText||'Tugas berhasil diselesaikan.');return;}if(a==='quest-event'){const event=activeQuestLines[questLineIndex]?.event;if(!event)return;showModal('<div class="eyebrow">RANDOM EVENT · STARFALL</div><h2 id="modalTitle">Mini Event</h2><p>'+esc(event.question)+'</p>'+(event.hint?'<p class="subtle" style="margin-top:6px">💡 '+esc(event.hint)+'</p>':'')+'<div class="modal-actions" style="display:grid;gap:8px">'+event.choices.map((choice,i)=>'<button class="button '+(i===0?'':'secondary')+'" data-action="quest-event-answer" data-answer="'+i+'">'+esc(choice)+'</button>').join('')+'</div>');return;}if(a==='quest-event-answer'){const event=activeQuestLines[questLineIndex]?.event;if(!event)return;const correct=Number(btn.dataset.answer)===event.answer;closeModal();showToast(correct?event.success:'Belum tepat, tapi kamu menemukan petunjuk baru.');advanceQuestLine();return;}if(a==='quest-battle-continue'){closeModal();activeQuestId=state.mainQuestActiveId||'prologue';activeQuestLines=starfallQuestCatalog[activeQuestId]?.lines||prologueLines;activeQuestLocation=starfallQuestCatalog[activeQuestId]?.location||'starfall';questLineIndex=Math.min(activeQuestLines.length-1,Number(state.mainQuestCheckpoints?.[activeQuestId]||0));state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}if(a==='quest-battle-retry'){closeModal();startStoryBattle(state.mainQuestActiveId||'prologue');return;}if(a==='quest-battle-later'){closeModal();state.questStoryActive=false;page='home';save();render();showToast('Progres Prologue tersimpan. Pulihkan pet sebelum kembali.');return;}if(a==='quest-test-reset'){const scope=btn.dataset.scope==='all'?'all':'prologue';showModal('<div class="eyebrow">QUEST TEST MODE</div><h2 id="modalTitle">Reset '+(scope==='all'?'semua quest':'Prologue')+'?</h2><p class="subtle">Ini hanya akan menghapus status dan checkpoint quest. Level, pet, coin, diamond, dan inventory tetap aman.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="quest-test-confirm" data-scope="'+scope+'">Ya, reset quest</button></div>');return;}if(a==='quest-test-confirm'){const scope=btn.dataset.scope==='all'?'all':'prologue';state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};if(scope==='all'){state.mainQuestProgress={};state.mainQuestCheckpoints={};}else{['prologue','chapter_01','chapter_02'].forEach(key=>{delete state.mainQuestProgress[key];delete state.mainQuestCheckpoints[key];});}activeQuestId='prologue';activeQuestLines=prologueLines;state.mainQuestActiveId='prologue';questLineIndex=0;state.questStoryActive=false;state.mainQuestHelpCount=0;save();closeModal();page='quest';render();showToast(scope==='all'?'Semua progres quest direset.':'Prologue siap dites ulang.');return;}if(a==='quest-test-opening'){state.introStoryStarted=true;state.introStoryCompleted=false;state.introStoryIndex=0;gameIntroIndex=0;save();closeModal();page='home';render();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);if(battle?.mode==='story'){battle=null;state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
+  if(a==='quest-location'){const loc=tamaWorldLocations.find(item=>item.id===btn.dataset.location);if(loc){tamaWorldSelectedLocation=loc.id;tamaWorldInsideLocation='';tamaVillageSelectedNpc='';}render();return;}if(a==='quest-enter-location'){const loc=tamaWorldLocations.find(item=>item.id===tamaWorldSelectedLocation);const progress=state.mainQuestProgress||{};if(loc&&(loc.id==='starfall'||(Array.isArray(loc.requires)&&loc.requires.every(key=>progress[key]==='completed')))&&(loc.id==='starfall'||loc.id==='forest')){tamaWorldInsideLocation=loc.id;tamaVillageSelectedNpc='';render();}return;}if(a==='quest-exit-location'){tamaWorldInsideLocation='';tamaVillageSelectedNpc='';render();return;}if(a==='village-npc-open'){tamaVillageSelectedNpc=btn.dataset.npc||'';render();return;}if(a==='village-npc-close'){tamaVillageSelectedNpc='';render();return;}if(a==='village-npc-main'){const npc=btn.dataset.npc,parent=btn.dataset.parent||tamaParentForLocation(tamaWorldInsideLocation);tamaVillageSelectedNpc='';const next=parent?tamaNextQuestSegment(parent):null;if(!next){showToast('Semua Main Quest di lokasi ini sudah selesai.');return;}if(next.owner!==npc){showToast('Belum waktunya. Ikuti Quest Guide dan temui '+next.npc+'.');return;}beginMainQuest(next.id);return;}if(a==='village-npc-talk'){const npc=btn.dataset.npc,progress=state.mainQuestProgress||{};const talks={aeloria:progress.prologue==='completed'?['Terima kasih sudah menolong desa. Kael sedang memeriksa menara lonceng.','Aku masih memikirkan cahaya yang jatuh malam itu.']:['Kamu datang tepat waktu. Ada sesuatu yang ingin kubicarakan tentang cahaya jatuh itu.','Desa ini menyimpan rahasia yang bahkan belum berani kuceritakan kepada warga lain.'],kael:progress.prologue==='completed'?['Lonceng tua kembali berbunyi. Aku butuh bantuanmu memeriksa menara.','Jangan sentuh kristal yang berdenyut sebelum kita tahu fungsinya.']:['Aku sedang memastikan semua warga aman. Bicara lagi setelah keadaan lebih tenang.','Aeloria tahu lebih banyak tentang desa ini daripada yang ia ceritakan.'],miri:progress.chapter_01==='completed'?['Fragmen ingatan mulai menunjukkan bentuk yang lebih jelas.','Aku menemukan catatan lama yang mungkin mengarah ke hutan.']:['Aku sedang meneliti kristal yang tertinggal setelah serangan.','Kalau menemukan simbol aneh, tolong ingat bentuknya.']};const list=talks[npc]||['Senang melihatmu kembali di desa.'];const msg=list[Math.floor(Math.random()*list.length)];const name={aeloria:'Aeloria',kael:'Kael',miri:'Miri'}[npc]||'Penduduk';tamaVillageSelectedNpc='';showModal('<div class="eyebrow">STARFALL VILLAGE · NPC</div><h2 id="modalTitle">'+name+'</h2><p>'+msg+'</p><button class="button full" data-action="close-modal">Sampai nanti</button>');return;}if(a==='quest-npc'){beginMainQuest(btn.dataset.quest);return;}if(a==='quest-idle-npc'){const lines={Noctis:'Aku mengawasi gema yang datang dari luar desa. Jangan abaikan simbol yang muncul di dekat hutan.',Miri:'Memory Fragment menyimpan potongan masa lalu. Setiap potongan punya cerita yang berbeda.'};const npc=btn.dataset.npc;showModal('<div class="eyebrow">STARFALL VILLAGE · NPC</div><h2 id="modalTitle">'+esc(npc)+'</h2><p>'+esc(lines[npc]||'Senang melihatmu kembali di desa.')+'</p><button class="button full" data-action="close-modal">Sampai nanti</button>');return;}if(a==='quest-start'){resumePrologue();return;}if(a==='quest-next'){advanceQuestLine();return;}if(a==='quest-finish'){completeQuestLine();return;}if(a==='quest-battle'){if(activeQuestLines[questLineIndex]?.action!=='battle'){showToast('Battle belum tersedia pada bagian ini.');return;}startStoryBattle(activeQuestId);return;}if(a==='quest-help'){const line=activeQuestLines[questLineIndex];if(line?.action!=='help')return;state.mainQuestHelpCount=Math.min(99,Number(state.mainQuestHelpCount||0)+1);advanceQuestLine();showToast(line.eventText||'Tugas berhasil diselesaikan.');return;}if(a==='quest-event'){const event=activeQuestLines[questLineIndex]?.event;if(!event)return;showModal('<div class="eyebrow">RANDOM EVENT · STARFALL</div><h2 id="modalTitle">Mini Event</h2><p>'+esc(event.question)+'</p>'+(event.hint?'<p class="subtle" style="margin-top:6px">💡 '+esc(event.hint)+'</p>':'')+'<div class="modal-actions" style="display:grid;gap:8px">'+event.choices.map((choice,i)=>'<button class="button '+(i===0?'':'secondary')+'" data-action="quest-event-answer" data-answer="'+i+'">'+esc(choice)+'</button>').join('')+'</div>');return;}if(a==='quest-event-answer'){const event=activeQuestLines[questLineIndex]?.event;if(!event)return;const correct=Number(btn.dataset.answer)===event.answer;closeModal();showToast(correct?event.success:'Belum tepat, tapi kamu menemukan petunjuk baru.');advanceQuestLine();return;}if(a==='quest-battle-continue'){closeModal();activeQuestId=state.mainQuestActiveId||'prologue';activeQuestLines=starfallQuestCatalog[activeQuestId]?.lines||prologueLines;activeQuestLocation=starfallQuestCatalog[activeQuestId]?.location||'starfall';questLineIndex=Math.min(activeQuestLines.length-1,Number(state.mainQuestCheckpoints?.[activeQuestId]||0));state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}if(a==='quest-battle-retry'){closeModal();startStoryBattle(state.mainQuestActiveId||'prologue');return;}if(a==='quest-battle-later'){closeModal();state.questStoryActive=false;page='home';save();render();showToast('Progres Prologue tersimpan. Pulihkan pet sebelum kembali.');return;}if(a==='quest-test-reset'){const scope=btn.dataset.scope==='all'?'all':'prologue';showModal('<div class="eyebrow">QUEST TEST MODE</div><h2 id="modalTitle">Reset '+(scope==='all'?'semua quest':'Prologue')+'?</h2><p class="subtle">Ini hanya akan menghapus status dan checkpoint quest. Level, pet, coin, diamond, dan inventory tetap aman.</p><div class="modal-actions"><button class="button secondary" data-action="close-modal">Batal</button><button class="button" data-action="quest-test-confirm" data-scope="'+scope+'">Ya, reset quest</button></div>');return;}if(a==='quest-test-confirm'){const scope=btn.dataset.scope==='all'?'all':'prologue';state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};if(scope==='all'){state.mainQuestProgress={};state.mainQuestCheckpoints={};}else{['prologue','chapter_01','chapter_02'].forEach(key=>{delete state.mainQuestProgress[key];delete state.mainQuestCheckpoints[key];});}activeQuestId='prologue';activeQuestLines=prologueLines;state.mainQuestActiveId='prologue';questLineIndex=0;state.questStoryActive=false;state.mainQuestHelpCount=0;save();closeModal();page='quest';render();showToast(scope==='all'?'Semua progres quest direset.':'Prologue siap dites ulang.');return;}if(a==='quest-test-opening'){state.introStoryStarted=true;state.introStoryCompleted=false;state.introStoryIndex=0;gameIntroIndex=0;save();closeModal();page='home';render();return;}if(a==='currency-convert'){openCurrencyExchange();return;}if(a==='diamond-store'){page='gacha';storeTab='diamond';render();return;}if(a==='convert-diamonds'){void convertDiamonds(btn);return;}if(a==='battle-section'){battleSection=btn.dataset.section==='solo'?'solo':'online';render();return;}if(a==='battle-cancel'){if(battle?.aiTimer)clearTimeout(battle.aiTimer);if(battle?.mode==='story'){battle=null;state.questStoryActive=true;page='quest';saveQuestCheckpoint('in_progress');render();return;}battle=null;render();return;}if(a==='collection-tab'){collectionTab=btn.dataset.tab==='accessories'?'accessories':'pets';render();return;}
   if(a==='store-tab'){storeTab=['diamond','premium'].includes(btn.dataset.tab)?btn.dataset.tab:'gacha';render();return;}
   if(a==='equip-frame'){const frame=accessoryFrameById(btn.dataset.frame);if(!ownsFrame(frame.id)){showToast('Frame ini masih terkunci. Beli dulu di Premium Store.');return;}state.equippedFrame=frame.id;save();render();showToast(frame.name+' frame equipped.');return;}
   if(a==='buy-premium'){purchasePremiumItem(btn.dataset.item);return;}
