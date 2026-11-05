@@ -551,7 +551,7 @@ function completeQuestLine(){
 let tamaWorldSelectedLocation='starfall',tamaWorldInsideLocation='';
 const tamaWorldLocations=[
  {id:'starfall',name:'Starfall Village',chapter:'Prologue · Chapter 01 · Chapter 02',image:'StarfallVillage.webp',x:18,y:76,description:'Desa tempat perjalananmu dimulai. Temui Aeloria, Kael, Miri, dan Noctis untuk membuka Main Quest.',requires:[]},
- {id:'forest',name:'Whispering Forest',chapter:'Chapter 03 · Whispers of the Forest',image:'WhisperingForest.webp',x:27,y:30,description:'Hutan tua yang menyimpan bisikan dan ingatan yang terlupakan.',requires:['chapter_02']},
+ {id:'forest',name:'Whispering Forest',chapter:'Chapter 02 · Whispers of the Forest',image:'WhisperingForest.webp',x:27,y:30,description:'Hutan tua yang menyimpan bisikan dan ingatan yang terlupakan.',requires:['chapter_02']},
  {id:'library',name:'Astral Library',chapter:'Chapter 04 · Pages That Never Existed',image:'AstralLibrary.webp',x:44,y:50,description:'Arsip kuno yang menyimpan catatan sejarah yang seharusnya tidak pernah ada.',requires:['chapter_03']},
  {id:'sanctuary',name:'Memory Sanctuary',chapter:'Chapter 05 · Memory Keeper’s Trial',image:'MemorySanctuary.webp',x:68,y:50,description:'Tempat suci yang menjaga pecahan ingatan dunia.',requires:['chapter_04']},
  {id:'kingdom',name:'Hollow Kingdom',chapter:'Chapter 06 · Hollow Kingdom Guards',image:'HollowKingdom.webp',x:56,y:16,description:'Kerajaan tua yang menyimpan rahasia masa lalu.',requires:['chapter_05']},
