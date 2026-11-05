@@ -264,7 +264,7 @@ function clearIntroSequence(){
   introSequenceTimers=[];
 }
 function showModal(html){document.getElementById('modalCard').innerHTML=html;document.getElementById('modalBackdrop').classList.remove('hidden');}
-function closeModal(){if(state?.mainQuestProgress?.prologue==='in_progress')saveQuestCheckpoint('in_progress');clearIntroSequence();document.getElementById('modalBackdrop').classList.add('hidden');}
+function closeModal(){if(state?.questStoryActive&&activeQuestId&&state.mainQuestProgress?.[activeQuestId]==='in_progress')saveQuestCheckpoint('in_progress');clearIntroSequence();document.getElementById('modalBackdrop').classList.add('hidden');}
 window.showTopupSuccessModal = function(diamonds){
   const amount = Math.max(0, Math.floor(Number(diamonds) || 0));
   showModal(`
@@ -390,16 +390,7 @@ prologueLines[63].event={question:'Simbol mana yang dibaca pertama pada kotak pe
 prologueLines[77].text='Miri: Clue: kristal paling redup harus disentuh terakhir untuk memulihkan rekaman.';
 prologueLines[78].event={question:'Kristal mana yang disentuh terakhir?',hint:'Clue: kristal paling redup harus disentuh terakhir.',choices:['Paling besar','Paling terang','Paling redup'],answer:2,success:'Rekaman berhasil dipulihkan!'};
 
-function saveQuestCheckpoint(status){
-  if(!state)return;
-  state.mainQuestProgress=state.mainQuestProgress||{};
-  state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};
-  if(status)state.mainQuestProgress[activeQuestId]=status;
-  state.mainQuestCheckpoints[activeQuestId]=Math.max(0,Math.min(activeQuestLines.length,questLineIndex));
-  state.mainQuestActiveId=activeQuestId;
-  state.mainQuestUpdatedAt=Date.now();
-  save();
-}
+
 const visualNovelPortraitCache=new Map();
 function preloadVisualNovelPortrait(src){
   if(!src||visualNovelPortraitCache.has(src))return visualNovelPortraitCache.get(src)||null;
@@ -407,12 +398,7 @@ function preloadVisualNovelPortrait(src){
   visualNovelPortraitCache.set(src,portrait);
   return portrait;
 }
-function preloadQuestNpcPortraits(){
-  for(const line of prologueLines){
-    const src=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');
-    if(src)preloadVisualNovelPortrait(src);
-  }
-}
+
 function preloadGameIntroPortraits(){
   for(const line of gameIntroLines)preloadVisualNovelPortrait('assets/main-quest/npcs/'+line.portrait);
 }
@@ -572,67 +558,16 @@ const starfallQuestCatalog={
  prologue:{title:'A Falling Star',npc:'Aeloria',portrait:'Aeloria.webp',location:'starfall',lines:prologueLines,requires:[]},
  chapter_02:{title:'Whispers of the Forest',npc:'Miri',portrait:'Miri.webp',location:'forest',lines:starfallChapter02Lines,requires:['prologue']}
 };
-function saveQuestCheckpoint(status){
- if(!state)return;
- state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};
- if(status)state.mainQuestProgress[activeQuestId]=status;
- state.mainQuestCheckpoints[activeQuestId]=Math.max(0,Math.min(activeQuestLines.length,questLineIndex));
- state.mainQuestActiveId=activeQuestId;state.mainQuestUpdatedAt=Date.now();save();
-}
-function preloadQuestNpcPortraits(){for(const quest of Object.values(starfallQuestCatalog))for(const line of quest.lines){const src=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');if(src)preloadVisualNovelPortrait(src);}}
-function resumePrologue(){const next=tamaNextQuestSegment('prologue');if(next)beginMainQuest(next.id);}
-function beginMainQuest(questId){
- const quest=starfallQuestCatalog[questId];if(!quest||!isQuestOwner())return;
- state.mainQuestProgress=state.mainQuestProgress||{};
- const savedCheckpoint=Number(state.mainQuestCheckpoints?.[questId]||0);
- if(state.mainQuestProgress[questId]==='completed'&&savedCheckpoint>=quest.lines.length){const q=starfallQuestCatalog[questId];showModal('<div class="eyebrow">TAMAVERSE · NPC</div><h2 id="modalTitle">'+esc(q.npc)+'</h2><p>Terima kasih sudah membantu kami. Masih banyak hal yang harus dijaga. Datanglah lagi saat perjalananmu berlanjut.</p><button class="button full" data-action="close-modal">Sampai nanti</button>');return;}
- if(state.mainQuestProgress[questId]==='completed'&&savedCheckpoint<quest.lines.length){state.mainQuestProgress[questId]='in_progress';state.mainQuestCheckpoints[questId]=Math.min(quest.lines.length-1,savedCheckpoint||0);save();}
- if(!quest.requires.every(key=>state.mainQuestProgress[key]==='completed')){showToast('Selesaikan Main Quest sebelumnya terlebih dahulu.');return;}
- activeQuestId=questId;activeQuestLines=quest.lines;activeQuestLocation=quest.location;state.mainQuestActiveId=questId;
- const checkpoint=Number(state.mainQuestCheckpoints?.[questId]);
- questLineIndex=Number.isInteger(checkpoint)?Math.max(0,Math.min(activeQuestLines.length-1,checkpoint)):0;
- preloadQuestNpcPortraits();state.questStoryActive=true;saveQuestCheckpoint('in_progress');page='quest';render();
-}
-function resumePrologue(){beginMainQuest('prologue');}
-function questStoryPage(){
- questLineIndex=Math.max(0,Math.min(activeQuestLines.length-1,questLineIndex));
- const line=activeQuestLines[questLineIndex],portraitSrc=line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'');
- if(line.name&&line.name!=='Narator'&&line.text&&/\b(?:Namaku|Aku)\s+(Aeloria|Kael|Miri|Noctis)\b/i.test(line.text)){const introduced=line.text.match(/\b(?:Namaku|Aku)\s+(Aeloria|Kael|Miri|Noctis)\b/i)?.[1]?.toLowerCase();if(introduced){state.mainQuestIntroductions=state.mainQuestIntroductions||{};state.mainQuestIntroductions[introduced]=true;save();}}
- const character=portraitSrc?'<div class="game-intro-character-wrap"><img class="game-intro-character" src="'+esc(portraitSrc)+'" alt="'+esc(line.name)+'"></div>':'<div class="game-intro-character-wrap"></div>';
- const last=questLineIndex===activeQuestLines.length-1;
- const action=line.action==='battle'?'quest-battle':line.action==='help'?'quest-help':line.action==='event'?'quest-event':last?'quest-finish':'quest-next';
- const label=line.action==='battle'?'Mulai Battle':line.action==='help'?'Selesaikan Tugas':line.action==='event'?'Ikuti Mini Event':last?'Selesaikan Main Quest':'Lanjutkan';
- const scene=tamaWorldLocations.find(x=>x.id===activeQuestLocation)||tamaWorldLocations[0];
- return '<section class="game-intro-scene" style="background-image:url(assets/main-quest/locations/'+esc(scene.image)+')"><div class="game-intro-shade"></div>'+character+'<div class="game-intro-dialogue" style="background-image:url(assets/main-quest/ui/DialogueBox.webp)"><div class="game-intro-name">'+esc(line.name)+'</div><p>'+esc(line.text)+'</p><button class="game-intro-next" data-action="'+action+'">'+label+' <span>›</span></button><div class="game-intro-counter">'+(questLineIndex+1)+' / '+activeQuestLines.length+'</div></div></section>';
-}
+
+
+
+
+function resumePrologue(){const next=tamaNextQuestSegment('prologue');if(next)beginMainQuest(next.id);else showToast('Prologue sudah selesai. Lanjutkan perjalanan dari World Map.');}
+
 function showQuestLine(){state.questStoryActive=true;render();}
-function updateVisualNovelLine(line,config){
- const scene=document.querySelector('.game-intro-scene');if(!scene)return false;
- const name=scene.querySelector('.game-intro-name'),textNode=scene.querySelector('.game-intro-dialogue p'),button=scene.querySelector('.game-intro-next'),counter=scene.querySelector('.game-intro-counter'),image=scene.querySelector('.game-intro-character');
- if(name)name.textContent=line.name==='Narator'?'':line.name||'';if(textNode)textNode.textContent=line.text||'';
- if(button){button.dataset.action=config.action;button.innerHTML=config.label+' <span>›</span>';}
- if(counter)counter.textContent=config.counter;
- if(image&&config.portrait&&image.getAttribute('src')!==config.portrait){const src=config.portrait,portrait=preloadVisualNovelPortrait(src);if(portrait?.complete&&portrait.naturalWidth){image.src=src;image.alt=line.name||'';image.removeAttribute('data-pending-src');}else if(portrait){image.dataset.pendingSrc=src;portrait.onload=()=>{if(image.isConnected&&image.dataset.pendingSrc===src){image.src=src;image.alt=line.name||'';image.removeAttribute('data-pending-src');}};}}
- return true;
-}
-function advanceQuestLine(){
- if(questLineIndex>=activeQuestLines.length-1){completeQuestLine();return;}
- questLineIndex++;
- const currentLine=activeQuestLines[questLineIndex];
- if(currentLine?.text&&/\b(?:Namaku|Aku)\s+(Aeloria|Kael|Miri|Noctis)\b/i.test(currentLine.text)){const introduced=currentLine.text.match(/\b(?:Namaku|Aku)\s+(Aeloria|Kael|Miri|Noctis)\b/i)?.[1]?.toLowerCase();if(introduced){state.mainQuestIntroductions=state.mainQuestIntroductions||{};state.mainQuestIntroductions[introduced]=true;}}
- saveQuestCheckpoint('in_progress');
- const line=activeQuestLines[questLineIndex],last=questLineIndex===activeQuestLines.length-1;
- const action=line.action==='battle'?'quest-battle':line.action==='help'?'quest-help':line.action==='event'?'quest-event':last?'quest-finish':'quest-next';
- const label=line.action==='battle'?'Mulai Battle':line.action==='help'?'Selesaikan Tugas':line.action==='event'?'Ikuti Mini Event':last?'Selesaikan Main Quest':'Lanjutkan';
- if(!updateVisualNovelLine(line,{action,label,counter:(questLineIndex+1)+' / '+activeQuestLines.length,portrait:line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'')}))render();
-}
-function completeQuestLine(){
- if(state.mainQuestProgress?.[activeQuestId]==='completed'){state.questStoryActive=false;render();return;}
- const quest=starfallQuestCatalog[activeQuestId],coins=activeQuestId==='prologue'?60:90,playerExp=activeQuestId==='prologue'?80:120,petExp=activeQuestId==='prologue'?60:80;questLineIndex=activeQuestLines.length;state.questStoryActive=false;saveQuestCheckpoint('completed');
- addCoins(coins);playerXP(playerExp);const rewardPet=activePet();if(rewardPet)grantPetXP(rewardPet,petExp);
- save();render();
- showModal('<div class="hatch-egg">🎁</div><h2 id="modalTitle" style="text-align:center">'+esc(quest.title)+' selesai!</h2><p style="text-align:center">Kamu menyelesaikan Main Quest bersama '+esc(quest.npc)+'.</p><div class="card" style="text-align:center;margin:14px 0"><p>🪙 <b>+'+coins+' Coins</b></p><p>✨ <b>+'+playerExp+' Player EXP</b></p><p>🐾 <b>+'+petExp+' Pet XP</b></p></div><button class="button full" data-action="close-modal">Lanjutkan</button>');
-}
+
+
+
 let tamaWorldSelectedLocation='starfall',tamaWorldInsideLocation='';
 const tamaWorldLocations=[
  {id:'starfall',name:'Starfall Village',chapter:'Prologue · A Falling Star',image:'StarfallVillage.webp',x:18,y:76,description:'Desa tempat perjalananmu dimulai.',requires:[]},
@@ -706,7 +641,27 @@ for(const [parent,segments] of Object.entries(tamaQuestSegmentPlan)){
  }
 }
 function tamaQuestSegments(parentId){return tamaQuestSegmentPlan[parentId]||[];}
+function tamaNormalizeQuestProgress(parentId){
+ const segments=tamaQuestSegments(parentId);if(!segments.length)return false;
+ state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};state.mainQuestRewardClaims=state.mainQuestRewardClaims||{};
+ let changed=false;
+ if(state.mainQuestProgress[parentId]==='completed'){
+  for(const segment of segments){
+   if(state.mainQuestProgress[segment.id]!=='completed'){state.mainQuestProgress[segment.id]='completed';changed=true;}
+   if(!state.mainQuestRewardClaims[segment.id]){state.mainQuestRewardClaims[segment.id]=true;changed=true;}
+  }
+ }else{
+  for(const segment of segments){
+   const status=state.mainQuestProgress[segment.id],checkpoint=Number(state.mainQuestCheckpoints[segment.id]||0);
+   if(status==='in_progress'&&checkpoint>=segment.lines.length){state.mainQuestProgress[segment.id]='completed';state.mainQuestRewardClaims[segment.id]=true;changed=true;}
+   else if(status==='completed'&&!state.mainQuestRewardClaims[segment.id]){state.mainQuestRewardClaims[segment.id]=true;changed=true;}
+  }
+  if(segments.every(segment=>state.mainQuestProgress[segment.id]==='completed')&&state.mainQuestProgress[parentId]!=='completed'){state.mainQuestProgress[parentId]='completed';changed=true;}
+ }
+ if(changed)save();return changed;
+}
 function tamaNextQuestSegment(parentId){
+ tamaNormalizeQuestProgress(parentId);
  if(state.mainQuestProgress?.[parentId]==='completed')return null;
  return tamaQuestSegments(parentId).find(segment=>state.mainQuestProgress?.[segment.id]!=='completed')||null;
 }
@@ -738,7 +693,7 @@ function saveQuestCheckpoint(status){
  if(!state)return;
  state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestCheckpoints=state.mainQuestCheckpoints||{};
  const quest=starfallQuestCatalog[activeQuestId],parent=quest?.parentId;
- if(status)state.mainQuestProgress[activeQuestId]=status;
+ if(status&&state.mainQuestProgress[activeQuestId]!=='completed')state.mainQuestProgress[activeQuestId]=status;
  if(parent&&state.mainQuestProgress[parent]!=='completed')state.mainQuestProgress[parent]='in_progress';
  state.mainQuestCheckpoints[activeQuestId]=Math.max(0,Math.min(activeQuestLines.length,questLineIndex));
  state.mainQuestActiveId=activeQuestId;state.mainQuestUpdatedAt=Date.now();save();
@@ -786,14 +741,21 @@ function advanceQuestLine(){
  if(!updateVisualNovelLine(line,{action,label,counter:(questLineIndex+1)+' / '+activeQuestLines.length,portrait:line.asset||(line.portrait?'assets/main-quest/npcs/'+line.portrait:'')}))render();
 }
 function completeQuestLine(){
- const quest=starfallQuestCatalog[activeQuestId];if(!quest){state.questStoryActive=false;render();return;}
- if(state.mainQuestProgress?.[activeQuestId]==='completed'){state.questStoryActive=false;render();return;}
- questLineIndex=activeQuestLines.length;state.questStoryActive=false;saveQuestCheckpoint('completed');
- const segments=tamaQuestSegments(quest.parentId),allDone=segments.length===3&&segments.every(segment=>state.mainQuestProgress?.[segment.id]==='completed');
+ const quest=starfallQuestCatalog[activeQuestId];
+ if(!quest||!quest.parentId){state.questStoryActive=false;page='quest';render();return;}
+ state.mainQuestProgress=state.mainQuestProgress||{};state.mainQuestRewardClaims=state.mainQuestRewardClaims||{};
+ if(state.mainQuestProgress[activeQuestId]==='completed'||state.mainQuestRewardClaims[activeQuestId]){
+  state.mainQuestProgress[activeQuestId]='completed';state.questStoryActive=false;saveQuestCheckpoint('completed');
+  tamaNormalizeQuestProgress(quest.parentId);page='quest';render();
+  showToast('Main Quest ini sudah pernah diselesaikan. Hadiah tidak diberikan lagi.');return;
+ }
+ questLineIndex=activeQuestLines.length;state.mainQuestProgress[activeQuestId]='completed';state.mainQuestRewardClaims[activeQuestId]=true;
+ state.questStoryActive=false;saveQuestCheckpoint('completed');
+ const segments=tamaQuestSegments(quest.parentId),allDone=segments.length===3&&segments.every(segment=>state.mainQuestProgress[segment.id]==='completed');
  if(allDone)state.mainQuestProgress[quest.parentId]='completed';
  const coins=30,playerExp=40,petExp=30;addCoins(coins);playerXP(playerExp);
  const rewardPet=activePet();if(rewardPet)grantPetXP(rewardPet,petExp);
- save();render();
+ save();page='quest';render();
  const next=tamaNextQuestSegment(quest.parentId);
  const message=allDone?'Seluruh Main Quest di '+esc(tamaQuestParentMeta[quest.parentId].title)+' selesai. Lokasi berikutnya kini terbuka.':next?'Main Quest bersama '+esc(quest.npc)+' selesai. Temui '+esc(next.npc)+' untuk melanjutkan.':'Main Quest selesai.';
  showModal('<div class="hatch-egg">🎁</div><h2 id="modalTitle" style="text-align:center">'+esc(quest.title)+' selesai!</h2><p style="text-align:center">'+message+'</p><div class="card" style="text-align:center;margin:14px 0"><p>🪙 <b>+'+coins+' Coins</b></p><p>✨ <b>+'+playerExp+' Player EXP</b></p><p>🐾 <b>+'+petExp+' Pet XP</b></p></div><button class="button full" data-action="close-modal">Lanjutkan</button>');
@@ -820,28 +782,8 @@ function mainQuestPage(){
  return '<section class="page tama-world-page"><header class="tama-world-header"><div><span class="eyebrow">TAMAVERSE · THE LOST MEMORIES</span><h1 class="page-title">TAMA WORLD MAP</h1><p class="subtle">Pilih lokasi, masuk ke dalam area, lalu klik NPC untuk memulai Main Quest.</p></div><div class="tama-world-progress"><b>'+completedCount+'/6</b><small>Story progress</small></div></header><section class="tama-map-stage" aria-label="Peta dunia Tamaverse"><img class="tama-world-map-image" src="assets/main-quest/locations/WorldMap.webp" alt="Tama World Map" fetchpriority="high">'+mapPins+'<div class="tama-map-legend"><span><i class="open"></i> Terbuka</span><span><i class="locked"></i> Belum terbuka</span></div></section><section class="tama-map-detail"><div class="tama-map-detail-art"><img src="assets/main-quest/locations/'+esc(selected.image)+'" alt="'+esc(selected.name)+'"></div><div class="tama-map-detail-copy"><span class="quest-chapter-tag">'+(selectedOpen?'LOCATION AVAILABLE':'UNDISCOVERED LOCATION')+'</span><h2>'+esc(selected.name)+'</h2><p>'+esc(selected.description)+'</p><small>'+esc(selected.chapter)+'</small>'+(selectedOpen&&playable?'<button class="button full" data-action="quest-enter-location">Masuk ke Lokasi <span>→</span></button>':selectedOpen?'<button class="button full" disabled>Story content coming soon</button>':'<button class="button secondary full" disabled>Lokasi belum terbuka</button>')+'</div></section><div class="tama-world-hint"><span>✦</span><p><b>Petunjuk perjalanan</b><br>Masuk ke lokasi, pilih NPC, lalu tekan Main Quest. Dialog tidak akan dimulai otomatis.</p></div><section class="quest-test-panel"><div><span class="quest-chapter-tag">DEVELOPER TOOLS</span><h3>Quest Test Mode</h3><p>Tools pengujian tetap tersedia khusus developer.</p></div><div class="quest-test-actions"><button class="button secondary" data-action="quest-test-reset" data-scope="prologue">Reset Prologue</button><button class="button secondary" data-action="quest-test-reset" data-scope="all">Reset All Quest</button><button class="button secondary" data-action="quest-test-opening">Test Opening Scene</button></div></section></section>';
 }
 
-function starfallVillagePage(progress){
- const completed=progress.prologue==='completed';
- const chapter=completed?'PROLOGUE COMPLETE · FOREST EXPEDITION AWAITS':'PROLOGUE · A FALLING STAR';
- const objective=completed?'Whispering Forest is now accessible':'Talk to Aeloria · Begin your journey';
- const known=state.mainQuestIntroductions||{};
- const npcs=completed
-  ?[{id:'aeloria',name:known.aeloria?'Aeloria':'???',portrait:'Aeloria.webp',x:28,y:80,quest:'prologue'},{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:70,y:80,quest:'prologue'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:49,y:84,quest:'prologue'}]
-  :[{id:'aeloria',name:known.aeloria?'Aeloria':'???',portrait:'Aeloria.webp',x:28,y:80,quest:'prologue'},{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:70,y:80,quest:'prologue'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:49,y:84,quest:'prologue'}];
- const npcMarkup=npcs.map(n=>'<button class="tama-village-npc '+(tamaVillageSelectedNpc===n.id?'is-focused':'')+'" style="--npc-x:'+n.x+'%;--npc-y:'+n.y+'%" data-action="village-npc-open" data-npc="'+n.id+'" aria-label="Bicara dengan '+n.name+'"><img src="assets/main-quest/npcs/'+n.portrait+'" alt=""><span>'+n.name+'</span></button>').join('');
- const selected=npcs.find(n=>n.id===tamaVillageSelectedNpc);
- const pop=selected?'<div class="tama-npc-choice" role="dialog" aria-label="Interaksi '+selected.name+'"><div class="tama-npc-choice-head"><b>'+selected.name+'</b><button data-action="village-npc-close" aria-label="Tutup">×</button></div>'+(completed?'':'<button data-action="village-npc-main" data-npc="'+selected.id+'" data-quest="'+selected.quest+'">📖 Main Quest</button>')+'<button data-action="village-npc-talk" data-npc="'+selected.id+'">💬 Ajak Ngobrol</button><button class="is-muted" data-action="village-npc-close">Nevermind</button></div>':'';
- return '<section class="page tama-village-scene"><div class="tama-village-background" role="img" aria-label="Starfall Village"></div><div class="tama-village-topbar"><button class="tama-village-back" data-action="quest-exit-location">← World Map</button><div class="tama-quest-guide"><small>QUEST GUIDE</small><b>'+chapter+'</b><span>◉ '+objective+'</span></div></div><div class="tama-village-npc-layer">'+npcMarkup+'</div>'+pop+'<div class="tama-village-location-label">STARFALL VILLAGE</div></section>';
-}
-function mainQuestPage(){
- const progress=state.mainQuestProgress||{};if(tamaWorldInsideLocation==='starfall')return starfallVillagePage(progress);
- const chapterKeys=['prologue','chapter_02','chapter_03','chapter_04','chapter_05','chapter_06'],completedCount=chapterKeys.filter(key=>progress[key]==='completed').length;
- const selected=tamaWorldLocations.find(l=>l.id===tamaWorldSelectedLocation)||tamaWorldLocations[0];
- const unlocked=loc=>loc.id==='starfall'||(Array.isArray(loc.requires)&&loc.requires.every(key=>progress[key]==='completed'));
- const mapPins=tamaWorldLocations.map(loc=>{const open=unlocked(loc),done=(loc.id==='starfall'&&progress.prologue==='completed')||(loc.id==='forest'&&progress.chapter_02==='completed');return '<button type="button" class="tama-map-pin '+(open?'is-open':'is-locked')+' '+(loc.id===selected.id?'is-selected':'')+'" style="--pin-x:'+loc.x+'%;--pin-y:'+loc.y+'%" data-action="quest-location" data-location="'+loc.id+'" aria-label="'+loc.name+' · '+(open?'Terbuka':'Terkunci')+'"><span class="tama-map-pin-icon">'+(done?'✓':open?'✦':'🔒')+'</span><span class="tama-map-pin-label">'+loc.name+'</span></button>';}).join('');
- const selectedOpen=unlocked(selected);
- return '<section class="page tama-world-page"><header class="tama-world-header"><div><span class="eyebrow">TAMAVERSE · THE LOST MEMORIES</span><h1 class="page-title">TAMA WORLD MAP</h1><p class="subtle">Pilih lokasi, masuk ke dalam area, lalu temui NPC untuk memulai Main Quest.</p></div><div class="tama-world-progress"><b>'+completedCount+'/6</b><small>Story progress</small></div></header><section class="tama-map-stage" aria-label="Peta dunia Tamaverse"><img class="tama-world-map-image" src="assets/main-quest/locations/WorldMap.webp" alt="Tama World Map" fetchpriority="high">'+mapPins+'<div class="tama-map-legend"><span><i class="open"></i> Terbuka</span><span><i class="locked"></i> Belum terbuka</span></div></section><section class="tama-map-detail"><div class="tama-map-detail-art"><img src="assets/main-quest/locations/'+selected.image+'" alt="'+selected.name+'"></div><div class="tama-map-detail-copy"><span class="quest-chapter-tag">'+(selectedOpen?'LOCATION AVAILABLE':'UNDISCOVERED LOCATION')+'</span><h2>'+selected.name+'</h2><p>'+selected.description+'</p><small>'+selected.chapter+'</small>'+(selectedOpen&&(selected.id==='starfall'||selected.id==='forest')?'<button class="button full" data-action="quest-enter-location">Masuk ke Lokasi <span>→</span></button>':selectedOpen?'<button class="button full" disabled>Story content coming soon</button>':'<button class="button secondary full" disabled>Lokasi belum terbuka</button>')+'</div></section><div class="tama-world-hint"><span>✦</span><p><b>Petunjuk perjalanan</b><br>Pin hanya memilih lokasi. Main Quest dimulai ketika kamu berbicara dengan NPC di dalam lokasi.</p></div><section class="quest-test-panel"><div><span class="quest-chapter-tag">DEVELOPER TOOLS</span><h3>Quest Test Mode</h3><p>Tools pengujian tetap tersedia khusus developer.</p></div><div class="quest-test-actions"><button class="button secondary" data-action="quest-test-reset" data-scope="prologue">Reset Prologue</button><button class="button secondary" data-action="quest-test-reset" data-scope="all">Reset All Quest</button><button class="button secondary" data-action="quest-test-opening">Test Opening Scene</button></div></section></section>';
-}
+
+
 function petActionLabel(action){return ({eat:'Yum! 🍓',play:'Having fun! ✨',bath:'Splash! 🫧',sleep:'Zzz... 🌙',train:'Go! 💪',greet:'Hello! ♥',idle:''})[action]||'';}
 function emptyPets(){return `<div class="card empty"><div style="font-size:42px">🥚</div><p>Belum ada pet. Tetaskan telur pertamamu untuk memulai!</p><button class="button" data-action="start">Tetaskan telur gratis</button></div>`;}
 function rarityRank(rarity){return ({Common:1,Rare:2,Epic:3,Legendary:4,Celestial:5,Sovereign:6})[rarity]||0;}
