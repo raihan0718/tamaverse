@@ -372,8 +372,7 @@ function advanceGameIntro(){
 function welcomePage(){return `<section class="page welcome"><div class="eyebrow">PETUALANGAN BARU DIMULAI</div><div class="welcome-art">${eggImage('basic')}</div><h1>Selamat datang di<br>TAMAVERSE</h1><p class="subtle">Rawat dan latih teman ajaibmu, buka telur dengan koin atau diamond, lalu bawa petmu ke battle untuk mendapat XP dan hadiah.</p><div class="card"><p>🎁 <b>Hadiah awal:</b> 1 telur gratis + 300 koin + 3 diamond</p><button class="button full" data-action="start">Mulai petualangan</button></div><p class="muted-label">Progres tersimpan di perangkat ini · Guest lokal</p></section>`;}
 const mainQuestChapters=[
   {number:'PROLOGUE',title:'A Falling Star',place:'Starfall Village',image:'StarfallVillage.webp',description:'Sebuah cahaya jatuh dari langit. Sejak malam itu, kenangan mulai menghilang.',minLevel:1},
-  {number:'CHAPTER 01',title:'The Forgotten Village',place:'Starfall Village',image:'StarfallVillage.webp',description:'Desa yang perlahan melupakan nama dan kisah penghuninya.',minLevel:3},
-  {number:'CHAPTER 02',title:'Whispers of the Forest',place:'Whispering Forest',image:'WhisperingForest.webp',description:'Bisikan lama memanggil dari balik pepohonan.',minLevel:5},
+  {number:'CHAPTER 01',title:'Whispers of the Forest',place:'Whispering Forest',image:'WhisperingForest.webp',description:'Bisikan lama memanggil dari balik pepohonan.',minLevel:5},
   {number:'CHAPTER 03',title:'Pages That Never Existed',place:'Astral Library',image:'AstralLibrary.webp',description:'Ada halaman yang hilang dari sejarah dunia.',minLevel:8},
   {number:'CHAPTER 04',title:'The Memory Keeper',place:'Memory Sanctuary',image:'MemorySanctuary.webp',description:'Penjaga kenangan menyimpan jawaban yang tak mudah diterima.',minLevel:11},
   {number:'CHAPTER 05',title:'The Hollow Kingdom',place:'Hollow Kingdom',image:'HollowKingdom.webp',description:'Kerajaan sunyi menyembunyikan asal mula Great Silence.',minLevel:14},
@@ -384,8 +383,11 @@ let questLineIndex=0;
 const storyBattleLineIndex=prologueLines.findIndex(line=>line.action==='battle');
 [38,55,70].forEach(i=>{prologueLines[i].action='help';prologueLines[i].eventText='Bantuan warga berhasil diselesaikan.';});
 [45,63,78].forEach(i=>prologueLines[i].action='event');
+prologueLines[44].text='Miri: Clue: panel mengikuti urutan fajar, siang, lalu malam. Perhatikan gambar di atas sebelum memilih.';
 prologueLines[45].event={question:'Urutkan simbol panel dari waktu paling awal sampai paling akhir.',hint:'Clue: gambar menunjukkan fajar, siang, lalu malam.',choices:['Fajar · Siang · Malam','Malam · Fajar · Siang','Siang · Malam · Fajar'],answer:0,success:'Panel berhasil dibuka!'};
+prologueLines[62].text='Miri: Clue: simbol yang menghadap matahari selalu menjadi awal. Cari arah sinarnya.';
 prologueLines[63].event={question:'Simbol mana yang dibaca pertama pada kotak penjaga?',hint:'Clue: simbol yang menghadap matahari selalu menjadi awal.',choices:['Bulan','Matahari','Bintang'],answer:1,success:'Kotak berhasil dibuka!'};
+prologueLines[77].text='Miri: Clue: kristal paling redup harus disentuh terakhir untuk memulihkan rekaman.';
 prologueLines[78].event={question:'Kristal mana yang disentuh terakhir?',hint:'Clue: kristal paling redup harus disentuh terakhir.',choices:['Paling besar','Paling terang','Paling redup'],answer:2,success:'Rekaman berhasil dipulihkan!'};
 
 function saveQuestCheckpoint(status){
@@ -634,20 +636,20 @@ let tamaWorldSelectedLocation='starfall',tamaWorldInsideLocation='';
 const tamaWorldLocations=[
  {id:'starfall',name:'Starfall Village',chapter:'Prologue · A Falling Star',image:'StarfallVillage.webp',x:18,y:76,description:'Desa tempat perjalananmu dimulai.',requires:[]},
  {id:'forest',name:'Whispering Forest',chapter:'Chapter 01 · Whispers of the Forest',image:'WhisperingForest.webp',x:27,y:30,description:'Hutan tua yang menyimpan bisikan dan ingatan yang terlupakan.',requires:['prologue']},
- {id:'library',name:'Astral Library',chapter:'Chapter 02 · Pages That Never Existed',image:'AstralLibrary.webp',x:44,y:50,description:'Arsip kuno yang menyimpan catatan sejarah yang seharusnya tidak pernah ada.',requires:['chapter_03']},
+ {id:'library',name:'Astral Library',chapter:'Chapter 02 · Pages That Never Existed',image:'AstralLibrary.webp',x:44,y:50,description:'Arsip kuno yang menyimpan catatan sejarah yang seharusnya tidak pernah ada.',requires:['chapter_02']},
  {id:'sanctuary',name:'Memory Sanctuary',chapter:'Chapter 03 · The Memory Keeper',image:'MemorySanctuary.webp',x:68,y:50,description:'Tempat suci yang menjaga pecahan ingatan dunia.',requires:['chapter_04']},
  {id:'kingdom',name:'Hollow Kingdom',chapter:'Chapter 04 · The Hollow Kingdom',image:'HollowKingdom.webp',x:56,y:16,description:'Kerajaan tua yang menyimpan rahasia masa lalu.',requires:['chapter_05']},
  {id:'forgotten',name:'The Forgotten Realm',chapter:'Chapter 05 · Beyond Memories',image:'TheForgottenRealm.webp',x:87,y:22,description:'Wilayah misterius di balik batas dunia yang dikenal.',requires:['chapter_06']}
 ];
 let tamaVillageSelectedNpc='';
 function starfallVillagePage(progress){
- const completed=progress.prologue==='completed',bellDone=progress.chapter_01==='completed';
- const chapter=bellDone?'CHAPTER 02 · WHISPERS OF THE FOREST':completed?'CHAPTER 01 · THE SILENT BELL':'PROLOGUE · A FALLING STAR';
- const objective=bellDone?'Talk to Miri · Begin forest expedition':completed?'Talk to Kael':'Talk to Aeloria';
+ const completed=progress.prologue==='completed';
+ const chapter=completed?'PROLOGUE COMPLETE · FOREST EXPEDITION AWAITS':'PROLOGUE · A FALLING STAR';
+ const objective=completed?'Whispering Forest is now accessible':'Talk to Aeloria · Begin your journey';
  const known=state.mainQuestIntroductions||{};
  const npcs=completed
-  ?[{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:28,y:80,quest:'chapter_01',hint:'Main Quest tersedia'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:66,y:82,quest:'chapter_02',hint:'Penduduk desa'}]
-  :[{id:'aeloria',name:known.aeloria?'Aeloria':'???',portrait:'Aeloria.webp',x:28,y:80,quest:'prologue',hint:'Main Quest tersedia'},{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:70,y:82,quest:'chapter_01',hint:'Penduduk desa'}];
+  ?[{id:'aeloria',name:known.aeloria?'Aeloria':'???',portrait:'Aeloria.webp',x:28,y:80,quest:'prologue'},{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:70,y:80,quest:'prologue'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:49,y:84,quest:'prologue'}]
+  :[{id:'aeloria',name:known.aeloria?'Aeloria':'???',portrait:'Aeloria.webp',x:28,y:80,quest:'prologue'},{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:70,y:80,quest:'prologue'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:49,y:84,quest:'prologue'}];
  const npcMarkup=npcs.map(n=>'<button class="tama-village-npc '+(tamaVillageSelectedNpc===n.id?'is-focused':'')+'" style="--npc-x:'+n.x+'%;--npc-y:'+n.y+'%" data-action="village-npc-open" data-npc="'+n.id+'" aria-label="Bicara dengan '+n.name+'"><img src="assets/main-quest/npcs/'+n.portrait+'" alt=""><span>'+n.name+'</span></button>').join('');
  const selected=npcs.find(n=>n.id===tamaVillageSelectedNpc);
  const pop=selected?'<div class="tama-npc-choice" role="dialog" aria-label="Interaksi '+selected.name+'"><div class="tama-npc-choice-head"><b>'+selected.name+'</b><button data-action="village-npc-close" aria-label="Tutup">×</button></div><button data-action="village-npc-main" data-npc="'+selected.id+'" data-quest="'+selected.quest+'">📖 Main Quest</button><button data-action="village-npc-talk" data-npc="'+selected.id+'">💬 Ajak Ngobrol</button><button class="is-muted" data-action="village-npc-close">Nevermind</button></div>':'';
