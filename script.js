@@ -586,9 +586,9 @@ const tamaQuestSegmentPlan={
   {id:'prologue_miri',owner:'miri',title:'A Falling Star · Miri',lines:prologueLines.slice(60,90)}
  ],
  chapter_02:[
-  {id:'chapter_02_aeloria',owner:'aeloria',title:'Whispers of the Forest · Aeloria',lines:starfallChapter02Lines.slice(0,30)},
+  {id:'chapter_02_aeloria',owner:'miri',title:'Whispers of the Forest · Miri',lines:starfallChapter02Lines.slice(0,30)},
   {id:'chapter_02_kael',owner:'kael',title:'Whispers of the Forest · Kael',lines:starfallChapter02Lines.slice(30,60)},
-  {id:'chapter_02_miri',owner:'miri',title:'Whispers of the Forest · Miri',lines:starfallChapter02Lines.slice(60,90)}
+  {id:'chapter_02_miri',owner:'aeloria',title:'Whispers of the Forest · Aeloria',lines:starfallChapter02Lines.slice(60,90)}
  ]
 };
 const tamaQuestParentMeta={
