@@ -454,41 +454,41 @@ const starfallChapter01Lines=makeStarfallQuestLines([
 'Noctis: Ini bukan akhir. Sekarang kita tahu desa dibangun untuk menjaga sesuatu.'
 ]);
 const starfallChapter02Lines=makeStarfallQuestLines([
-'Malam tiba di Starfall Village. Cahaya kecil dari ruang bawah tanah kini tersimpan di laboratorium Miri.',
-'Miri: Aku Miri, peneliti Memory Fragment di desa ini. Fragmen ini memutar potongan ingatan, tetapi gambarnya selalu terputus.',
-'Aeloria: Apakah kamu bisa memperbaikinya?',
-'Miri: Bisa, jika kita menemukan tiga bagian catatan yang hilang dari arsip desa.',
-'Kael: Arsip lama tersebar. Sebagian tersimpan di rumah penjaga, sebagian lagi di balai warga.',
-'Noctis: Jangan percaya semua yang tertulis. Beberapa kenangan sengaja dibuat berbeda.',
-'Aeloria: Kita mulai dari balai warga. Aku akan meminta izin membuka ruang arsip.',
-'Miri: Sementara itu, bantu aku mencocokkan simbol pada fragmen dengan catatan yang ditemukan.',
-'Narator: Kamu menemukan lembar catatan dengan simbol bulan yang hampir pudar.',
-'Kael: Ada bekas langkah menuju rumah penjaga. Seseorang baru saja keluar dari sana.',
-'Aeloria: Rumah itu kosong sejak pemiliknya menghilang bertahun-tahun lalu.',
-'Noctis: Tidak kosong. Aku bisa mendengar seseorang mengulang kalimat yang sama dari dalam.',
-'Miri: Itu mungkin gema memori. Jangan jawab jika suaranya memanggil namamu.',
-'Narator: Pintu terbuka sendiri dan memperlihatkan ruangan yang dipenuhi jam berhenti.',
-'Kael: Semua jam menunjukkan waktu yang berbeda. Mana yang harus kita periksa?',
-'Aeloria: Lihat bayangannya. Hanya satu jam yang memiliki bayangan bergerak.',
-'Miri: Aku menemukan catatan kedua di balik jam itu.',
-'Noctis: Catatan ini menyebut tiga saksi dan satu ingatan palsu.',
-'Kael: Berarti ada seseorang yang menyembunyikan kejadian sebenarnya.',
-'Narator: Dari lorong terdengar suara benda jatuh. Sebuah bayangan melintas menuju balai warga.',
-'Aeloria: Cepat! Jangan sampai catatan terakhir ikut hilang.',
-'Miri: Aku akan menyusun fragmen. Tolong periksa rak paling ujung.',
-'Narator: Rak itu terkunci dengan susunan simbol yang sama seperti di menara.',
-'Kael: Kita pernah melihat pola ini. Coba ingat urutan yang muncul pada panel.',
-'Noctis: Ada satu simbol yang sengaja dibalik. Itu tanda bahwa catatan ini telah diubah.',
-'Miri: Berhasil! Ketiga bagian catatan kini menyatu dengan Memory Fragment.',
-'Aeloria: Gambarnya mulai jelas. Itu sosok penjaga yang berdiri di luar desa.',
-'Kael: Aku mengenali lambang di jubahnya. Lambang itu sama dengan lambang Whispering Forest.',
-'Noctis: Penjaga itu bukan menyerang desa. Ia sedang memperingatkan kita.',
-'Narator: Fragmen menampilkan jalan menuju hutan. Peta lama Starfall Village kini terbuka.'
+'Malam setelah lonceng kembali berbunyi, Miri memanggilmu ke laboratorium kecil di tepi desa.',
+'Miri: Aku sudah menyusun petunjuk dari Memory Fragment. Ada satu suara yang terus muncul: bisikan dari Whispering Forest.',
+'Aeloria: Hutan itu sudah lama dihindari warga. Jalan setapaknya berubah setiap kali kabut turun.',
+'Kael: Aku pernah berjaga di sana. Ada penanda batu di pintu masuk, tapi seseorang memindahkannya.',
+'Miri: Kalau sumber bisikan itu berkaitan dengan Fragment, kita harus memeriksanya sebelum jejaknya hilang.',
+'Noctis: Hutan tidak memanggil semua orang. Ia memanggil sesuatu yang dibawa oleh pendatang itu.',
+'Aeloria: Aku ikut. Kita berangkat saat matahari terbit dan tetap bersama.',
+'Narator: Di gerbang desa, Miri menyerahkan kompas kecil yang jarumnya berputar ke arah pepohonan.',
+'Kael: Sebelum masuk, bantu aku mencocokkan tiga simbol pada penanda batu. Ini cara lama untuk memastikan jalur aman.',
+'Narator: Kamu menemukan tiga batu dengan ukiran daun, bulan, dan bintang. Kompas bergetar saat didekatkan.',
+'Aeloria: Ukiran bulan berada di tengah. Mungkin itu petunjuk urutannya.',
+'Noctis: Atau mungkin seseorang ingin kita berpikir begitu. Perhatikan lumut pada batu yang paling tua.',
+'Miri: Lumut hanya tumbuh di sisi yang menghadap utara. Kita bisa menentukan susunan aslinya.',
+'Narator: Penanda batu menyala dan kabut di pintu masuk terbelah perlahan.',
+'Kael: Dengar. Tiga ketukan, jeda, lalu satu ketukan. Itu bukan suara burung.',
+'Noctis: Jangan ikuti suara yang memanggil namamu. Hutan ini meniru suara yang pernah kamu dengar.',
+'Aeloria: Ada jejak kaki kecil di tanah. Jejak itu berhenti tepat di depan pohon tumbang.',
+'Miri: Aku menemukan serpihan catatan terselip di kulit pohon. Tulisannya sama dengan simbol pada Fragment.',
+'Kael: Catatan ini menyebut sebuah mata air yang mengalir ke arah berlawanan dari lereng.',
+'Narator: Dari balik semak, cahaya biru berkelebat lalu menghilang menuju mata air.',
+'Aeloria: Kita harus memeriksa tempat itu. Tapi jalurnya tertutup akar dan tanaman merambat.',
+'Kael: Aku akan menahan dahan ini. Tolong cari tanda yang menunjukkan akar mana yang bisa digeser.',
+'Narator: Di dekat akar, kamu menemukan empat batu kecil dengan pola yang berulang.',
+'Noctis: Polanya bukan hiasan. Susun simbol yang sama seperti urutan pada penanda gerbang.',
+'Miri: Berhasil! Akar-akar itu bergerak menjauh. Ada ruang tersembunyi di baliknya.',
+'Narator: Di ruang itu terdapat kristal yang memantulkan bayangan seseorang berjubah dengan lambang hutan.',
+'Aeloria: Sosok itu terlihat seperti penjaga lama Whispering Forest. Tapi kenapa ia muncul dalam ingatanmu?',
+'Kael: Aku mengenali lambangnya. Penjaga itu menghilang pada malam Great Silence dimulai.',
+'Miri: Fragment ini menunjukkan bahwa ia sedang melindungi sesuatu, bukan menyerang desa.',
+'Narator: Bisikan mendadak berhenti. Di kejauhan, sebuah lentera menyala sendiri dan menandai jalan lebih dalam ke hutan.'
 ]);
 const starfallQuestCatalog={
  prologue:{title:'A Falling Star',npc:'Aeloria',portrait:'Aeloria.webp',location:'starfall',lines:prologueLines,requires:[]},
  chapter_01:{title:'The Silent Bell',npc:'Kael',portrait:'Kael.webp',location:'starfall',lines:starfallChapter01Lines,requires:['prologue']},
- chapter_02:{title:'The Missing Memory',npc:'Miri',portrait:'Miri.webp',location:'starfall',lines:starfallChapter02Lines,requires:['chapter_01']}
+ chapter_02:{title:'Whispers of the Forest',npc:'Miri',portrait:'Miri.webp',location:'forest',lines:starfallChapter02Lines,requires:['chapter_01']}
 };
 function saveQuestCheckpoint(status){
  if(!state)return;
@@ -560,11 +560,11 @@ const tamaWorldLocations=[
 let tamaVillageSelectedNpc='';
 function starfallVillagePage(progress){
  const completed=progress.prologue==='completed',bellDone=progress.chapter_01==='completed';
- const chapter=bellDone?'CHAPTER 03 · THE MISSING MEMORY':completed?'CHAPTER 02 · THE SILENT BELL':'PROLOGUE · A FALLING STAR';
- const objective=bellDone?'Talk to Miri':completed?'Talk to Kael':'Talk to Aeloria';
+ const chapter=bellDone?'CHAPTER 02 · WHISPERS OF THE FOREST':completed?'CHAPTER 01 · THE SILENT BELL':'PROLOGUE · A FALLING STAR';
+ const objective=bellDone?'Talk to Miri · Begin forest expedition':completed?'Talk to Kael':'Talk to Aeloria';
  const known=state.mainQuestIntroductions||{};
  const npcs=completed
-  ?[{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:28,y:80,quest:'chapter_01',hint:'Main Quest tersedia'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:70,y:82,quest:'chapter_02',hint:'Penduduk desa'}]
+  ?[{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:28,y:80,quest:'chapter_01',hint:'Main Quest tersedia'},{id:'miri',name:known.miri?'Miri':'???',portrait:'Miri.webp',x:66,y:82,quest:'chapter_02',hint:'Penduduk desa'}]
   :[{id:'aeloria',name:known.aeloria?'Aeloria':'???',portrait:'Aeloria.webp',x:28,y:80,quest:'prologue',hint:'Main Quest tersedia'},{id:'kael',name:known.kael?'Kael':'???',portrait:'Kael.webp',x:70,y:82,quest:'chapter_01',hint:'Penduduk desa'}];
  const npcMarkup=npcs.map(n=>'<button class="tama-village-npc '+(tamaVillageSelectedNpc===n.id?'is-focused':'')+'" style="--npc-x:'+n.x+'%;--npc-y:'+n.y+'%" data-action="village-npc-open" data-npc="'+n.id+'" aria-label="Bicara dengan '+n.name+'"><img src="assets/main-quest/npcs/'+n.portrait+'" alt=""><span>'+n.name+'</span></button>').join('');
  const selected=npcs.find(n=>n.id===tamaVillageSelectedNpc);
