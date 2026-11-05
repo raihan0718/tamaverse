@@ -1515,6 +1515,8 @@ function normalizeSavedState(saved){
   base.battleHistory=Array.isArray(saved.battleHistory)?saved.battleHistory:[];
   base.mainQuestProgress=saved.mainQuestProgress&&typeof saved.mainQuestProgress==='object'?{...saved.mainQuestProgress}:{};
   base.mainQuestCheckpoints=saved.mainQuestCheckpoints&&typeof saved.mainQuestCheckpoints==='object'?{...saved.mainQuestCheckpoints}:{};
+  // Keep NPC introductions across app closes and account-save reloads.
+  base.mainQuestIntroductions=saved.mainQuestIntroductions&&typeof saved.mainQuestIntroductions==='object'?{...saved.mainQuestIntroductions}:{};
   base.questStoryActive=saved.questStoryActive===true&&base.mainQuestProgress?.[saved.mainQuestActiveId||'prologue']!=='completed';
   base.mainQuestHelpCount=Math.max(0,Math.min(3,Math.floor(Number(saved.mainQuestHelpCount)||0)));
   base.introStoryStarted=saved.introStoryStarted===true;
