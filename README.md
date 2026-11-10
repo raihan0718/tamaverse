@@ -67,3 +67,31 @@ A screenshot is not proof of settlement by itself. Verify the actual incoming tr
 ### Current limitations
 
 Package prices are not preset. The admin sets each order's amount manually. QRIS is sent manually; no payment gateway, dynamic QRIS generation, or automatic settlement webhook is configured. The bot and function source are committed, but deployment and live Telegram testing are still required.
+
+## Public Diamond Giveaway
+
+The public giveaway flow uses a server-side Supabase migration and the existing verified Telegram account session.
+
+1. Run `supabase/migrations/20261110000100_public_diamond_giveaways.sql` in the Supabase SQL Editor for project `uziyhbgxvdetzlujzozu`.
+2. Confirm the owner/admin Telegram account is the existing owner ID `8906658395` used by the current owner-only tools.
+3. Deploy the GitHub Pages update. The page loads `giveaway.js` after `supabase.js`.
+4. Open Tamaverse with the owner Telegram account, then Profile → Diamond Giveaway.
+5. Set the Diamond amount per player, maximum number of claims, and optionally an expiry date/time. Create the link and share it.
+6. Players open the link in Telegram, verify their account, then press **Claim Diamonds**.
+
+Security behavior:
+- The database checks admin identity; hiding the UI is not the security boundary.
+- Claiming locks the giveaway row, checks expiry/quota, and credits the authenticated account in one database transaction.
+- A unique constraint allows one claim per account per giveaway.
+- Giveaway tables are not directly readable or writable by browser clients; access is through restricted RPC functions.
+- Cancellation stops future claims. Already credited Diamonds are not clawed back.
+
+Manual verification:
+- Create a small test giveaway (e.g. 2 Diamonds, 2 claims, expiry in 10 minutes).
+- Claim once from two different Telegram accounts; both should receive 2 Diamonds.
+- Try a second claim from either account; it must be rejected.
+- Try a third account after the quota is full; it must be rejected.
+- Create an already-expired test by setting a short expiry and waiting; claims must be rejected.
+- Cancel an active test giveaway; its link must stop working.
+
+The migration and frontend source being committed does not mean the SQL has been applied to Supabase or the live flow has been tested. Run the migration and complete the manual checks before announcing a live giveaway.
