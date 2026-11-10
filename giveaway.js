@@ -5,7 +5,7 @@
   const isAdmin = () => String(window.TAMAVERSE_TELEGRAM_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '') === ADMIN_TELEGRAM_ID;
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const format = value => Number(value || 0).toLocaleString('id-ID');
-  const itemNames = {food:'Apple',energy:'Energy Potion',snack:'Health Potion',training:'Training Manual',rename_card:'Rename Card',rename_pet_card:'Rename Pet Card'};
+  const itemNames = {food:'Apple',energy:'Energy Potion',snack:'Health Potion',training:'Training Manual',rename_card:'Rename Card',rename_pet_card:'Rename Pet Card',frame_legendary:'Royal Frame',frame_celestial:'Celestial Frame'};
   const dbCall = async (name,args={}) => {
     if (!db() || !window.TAMAVERSE_USER_ID || typeof window.ensureTamaverseAuth !== 'function') throw new Error('Akun Telegram belum siap. Muat ulang Tamaverse dari Telegram.');
     await window.ensureTamaverseAuth();
@@ -32,7 +32,7 @@
           <div id="giveawayItemFields" hidden>
             <label class="muted-label" for="giveawayItemKey">PILIH ITEM</label>
             <select class="text-input" id="giveawayItemKey">
-              <option value="food">Apple</option><option value="energy">Energy Potion</option><option value="snack">Health Potion</option><option value="training">Training Manual</option><option value="rename_card">Rename Card</option><option value="rename_pet_card">Rename Pet Card</option>
+              <option value="food">Apple</option><option value="energy">Energy Potion</option><option value="snack">Health Potion</option><option value="training">Training Manual</option><option value="rename_card">Rename Card</option><option value="rename_pet_card">Rename Pet Card</option><option value="frame_legendary">Royal Frame</option><option value="frame_celestial">Celestial Frame</option>
             </select>
             <label class="muted-label" for="giveawayItemQuantity">JUMLAH ITEM PER PEMAIN</label><input class="text-input" id="giveawayItemQuantity" type="number" min="1" max="10000" step="1" value="1">
           </div>
