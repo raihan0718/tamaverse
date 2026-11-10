@@ -22,7 +22,7 @@ create table if not exists public.tamaverse_giveaways (
   constraint tamaverse_giveaway_reward_valid check (
     (reward_type = 'diamonds' and diamonds between 1 and 100000 and item_key is null and item_quantity is null)
     or
-    (reward_type = 'item' and diamonds is null and item_key in ('food','energy','snack','training','rename_card','rename_pet_card') and item_quantity between 1 and 10000)
+    (reward_type = 'item' and diamonds is null and item_key in ('food','energy','snack','training','rename_card','rename_pet_card','frame_legendary','frame_celestial') and item_quantity between 1 and 10000)
   ),
   constraint tamaverse_giveaway_expiry_future check (expires_at > created_at)
 );
@@ -91,7 +91,7 @@ begin
       raise exception 'INVALID_GIVEAWAY_REWARD';
     end if;
   elsif p_reward_type = 'item' then
-    if p_item_key not in ('food','energy','snack','training','rename_card','rename_pet_card')
+    if p_item_key not in ('food','energy','snack','training','rename_card','rename_pet_card','frame_legendary','frame_celestial')
        or p_item_quantity is null or p_item_quantity < 1 or p_item_quantity > 10000 then
       raise exception 'INVALID_GIVEAWAY_REWARD';
     end if;
@@ -224,6 +224,14 @@ begin
     elsif v_giveaway.item_key='rename_pet_card' then
       update public.premium_inventory set rename_pet_card_count=rename_pet_card_count+v_giveaway.item_quantity,updated_at=now()
         where owner_id=v_owner;
+    elsif v_giveaway.item_key in ('frame_legendary','frame_celestial') then
+      update public.premium_inventory
+      set owned_frames = array(
+        select distinct unnest(owned_frames || array[
+          case when v_giveaway.item_key='frame_legendary' then 'legendary' else 'celestial' end
+        ]::text[])
+      ), updated_at=now()
+      where owner_id=v_owner;
     end if;
     insert into public.tamaverse_giveaway_claims
       (giveaway_id,owner_id,reward_type,reward_key,reward_quantity)
