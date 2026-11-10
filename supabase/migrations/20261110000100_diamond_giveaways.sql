@@ -79,7 +79,7 @@ begin
     raise exception 'INVALID_GIVEAWAY_TITLE';
   end if;
 
-  v_code := encode(extensions.gen_random_bytes(24), 'hex');
+  v_code := replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', '');
   insert into public.tamaverse_diamond_giveaways
     (code, title, diamonds, quota, expires_at, created_by)
   values
@@ -146,7 +146,7 @@ declare
   v_balance bigint;
 begin
   if v_owner is null then raise exception 'AUTH_REQUIRED'; end if;
-  if p_code is null or length(trim(p_code)) <> 48 then
+  if p_code is null or length(trim(p_code)) <> 64 then
     raise exception 'INVALID_GIVEAWAY_LINK';
   end if;
 
