@@ -488,6 +488,7 @@
         window.state.items = window.state.items || {};
         player.coins = Number(inventoryData.coins ?? player.coins ?? 0);
         player.diamonds = Number(inventoryData.diamonds ?? player.diamonds ?? 0);
+        window.state.items.food = Number(inventoryData.food ?? window.state.items.food ?? 0);
         window.state.items.snack = Number(inventoryData.snack ?? window.state.items.snack ?? 0);
         window.state.items.energy = Number(inventoryData.energy ?? window.state.items.energy ?? 0);
         window.state.items.training = Number(inventoryData.training ?? window.state.items.training ?? 0);
